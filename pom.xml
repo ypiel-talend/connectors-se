@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+   Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+         http://maven.apache.org/POM/4.0.0
+          http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.talend.components</groupId>
+  <artifactId>connectors-se</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>Components</name>
+  <packaging>pom</packaging>
+  <description>SE connectors using Talend Component Kit.</description>
+  <url>https://github.com/talend/tacokit-se</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <component-api.version>1.0.1-SNAPSHOT</component-api.version>
+    <component-runtime.version>1.0.1-SNAPSHOT</component-runtime.version>
+    <beam.version>2.4.0</beam.version>
+    <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
+    <junit5.version>5.2.0</junit5.version>
+    <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
+
+    <!-- set to true if you use native beam programming model -->
+    <validation.model>true</validation.model>
+  </properties>
+
+  <modules>
+    <module>localio</module>
+  </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.16.20</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-api</artifactId>
+      <version>${component-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-runtime-junit</artifactId>
+      <version>${component-runtime.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit5.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.beam</groupId>
+        <artifactId>beam-sdks-java-core</artifactId>
+        <version>${beam.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.beam</groupId>
+        <artifactId>beam-runners-direct-java</artifactId>
+        <version>${beam.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.talend.sdk.component</groupId>
+        <artifactId>component-runtime-beam-junit</artifactId>
+        <version>${component-runtime.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.talend.daikon</groupId>
+        <artifactId>daikon</artifactId>
+        <version>0.23.0</version>
+        <classifier>tests</classifier>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <!--
+      <plugin>
+        <groupId>org.talend.tools</groupId>
+        <artifactId>talend-tools-maven-plugin</artifactId>
+        <version>1.0.4</version>
+        <executions>
+          <execution>
+            <id>hub-detect</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>hub-detect</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <blackduckUrl>https://blackduck.talend.com</blackduckUrl>
+          <blackduckName>Talend Component (TCOMP)</blackduckName>
+        </configuration>
+      </plugin>
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+          <compilerArgs>
+            <compilerArg>-parameters</compilerArg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.talend.sdk.component</groupId>
+        <artifactId>talend-component-maven-plugin</artifactId>
+        <version>${component-runtime.version}</version>
+        <executions>
+          <execution>
+            <id>talend-dependencies</id>
+            <goals>
+              <goal>dependencies</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>talend-component-validate</id>
+            <goals>
+              <goal>validate</goal>
+            </goals>
+            <configuration>
+              <validateModel>${validation.model}</validateModel>
+            </configuration>
+          </execution>
+          <execution>
+            <id>talend-component-documentation</id>
+            <goals>
+              <goal>asciidoc</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>talend-component-bundle</id>
+            <goals>
+              <goal>car</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
+        <configuration>
+          <localCheckout>true</localCheckout>
+          <pushChanges>false</pushChanges>
+          <releaseProfiles>release</releaseProfiles>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>net.revelc.code.formatter</groupId>
+        <artifactId>formatter-maven-plugin</artifactId>
+        <version>2.7.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>format</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <configFile>talend_java_eclipse_formatter.xml</configFile>
+          <lineEnding>LF</lineEnding>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.talend.tools</groupId>
+            <artifactId>java-formatter</artifactId>
+            <version>0.1.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.21.0</version>
+        <configuration>
+          <forkCount>1</forkCount>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-surefire-provider</artifactId>
+            <version>${junit-platform-surefire-provider.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit5.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit5.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://github.com/talend/tacokit-se/blob/master/LICENSE</url>
+      <distribution>may be downloaded from the Maven repository</distribution>
+    </license>
+  </licenses>
+
+  <repositories>
+    <repository>
+      <id>TalendOpenSourceRelease</id>
+      <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>TalendOpenSourceRelease</id>
+      <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <scm>
+    <connection>scm:git:https://github.com/talend/tacokit-se.git</connection>
+    <developerConnection>scm:git:https://github.com/talend/tacokit-se.git</developerConnection>
+    <url>https://github.com/talend/tacokit-se</url>
+    <tag>HEAD</tag>
+  </scm>
+</project>
