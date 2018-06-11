@@ -41,18 +41,18 @@ public class BigQueryDataSet implements Serializable {
 
     @Option
     @Suggestable(value = "BigQueryTables", parameters = {})
-    @ActiveIf(target = "../sourceType", value = "TABLE_NAME")
+    @ActiveIf(target = "sourceType", value = "TABLE_NAME")
     @Documentation("The BigQuery table name if `sourceType` == TABLE_NAME")
     private String tableName;
 
     @Option
     @Code("sql")
-    @ActiveIf(target = "../sourceType", value = "QUERY")
+    @ActiveIf(target = "sourceType", value = "QUERY")
     @Documentation("The BigQuery query if `sourceType` == QUERY")
     private String query;
 
     @Option
-    @ActiveIf(target = "../sourceType", value = "QUERY")
+    @ActiveIf(target = "sourceType", value = "QUERY")
     @Documentation("Should the query use legacy SQL")
     private boolean useLegacySql;
 

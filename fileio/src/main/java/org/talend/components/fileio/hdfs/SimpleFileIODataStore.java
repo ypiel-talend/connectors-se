@@ -21,7 +21,7 @@ import lombok.Data;
 public class SimpleFileIODataStore implements Serializable {
 
     @Option
-    @ActiveIf(target = "../useKerberos", value = "false")
+    @ActiveIf(target = "useKerberos", value = "false")
     @Documentation("The datastore username to use")
     private String username;
 
@@ -30,12 +30,12 @@ public class SimpleFileIODataStore implements Serializable {
     private boolean useKerberos;
 
     @Option
-    @ActiveIf(target = "../useKerberos", value = "true")
+    @ActiveIf(target = "useKerberos", value = "true")
     @Documentation("If `useKerberos` is true, the principal to use.")
     private String kerberosPrincipal = "username@EXAMPLE.COM";
 
     @Option
-    @ActiveIf(target = "../useKerberos", value = "true")
+    @ActiveIf(target = "useKerberos", value = "true")
     @Documentation("If `useKerberos` is true, the keytab to use.")
     private String kerberosKeytab = "/home/username/username.keytab";
 }
