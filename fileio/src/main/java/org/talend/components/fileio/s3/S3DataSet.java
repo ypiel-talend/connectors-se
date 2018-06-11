@@ -99,7 +99,7 @@ public class S3DataSet implements Serializable {
     private String specificFieldDelimiter = ";";
 
     @Option
-    @Documentation("Maximum number of inputs retrieved if positive.")
+    @Documentation("Maximum number of data to handle if positive.")
     private int limit = -1;
 
     @Getter
