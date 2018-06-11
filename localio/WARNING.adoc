@@ -1,0 +1,5 @@
+= Current state
+
+WARNING: current implementation of the FixedInput wraps the old component
+and still uses `IndexedRecord` as main model, it _MUST_  move to `JsonObject`
+to be portable.

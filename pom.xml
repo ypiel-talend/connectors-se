@@ -44,6 +44,7 @@
 
   <modules>
     <module>localio</module>
+    <module>fileio</module>
   </modules>
 
   <dependencies>

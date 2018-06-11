@@ -22,8 +22,8 @@ import lombok.Getter;
 @Version
 @Icon(FILE_O)
 @DataSet("FixedDataSet")
-@OptionsOrder({ "format", "recordDelimiter", "specificRecordDelimiter", "fieldDelimiter", "specificFieldDelimiter", "schema",
-        "csvSchema", "values" })
+@OptionsOrder({ "datastore", "format", "recordDelimiter", "specificRecordDelimiter", "fieldDelimiter", "specificFieldDelimiter",
+        "schema", "csvSchema", "values" })
 public class FixedDataSet implements Serializable {
 
     @Option
