@@ -1,6 +1,6 @@
-package org.talend.components.fileio.s3;
+package org.talend.components.fileio.hdfs;
 
-import static org.talend.sdk.component.api.component.Icon.IconType.FILE_S3_O;
+import static org.talend.sdk.component.api.component.Icon.IconType.FILE_HDFS_O;
 
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.configuration.Option;
@@ -12,14 +12,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
+@Icon(FILE_HDFS_O)
 @EqualsAndHashCode(callSuper = true)
-@Icon(FILE_S3_O)
-@DataStore("S3OutputDataSet")
-@Documentation("Dataset of a S3 sink.")
-@OptionsOrder({ "datastore", "region", "unknownRegion", "bucket", "object", "encryptDataAtRest", "kmsForDataAtRest", "format",
-        "recordDelimiter", "specificRecordDelimiter", "fieldDelimiter", "specificFieldDelimiter", "limit", "overwrite",
-        "mergeOutput", "limit" })
-public class S3OutputDataSet extends S3DataSet {
+@DataStore("SimpleFileIOOutputDataSet")
+@Documentation("Dataset of a HDFS source.")
+@OptionsOrder({ "datastore", "format", "path", "recordDelimiter", "specificRecordDelimiter", "fieldDelimiter",
+        "specificFieldDelimiter", "overwrite", "mergeOutput", "limit" })
+public class SimpleFileIOOutputDataSet extends SimpleFileIODataSet {
 
     @Option
     @Documentation("Should overwrite data.")

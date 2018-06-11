@@ -22,7 +22,7 @@ import lombok.Data;
 @DataStore("SimpleFileIODataSet")
 @Documentation("Dataset of a HDFS source.")
 @OptionsOrder({ "datastore", "format", "path", "recordDelimiter", "specificRecordDelimiter", "fieldDelimiter",
-        "specificFieldDelimiter" })
+        "specificFieldDelimiter", "limit" })
 public class SimpleFileIODataSet implements Serializable {
 
     @Option
@@ -60,4 +60,9 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "../fieldDelimiter", value = "OTHER")
     @Documentation("A custom delimiter if `fieldDelimiter` is `OTHER`")
     private String specificFieldDelimiter = ";";
+
+    @Option
+    @ActiveIf(target = ".", value = "-2147483648")
+    @Documentation("Maximum number of data to handle if positive.")
+    private int limit = -1;
 }

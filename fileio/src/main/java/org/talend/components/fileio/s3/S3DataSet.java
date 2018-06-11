@@ -99,6 +99,7 @@ public class S3DataSet implements Serializable {
     private String specificFieldDelimiter = ";";
 
     @Option
+    @ActiveIf(target = ".", value = "-2147483648")
     @Documentation("Maximum number of data to handle if positive.")
     private int limit = -1;
 
