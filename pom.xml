@@ -52,6 +52,7 @@
     <module>localio</module>
     <module>fileio</module>
     <module>bigquery</module>
+    <module>elasticsearch</module>
   </modules>
 
   <dependencies>
@@ -191,6 +192,12 @@
         <artifactId>beam-runners-direct-java</artifactId>
         <version>${beam.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.talend.sdk.component</groupId>
+        <artifactId>component-runtime-beam</artifactId>
+        <version>${component-runtime.version}</version>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.talend.sdk.component</groupId>
