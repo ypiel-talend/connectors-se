@@ -31,10 +31,16 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <component-api.version>1.0.1-SNAPSHOT</component-api.version>
+    <component-api.version>1.0.1</component-api.version>
     <component-runtime.version>1.0.1-SNAPSHOT</component-runtime.version>
+    <slf4j.version>1.7.25</slf4j.version>
+
     <beam.version>2.4.0</beam.version>
+    <jackson.version>2.8.9</jackson.version>
+    <jackson-codehaus.version>1.9.14-TALEND</jackson-codehaus.version>
+
     <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
+
     <junit5.version>5.2.0</junit5.version>
     <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
 
@@ -60,6 +66,12 @@
       <version>${component-api.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.talend.sdk.component</groupId>
@@ -82,11 +94,89 @@
   </dependencies>
 
   <dependencyManagement>
-    <dependencies>
+    <dependencies> <!-- mainly to make beam* provided -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${slf4j.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.1</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.1.0</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>${jackson-codehaus.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-core-asl</artifactId>
+        <version>${jackson-codehaus.version}</version>
+        <scope>provided</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.beam</groupId>
         <artifactId>beam-sdks-java-core</artifactId>
         <version>${beam.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.thoughtworks.paranamer</groupId>
+        <artifactId>paranamer</artifactId>
+        <version>2.7</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.avro</groupId>
+        <artifactId>avro</artifactId>
+        <version>1.8.2</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.4</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.tukaani</groupId>
+        <artifactId>xy</artifactId>
+        <version>1.5</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -163,12 +253,14 @@
         <executions>
           <execution>
             <id>talend-dependencies</id>
+            <phase>process-classes</phase>
             <goals>
               <goal>dependencies</goal>
             </goals>
           </execution>
           <execution>
             <id>talend-component-validate</id>
+            <phase>process-classes</phase>
             <goals>
               <goal>validate</goal>
             </goals>
@@ -178,17 +270,31 @@
           </execution>
           <execution>
             <id>talend-component-documentation</id>
+            <phase>process-classes</phase>
             <goals>
               <goal>asciidoc</goal>
             </goals>
           </execution>
           <execution>
             <id>talend-component-bundle</id>
+            <phase>package</phase>
             <goals>
               <goal>car</goal>
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-core</artifactId>
+            <version>${beam.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.talend.sdk.component</groupId>
+            <artifactId>component-runtime-beam</artifactId>
+            <version>${component-runtime.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

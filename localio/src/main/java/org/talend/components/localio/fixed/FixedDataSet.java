@@ -35,35 +35,35 @@ public class FixedDataSet implements Serializable {
     private RecordFormat format = RecordFormat.CSV;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
+    @ActiveIf(target = "../format", value = "CSV")
     @Documentation("How to split records in the file stream.")
     private RecordDelimiterType recordDelimiter = RecordDelimiterType.LF;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
-    @ActiveIf(target = "./recordDelimiter", value = "OTHER")
+    @ActiveIf(target = "../format", value = "CSV")
+    @ActiveIf(target = "../recordDelimiter", value = "OTHER")
     @Documentation("Overrides recordDelimiter with a custom value.")
     private String specificRecordDelimiter = RecordDelimiterType.LF.getDelimiter();
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
+    @ActiveIf(target = "../format", value = "CSV")
     @Documentation("How to split columns in a record.")
     private FieldDelimiterType fieldDelimiter = FieldDelimiterType.SEMICOLON;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
-    @ActiveIf(target = "./fieldDelimiter", value = "OTHER")
+    @ActiveIf(target = "../format", value = "CSV")
+    @ActiveIf(target = "../fieldDelimiter", value = "OTHER")
     @Documentation("Custom field delimiter, replaces fieldDelimiter.")
     private String specificFieldDelimiter = FieldDelimiterType.SEMICOLON.getDelimiter();
 
     @Option
-    @ActiveIf(target = "./format", value = "AVRO")
+    @ActiveIf(target = "../format", value = "AVRO")
     @Documentation("If format is AVRO the Avro schema.")
     private String schema;
 
     @Option
     @Code("json")
-    @ActiveIf(target = "./format", value = "CSV")
+    @ActiveIf(target = "../format", value = "CSV")
     @Documentation("If format is CSV the csv schema.")
     private String csvSchema;
 

@@ -37,13 +37,13 @@ public class S3DataSet implements Serializable {
     private S3Region region = S3Region.DEFAULT;
 
     @Option
-    @ActiveIf(target = "./region", value = "OTHER")
+    @ActiveIf(target = "../region", value = "OTHER")
     @Documentation("A custom region.")
     private String unknownRegion;
 
     @Option
     @Required
-    @Suggestable(value = "S3FindBuckets", parameters = { "./datastore", "./region", "./unknownRegion" })
+    @Suggestable(value = "S3FindBuckets", parameters = { "../datastore", "../region", "../unknownRegion" })
     @Documentation("The dataset bucket.")
     private String bucket;
 
@@ -67,7 +67,7 @@ public class S3DataSet implements Serializable {
     private boolean encryptDataAtRest;
 
     @Option
-    @ActiveIf(target = "./encryptDataAtRest", value = "true")
+    @ActiveIf(target = "../encryptDataAtRest", value = "true")
     @Documentation("KMS to use for data at rest encryption.")
     private String kmsForDataAtRest;
 
@@ -77,24 +77,24 @@ public class S3DataSet implements Serializable {
     private SimpleFileIOFormat format = SimpleFileIOFormat.CSV;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
+    @ActiveIf(target = "../format", value = "CSV")
     @Documentation("The record delimiter to split the file in records")
     private RecordDelimiterType recordDelimiter = RecordDelimiterType.LF;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
-    @ActiveIf(target = "./recordDelimiter", value = "OTHER")
+    @ActiveIf(target = "../format", value = "CSV")
+    @ActiveIf(target = "../recordDelimiter", value = "OTHER")
     @Documentation("A custom delimiter if `recordDelimiter` is `OTHER`")
     private String specificRecordDelimiter = ";";
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
+    @ActiveIf(target = "../format", value = "CSV")
     @Documentation("The field delimiter to split the records in columns")
     private FieldDelimiterType fieldDelimiter = FieldDelimiterType.SEMICOLON;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
-    @ActiveIf(target = "./fieldDelimiter", value = "OTHER")
+    @ActiveIf(target = "../format", value = "CSV")
+    @ActiveIf(target = "../fieldDelimiter", value = "OTHER")
     @Documentation("A custom delimiter if `fieldDelimiter` is `OTHER`")
     private String specificFieldDelimiter = ";";
 

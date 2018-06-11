@@ -40,24 +40,24 @@ public class SimpleFileIODataSet implements Serializable {
     private String path;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
+    @ActiveIf(target = "../format", value = "CSV")
     @Documentation("The record delimiter to split the file in records")
     private RecordDelimiterType recordDelimiter = RecordDelimiterType.LF;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
-    @ActiveIf(target = "./recordDelimiter", value = "OTHER")
+    @ActiveIf(target = "../format", value = "CSV")
+    @ActiveIf(target = "../recordDelimiter", value = "OTHER")
     @Documentation("A custom delimiter if `recordDelimiter` is `OTHER`")
     private String specificRecordDelimiter = ";";
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
+    @ActiveIf(target = "../format", value = "CSV")
     @Documentation("The field delimiter to split the records in columns")
     private FieldDelimiterType fieldDelimiter = FieldDelimiterType.SEMICOLON;
 
     @Option
-    @ActiveIf(target = "./format", value = "CSV")
-    @ActiveIf(target = "./fieldDelimiter", value = "OTHER")
+    @ActiveIf(target = "../format", value = "CSV")
+    @ActiveIf(target = "../fieldDelimiter", value = "OTHER")
     @Documentation("A custom delimiter if `fieldDelimiter` is `OTHER`")
     private String specificFieldDelimiter = ";";
 }
