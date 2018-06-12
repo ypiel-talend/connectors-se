@@ -1,9 +1,17 @@
 def slackChannel = 'components'
-def mavenName = 'maven-3.5.3'
-def jdkName = 'jdk8-latest'
 
 pipeline {
-  agent any
+  agent {
+    kubernetes {
+      label 'connectors-se'
+      containerTemplate {
+        name 'maven'
+        image 'maven:3.5.3-jdk-8'
+        ttyEnabled true
+        command 'cat'
+      }
+    }
+  }
 
   options {
     buildDiscarder(logRotator(artifactNumToKeepStr: '5', numToKeepStr: env.BRANCH_NAME == 'master' ? '10' : '2'))
@@ -12,30 +20,17 @@ pipeline {
   }
 
   triggers {
-    cron(env.BRANCH_NAME == "master" ? "H H(19-21) * * *" : "")
+    cron(env.BRANCH_NAME == "master" ? "@daily" : "")
   }
 
   stages {
-   stage('Compile') {
-     steps {
-       withMaven(maven: mavenName, jdk: jdkName) {
-         sh 'mvn clean install -DskipTests'
-       }
-     }
-   }
-   stage('Test') {
-     steps {
-       withMaven(maven: mavenName, jdk: jdkName) {
-         sh 'mvn clean install'
-       }
-     }
-     post {
-       always {
-         archive 'target/**/*'
-         junit 'target/surefire-reports/*.xml'
-       }
-     }
-   }
+    stage('Run maven') {
+      steps {
+        container('maven') {
+          sh 'mvn clean install'
+        }
+      }
+    }
   }
   post {
     success {
