@@ -54,7 +54,6 @@
     <module>bigquery</module>
     <module>elasticsearch</module>
     <module>processing</module>
-    <module>salesforce</module>
     <module>jdbc</module>
     <!-- off until tests pass
     <module>salesforce</module>
