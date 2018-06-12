@@ -1,4 +1,6 @@
 def slackChannel = 'components'
+def mavenName = 'maven-3.5.3'
+def jdkName = 'jdk8-latest'
 
 pipeline {
   agent any
@@ -10,24 +12,22 @@ pipeline {
   }
 
   triggers {
-    cron '@daily'
-    pollSCM '@hourly'
-  }
-
-  tools{
-    maven 'maven 3'
-    jdk 'java 8'
+    cron(env.BRANCH_NAME == "master" ? "H H(19-21) * * *" : "")
   }
 
   stages {
    stage('Compile') {
      steps {
-       sh 'mvn clean install -DskipTests'
+       withMaven(maven: mavenName, jdk: jdkName) {
+         sh 'mvn clean install -DskipTests'
+       }
      }
    }
    stage('Test') {
      steps {
-       sh 'mvn clean install'
+       withMaven(maven: mavenName, jdk: jdkName) {
+         sh 'mvn clean install'
+       }
      }
      post {
        always {
