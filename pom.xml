@@ -53,6 +53,7 @@
     <module>fileio</module>
     <module>bigquery</module>
     <module>elasticsearch</module>
+    <module>salesforce</module>
   </modules>
 
   <dependencies>
