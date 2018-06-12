@@ -67,7 +67,7 @@ public class BasicDatastoreService {
 
     private Properties loadCustomConfiguration(final LocalConfiguration configuration) {
         final String configFile = configuration.get(CONFIG_FILE_lOCATION_KEY);
-        try (InputStream is = configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
+        try (final InputStream is = configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
             if (is != null) {
                 return new Properties() {
 
@@ -76,7 +76,7 @@ public class BasicDatastoreService {
                     }
                 };
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.warn("not found the property file, will use the default value for endpoint and timeout", e);
         }
 
@@ -88,19 +88,8 @@ public class BasicDatastoreService {
         final Properties props = loadCustomConfiguration(localConfiguration);
         final Integer timeout = (props != null) ? Integer.parseInt(props.getProperty("timeout", String.valueOf(DEFAULT_TIMEOUT)))
                 : DEFAULT_TIMEOUT;
-        String endpoint = props != null ? props.getProperty("endpoint", URL) : URL;
-        if (endpoint.contains(RETIRED_ENDPOINT)) {
-            endpoint = endpoint.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
-        }
-        final String ep = endpoint;
-        ConnectorConfig config = new ConnectorConfig() {
-
-            @Override
-            public Proxy getProxy() {
-                final Iterator<Proxy> pxyIt = ProxySelector.getDefault().select(URI.create(ep)).iterator();
-                return pxyIt.hasNext() ? pxyIt.next() : super.getProxy();
-            }
-        };
+        final String endpoint = getEndpoint(props);
+        ConnectorConfig config = newConnectorConfig(endpoint);
         config.setAuthEndpoint(endpoint);
         config.setUsername(datastore.getUserId());
         String password = datastore.getPassword();
@@ -116,7 +105,7 @@ public class BasicDatastoreService {
 
         // Notes on how to test this
         // http://thysmichels.com/2014/02/15/salesforce-wsc-partner-connection-session-renew-when-session-timeout/
-        config.setSessionRenewer((SessionRenewer) connectorConfig -> {
+        config.setSessionRenewer(connectorConfig -> {
             log.debug("renewing session...");
             SessionRenewer.SessionRenewalHeader header = new SessionRenewer.SessionRenewalHeader();
             connectorConfig.setSessionId(null);
@@ -130,12 +119,32 @@ public class BasicDatastoreService {
         return new PartnerConnection(config);
     }
 
+    private String getEndpoint(final Properties props) {
+        final String endpoint = props != null ? props.getProperty("endpoint", URL) : URL;
+        if (endpoint.contains(RETIRED_ENDPOINT)) {
+            return endpoint.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
+        }
+        return endpoint;
+    }
+
+    private ConnectorConfig newConnectorConfig(final String ep) {
+        return new ConnectorConfig() {
+
+            @Override
+            public Proxy getProxy() {
+                final Iterator<Proxy> pxyIt = ProxySelector.getDefault().select(URI.create(ep)).iterator();
+                return pxyIt.hasNext() ? pxyIt.next() : super.getProxy();
+            }
+        };
+    }
+
     public BulkConnection bulkConnect(final BasicDataStore datastore, final LocalConfiguration configuration)
             throws AsyncApiException, ConnectionException {
 
+        final Properties props = loadCustomConfiguration(configuration);
         final PartnerConnection partnerConnection = connect(datastore, configuration);
         final ConnectorConfig partnerConfig = partnerConnection.getConfig();
-        ConnectorConfig bulkConfig = new ConnectorConfig();
+        ConnectorConfig bulkConfig = newConnectorConfig(getEndpoint(props));
         bulkConfig.setSessionId(partnerConfig.getSessionId());
         // For session renew
         bulkConfig.setSessionRenewer(partnerConfig.getSessionRenewer());

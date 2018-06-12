@@ -24,11 +24,6 @@ import org.talend.sdk.component.maven.Server;
 @WithMavenServers //
 class BasicDatastoreServiceTest {
 
-    static {
-        // System.setProperty("talend.junit.http.capture", "true");
-        System.setProperty("talend.junit.http.passthrough", "false");
-    }
-
     @Injected
     private BaseComponentsHandler componentsHandler;
 
@@ -37,10 +32,10 @@ class BasicDatastoreServiceTest {
 
     private final static MavenDecrypter mavenDecrypter = new MavenDecrypter();
 
-    @DecryptedServer(value = "salesforce-password")
+    @DecryptedServer(value = "salesforce-password", alwaysTryLookup = false)
     private Server serverWithPassword;
 
-    @DecryptedServer(value = "salesforce-securitykey")
+    @DecryptedServer(value = "salesforce-securitykey", alwaysTryLookup = false)
     private Server serverWithSecuritykey;
 
     @Test
