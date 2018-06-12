@@ -54,6 +54,7 @@
     <module>bigquery</module>
     <module>elasticsearch</module>
     <module>salesforce</module>
+    <module>jdbc</module>
   </modules>
 
   <dependencies>
