@@ -56,8 +56,6 @@
     <module>salesforce</module>
     <module>jdbc</module>
     <module>processing</module>
-    <module>salesforce</module>
-    <module>jdbc</module>
   </modules>
 
   <dependencies>
