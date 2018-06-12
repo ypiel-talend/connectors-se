@@ -8,32 +8,32 @@ pipeline {
 apiVersion: v1
 kind: Pod
 spec:
-containers:
-  - name: maven
-    image: maven:3.5.3-jdk-8
-    command:
-    - cat
-    tty: true
-    volumeMounts:
-    - name: docker
-      mountPath: /var/run/docker.sock
-    - name: m2
-      mountPath: /root/.m2/repository
-    resources:
-        requests:
-          memory: "1G"
-          cpu: "500m"
-        limits:
-          memory: "4G"
-          cpu: "2"
+  containers:
+    - name: maven
+      image: maven:3.5.3-jdk-8
+      command:
+      - cat
+      tty: true
+      volumeMounts:
+      - name: docker
+        mountPath: /var/run/docker.sock
+      - name: m2
+        mountPath: /root/.m2/repository
+      resources:
+          requests:
+            memory: "1G"
+            cpu: "500m"
+          limits:
+            memory: "4G"
+            cpu: "2"
 
-volumes:
-- name: docker
-  hostPath:
-    path: /var/run/docker.sock
-- name: m2
-  hostPath:
-    path: /tmp/jenkins/tdi/m2
+  volumes:
+  - name: docker
+    hostPath:
+      path: /var/run/docker.sock
+  - name: m2
+    hostPath:
+      path: /tmp/jenkins/tdi/m2
 """
     }
   }
