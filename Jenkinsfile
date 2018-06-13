@@ -65,24 +65,20 @@ spec:
         container('maven') {
           sh 'mvn clean site:site site:stage -T1C'
         }
-        post {
-          always {
-            publishHTML (target: [
-              allowMissing: false,
-              alwaysLinkToLastBuild: false,
-              keepAll: true,
-              reportDir: 'target/staging',
-              reportFiles: 'index.html',
-              reportName: "Maven Site"
-            ])
-          }
-        }
       }
     }
   }
   post {
     always {
       junit testResults: '*/target/surefire-reports/*.xml', allowEmptyResults: true
+      publishHTML (target: [
+        allowMissing: true,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'target/staging',
+        reportFiles: 'index.html',
+        reportName: "Maven Site"
+      ])
     }
     success {
       slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
