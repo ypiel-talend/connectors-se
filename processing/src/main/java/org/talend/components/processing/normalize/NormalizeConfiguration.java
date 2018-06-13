@@ -18,18 +18,13 @@ import lombok.Getter;
 @Data
 @Icon(NORMALIZE)
 @Documentation("Normalization configuration.")
-@OptionsOrder({ "columnToNormalize", "isList", "fieldSeparator", "otherSeparator", "discardTrailingEmptyStr", "trim" })
+@OptionsOrder({ "columnToNormalize", "fieldSeparator", "otherSeparator", "discardTrailingEmptyStr", "trim" })
 public class NormalizeConfiguration implements Serializable {
 
     @Option
     @Required
     @Documentation("The column to normalize")
     private String columnToNormalize = "";
-
-    @Option
-    @Required
-    @Documentation("Is the column a list")
-    private boolean isList;
 
     @Option
     @Documentation("Should discard trailing spaces")

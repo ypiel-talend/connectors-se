@@ -56,12 +56,15 @@ spec:
     stage('Run maven') {
       steps {
         container('maven') {
-          sh 'mvn clean install'
+          sh 'mvn clean install -T1C'
         }
       }
     }
   }
   post {
+    always {
+      junit testResults: '*/target/surefire-reports/*.xml', allowEmptyResults: true
+    }
     success {
       slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
     }
