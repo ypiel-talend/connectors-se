@@ -150,11 +150,17 @@ public class BasicDatastoreService {
         bulkConfig.setSessionRenewer(partnerConfig.getSessionRenewer());
         bulkConfig.setUsername(partnerConfig.getUsername());
         bulkConfig.setPassword(partnerConfig.getPassword());
+        bulkConfig.setAuthEndpoint(partnerConfig.getServiceEndpoint());
+
+        // reuse proxy
+        bulkConfig.setProxy(partnerConfig.getProxy());
+
         /*
          * The endpoint for the Bulk API service is the same as for the normal SOAP uri until the /Soap/ part. From here
          * it's '/async/versionNumber'
          */
         String soapEndpoint = partnerConfig.getServiceEndpoint();
+        partnerConfig.setAuthEndpoint(soapEndpoint);
         // set it by a default property file
 
         // Service endpoint should be like this:

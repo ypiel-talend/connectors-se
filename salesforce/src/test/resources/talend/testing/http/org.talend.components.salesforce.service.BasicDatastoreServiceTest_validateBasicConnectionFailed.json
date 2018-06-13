@@ -4,7 +4,7 @@
       "headers":{
         "SOAPAction":"\"\"",
         "Accept":"text/xml",
-        "Connection":"keep-alive",
+        "Host":"login.salesforce.com",
         "Accept-Encoding":"gzip",
         "Content-Type":"text/xml; charset=UTF-8"
       },
@@ -15,8 +15,7 @@
       "headers":{
         "Transfer-Encoding":"chunked",
         "Cache-Control":"no-cache,must-revalidate,max-age=0,no-store,private",
-        "Set-Cookie":"BrowserId=WKUfOGwiQi-4If4Znl7PvQ;Path=/;Domain=.salesforce.com;Expires=Sat, 11-Aug-2018 09:54:02 GMT;Max-Age=5184000",
-        "Expires":"Thu, 01 Jan 1970 00:00:00 GMT",
+        "Date":"Tue, 12 Jun 2018 15:54:38 GMT",
         "Content-Type":"text/xml; charset=UTF-8"
       },
       "payload":"<?xml version=\"1.0\" encoding=\"UTF-8\"?><soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:sf=\"urn:fault.partner.soap.sforce.com\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><soapenv:Body><soapenv:Fault><faultcode>INVALID_LOGIN</faultcode><faultstring>INVALID_LOGIN: Invalid username, password, security token; or user locked out.</faultstring><detail><sf:LoginFault xsi:type=\"sf:LoginFault\"><sf:exceptionCode>INVALID_LOGIN</sf:exceptionCode><sf:exceptionMessage>Invalid username, password, security token; or user locked out.</sf:exceptionMessage></sf:LoginFault></detail></soapenv:Fault></soapenv:Body></soapenv:Envelope>",

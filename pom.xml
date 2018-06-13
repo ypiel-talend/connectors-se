@@ -55,9 +55,7 @@
     <module>elasticsearch</module>
     <module>processing</module>
     <module>jdbc</module>
-    <!-- off until tests pass
     <module>salesforce</module>
-    -->
   </modules>
 
   <dependencies>

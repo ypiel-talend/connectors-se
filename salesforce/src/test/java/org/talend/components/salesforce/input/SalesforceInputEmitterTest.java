@@ -12,6 +12,7 @@ import javax.json.JsonObject;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.talend.components.salesforce.SfHeaderFilter;
 import org.talend.components.salesforce.dataset.QueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
@@ -28,17 +29,19 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 @DisplayName("Suite of test for the Salesforce Input component")
 @WithComponents("org.talend.components.salesforce")
-@HttpApi(useSsl = true)
+@HttpApi(useSsl = true, headerFilter = SfHeaderFilter.class)
 @WithMavenServers //
 class SalesforceInputEmitterTest {
+
+    static {
+        // System.setProperty("talend.junit.http.capture", "true");
+    }
 
     @Injected
     private BaseComponentsHandler componentsHandler;
 
     @HttpApiInject
     private HttpApiHandler<?> httpApiHandler;
-
-    private final static MavenDecrypter mavenDecrypter = new MavenDecrypter();
 
     @DecryptedServer(value = "salesforce-password", alwaysTryLookup = false)
     private Server serverWithPassword;
@@ -179,5 +182,4 @@ class SalesforceInputEmitterTest {
         final List<JsonObject> records = componentsHandler.getCollectedData(JsonObject.class);
         assertEquals(0, records.size());
     }
-
 }
