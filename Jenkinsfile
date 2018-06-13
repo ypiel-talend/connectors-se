@@ -63,7 +63,7 @@ spec:
     stage('Publish Site') {
       steps {
         container('maven') {
-          sh 'mvn clean site:site site:stage -T1C'
+          sh 'mvn clean site:site site:stage -T1C -Dmaven.test.failure.ignore=true'
         }
         post {
           always {
