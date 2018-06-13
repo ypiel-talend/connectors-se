@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
+import org.talend.components.salesforce.SfHeaderFilter;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
@@ -16,21 +17,22 @@ import org.talend.sdk.component.junit.http.junit5.HttpApiInject;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.WithMavenServers;
-import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
 
 @WithComponents("org.talend.components.salesforce")
-@HttpApi(useSsl = true)
+@HttpApi(useSsl = true, headerFilter = SfHeaderFilter.class)
 @WithMavenServers //
 class BasicDatastoreServiceTest {
+
+    static {
+        // System.setProperty("talend.junit.http.capture", "true");
+    }
 
     @Injected
     private BaseComponentsHandler componentsHandler;
 
     @HttpApiInject
     private HttpApiHandler<?> httpApiHandler;
-
-    private final static MavenDecrypter mavenDecrypter = new MavenDecrypter();
 
     @DecryptedServer(value = "salesforce-password", alwaysTryLookup = false)
     private Server serverWithPassword;
