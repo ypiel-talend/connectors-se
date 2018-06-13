@@ -60,6 +60,25 @@ spec:
         }
       }
     }
+    stage('Publish Site') {
+      steps {
+        container('maven') {
+          sh 'mvn clean site:site site:stage -T1C'
+        }
+        post {
+          always {
+            publishHTML (target: [
+              allowMissing: false,
+              alwaysLinkToLastBuild: false,
+              keepAll: true,
+              reportDir: 'target/staging',
+              reportFiles: 'index.html',
+              reportName: "Maven Site"
+            ])
+          }
+        }
+      }
+    }
   }
   post {
     always {

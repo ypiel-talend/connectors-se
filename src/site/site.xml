@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<project name="Talend Component Kit Connectors"
+         xmlns="http://maven.apache.org/DECORATION/1.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+          http://maven.apache.org/DECORATION/1.6.0
+          http://maven.apache.org/xsd/decoration-1.6.0.xsd">
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>1.7</version>
+  </skin>
+  <custom>
+    <fluidoSkin>
+      <sideBarEnabled>true</sideBarEnabled>
+      <topBarEnabled>false</topBarEnabled>
+      <navBarStyle>navbar-inverse</navBarStyle>
+      <copyrightClass>pull-right</copyrightClass>
+      <breadcrumbDivider>»</breadcrumbDivider>
+      <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+      <topBarIcon>
+        <name>Talend Component Kit Connectors</name>
+        <alt>Talend Component Kit Connectors</alt>
+        <src>https://www.talend.com/wp-content/uploads/talend_logo_.svg</src>
+        <href>index.html</href>
+      </topBarIcon>
+      <gitHub>
+        <projectId>Talend/connectors-se</projectId>
+        <ribbonOrientation>right</ribbonOrientation>
+        <ribbonColor>blue</ribbonColor>
+      </gitHub>
+      <twitter>
+        <user>Talend</user>
+        <showUser>true</showUser>
+        <showFollowers>true</showFollowers>
+      </twitter>
+    </fluidoSkin>
+  </custom>
+  <bannerLeft>
+    <name>Talend Connectors SE</name>
+    <src>https://raw.githubusercontent.com/Talend/component-runtime/master/documentation/src/main/antora/modules/ROOT/assets/images/logo/60x60-tcomp-positive-dark-blue.png</src>
+    <href>https://talend.github.com/connectors-se</href>
+  </bannerLeft>
+  <poweredBy>
+    <logo name="Talend" href="https://www.talend.com/" width="90"
+          img="https://www.talend.com/wp-content/uploads/talend_logo_.svg"/>
+  </poweredBy>
+  <version position="right" />
+  <publishDate position="right"/>
+  <body>
+    <breadcrumbs>
+      <item name="Connectors ${project.version}" href="index.html" />
+    </breadcrumbs>
+    <menu name="Pages">
+      <item name="Introduction" href="index.html"/>
+    </menu>
+    <menu name="Project Information" ref="reports" inherit="bottom" />
+    <menu ref="modules" inherit="bottom" />
+  </body>
+</project>
