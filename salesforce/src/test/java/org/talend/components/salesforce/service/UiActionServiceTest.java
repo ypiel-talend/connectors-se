@@ -1,13 +1,18 @@
 package org.talend.components.salesforce.service;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.salesforce.SfHeaderFilter;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
@@ -22,11 +27,20 @@ import org.talend.sdk.component.maven.Server;
 @WithComponents("org.talend.components.salesforce")
 @HttpApi(useSsl = true, headerFilter = SfHeaderFilter.class)
 @WithMavenServers //
-class BasicDatastoreServiceTest {
+class UiActionServiceTest {
 
     static {
         // System.setProperty("talend.junit.http.capture", "true");
     }
+
+    @Service
+    private UiActionService service;
+
+    @Service
+    private Messages i18n;
+
+    @Service
+    private LocalConfiguration configuration;
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -41,10 +55,8 @@ class BasicDatastoreServiceTest {
     private Server serverWithSecuritykey;
 
     @Test
+    @DisplayName("Validate connection")
     void validateBasicConnectionOK() {
-        final BasicDatastoreService service = componentsHandler.findService(BasicDatastoreService.class);
-        final Messages i18n = componentsHandler.findService(Messages.class);
-        final LocalConfiguration configuration = componentsHandler.findService(LocalConfiguration.class);
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
@@ -56,14 +68,36 @@ class BasicDatastoreServiceTest {
     }
 
     @Test
+    @DisplayName("Validate connection with bad credentials")
     void validateBasicConnectionFailed() {
-        final BasicDatastoreService service = componentsHandler.findService(BasicDatastoreService.class);
-        final Messages i18n = componentsHandler.findService(Messages.class);
-        final LocalConfiguration configuration = componentsHandler.findService(LocalConfiguration.class);
         final HealthCheckStatus status = service.validateBasicConnection(new BasicDataStore(), i18n, configuration);
         assertNotNull(status);
         assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
         assertFalse(status.getComment().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Load modules")
+    void loadModules() {
+        final BasicDataStore datasore = new BasicDataStore();
+        datasore.setUserId(serverWithPassword.getUsername());
+        datasore.setPassword(serverWithPassword.getPassword());
+        datasore.setSecurityKey(serverWithSecuritykey.getPassword());
+        final SuggestionValues modules = service.loadSalesforceModules(datasore);
+        assertNotNull(modules);
+        assertTrue(modules.isCacheable());
+        assertEquals(376, modules.getItems().size());
+    }
+
+    @Test
+    @DisplayName("Load modules with bad basic credentials")
+    void loadModulesWithBadCredentials() {
+        assertThrows(IllegalStateException.class, () -> {
+            final BasicDataStore datasore = new BasicDataStore();
+            datasore.setUserId("basUserName");
+            datasore.setPassword("NoPass");
+            service.loadSalesforceModules(datasore);
+        });
     }
 
 }

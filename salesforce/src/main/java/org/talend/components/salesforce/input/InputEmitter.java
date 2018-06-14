@@ -24,7 +24,8 @@ import com.sforce.ws.ConnectionException;
 
 import org.talend.components.salesforce.BulkResultSet;
 import org.talend.components.salesforce.dataset.QueryDataSet;
-import org.talend.components.salesforce.service.BasicDatastoreService;
+import org.talend.components.salesforce.service.SalesforceService;
+import org.talend.components.salesforce.service.UiActionService;
 import org.talend.components.salesforce.service.BulkQueryService;
 import org.talend.components.salesforce.service.Messages;
 import org.talend.components.salesforce.soql.SoqlQuery;
@@ -45,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("Salesforce query input ")
 public class InputEmitter implements Serializable {
 
-    private final BasicDatastoreService service;
+    private final SalesforceService service;
 
     private final QueryDataSet dataset;
 
@@ -59,7 +60,7 @@ public class InputEmitter implements Serializable {
 
     private Messages messages;
 
-    public InputEmitter(@Option("configuration") final QueryDataSet queryDataSet, final BasicDatastoreService service,
+    public InputEmitter(@Option("configuration") final QueryDataSet queryDataSet, final SalesforceService service,
             LocalConfiguration configuration, final JsonBuilderFactory jsonBuilderFactory, final Messages messages) {
         this.service = service;
         this.dataset = queryDataSet;
@@ -75,22 +76,11 @@ public class InputEmitter implements Serializable {
             bulkQueryService = new BulkQueryService(bulkConnection, jsonBuilderFactory, messages);
             bulkQueryService.doBulkQuery(getModuleName(), getSoqlQuery());
         } catch (ConnectionException e) {
-            throw handleConnectionException(e);
+            throw service.handleConnectionException(e);
         } catch (AsyncApiException e) {
             throw new IllegalStateException(e.getExceptionMessage(), e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        }
-    }
-
-    private IllegalStateException handleConnectionException(final ConnectionException e) {
-        if (e == null) {
-            return new IllegalStateException("unexpected error. can't handle connection error.");
-        } else if (ApiFault.class.isInstance(e)) {
-            final ApiFault queryFault = ApiFault.class.cast(e);
-            return new IllegalStateException(queryFault.getExceptionMessage(), queryFault);
-        } else {
-            return new IllegalStateException("connection error", e);
         }
     }
 
@@ -110,7 +100,7 @@ public class InputEmitter implements Serializable {
             }
             return currentRecord;
         } catch (ConnectionException e) {
-            throw handleConnectionException(e);
+            throw service.handleConnectionException(e);
         } catch (AsyncApiException e) {
             throw new IllegalStateException(e.getExceptionMessage(), e);
         } catch (IOException e) {

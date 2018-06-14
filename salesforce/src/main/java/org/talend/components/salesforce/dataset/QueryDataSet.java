@@ -44,8 +44,8 @@ public class QueryDataSet implements Serializable {
 
     @Option
     @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" })
+    @Suggestable(value = "loadSalesforceModules", parameters = { "dataStore" })
     @Documentation("")
-    @Suggestable(value = "getmodules", parameters = { ".", ".datastore" })
     public String moduleName;
 
     @Option
