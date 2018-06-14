@@ -1,8 +1,5 @@
 package org.talend.components.salesforce.service;
 
-import static org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus.Status.KO;
-import static org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus.Status.OK;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,17 +20,14 @@ import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.SessionRenewer;
 
 import org.talend.components.salesforce.datastore.BasicDataStore;
-import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
-import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
-import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class BasicDatastoreService {
+public class SalesforceService {
 
     private static final int DEFAULT_TIMEOUT = 60000;
 
@@ -46,24 +40,6 @@ public class BasicDatastoreService {
     private static final String DEFAULT_API_VERSION = "42.0";
 
     public static final String URL = "https://" + ACTIVE_ENDPOINT + "/services/Soap/u/" + DEFAULT_API_VERSION;
-
-    @HealthCheck("basic.healthcheck")
-    public HealthCheckStatus validateBasicConnection(@Option final BasicDataStore datastore, Messages i18n,
-            LocalConfiguration configuration) {
-        try {
-            connect(datastore, configuration);
-        } catch (ConnectionException ex) {
-            String error;
-            if (ApiFault.class.isInstance(ex)) {
-                final ApiFault fault = ApiFault.class.cast(ex);
-                error = fault.getExceptionCode() + " " + fault.getExceptionMessage();
-            } else {
-                error = ex.getMessage();
-            }
-            return new HealthCheckStatus(KO, i18n.healthCheckFailed(error));
-        }
-        return new HealthCheckStatus(OK, i18n.healthCheckOk());
-    }
 
     private Properties loadCustomConfiguration(final LocalConfiguration configuration) {
         final String configFile = configuration.get(CONFIG_FILE_lOCATION_KEY);
@@ -175,4 +151,14 @@ public class BasicDatastoreService {
         return new BulkConnection(bulkConfig);
     }
 
+    public IllegalStateException handleConnectionException(final ConnectionException e) {
+        if (e == null) {
+            return new IllegalStateException("unexpected error. can't handle connection error.");
+        } else if (ApiFault.class.isInstance(e)) {
+            final ApiFault queryFault = ApiFault.class.cast(e);
+            return new IllegalStateException(queryFault.getExceptionMessage(), queryFault);
+        } else {
+            return new IllegalStateException("connection error", e);
+        }
+    }
 }
