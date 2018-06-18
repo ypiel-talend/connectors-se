@@ -48,12 +48,18 @@ public class ElasticsearchInput extends PTransform<PBegin, PCollection<JsonObjec
     }
 
     private ElasticsearchIO.Read configure() {
-        ElasticsearchIO.Read current = ElasticsearchIO.read()
-                .withConnectionConfiguration(ElasticsearchIO.ConnectionConfiguration.create(
-                        Stream.of(configuration.getDatastore().getNodes().split(",")).map(String::trim).toArray(String[]::new),
-                        configuration.getIndex(), configuration.getType()));
-        if (configuration.getQuery() != null && !configuration.getQuery().isEmpty()) {
-            current = current.withQuery(configuration.getQuery());
+        final ElasticsearchIO.ConnectionConfiguration configuration = ElasticsearchIO.ConnectionConfiguration.create(
+                Stream.of(this.configuration.getDatastore().getNodes().split(",")).map(String::trim).toArray(String[]::new),
+                this.configuration.getIndex(), this.configuration.getType());
+        if (this.configuration.getDatastore().getUsername() != null) {
+            configuration.withUsername(this.configuration.getDatastore().getUsername());
+        }
+        if (this.configuration.getDatastore().getPassword() != null) {
+            configuration.withPassword(this.configuration.getDatastore().getPassword());
+        }
+        ElasticsearchIO.Read current = ElasticsearchIO.read().withConnectionConfiguration(configuration);
+        if (this.configuration.getQuery() != null && !this.configuration.getQuery().isEmpty()) {
+            current = current.withQuery(this.configuration.getQuery());
         }
         // todo: keep alive and batchsize
         return current;
