@@ -15,11 +15,9 @@
 #
 FROM alpine:3.7
 
-ARG ARTIFACT_ID=${project.artifactId}
-ARG ARTIFACT_VERSION=${project.version}
-ARG ARTIFACT_TYPE=car
-
 MAINTAINER contact@talend.com
+
+ARG BUILD_VERSION
 
 ENV LC_ALL en_US.UTF-8
 
@@ -30,12 +28,11 @@ WORKDIR $OUTPUT
 RUN date
 
 ADD component-registry.properties component-registry.properties
-ADD $ARTIFACT_ID-$ARTIFACT_VERSION.$ARTIFACT_TYPE $ARTIFACT_ID.$ARTIFACT_TYPE
+ADD connectors-se-docker/target/connectors-se-docker-$BUILD_VERSION.car repository.car
 
-# todo: signature when available
 RUN set -ex && \
-    unzip $ARTIFACT_ID.$ARTIFACT_TYPE 'MAVEN-INF/*' -d . && \
+    unzip repository.car 'MAVEN-INF/*' -d . && \
     mv MAVEN-INF/repository repository && \
-    rm -Rf $ARTIFACT_ID.$ARTIFACT_TYPE MAVEN-INF
+    rm -Rf repository.car MAVEN-INF
 
 CMD [ "/bin/sh" ]

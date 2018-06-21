@@ -1,4 +1,6 @@
 def slackChannel = 'components'
+def version = 'will be replaced'
+def image = 'will be replaced'
 
 pipeline {
   agent {
@@ -9,29 +11,16 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-    - name: docker
-      image: docker
+    - name: maven
+      image: jenkinsxio/builder-maven:0.0.319
       command:
       - cat
       tty: true
       volumeMounts:
       - name: docker
         mountPath: /var/run/docker.sock
-    - name: maven
-      image: maven:3.5.3-jdk-8
-      command:
-      - cat
-      tty: true
-      volumeMounts:
       - name: m2
         mountPath: /root/.m2/repository
-      resources:
-          requests:
-            memory: "1G"
-            cpu: "500m"
-          limits:
-            memory: "4G"
-            cpu: "2"
 
   volumes:
   - name: docker
@@ -46,6 +35,7 @@ spec:
 
   environment {
     MAVEN_OPTS = '-Dmaven.artifact.threads=128 -Dorg.slf4j.simpleLogger.showThreadName=true -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss'
+    TALEND_REGISTRY="registry.datapwn.com"
   }
 
   options {
@@ -71,15 +61,36 @@ spec:
         expression { sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim() == 'master' }
       }
       steps {
-        container('docker') {
-          sh 'mvn clean install -T1C -Pdocker -DskipTests -Dinvoker.skip=true'
-          dir ('connectors-se-docker/target/classes') {
-            withCredentials([  usernamePassword(
-                credentialsId: 'docker-registry-credentials',
-                passwordVariable: 'DOCKER_PASSWORD',
-                usernameVariable: 'DOCKER_LOGIN')
-            ]) {
-              sh 'chmod +x build.docker.sh && ./build.docker.sh'
+        container('maven') {
+          withCredentials([
+            usernamePassword(
+              credentialsId: 'docker-registry-credentials',
+              passwordVariable: 'DOCKER_PASSWORD',
+              usernameVariable: 'DOCKER_LOGIN')
+          ]) {
+            script {
+              version = sh(returnStdout: true, script: 'grep "<version>" pom.xml  | head -n 1 | sed "s/.*>\\(.*\\)<.*/\\1/"').trim()
+              image = sh(returnStdout: true, script: 'echo "talend/connectors-se:$(echo "' + version + '" | sed "s/SNAPSHOT/dev/")"').trim()
+            }
+
+            sh """
+# create the registration file for components (used by the server)
+grep "^      <artifactId>" connectors-se-docker/pom.xml | sed "s#.*<artifactId>\\(.*\\)</artifactId>#\\1=org.talend.components:\\1:${version}#" | sort -u > component-registry.properties
+
+# drop already existing snapshot image if any
+if [[ "${version}" = *"SNAPSHOT" ]]; then
+  docker rmi "${image}" "$TALEND_REGISTRY/${image}" || :
+fi
+
+# build and push current image
+docker build --tag "${image}" --build-arg BUILD_VERSION=${version} . && docker tag "${image}" "$TALEND_REGISTRY/${image}" || exit 1
+"""
+            retry(5) {
+            sh '''#! /bin/bash
+set +x
+echo $DOCKER_PASSWORD | docker login $TALEND_REGISTRY -u $DOCKER_LOGIN --password-stdin
+'''
+              sh "docker push ${env.TALEND_REGISTRY}/${image}"
             }
           }
         }
