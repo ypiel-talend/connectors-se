@@ -19,6 +19,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 @Data
 @Icon(FILE_S3_O)

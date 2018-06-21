@@ -18,6 +18,7 @@
   <properties>
     <!-- native beam -->
     <validation.model>false</validation.model>
+    <hadoop.version>2.7.3</hadoop.version>
   </properties>
 
   <dependencies>
@@ -28,6 +29,11 @@
     <dependency>
       <groupId>org.talend.components</groupId>
       <artifactId>simplefileio-runtime</artifactId>
+      <version>${tcomp0.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.talend.components</groupId>
+      <artifactId>components-adapter-beam</artifactId>
       <version>${tcomp0.version}</version>
     </dependency>
     <dependency>
@@ -54,20 +60,37 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-runtime-beam</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.beam</groupId>
       <artifactId>beam-runners-direct-java</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.talend.sdk.component</groupId>
       <artifactId>component-runtime-beam-junit</artifactId>
+      <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.talend.daikon</groupId>
       <artifactId>daikon</artifactId>
       <classifier>tests</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>${hadoop.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-runtime-http-junit</artifactId>
+      <version>${component-runtime.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
