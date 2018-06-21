@@ -9,14 +9,20 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-    - name: maven
-      image: maven:3.5.3-jdk-8
+    - name: docker
+      image: docker
       command:
       - cat
       tty: true
       volumeMounts:
       - name: docker
         mountPath: /var/run/docker.sock
+    - name: maven
+      image: maven:3.5.3-jdk-8
+      command:
+      - cat
+      tty: true
+      volumeMounts:
       - name: m2
         mountPath: /root/.m2/repository
       resources:
@@ -56,7 +62,26 @@ spec:
     stage('Run maven') {
       steps {
         container('maven') {
-          sh 'mvn clean install -T1C'
+          sh 'mvn clean install -T1C -Pdocker'
+        }
+      }
+    }
+    stage('Build Docker Components Image') {
+      when {
+        expression { sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim() == 'master' }
+      }
+      steps {
+        container('docker') {
+          sh 'mvn clean install -T1C -Pdocker -DskipTests -Dinvoker.skip=true'
+          dir ('connectors-se-docker/target/classes') {
+            withCredentials([  usernamePassword(
+                credentialsId: 'docker-registry-credentials',
+                passwordVariable: 'DOCKER_PASSWORD',
+                usernameVariable: 'DOCKER_LOGIN')
+            ]) {
+              sh 'chmod +x build.docker.sh && ./build.docker.sh'
+            }
+          }
         }
       }
     }
