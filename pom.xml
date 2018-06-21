@@ -61,6 +61,15 @@
     <module>salesforce</module>
   </modules>
 
+  <profiles>
+    <profile>
+      <id>docker</id>
+      <modules>
+        <module>connectors-se-docker</module>
+      </modules>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -223,12 +232,12 @@
 
   <distributionManagement>
     <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <id>talend.snapshots</id>
+      <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot</url>
     </snapshotRepository>
     <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>talend.releases</id>
+      <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceRelease</url>
     </repository>
     <site>
       <id>documentation.website</id>

@@ -53,20 +53,15 @@ public class ElasticsearchOutput extends PTransform<PCollection<JsonObject>, PDo
     }
 
     private ElasticsearchIO.Write configure() {
-        final ElasticsearchIO.ConnectionConfiguration configuration = ElasticsearchIO
-                .ConnectionConfiguration.create(
-                Stream.of(this.configuration.getDatastore()
-                                            .getNodes()
-                                            .split(","))
-                      .map(String::trim)
-                      .toArray(String[]::new), this.configuration.getIndex(), this.configuration.getType());
+        final ElasticsearchIO.ConnectionConfiguration configuration = ElasticsearchIO.ConnectionConfiguration.create(
+                Stream.of(this.configuration.getDatastore().getNodes().split(",")).map(String::trim).toArray(String[]::new),
+                this.configuration.getIndex(), this.configuration.getType());
         if (this.configuration.getDatastore().getUsername() != null) {
             configuration.withUsername(this.configuration.getDatastore().getUsername());
         }
         if (this.configuration.getDatastore().getPassword() != null) {
             configuration.withPassword(this.configuration.getDatastore().getPassword());
         }
-        return ElasticsearchIO.write()
-                              .withConnectionConfiguration(configuration);
+        return ElasticsearchIO.write().withConnectionConfiguration(configuration);
     }
 }
