@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-FROM alpine:3.7 as stagingImage
+FROM alpine:3.7 as builder
 
 ARG BUILD_VERSION
 
@@ -41,7 +41,7 @@ ENV OUTPUT /opt/talend/maven
 RUN mkdir -p $OUTPUT
 WORKDIR $OUTPUT
 
-COPY --from=stagingImage /opt/talend/maven/component-registry.properties component-registry.properties
-COPY --from=stagingImage /opt/talend/maven/repository repository
+COPY --from=builder /opt/talend/maven/component-registry.properties component-registry.properties
+COPY --from=builder /opt/talend/maven/repository repository
 
 CMD [ "/bin/sh" ]
