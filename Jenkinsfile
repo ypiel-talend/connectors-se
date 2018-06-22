@@ -49,13 +49,6 @@ spec:
   }
 
   stages {
-    stage('Test jenkins') {
-      steps {
-        container('maven') {
-          sh 'docker --version'
-        }
-      }
-    }
     stage('Run maven') {
       steps {
         container('maven') {
@@ -125,6 +118,12 @@ echo $DOCKER_PASSWORD | docker login $TALEND_REGISTRY -u $DOCKER_LOGIN --passwor
         reportFiles: 'index.html',
         reportName: "Maven Site"
       ])
+    }
+    success {
+      slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
+    }
+    failure {
+      slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
     }
   }
 }

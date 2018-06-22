@@ -13,15 +13,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-FROM alpine:3.7 as stagingImage
+FROM alpine:3.7
+
+MAINTAINER contact@talend.com
 
 ARG BUILD_VERSION
 
-RUN date
+ENV LC_ALL en_US.UTF-8
 
 ENV OUTPUT /opt/talend/maven
 RUN mkdir -p $OUTPUT
 WORKDIR $OUTPUT
+
+RUN date
 
 ADD component-registry.properties component-registry.properties
 ADD connectors-se-docker/target/connectors-se-docker-$BUILD_VERSION.car repository.car
@@ -30,18 +34,5 @@ RUN set -ex && \
     unzip repository.car 'MAVEN-INF/*' -d . && \
     mv MAVEN-INF/repository repository && \
     rm -Rf repository.car MAVEN-INF
-
-FROM alpine:3.7
-
-MAINTAINER contact@talend.com
-
-ENV LC_ALL en_US.UTF-8
-
-ENV OUTPUT /opt/talend/maven
-RUN mkdir -p $OUTPUT
-WORKDIR $OUTPUT
-
-COPY --from=stagingImage /opt/talend/maven/component-registry.properties component-registry.properties
-COPY --from=stagingImage /opt/talend/maven/repository repository
 
 CMD [ "/bin/sh" ]
