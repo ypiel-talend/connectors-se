@@ -77,6 +77,9 @@ spec:
 # create the registration file for components (used by the server)
 grep "^      <artifactId>" connectors-se-docker/pom.xml | sed "s#.*<artifactId>\\(.*\\)</artifactId>#\\1=org.talend.components:\\1:${version}#" | sort -u > component-registry.properties
 
+echo "Registered components:"
+cat component-registry.properties
+
 # drop already existing snapshot image if any
 if [[ "${version}" = *"SNAPSHOT" ]]; then
   docker rmi "${image}" "$TALEND_REGISTRY/${image}" || :
@@ -115,12 +118,6 @@ echo $DOCKER_PASSWORD | docker login $TALEND_REGISTRY -u $DOCKER_LOGIN --passwor
         reportFiles: 'index.html',
         reportName: "Maven Site"
       ])
-    }
-    success {
-      slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
-    }
-    failure {
-      slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
     }
   }
 }
