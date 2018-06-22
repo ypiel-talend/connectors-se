@@ -49,6 +49,13 @@ spec:
   }
 
   stages {
+    stage('Test jenkins') {
+      steps {
+        container('maven') {
+          sh 'docker --version'
+        }
+      }
+    }
     stage('Run maven') {
       steps {
         container('maven') {
