@@ -8,7 +8,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@DataStore("FixedDatastore")
+@DataStore("FixedDatastoreConfiguration")
 @Documentation("A fixed input doesn't have any connection since it \"mocks\" its input.")
-public class FixedDatastore implements Serializable {
+public class FixedDatastoreConfiguration implements Serializable {
 }

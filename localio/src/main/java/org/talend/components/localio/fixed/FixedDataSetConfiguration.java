@@ -1,10 +1,7 @@
 package org.talend.components.localio.fixed;
 
-import static org.talend.sdk.component.api.component.Icon.IconType.FILE_O;
-
 import java.io.Serializable;
 
-import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -20,14 +17,13 @@ import lombok.Getter;
 
 @Data
 @Version
-@Icon(FILE_O)
-@DataSet("FixedDataSet")
+@DataSet("FixedDataSetConfiguration")
 @OptionsOrder({ "datastore", "format", "recordDelimiter", "specificRecordDelimiter", "fieldDelimiter", "specificFieldDelimiter",
         "schema", "csvSchema", "values" })
-public class FixedDataSet implements Serializable {
+public class FixedDataSetConfiguration implements Serializable {
 
     @Option
-    private FixedDatastore datastore;
+    private FixedDatastoreConfiguration datastore = new FixedDatastoreConfiguration();
 
     @Option
     @Required
@@ -57,12 +53,12 @@ public class FixedDataSet implements Serializable {
     private String specificFieldDelimiter = FieldDelimiterType.SEMICOLON.getDelimiter();
 
     @Option
+    @Code("json")
     @ActiveIf(target = "format", value = "AVRO")
     @Documentation("If format is AVRO the Avro schema.")
     private String schema;
 
     @Option
-    @Code("json")
     @ActiveIf(target = "format", value = "CSV")
     @Documentation("If format is CSV the csv schema.")
     private String csvSchema;

@@ -51,13 +51,14 @@ class FixedFlowInputTest {
     @Test
     void input() throws IOException {
         final FixedFlowInputConfiguration configuration = new FixedFlowInputConfiguration();
-        configuration.setNbRows(2);
-        configuration.setSchema(refSchema.toString());
-        configuration.setValues(generateInputJSON(refSchema, refRecord));
+        configuration.setRepeat(2);
+        configuration.getDataset().setFormat(FixedDataSetConfiguration.RecordFormat.AVRO);
+        configuration.getDataset().setSchema(refSchema.toString());
+        configuration.getDataset().setValues(generateInputJSON(refSchema, refRecord));
         final Map<String, String> asConfig = configurationByExample().forInstance(configuration).configured().toMap();
         final Pipeline pipeline = Pipeline.create();
         final PTransform<PBegin, PCollection<IndexedRecord>> input = handler.asManager()
-                .createComponent("LocalIO", "FixedFlowInput", MAPPER, 1, asConfig)
+                .createComponent("LocalIO", "FixedFlowInputRuntime", MAPPER, 1, asConfig)
                 .map(e -> (PTransform<PBegin, PCollection<IndexedRecord>>) e)
                 .orElseThrow(() -> new IllegalArgumentException("No component for fixed flow input"));
         PAssert.that(pipeline.apply(input)).satisfies(it -> {
