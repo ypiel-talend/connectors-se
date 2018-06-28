@@ -27,7 +27,7 @@ class DevNullOutputTest {
     void ensureItRuns() {
         final Pipeline pipeline = Pipeline.create();
         final PTransform<PCollection<IndexedRecord>, PCollection<IndexedRecord>> input = handler.asManager()
-                .createComponent("LocalIO", "DevNullOutput", PROCESSOR, 1, emptyMap())
+                .createComponent("LocalIO", "DevNullOutputRuntime", PROCESSOR, 1, emptyMap())
                 .map(e -> (PTransform<PCollection<IndexedRecord>, PCollection<IndexedRecord>>) e)
                 .orElseThrow(() -> new IllegalArgumentException("No component for fixed flow input"));
         pipeline.apply(Create.of(GenericDataRecordHelper.createRecord(new Object[] { "a", 1 }))).apply(input);
