@@ -8,6 +8,7 @@ import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.View;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionView;
@@ -58,10 +59,8 @@ public class FixedFlowInputRuntime extends PTransform<PBegin, PCollection<Indexe
         }
 
         if (values.size() != 0) {
-            PCollection<IndexedRecord> out = (PCollection<IndexedRecord>) begin
-                    .apply(Create.of(values).withCoder((AvroCoder) AvroCoder.of(runtime.getSchema())));
-            final PCollectionView<List<IndexedRecord>> data = out
-                    .apply(Combine.globally(new IndexedRecordCollectionCombineFn()).asSingletonView());
+            final PCollectionView<List<IndexedRecord>> data = ((PCollection<IndexedRecord>) begin
+                    .apply(Create.of(values).withCoder((AvroCoder) AvroCoder.of(runtime.getSchema())))).apply(View.asList());
             return begin.apply(GenerateSequence.from(0).to(configuration.getRepeat()))
                     .apply(ParDo.of(new DoFn<Long, IndexedRecord>() {
 
@@ -78,34 +77,4 @@ public class FixedFlowInputRuntime extends PTransform<PBegin, PCollection<Indexe
                     .withRows(configuration.getRepeat()));
         }
     }
-
-    public static class IndexedRecordCollectionCombineFn
-            extends Combine.CombineFn<IndexedRecord, List<IndexedRecord>, List<IndexedRecord>> {
-
-        List<IndexedRecord> accs;
-
-        @Override
-        public List<IndexedRecord> createAccumulator() {
-            return new ArrayList<>();
-        }
-
-        @Override
-        public List<IndexedRecord> addInput(List<IndexedRecord> accumulator, IndexedRecord input) {
-            accumulator.add(input);
-            return accumulator;
-        }
-
-        @Override
-        public List<IndexedRecord> mergeAccumulators(Iterable<List<IndexedRecord>> accumulators) {
-            List<IndexedRecord> accumulator = createAccumulator();
-            accumulators.forEach(l -> accumulator.addAll(l));
-            return accumulator;
-        }
-
-        @Override
-        public List<IndexedRecord> extractOutput(List<IndexedRecord> accumulator) {
-            return accumulator;
-        }
-    }
-
 }

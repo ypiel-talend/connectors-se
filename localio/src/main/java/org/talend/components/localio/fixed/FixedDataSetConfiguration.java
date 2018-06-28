@@ -23,7 +23,7 @@ import lombok.Getter;
 public class FixedDataSetConfiguration implements Serializable {
 
     @Option
-    private FixedDatastoreConfiguration datastore = new FixedDatastoreConfiguration();
+    private FixedDataStoreConfiguration datastore = new FixedDataStoreConfiguration();
 
     @Option
     @Required

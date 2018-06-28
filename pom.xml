@@ -40,12 +40,16 @@
     <jackson-codehaus.version>1.9.14-TALEND</jackson-codehaus.version>
 
     <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
+    <daikon.version>0.23.0</daikon.version>
 
     <junit5.version>5.2.0</junit5.version>
     <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
 
     <surefire.version>2.21.0</surefire.version>
     <jacoco.version>0.8.1</jacoco.version>
+
+    <commons-csv.version>1.4</commons-csv.version>
+    <guava.version>20.0</guava.version>
 
     <!-- set to true if you use native beam programming model -->
     <validation.model>true</validation.model>
@@ -223,7 +227,7 @@
       <dependency>
         <groupId>org.talend.daikon</groupId>
         <artifactId>daikon</artifactId>
-        <version>0.23.0</version>
+        <version>${daikon.version}</version>
         <classifier>tests</classifier>
         <scope>test</scope>
       </dependency>
