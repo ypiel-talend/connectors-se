@@ -21,9 +21,9 @@ docker build --tag $__image --build-arg BUILD_VERSION=${__version} .
 # export COMPONENT_SERVER_TAG=1.0.1_20180702085026
 
 CONNECTORS_SE_TAG_SUGGEST=$(echo $__version | sed "s/SNAPSHOT/dev/")
-COMPONENT_SERVER_TAG_SUGGEST=$(curl -s 'https://hub.docker.com/v2/repositories/tacokit/component-server/tags/' | jq -r '.results[0].name')
+COMPONENT_SERVER_TAG=${COMPONENT_SERVER_TAG:-latest}
 
-docker build --tag talend/component-server:1.0.1-sprint25-connectorsIncluded \
+docker build --tag talend/component-server:1.0.1-sprint26-connectorsIncluded \
 	--build-arg CONNECTORS_SE_TAG=${CONNECTORS_SE_TAG:-$CONNECTORS_SE_TAG_SUGGEST} \
-	--build-arg COMPONENT_SERVER_TAG=${COMPONENT_SERVER_TAG:-$COMPONENT_SERVER_TAG_SUGGEST} \
+	--build-arg COMPONENT_SERVER_TAG=$COMPONENT_SERVER_TAG \
 	-f component-server-docker/Dockerfile .
