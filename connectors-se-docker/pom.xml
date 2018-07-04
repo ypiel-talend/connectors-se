@@ -77,22 +77,30 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.talend.sdk.component</groupId>
-        <artifactId>talend-component-maven-plugin</artifactId>
-        <version>${component-runtime.version}</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
         <executions>
           <execution>
-            <id>build-car</id>
-            <phase>package</phase>
+            <id>create-m2</id>
             <goals>
-              <goal>dependencies</goal>
-              <goal>car</goal>
+              <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <skip>false</skip>
+              <outputDirectory>${project.build.directory}/docker-m2</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              <useRepositoryLayout>true</useRepositoryLayout>
+              <includeScope>runtime</includeScope>
+              <excludeArtifactIds>connectors-se-docker</excludeArtifactIds>
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.talend.sdk.component</groupId>
+        <artifactId>talend-component-maven-plugin</artifactId>
+        <version>${component-runtime.version}</version>
         <configuration> <!-- parent -->
           <skip>true</skip>
         </configuration>

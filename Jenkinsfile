@@ -68,33 +68,7 @@ spec:
               passwordVariable: 'DOCKER_PASSWORD',
               usernameVariable: 'DOCKER_LOGIN')
           ]) {
-            script {
-              version = sh(returnStdout: true, script: 'grep "<version>" pom.xml  | head -n 1 | sed "s/.*>\\(.*\\)<.*/\\1/"').trim()
-              image = sh(returnStdout: true, script: 'echo "talend/connectors-se:$(echo "' + version + '" | sed "s/SNAPSHOT/dev/")"').trim()
-            }
-
-            sh """
-# create the registration file for components (used by the server)
-grep "^      <artifactId>" connectors-se-docker/pom.xml | sed "s#.*<artifactId>\\(.*\\)</artifactId>#\\1=org.talend.components:\\1:${version}#" | sort -u > component-registry.properties
-
-echo "Registered components:"
-cat component-registry.properties
-
-# drop already existing snapshot image if any
-if [[ "${version}" = *"SNAPSHOT" ]]; then
-  docker rmi "${image}" "$TALEND_REGISTRY/${image}" || :
-fi
-
-# build and push current image
-docker build --tag "${image}" --build-arg BUILD_VERSION=${version} . && docker tag "${image}" "$TALEND_REGISTRY/${image}" || exit 1
-"""
-            retry(5) {
-            sh '''#! /bin/bash
-set +x
-echo $DOCKER_PASSWORD | docker login $TALEND_REGISTRY -u $DOCKER_LOGIN --password-stdin
-'''
-              sh "docker push ${env.TALEND_REGISTRY}/${image}"
-            }
+            sh "chmod +x ./connectors-se-docker/src/main/scripts/docker/*.sh && ./connectors-se-docker/src/main/scripts/docker/all.sh"
           }
         }
       }
