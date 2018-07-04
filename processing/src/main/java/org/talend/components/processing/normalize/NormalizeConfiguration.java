@@ -35,7 +35,6 @@ public class NormalizeConfiguration implements Serializable {
     private boolean trim;
 
     @Option
-    @Required
     @ActiveIf(target = "isList", value = "false")
     @Documentation("Is the column a list")
     private Delimiter fieldSeparator = Delimiter.SEMICOLON;

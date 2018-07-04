@@ -47,12 +47,10 @@ public class FilterRowConfiguration implements Serializable {
         private String columnName;
 
         @Option
-        @Required
         @Documentation("The function to apply on the column")
         private Transformer function = Transformer.EMPTY;
 
         @Option
-        @Required
         @Documentation("The operator")
         private Operator operator = Operator.EQUAL;
 

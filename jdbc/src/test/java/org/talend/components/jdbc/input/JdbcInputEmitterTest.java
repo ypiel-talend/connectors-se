@@ -150,6 +150,7 @@ class JdbcInputEmitterTest {
         connection.setUserId("sa");
         connection.setPassword("sa");
         connection.setDbType("ORACLEXX");
+        connection.setJdbcUrl("jdbc:derby://localhost:1234/foo");
         final QueryDataset dataset = new QueryDataset();
         dataset.setConnection(connection);
         dataset.setSqlQuery("select * from users");
@@ -165,6 +166,7 @@ class JdbcInputEmitterTest {
         connection.setUserId("sa");
         connection.setPassword("sa");
         connection.setDbType("ORACLE");
+        connection.setJdbcUrl("jdbc:derby://localhost:1234/foo");
         final QueryDataset dataset = new QueryDataset();
         dataset.setConnection(connection);
         dataset.setSqlQuery("select * from users");
