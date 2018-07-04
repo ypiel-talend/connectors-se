@@ -48,7 +48,9 @@ function buildAndTag() {
 
 function pushImage() {
     if [ -n "$DOCKER_LOGIN" ]; then
-        docker "$TALEND_REGISTRY" -u "$DOCKER_LOGIN" -p "$DOCKER_PASSWORD"
+        set +x
+        echo "$DOCKER_PASSWORD" | docker login "$TALEND_REGISTRY" -u "$DOCKER_LOGIN" --password-stdin
+        set -x
         for i in {1..5}; do
             docker push "$TALEND_REGISTRY/$1" && break || sleep 15
         done
