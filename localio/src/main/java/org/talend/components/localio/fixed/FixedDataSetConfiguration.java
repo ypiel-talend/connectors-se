@@ -26,7 +26,7 @@ public class FixedDataSetConfiguration implements Serializable {
     private FixedDataStoreConfiguration datastore = new FixedDataStoreConfiguration();
 
     @Option
-    @Required
+    // @Required
     @Documentation("The content format (CSV, JSON, AVRO).")
     private RecordFormat format = RecordFormat.CSV;
 
