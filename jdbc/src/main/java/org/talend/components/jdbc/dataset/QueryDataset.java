@@ -20,23 +20,19 @@ import lombok.Data;
 public class QueryDataset implements Serializable {
 
     @Option
-    @Required
     @Documentation("the connection information to execute the query")
     private BasicDatastore connection;
 
     @Option
-    @Required
     @Documentation("The source type")
     private SourceType sourceType = SourceType.QUERY;
 
     @Option
-    @Required
     @Documentation("The table name if the source type is a TABLE")
     @ActiveIf(target = "sourceType", value = { "TABLE_NAME" })
     private String tableName;
 
     @Option
-    @Required
     @ActiveIf(target = "sourceType", value = { "QUERY" })
     @Documentation("A valid read only query is the source type is Query")
     private String sqlQuery;
