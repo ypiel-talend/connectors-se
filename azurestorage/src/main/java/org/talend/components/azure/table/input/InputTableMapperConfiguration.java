@@ -1,18 +1,24 @@
 package org.talend.components.azure.table.input;
 
-import java.io.Serializable;
-import java.util.List;
-
-import org.talend.components.azure.common.AzureConnection;
+import com.microsoft.azure.storage.table.EdmType;
+import com.microsoft.azure.storage.table.TableQuery;
+import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.common.NameMapping;
+import org.talend.components.azure.service.Comparison;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @GridLayout(value = {
     @GridLayout.Row("azureConnection"),
@@ -27,6 +33,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 }, names = GridLayout.FormType.ADVANCED)
 @Documentation("TODO fill the documentation for this configuration")
 @DataSet("Input")
+@Data
 public class InputTableMapperConfiguration implements Serializable {
     @Option
     @Documentation("bl")
@@ -53,7 +60,7 @@ public class InputTableMapperConfiguration implements Serializable {
     private List<NameMapping> nameMappings;
 
     @Option
-    @Structure(discoverSchema = "guess", type = Structure.Type.IN)
+    @Structure(discoverSchema = "guessSchema", type = Structure.Type.OUT)
     @Documentation("SOS")
     private List<String> schema;
 
@@ -68,19 +75,97 @@ public class InputTableMapperConfiguration implements Serializable {
 
 
     private enum Predicate {
-        AND,
-        OR
+        AND("AND", TableQuery.Operators.AND),
+        OR("OR", TableQuery.Operators.OR);
+
+        private String displayName;
+
+        private String operator;
+
+        private static Map<String, Predicate> mapPossibleValues = new HashMap<>();
+
+        private static List<String> possibleValues = new ArrayList<>();
+
+        static {
+            for (Predicate predicate : values()) {
+                mapPossibleValues.put(predicate.displayName, predicate);
+                possibleValues.add(predicate.displayName);
+            }
+        }
+
+        Predicate(String displayName, String operator) {
+            this.displayName = displayName;
+            this.operator = operator;
+        }
+
+        /**
+         * Convert String predicat to Azure Type {@link TableQuery.Operators}
+         */
+        public static String getOperator(String p) {
+
+            if (!mapPossibleValues.containsKey(p)) {
+                throw new IllegalArgumentException(String.format("Invalid value %s, it must be %s", p, possibleValues));
+            }
+            return mapPossibleValues.get(p).operator;
+        }
+
+        @Override
+        public String toString() {
+            return this.displayName;
+        }
     }
 
 
     private enum FieldType {
-        STRING,
-        NUMERIC,
-        DATE,
-        GUID,
-        BOOLEAN
+        STRING("STRING", EdmType.STRING),
+
+        NUMERIC("NUMERIC", EdmType.INT32),
+
+        DATE("DATE", EdmType.DATE_TIME),
+
+        GUID("GUID", EdmType.GUID),
+
+        BOOLEAN("BOOLEAN", EdmType.BOOLEAN);
+
+        private String displayName;
+
+        private EdmType supportedType;
+
+        private static Map<String, FieldType> mapPossibleValues = new HashMap<>();
+
+        private static List<String> possibleValues = new ArrayList<>();
+
+        static {
+            for (FieldType supportedFieldType : values()) {
+                possibleValues.add(supportedFieldType.displayName);
+                mapPossibleValues.put(supportedFieldType.displayName, supportedFieldType);
+            }
+        }
+
+        FieldType(String displayName, EdmType supportedType) {
+            this.displayName = displayName;
+            this.supportedType = supportedType;
+        }
+
+        /**
+         * Convert String type names to Azure Type {@link EdmType}
+         */
+        public static EdmType getEdmType(String ft) {
+            if (!mapPossibleValues.containsKey(ft)) {
+                throw new IllegalArgumentException(String.format("Invalid value %s, it must be %s", ft, possibleValues));
+            }
+            return mapPossibleValues.get(ft).supportedType;
+        }
+
+        @Override
+        public String toString() {
+            return this.displayName;
+        }
+
+
     }
 
+    @Data
     private class FilterExpression {
         @Option
         @Documentation("column name")
@@ -102,6 +187,59 @@ public class InputTableMapperConfiguration implements Serializable {
         @Option
         @Documentation("fieldType")
         private FieldType fieldType = FieldType.STRING;
+    }
 
+    public String generateCombinedFilterConditions() {
+        String filter = "";
+        if (isValidFilterExpression()) {
+            for (FilterExpression filterExpression: filterExpressions) {
+                String c = filterExpression.column;
+                String cfn = filterExpression.function.toString();
+                String cop = filterExpression.predicate.toString();
+                String typ = filterExpression.fieldType.toString();
+
+                String f = Comparison.getQueryComparisons(cfn);
+                String value = filterExpression.value;
+                String p = Predicate.getOperator(cop);
+
+                EdmType t = FieldType.getEdmType(typ);
+
+                String flt = TableQuery.generateFilterCondition(c, f, value, t);
+
+                if (!filter.isEmpty()) {
+                    filter = TableQuery.combineFilters(filter, p, flt);
+                } else {
+                    filter = flt;
+                }
+            }
+        }
+        return filter;
+    }
+
+    /**
+     * this method check if the data in the Filter expression is valid and can produce a Query filter.<br/>
+     * the table is valid if :<br>
+     * 1) all column, fieldType, function, operand and predicate lists are not null<br/>
+     * 2) values in the lists column, fieldType, function, operand and predicate are not empty
+     *
+     * <br/>
+     *
+     * @return {@code true } if the two above condition are true
+     *
+     */
+    private boolean isValidFilterExpression() {
+
+        if (filterExpressions == null) {
+            return false;
+        }
+        for (FilterExpression filterExpression: filterExpressions) {
+            if (StringUtils.isEmpty(filterExpression.column) || filterExpression.fieldType == null
+                    || filterExpression.function == null || StringUtils.isEmpty(filterExpression.value)
+                    || filterExpression.predicate == null) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
