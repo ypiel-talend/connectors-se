@@ -97,41 +97,14 @@
           </execution>
         </executions>
       </plugin>
-
-
-      <!-- TEMPORARY, should update for new build scripts. -->
-      <!--<plugin>-->
-        <!--<groupId>org.talend.sdk.component</groupId>-->
-        <!--<artifactId>talend-component-maven-plugin</artifactId>-->
-        <!--<version>${component-runtime.version}</version>-->
-        <!--<configuration> &lt;!&ndash; parent &ndash;&gt;-->
-          <!--<skip>true</skip>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
-
       <plugin>
         <groupId>org.talend.sdk.component</groupId>
         <artifactId>talend-component-maven-plugin</artifactId>
         <version>${component-runtime.version}</version>
-        <executions>
-          <execution>
-            <id>build-car</id>
-            <phase>package</phase>
-            <goals>
-              <goal>dependencies</goal>
-              <goal>car</goal>
-            </goals>
-            <configuration>
-              <skip>false</skip>
-            </configuration>
-          </execution>
-        </executions>
         <configuration> <!-- parent -->
           <skip>true</skip>
         </configuration>
       </plugin>
-
-
     </plugins>
   </build>
 </project>
