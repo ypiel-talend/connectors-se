@@ -1,20 +1,32 @@
 package org.talend.components.processing.replicate;
 
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.json.JsonBuilderFactory;
+
+import org.apache.avro.Schema;
+import org.apache.avro.generic.IndexedRecord;
+import org.apache.beam.runners.direct.DirectRunner;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.Create;
+import org.apache.beam.sdk.values.PCollection;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.talend.components.adapter.beam.BeamJobContext;
+import org.talend.components.adapter.beam.coders.LazyAvroCoder;
+import org.talend.daikon.avro.GenericDataRecordHelper;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.ComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
-import org.talend.sdk.component.junit5.WithComponents;
 
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.talend.sdk.component.runtime.manager.chain.Job.components;
-
-@WithComponents("org.talend.components.processing")
 class ReplicateTest {
 
     @Injected
@@ -25,17 +37,40 @@ class ReplicateTest {
 
     @Test
     void replicate() {
+        // Create pipeline
+        PipelineOptions options = PipelineOptionsFactory.create();
+        options.setRunner(DirectRunner.class);
+        final Pipeline p = Pipeline.create(options);
 
-        final JsonObject object1 = factory.createObjectBuilder().add("index", 1).build();
-        final JsonObject object2 = factory.createObjectBuilder().add("index", 2).build();
-        final JsonObject object3 = factory.createObjectBuilder().add("index", 3).build();
-        handler.setInputData(asList(object1, object2, object3));
-        components().component("input", "test://emitter").component("replicate", "Processing://Replicate")
-                .component("output", "test://collector").connections().from("input").to("replicate").from("replicate")
-                .to("output").build().run();
+        // Create PCollection for test
+        Schema a = GenericDataRecordHelper.createSchemaFromObject("a", new Object[] { "a" });
+        IndexedRecord irA = GenericDataRecordHelper.createRecord(a, new Object[] { "a" });
+        IndexedRecord irB = GenericDataRecordHelper.createRecord(a, new Object[] { "b" });
+        IndexedRecord irC = GenericDataRecordHelper.createRecord(a, new Object[] { "c" });
 
-        final List<JsonObject> values = handler.getCollectedData(JsonObject.class);
-        assertEquals(1, values.size());
-        // assertEquals(2, values.iterator().next().getInt("index"));
+        List<IndexedRecord> data = Arrays.asList( //
+                irA, //
+                irB, //
+                irC, //
+                irA, //
+                irA, //
+                irC //
+        );
+
+        PCollection<IndexedRecord> input =
+                (PCollection<IndexedRecord>) p.apply(Create.of(data).withCoder(LazyAvroCoder.of()));
+
+        Replicate processor = new Replicate(new ReplicateConfiguration());
+        BeamJobContext context = Mockito.mock(BeamJobContext.class);
+        processor.build(context);
+        verify(context, times(1)).getLinkNameByPortName(anyString());
+        verify(context, times(0)).getPCollectionByLinkName(anyString());
+
+        BeamJobContext ctx = Mockito.mock(BeamJobContext.class);
+        when(ctx.getLinkNameByPortName(anyString())).thenReturn("test");
+        when(ctx.getPCollectionByLinkName(anyString())).thenReturn(input);
+        processor.build(ctx);
+        verify(ctx, times(2)).getLinkNameByPortName(anyString());
+        verify(ctx, times(1)).getPCollectionByLinkName(anyString());
     }
 }
