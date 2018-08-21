@@ -56,9 +56,17 @@ class Artifactory extends Http<Map<String, Object>> {
     }
 }
 
+
+def artifactory
+withCredentials([usernamePassword(
+        credentialsId: 'artifactory-credentials',
+        passwordVariable: 'JFROG_DOCKER_PASSWORD', usernameVariable: 'JFROG_DOCKER_LOGIN')]) {
+    artifactory = new Artifactory(token: JFROG_DOCKER_PASSWORD)
+}
+
 def addDockerTagProposal(image) {
     def parameter = image.replace('/', '_').replace('-', '').toUpperCase(ROOT) + '__DOCKER_IMAGE'
-    def tags = new Artifactory(token: args[0]).listTags(image)
+    def tags = artifactory.listTags(image)
     def proposals = '[' + tags.collect { "\"$it\"" }.join(',') + ']'
 
     activeChoiceParam(parameter) {
