@@ -1,6 +1,11 @@
 #!/usr/bin/groovy
 import static java.util.Locale.ROOT
 
+folder('TDI') {
+    displayName("[TDI] Folder containing TDI jobs")
+    description("""""")
+}
+
 def addDockerTagProposal(image) {
     def paramName = image.replace('/', '_').replace('-', '').toUpperCase(ROOT) + '__DOCKER_IMAGE'
 
