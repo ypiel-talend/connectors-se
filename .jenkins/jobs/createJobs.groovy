@@ -24,20 +24,18 @@ def addDockerTagProposal(image) {
  * JOB DEFINITIONS
  */
 
-def refreshDockerImages = readFileFromWorkspace('.jenkins/jobs/templates/refreshDockerImages.groovy')
 pipelineJob('TDI/refresh-docker-images') {
     displayName("[TDI][generated] Refreshes images for data-catalog-stack")
     description("## Refreshes proposals for Data Catalog Stack\n\nWARNING: generated job.")
 
     logRotator(30, -1, 1, -1)
-    triggers {
-        periodic(10)
-    }
 
     definition {
-        cps {
-            script(refreshDockerImages)
-            sandbox()
+        cpsScm {
+            scm {
+                git('https://github.com/talend/connectors-se.git')
+                scriptPath('.jenkins/jobs/generated/RefreshDockerImages.groovy')
+            }
         }
     }
 }

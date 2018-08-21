@@ -34,6 +34,16 @@ pipeline {
         }
     }
 
+    triggers {
+        cron(env.BRANCH_NAME == "master" ? "@daily" : "")
+    }
+
+    options {
+        buildDiscarder(logRotator(artifactNumToKeepStr: '5', numToKeepStr: env.BRANCH_NAME == 'master' ? '10' : '2'))
+        timeout(time: 60, unit: 'MINUTES')
+        skipStagesAfterUnstable()
+    }
+
     stages {
         stage('Refresh Proposals') {
             steps {
@@ -45,9 +55,10 @@ pipeline {
                                     usernameVariable: 'JFROG_LOGIN')
                     ]) {
                         script {
-                            def artifactory = load './.jenkins/jobs/templates/Artifactory.groovy'
+                            def src = new URL('https://raw.githubusercontent.com/Talend/connectors-se/master/.jenkins/jobs/templates/Artifactory.groovy').text
+                            new File('Artifactory.groovy').text = src
+                            def artifactory = load 'Artifactory.groovy'
                             artifactory.token = "${env.JFROG_TOKEN}"
-
 
                             def datasetTags = artifactory.listTags('talend/data-catalog/dataset')
                             println(datasetTags)
