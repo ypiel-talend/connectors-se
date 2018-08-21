@@ -76,7 +76,7 @@ def addDockerTagProposal(image) {
  * JOB DEFINITIONS
  */
 
-def pipelineDefinitionContent = readFileFromWorkspace('.jenkins/jobs/createDataCatalogStack.groovy')
+def pipelineDefinitionContent = readFileFromWorkspace('.jenkins/jobs/templates/createDataCatalogStack.groovy')
 pipelineJob('TDI/data-catalog-stack') {
     displayName("[TDI][generated] Create Data Catalog Stack")
     description("## Build Data Catalog Stack\n\nWARNING: generated job.")
