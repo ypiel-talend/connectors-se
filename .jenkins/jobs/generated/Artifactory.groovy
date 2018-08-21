@@ -43,7 +43,7 @@ class Artifactory extends Http<Map<String, Object>> {
                 ],
                 payload: new ByteArrayInputStream("""items.find({
                 "@docker.repoName":{ "\$match":"$image" }
-            })""".stripMargin().getBytes(StandardCharsets.UTF_8)),
+            })""".stripMargin().getBytes()),
                 responseProcessor: { HttpURLConnection connection -> new JsonSlurper().parse(connection.inputStream) }
         )).results.collect {
             def path = it.path
