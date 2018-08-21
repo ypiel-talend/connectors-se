@@ -26,7 +26,9 @@ public class ReplicateRow implements BeamJobBuilder, Serializable {
     private final ReplicateConfiguration configuration;
 
     private final static String MAIN_CONNECTOR = "MAIN";
+
     private final static String FLOW_CONNECTOR = MAIN_CONNECTOR;
+
     private final static String SECOND_FLOW_CONNECTOR = MAIN_CONNECTOR;
 
     private boolean hasFlow;
@@ -44,17 +46,17 @@ public class ReplicateRow implements BeamJobBuilder, Serializable {
             PCollection<Object> mainPCollection = beamJobContext.getPCollectionByLinkName(mainLink);
             if (mainPCollection != null) {
                 String flowLink = beamJobContext.getLinkNameByPortName("output_" + FLOW_CONNECTOR);
-//                String secondFlowLink = beamJobContext.getLinkNameByPortName("output_" + SECOND_FLOW_CONNECTOR);
+                // String secondFlowLink = beamJobContext.getLinkNameByPortName("output_" + SECOND_FLOW_CONNECTOR);
 
                 hasFlow = !isEmpty(flowLink);
-//                hasSecondFlow = !isEmpty(secondFlowLink);
+                // hasSecondFlow = !isEmpty(secondFlowLink);
 
                 if (hasFlow) {
                     beamJobContext.putPCollectionByLinkName(flowLink, mainPCollection);
                 }
-//                if (hasSecondFlow) {
-//                    beamJobContext.putPCollectionByLinkName(secondFlowLink, mainPCollection);
-//                }
+                // if (hasSecondFlow) {
+                // beamJobContext.putPCollectionByLinkName(secondFlowLink, mainPCollection);
+                // }
             }
         }
     }
@@ -66,6 +68,6 @@ public class ReplicateRow implements BeamJobBuilder, Serializable {
     }
 
     public static boolean isEmpty(final CharSequence cs) {
-            return cs == null || cs.length() == 0;
+        return cs == null || cs.length() == 0;
     }
 }
