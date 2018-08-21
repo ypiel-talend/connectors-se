@@ -29,7 +29,7 @@ def addDockerTagProposal(image) {
  */
 
 pipelineJob('TDI/refresh-docker-images') {
-    displayName("[TDI][generated] Refreshes images for data-catalog-stack")
+    displayName("[TDI][generated] Refreshes images for data-catalog-stack (last update: ${new Date().toString()}")
     description("## Refreshes proposals for Data Catalog Stack\n\nWARNING: generated job.")
 
     logRotator(30, -1, 1, -1)

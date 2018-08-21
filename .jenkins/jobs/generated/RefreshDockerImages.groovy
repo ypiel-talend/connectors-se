@@ -1,9 +1,6 @@
 #!/usr/bin/groovy
 
 pipeline {
-    options {
-        disableConcurrentBuilds()
-    }
     agent {
         kubernetes {
             label 'connectors-se_refresh-docker-images'
@@ -39,8 +36,9 @@ pipeline {
     }
 
     options {
+        disableConcurrentBuilds()
         buildDiscarder(logRotator(artifactNumToKeepStr: '5', numToKeepStr: env.BRANCH_NAME == 'master' ? '10' : '2'))
-        timeout(time: 60, unit: 'MINUTES')
+        timeout(time: 10, unit: 'MINUTES')
         skipStagesAfterUnstable()
     }
 
@@ -55,9 +53,7 @@ pipeline {
                                     usernameVariable: 'JFROG_LOGIN')
                     ]) {
                         script {
-                            def src = new URL('https://raw.githubusercontent.com/Talend/connectors-se/master/.jenkins/jobs/templates/Artifactory.groovy').text
-                            new File('Artifactory.groovy').text = src
-                            def artifactory = load 'Artifactory.groovy'
+                            def artifactory = load '.jenkins/jobs/generated/Artifactory.groovy'
                             artifactory.token = "${env.JFROG_TOKEN}"
 
                             def datasetTags = artifactory.listTags('talend/data-catalog/dataset')
