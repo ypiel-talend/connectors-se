@@ -1,7 +1,6 @@
 #!/usr/bin/groovy
 import static java.util.Locale.ROOT
 
-def artifactoryClass = readFileFromWorkspace('.jenkins/jobs/templates/Artifactory.groovy')
 def addDockerTagProposal(image) {
     def paramName = image.replace('/', '_').replace('-', '').toUpperCase(ROOT) + '__DOCKER_IMAGE'
 
