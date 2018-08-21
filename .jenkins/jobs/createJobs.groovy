@@ -1,80 +1,20 @@
 #!/usr/bin/groovy
-import groovy.json.JsonSlurper
-
-import static java.util.Collections.emptyMap
 import static java.util.Locale.ROOT
 
-/**
- * UTILITIES TO PRE-FILL PARAMETERS
- */
-class HttpConfig<T> {
-    String method = 'GET'
-    String url
-    Map<String, String> headers = emptyMap()
-    InputStream payload
-    Closure<T> responseProcessor
-}
-
-abstract class Http<T> { // normally plain java is allowed on jenkins, HTTPBuilder is not always
-    T http(HttpConfig<T> config) {
-        HttpURLConnection connection = new URL(config.url).openConnection()
-        connection.requestMethod = config.method
-        config.headers.each({ e -> connection.setRequestProperty(e.key, e.value) })
-        if (config.payload) {
-            connection.doOutput = true
-            connection.outputStream.write(config.payload.bytes)
-        }
-        if (connection.responseCode > 299) {
-            throw new IllegalArgumentException("Invalid response: $connection.responseCode: $connection.inputStream.text")
-        }
-        config.responseProcessor(connection)
-    }
-}
-
-class Artifactory extends Http<Map<String, Object>> {
-    String token
-    String base = 'https://talendregistry.jfrog.io/talendregistry'
-
-    Collection<String> listTags(String image) {
-        http(new HttpConfig<Map<String, Object>>(
-                url: "$base/api/search/aql",
-                method: 'POST',
-                headers: [
-                        'Content-Type': 'text/plain',
-                        'Accept': 'application/json',
-                        'X-JFrog-Art-Api': token
-                ],
-                payload: new ByteArrayInputStream("""items.find({
-                "@docker.repoName":{ "\$match":"$image" }
-            })""".stripMargin().bytes),
-                responseProcessor: { HttpURLConnection connection -> new JsonSlurper().parse(connection.inputStream) }
-        )).results.collect {
-            def path = it.path
-            def sep = path.lastIndexOf('/')
-            "${path.substring(0, sep)}:${path.substring(sep + 1)}"
-        }
-    }
-}
-
-
-def artifactory
-withCredentials([usernamePassword(
-        credentialsId: 'artifactory-credentials',
-        passwordVariable: 'JFROG_DOCKER_PASSWORD', usernameVariable: 'JFROG_DOCKER_LOGIN')]) {
-    artifactory = new Artifactory(token: JFROG_DOCKER_PASSWORD)
-}
-
+def artifactoryClass = readFileFromWorkspace('.jenkins/jobs/templates/Artifactory.groovy')
 def addDockerTagProposal(image) {
-    def parameter = image.replace('/', '_').replace('-', '').toUpperCase(ROOT) + '__DOCKER_IMAGE'
-    def tags = artifactory.listTags(image)
-    def proposals = '[' + tags.collect { "\"$it\"" }.join(',') + ']'
+    def paramName = image.replace('/', '_').replace('-', '').toUpperCase(ROOT) + '__DOCKER_IMAGE'
 
-    activeChoiceParam(parameter) {
+    activeChoiceParam(paramName) {
         description("The $image docker image tag")
         filterable()
         choiceType('SINGLE_SELECT')
         groovyScript {
-            script(proposals)
+            script("""
+            $artifactoryClass
+
+            return '[' + new Artifactory(token: \\"$token\\").listTags(\\"$image\\").collect { "\\"\$it\\"" }.join(',') + ']'
+            """.stripMargin())
             fallbackScript('"No choice available')
         }
     }
@@ -84,7 +24,26 @@ def addDockerTagProposal(image) {
  * JOB DEFINITIONS
  */
 
-def pipelineDefinitionContent = readFileFromWorkspace('.jenkins/jobs/templates/createDataCatalogStack.groovy')
+def refreshDockerImages = readFileFromWorkspace('.jenkins/jobs/templates/refreshDockerImages.groovy')
+pipelineJob('TDI/refresh-docker-images') {
+    displayName("[TDI][generated] Refreshes images for data-catalog-stack")
+    description("## Refreshes proposals for Data Catalog Stack\n\nWARNING: generated job.")
+
+    logRotator(30, -1, 1, -1)
+    triggers {
+        periodic(10)
+    }
+
+    definition {
+        cps {
+            script(refreshDockerImages)
+            sandbox()
+        }
+    }
+}
+
+/*
+def createDataCatalogStack = readFileFromWorkspace('.jenkins/jobs/templates/createDataCatalogStack.groovy')
 pipelineJob('TDI/data-catalog-stack') {
     displayName("[TDI][generated] Create Data Catalog Stack")
     description("## Build Data Catalog Stack\n\nWARNING: generated job.")
@@ -98,8 +57,9 @@ pipelineJob('TDI/data-catalog-stack') {
 
     definition {
         cps {
-            script(pipelineDefinitionContent)
+            script(createDataCatalogStack)
             sandbox()
         }
     }
 }
+*/

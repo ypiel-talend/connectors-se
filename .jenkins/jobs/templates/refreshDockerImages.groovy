@@ -6,7 +6,7 @@ pipeline {
     }
     agent {
         kubernetes {
-            label 'connectors-se_data-catalog-stack'
+            label 'connectors-se_refresh-docker-images'
             yaml """
             apiVersion: v1
             kind: Pod
@@ -35,10 +35,24 @@ pipeline {
     }
 
     stages {
-        stage('Temp') {
+        stage('Refresh Proposals') {
             steps {
                 container('maven') {
-                    echo "Configured image: ${TALEND_DATACATALOG_DATASET__DOCKER_IMAGE}"
+                    withCredentials([
+                            usernamePassword(
+                                    credentialsId: 'artifactory-credentials',
+                                    passwordVariable: 'JFROG_TOKEN',
+                                    usernameVariable: 'JFROG_LOGIN')
+                    ]) {
+                        script {
+                            def artifactory = load './.jenkins/jobs/templates/Artifactory.groovy'
+                            artifactory.token = "${env.JFROG_TOKEN}"
+
+
+                            def datasetTags = artifactory.listTags('talend/data-catalog/dataset')
+                            println(datasetTags)
+                        }
+                    }
                 }
             }
         }
