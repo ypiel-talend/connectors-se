@@ -19,4 +19,63 @@
     <!-- native beam -->
     <validation.model>false</validation.model>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-sdks-java-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-runners-direct-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-runtime-beam-junit</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.talend.daikon</groupId>
+      <artifactId>daikon</artifactId>
+      <version>0.23.0</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.talend.components</groupId>
+      <artifactId>components-adapter-beam</artifactId>
+      <version>${tcomp0.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.beam</groupId>
+          <artifactId>beam-sdks-java-extensions-google-cloud-platform-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.talend.components</groupId>
+          <artifactId>components-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.beam</groupId>
+          <artifactId>beam-sdks-java-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.beam</groupId>
+          <artifactId>beam-runners-direct-java</artifactId>
+        </exclusion>
+        <!--<exclusion>-->
+          <!--<groupId>org.talend.daikon</groupId>-->
+          <!--<artifactId>daikon</artifactId>-->
+        <!--</exclusion>-->
+      </exclusions>
+    </dependency>
+    <!-- guava for components-adapter-beam -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>23.0</version>
+    </dependency>
+  </dependencies>
+
 </project>
