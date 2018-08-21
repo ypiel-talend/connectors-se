@@ -69,7 +69,7 @@ class ReplicateTest {
         when(ctx.getLinkNameByPortName(anyString())).thenReturn("test");
         when(ctx.getPCollectionByLinkName(anyString())).thenReturn(input);
         processor.build(ctx);
-        verify(ctx, times(2)).getLinkNameByPortName(anyString());
+        verify(ctx, times(3)).getLinkNameByPortName(anyString());
         verify(ctx, times(1)).getPCollectionByLinkName(anyString());
     }
 }
