@@ -49,6 +49,19 @@ spec:
   }
 
   stages {
+    stage('Update jobs') {
+      when {
+        anyOf {
+          branch 'master'
+        }
+      }
+      steps {
+        jobDsl targets: '.jenkins/jobs/*.groovy',
+               removedJobAction: 'DELETE',
+               removedConfigFilesAction: 'DELETE',
+               sandbox: true
+      }
+    }
     stage('Run maven') {
       steps {
         container('maven') {
@@ -78,19 +91,6 @@ spec:
         container('maven') {
           sh 'mvn clean site:site site:stage -T1C -Dmaven.test.failure.ignore=true'
         }
-      }
-    }
-    stage('Job DSL') {
-      when {
-        anyOf {
-          branch 'master'
-        }
-      }
-      steps {
-        jobDsl targets: '.jenkins/jobs/*.groovy',
-               removedJobAction: 'DELETE',
-               removedConfigFilesAction: 'DELETE',
-               sandbox: true
       }
     }
   }
