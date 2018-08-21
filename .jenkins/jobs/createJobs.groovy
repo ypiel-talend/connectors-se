@@ -37,7 +37,12 @@ pipelineJob('TDI/refresh-docker-images') {
     definition {
         cpsScm {
             scm {
-                git('https://github.com/talend/connectors-se.git')
+                git {
+                    remote {
+                        github('talend/connectors-se', 'https')
+                        credentials('github-credentials')
+                    }
+                }
                 scriptPath('.jenkins/jobs/generated/RefreshDockerImages.groovy')
             }
         }
