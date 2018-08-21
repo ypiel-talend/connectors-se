@@ -15,7 +15,7 @@ class HttpConfig<T> {
     Closure<T> responseProcessor
 }
 
-trait Http<T> { // normally plain java is allowed on jenkins, HTTPBuilder is not always
+abstract class Http<T> { // normally plain java is allowed on jenkins, HTTPBuilder is not always
     T http(HttpConfig<T> config) {
         HttpURLConnection connection = new URL(config.url).openConnection()
         connection.requestMethod = config.method
@@ -31,7 +31,7 @@ trait Http<T> { // normally plain java is allowed on jenkins, HTTPBuilder is not
     }
 }
 
-class Artifactory implements Http<Map<String, Object>> {
+class Artifactory extends Http<Map<String, Object>> {
     String token
     String base = 'https://talendregistry.jfrog.io/talendregistry'
 
