@@ -1,5 +1,7 @@
 import groovy.json.JsonSlurper
 
+import java.nio.charset.StandardCharsets
+
 import static java.util.Collections.emptyMap
 
 class HttpConfig<T> {
@@ -41,7 +43,7 @@ class Artifactory extends Http<Map<String, Object>> {
                 ],
                 payload: new ByteArrayInputStream("""items.find({
                 "@docker.repoName":{ "\$match":"$image" }
-            })""".stripMargin().bytes),
+            })""".stripMargin().getBytes(StandardCharsets.UTF_8)),
                 responseProcessor: { HttpURLConnection connection -> new JsonSlurper().parse(connection.inputStream) }
         )).results.collect {
             def path = it.path
