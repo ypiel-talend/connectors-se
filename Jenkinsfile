@@ -49,19 +49,6 @@ spec:
   }
 
   stages {
-    stage('Update jobs') {
-      when {
-        anyOf {
-          branch 'master'
-        }
-      }
-      steps {
-        jobDsl targets: '.jenkins/jobs/*.groovy',
-               removedJobAction: 'DELETE',
-               removedConfigFilesAction: 'DELETE',
-               sandbox: true
-      }
-    }
     stage('Run maven') {
       steps {
         container('maven') {
@@ -108,6 +95,9 @@ spec:
     }
     success {
       slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
+    }
+    failure {
+      slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
     }
   }
 }
