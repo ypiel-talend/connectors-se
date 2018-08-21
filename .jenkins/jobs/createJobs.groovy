@@ -38,6 +38,7 @@ pipelineJob('TDI/refresh-docker-images') {
         cpsScm {
             scm {
                 git {
+                    branch('master')
                     remote {
                         github('talend/connectors-se', 'https')
                         credentials('github-credentials')
