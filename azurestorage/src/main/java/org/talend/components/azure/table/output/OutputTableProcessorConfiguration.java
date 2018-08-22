@@ -13,7 +13,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 @GridLayout(value = {
         @GridLayout.Row("azureConnection"),
-        @GridLayout.Row({"partitionName", "rowKeys"}),
+        @GridLayout.Row({"partitionName", "rowKey"}),
         @GridLayout.Row({"actionOnData", "actionOnTable"}),
         @GridLayout.Row("processInBatch"),
         @GridLayout.Row("dieOnError")
@@ -40,7 +40,7 @@ public class OutputTableProcessorConfiguration implements Serializable {
     //TODO make selection list from table columns
     @Option
     @Documentation("")
-    private String rowKeys;
+    private String rowKey;
 
     @Option
     @Documentation("")

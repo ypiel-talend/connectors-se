@@ -166,6 +166,8 @@ public class InputTableMapperConfiguration implements Serializable {
     }
 
     @Data
+//    @OptionsOrder({"column", "function", "value", "predicate", "fieldType"})
+//    FIXME: OptionsOrder is not working now
     private class FilterExpression {
         @Option
         @Documentation("column name")
@@ -188,7 +190,8 @@ public class InputTableMapperConfiguration implements Serializable {
         @Documentation("fieldType")
         private FieldType fieldType = FieldType.STRING;
     }
-
+    
+    //TODO move it to util class
     public String generateCombinedFilterConditions() {
         String filter = "";
         if (isValidFilterExpression()) {

@@ -1,20 +1,17 @@
 package org.talend.components.azure.table.input;
 
-import java.io.Serializable;
-import java.net.URISyntaxException;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import org.talend.components.azure.service.AzureConnectionService;
+import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.input.Producer;
+import org.talend.sdk.component.api.meta.Documentation;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
-import com.microsoft.azure.storage.CloudStorageAccount;
-import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.input.Producer;
-import org.talend.sdk.component.api.meta.Documentation;
-
-import org.talend.components.azure.service.AzureConnectionService;
+import java.io.Serializable;
+import java.net.URISyntaxException;
 
 @Documentation("TODO fill the documentation for this source")
 public class InputTableSource implements Serializable {
@@ -38,7 +35,6 @@ public class InputTableSource implements Serializable {
     public void init() {
         try {
             connection = service.createStorageAccount(configuration.getAzureConnection().getConnection());
-            //TODO move it to util class
             filter = configuration.generateCombinedFilterConditions();
         } catch (URISyntaxException e) {
             throw new RuntimeException("Can't establish connection", e);
