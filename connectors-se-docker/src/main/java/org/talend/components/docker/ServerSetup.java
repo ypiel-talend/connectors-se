@@ -15,8 +15,6 @@ import java.nio.file.Files;
 import java.util.List;
 
 import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
@@ -121,6 +119,6 @@ public class ServerSetup {
         final DefaultsContext context = mainArgs == args ? new SystemPropertiesDefaultsContext()
                 : (target, commandMethod, key) -> System.getenv(key.replace("-", "_").replace(".", "_").toUpperCase(ROOT));
         final Main main = new Main(context, ServerSetup.class);
-        main.exec(args);
+        ofNullable(main.exec(args)).ifPresent(System.out::println);
     }
 }
