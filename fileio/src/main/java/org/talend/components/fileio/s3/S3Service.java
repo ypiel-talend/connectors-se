@@ -1,11 +1,13 @@
 package org.talend.components.fileio.s3;
 
 import static java.util.Comparator.comparing;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.talend.components.simplefileio.runtime.s3.S3Connection;
 import org.talend.components.simplefileio.s3.S3Region;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
@@ -29,12 +31,9 @@ import com.amazonaws.services.s3.model.Bucket;
 public class S3Service {
 
     @Suggestions("S3FindBuckets")
-    public SuggestionValues findBuckets(@Option("datastore") final S3DataStore dataStore,
-            @Option("region") final S3DataSet.S3Region region, @Option("unknownRegion") final String unknownRegion) {
+    public SuggestionValues findBuckets(@Option("datastore") final S3DataStore dataStore) {
         final AmazonS3 client = createClient(dataStore);
         try {
-            final String usedRegion = findRuntimeRegion(region, unknownRegion);
-            client.setEndpoint(regionToEndpoint(usedRegion));
             return new SuggestionValues(true,
                     client.listBuckets().stream().map(bucket -> new SuggestionValues.Item(bucket.getName(), bucket.getName()))
                             .sorted(comparing(SuggestionValues.Item::getLabel)).collect(toList()));
@@ -66,7 +65,7 @@ public class S3Service {
         }
     }
 
-    public AmazonS3 createClient(final S3DataStore datastore) {
+    public static AmazonS3 createClient(final S3DataStore datastore) {
         final AWSCredentialsProviderChain credentials = datastore.isSpecifyCredentials()
                 ? new AWSCredentialsProviderChain(
                         new AWSStaticCredentialsProvider(
@@ -77,30 +76,29 @@ public class S3Service {
         return new AmazonS3Client(credentials);
     }
 
-    private boolean doesRegionMatch(final AmazonS3 client, final Bucket bucket, final String usedRegion) {
+    // get the correct endpoint
+    private static String getEndpoint(S3DataSet dataset) {
+        String bucket = dataset.getBucket();
+        S3DataStore datastore = dataset.getDatastore();
+        AmazonS3 s3client = createClient(datastore);
+        String bucketLocation = null;
         try {
-            final String bucketLocation = client.getBucketLocation(bucket.getName());
-            final String bucketRegion = ofNullable(S3DataSet.S3Region.fromLocation(client.getBucketLocation(bucket.getName())))
-                    .map(S3DataSet.S3Region::getValue).orElse(bucketLocation);
-            return usedRegion.equals(bucketRegion);
-        } catch (final Exception e) {
-            return false;
+            bucketLocation = s3client.getBucketLocation(bucket);
+        } catch (IllegalArgumentException e) {
+            // java.lang.IllegalArgumentException: Cannot create enum from eu-west-2 value!
+            String info = e.getMessage();
+            if (info == null || info.isEmpty()) {
+                throw e;
+            }
+            Pattern regex = Pattern.compile("[a-zA-Z]+-[a-zA-Z]+-[1-9]");
+            Matcher matcher = regex.matcher(info);
+            if (matcher.find()) {
+                bucketLocation = matcher.group(0);
+            } else {
+                throw e;
+            }
         }
-    }
-
-    private String regionToEndpoint(final String region) {
-        final S3Region s3Region = S3Region.fromString(region);
-        if (s3Region != null) {
-            return s3Region.toEndpoint();
-        }
-        // TODO let the user provide endpoint,
-        // or we remove the custom region, and provide a configuration file can be loaded on fly, keep update
-        // also need to consider location to region mapping
-        return String.format("s3.dualstack.%s.amazonaws.com", region);
-    }
-
-    private String findRuntimeRegion(final S3DataSet.S3Region region, final String alternative) {
-        return ofNullable(region).filter(r -> r != S3DataSet.S3Region.OTHER).map(S3DataSet.S3Region::getValue)
-                .orElse(alternative);
+        String region = S3DataSet.S3Region.getBucketRegionFromLocation(bucketLocation);
+        return S3DataSet.S3Region.regionToEndpoint(region);
     }
 }

@@ -4,7 +4,6 @@ import org.talend.components.simplefileio.SimpleFileIODatasetProperties;
 import org.talend.components.simplefileio.SimpleFileIOFormat;
 import org.talend.components.simplefileio.s3.S3DatasetProperties;
 import org.talend.components.simplefileio.s3.S3DatastoreProperties;
-import org.talend.components.simplefileio.s3.S3Region;
 import org.talend.components.simplefileio.s3.input.S3InputProperties;
 import org.talend.components.simplefileio.s3.output.S3OutputProperties;
 import org.talend.sdk.component.api.service.Service;
@@ -37,8 +36,6 @@ public class S3ConfigurationService {
         final S3DatasetProperties dataset = new S3DatasetProperties("datasetRef");
         dataset.bucket.setValue(configuration.getBucket());
         dataset.object.setValue(configuration.getObject());
-        dataset.unknownRegion.setValue(configuration.getUnknownRegion());
-        dataset.region.setValue(S3Region.valueOf(configuration.getRegion().name()));
         dataset.fieldDelimiter
                 .setValue(SimpleFileIODatasetProperties.FieldDelimiterType.valueOf(configuration.getFieldDelimiter().name()));
         dataset.specificFieldDelimiter.setValue(configuration.getSpecificFieldDelimiter());
