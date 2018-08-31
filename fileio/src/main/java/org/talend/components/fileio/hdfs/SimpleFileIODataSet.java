@@ -104,7 +104,7 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "format", value = "CSV")
     @ActiveIf(target = "setHeaderLine4CSV", value = "true")
     @Documentation("set the header number for CSV")
-    private String headerLine4CSV;
+    private long headerLine4CSV;
 
     @Option
     @ActiveIf(target = "format", value = "EXCEL")
@@ -115,7 +115,7 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "format", value = "EXCEL")
     @ActiveIf(target = "setHeaderLine4EXCEL", value = "true")
     @Documentation("set the header number for EXCEL")
-    private String headerLine4EXCEL;
+    private long headerLine4EXCEL;
 
     @Option
     @ActiveIf(target = "format", value = "CSV")
@@ -147,11 +147,13 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "format", value = "EXCEL")
     @ActiveIf(target = "setFooterLine4EXCEL", value = "true")
     @Documentation("set the footer number for EXCEL")
-    private String footerLine4EXCEL;
+    private long footerLine4EXCEL;
 
-    //TODO the limit is used for get data, sometimes, for dataset, we want to get sample only, but sometimes, for input, we want to get all,
-    //so the limit is different here, but how to set the limit here by runtime, need to wait for the runtime implement check.
-    //now in tacokit, no getSample, getSchema interface, they are auto executed in framework level, and we only need to implement the input component, need to check it.
+    // TODO the limit is used for get data, sometimes, for dataset, we want to get sample only, but sometimes, for input, we want
+    // to get all,
+    // so the limit is different here, but how to set the limit here by runtime, need to wait for the runtime implement check.
+    // now in tacokit, no getSample, getSchema interface, they are auto executed in framework level, and we only need to implement
+    // the input component, need to check it.
     @Option
     @ActiveIf(target = ".", value = "-2147483648")
     @Documentation("Maximum number of data to handle if positive.")

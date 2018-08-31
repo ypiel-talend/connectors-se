@@ -27,9 +27,6 @@ class S3OutputTest {
     @Injected
     private ComponentsHandler handler;
 
-    @Service
-    private S3ConfigurationService configurationService;
-
     @Test
     void output() throws IOException {
         final S3OutputConfig configuration = new S3OutputConfig();

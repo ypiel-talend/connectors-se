@@ -37,12 +37,12 @@ public class S3Output extends PTransform<PCollection<IndexedRecord>, PDone> {
 
     @Override
     public PDone expand(final PCollection<IndexedRecord> in) {
-    	// The UGI does not control security for S3.
+        // The UGI does not control security for S3.
         UgiDoAs doAs = UgiDoAs.ofNone();
         String path = S3Service.getUriPath(configuration.getDataset());
-        boolean overwrite = configuration.getOverwrite();
+        boolean overwrite = configuration.isOverwrite();
         int limit = -1; // limit is ignored for sinks
-        boolean mergeOutput = configuration.getMergeOutput();
+        boolean mergeOutput = configuration.isMergeOutput();
 
         SimpleRecordFormatBase rf = null;
         switch (configuration.getDataset().getFormat()) {
@@ -52,8 +52,9 @@ public class S3Output extends PTransform<PCollection<IndexedRecord>, PDone> {
             break;
 
         case CSV:
-            rf = new SimpleRecordFormatCsvIO(doAs, path, overwrite, limit, configuration.getDataset().getRecordDelimiter(),
-            		configuration.getDataset().getFieldDelimiter(), mergeOutput);
+            rf = new SimpleRecordFormatCsvIO(doAs, path, overwrite, limit,
+                    configuration.getDataset().getRecordDelimiter().getDelimiter(),
+                    configuration.getDataset().getFieldDelimiter().getDelimiter(), mergeOutput);
             break;
 
         case PARQUET:
@@ -68,10 +69,10 @@ public class S3Output extends PTransform<PCollection<IndexedRecord>, PDone> {
         S3Service.setS3Configuration(rf.getExtraHadoopConfiguration(), configuration.getDataset());
         return rf.write(in);
     }
-    
-    //TODO copy it from the tcompv0 output runtime, what is used for? need to recheck it when runtime platform is ready
+
+    // TODO copy it from the tcompv0 output runtime, what is used for? need to recheck it when runtime platform is ready
     public void runAtDriver() {
-        if (configuration.getOverwrite()) {
+        if (configuration.isOverwrite()) {
             try {
                 Path p = new Path(S3Service.getUriPath(configuration.getDataset()));
 
@@ -85,8 +86,7 @@ public class S3Output extends PTransform<PCollection<IndexedRecord>, PDone> {
                 if (fs.exists(p)) {
                     boolean deleted = fs.delete(p, true);
                     if (!deleted)
-                        throw SimpleFileIOErrorCode.createOutputNotAuthorized(null, null,
-                                p.toString());
+                        throw SimpleFileIOErrorCode.createOutputNotAuthorized(null, null, p.toString());
                 }
             } catch (RuntimeException e) {
                 throw e;

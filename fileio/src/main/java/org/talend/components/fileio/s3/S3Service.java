@@ -112,7 +112,8 @@ public class S3Service {
         S3Service.setS3Configuration(extraConfig, dataset);
         extraConfig.addTo(config);
         try {
-            return (S3AFileSystem) FileSystem.get(new URI(Constants.FS_S3A + "://" + dataset.getBucket()), config);
+            return (S3AFileSystem) FileSystem.get(
+                    new URI(com.talend.shaded.org.apache.hadoop.fs.s3a.Constants.FS_S3A + "://" + dataset.getBucket()), config);
         } catch (URISyntaxException e) {
             // The URI is constant, so this exception should never occur.
             throw new RuntimeException(e);
@@ -121,7 +122,7 @@ public class S3Service {
 
     public static String getUriPath(S3DataSet dataset, String path) {
         // Construct the path using the s3a schema.
-        return Constants.FS_S3A + "://" + dataset.getBucket() + "/" + path;
+        return com.talend.shaded.org.apache.hadoop.fs.s3a.Constants.FS_S3A + "://" + dataset.getBucket() + "/" + path;
     }
 
     public static String getUriPath(S3DataSet dataset) {
@@ -130,23 +131,25 @@ public class S3Service {
 
     public static void setS3Configuration(ExtraHadoopConfiguration conf, S3DataStore datastore) {
         // Never reuse a filesystem created through this object.
-        conf.set(String.format("fs.%s.impl.disable.cache", Constants.FS_S3A), "true");
+        conf.set(String.format("fs.%s.impl.disable.cache", com.talend.shaded.org.apache.hadoop.fs.s3a.Constants.FS_S3A), "true");
         if (datastore.isSpecifyCredentials()) {
             // do not be polluted by hidden accessKey/secretKey
-            conf.set(Constants.ACCESS_KEY, datastore.getAccessKey());
-            conf.set(Constants.SECRET_KEY, datastore.getSecretKey());
+            conf.set(com.talend.shaded.org.apache.hadoop.fs.s3a.Constants.ACCESS_KEY, datastore.getAccessKey());
+            conf.set(com.talend.shaded.org.apache.hadoop.fs.s3a.Constants.SECRET_KEY, datastore.getSecretKey());
         }
     }
 
     public static void setS3Configuration(ExtraHadoopConfiguration conf, S3DataSet dataset) {
         String endpoint = getEndpoint(dataset);
-        conf.set(Constants.ENDPOINT, endpoint);
+        conf.set(com.talend.shaded.org.apache.hadoop.fs.s3a.Constants.ENDPOINT, endpoint);
         // need to it?
         // conf.set("fs.s3a.experimental.input.fadvise", "random");
 
         if (dataset.isEncryptDataAtRest()) {
-            conf.set(Constants.SERVER_SIDE_ENCRYPTION_ALGORITHM, S3AEncryptionMethods.SSE_KMS.getMethod());
-            conf.set(Constants.SERVER_SIDE_ENCRYPTION_KEY, dataset.getKmsForDataAtRest());
+            conf.set(com.talend.shaded.org.apache.hadoop.fs.s3a.Constants.SERVER_SIDE_ENCRYPTION_ALGORITHM,
+                    S3AEncryptionMethods.SSE_KMS.getMethod());
+            conf.set(com.talend.shaded.org.apache.hadoop.fs.s3a.Constants.SERVER_SIDE_ENCRYPTION_KEY,
+                    dataset.getKmsForDataAtRest());
         }
         if (dataset.isEncryptDataInMotion()) {
             // TODO: these don't exist yet...

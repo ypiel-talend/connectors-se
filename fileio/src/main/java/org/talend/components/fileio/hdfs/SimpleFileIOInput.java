@@ -6,8 +6,6 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
-import org.talend.components.fileio.runtime.SimpleFileIODatasetRuntime;
-import org.talend.components.fileio.runtime.SimpleFileIOInputRuntime;
 import org.talend.components.fileio.runtime.SimpleRecordFormat;
 import org.talend.components.fileio.runtime.SimpleRecordFormatAvroIO;
 import org.talend.components.fileio.runtime.SimpleRecordFormatCsvIO;
@@ -20,7 +18,6 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.PartitionMapper;
 import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.processor.Processor;
 
 @Version
 @Icon(FILE_HDFS_O)
@@ -36,9 +33,8 @@ public class SimpleFileIOInput extends PTransform<PBegin, PCollection<IndexedRec
 
     @Override
     public PCollection<IndexedRecord> expand(final PBegin in) {
-    	// Controls the access security on the cluster.
-        UgiDoAs doAs = SimpleFileIOService.getReadWriteUgiDoAs(configuration,
-                UgiExceptionHandler.AccessType.Read);
+        // Controls the access security on the cluster.
+        UgiDoAs doAs = SimpleFileIOService.getReadWriteUgiDoAs(configuration, UgiExceptionHandler.AccessType.Read);
         String path = configuration.getPath();
         boolean overwrite = false; // overwrite is ignored for reads.
         int limit = configuration.getLimit();
@@ -52,9 +48,10 @@ public class SimpleFileIOInput extends PTransform<PBegin, PCollection<IndexedRec
             break;
 
         case CSV:
-            rf = new SimpleRecordFormatCsvIO(doAs, path, limit, configuration.getRecordDelimiter(), configuration.getFieldDelimiter(),
-            		configuration.getEncoding(), configuration.getHeaderLine(), configuration.getTextEnclosureCharacter(),
-            		configuration.getEscapeCharacter());
+            rf = new SimpleRecordFormatCsvIO(doAs, path, limit, configuration.getRecordDelimiter().getDelimiter(),
+                    configuration.getFieldDelimiter().getDelimiter(), configuration.getEncoding4CSV().getEncoding(),
+                    configuration.getHeaderLine4CSV(), configuration.getTextEnclosureCharacter(),
+                    configuration.getEscapeCharacter());
             break;
 
         case PARQUET:
@@ -62,8 +59,9 @@ public class SimpleFileIOInput extends PTransform<PBegin, PCollection<IndexedRec
             break;
 
         case EXCEL:
-            rf = new SimpleRecordFormatExcelIO(doAs, path, overwrite, limit, mergeOutput, configuration.getEncoding(), configuration.getSheetName(),
-            		configuration.getHeaderLine(), configuration.getFooterLine(), configuration.getExcelFormat());
+            rf = new SimpleRecordFormatExcelIO(doAs, path, overwrite, limit, mergeOutput,
+                    configuration.getEncoding4EXCEL().getEncoding(), configuration.getSheet(),
+                    configuration.getHeaderLine4EXCEL(), configuration.getFooterLine4EXCEL(), configuration.getExcelFormat());
             break;
         }
 

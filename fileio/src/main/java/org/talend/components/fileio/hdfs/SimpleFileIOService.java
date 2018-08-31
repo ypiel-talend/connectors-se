@@ -23,18 +23,16 @@ public class SimpleFileIOService {
         // list.add(new SuggestionValues.Item(format.name(), format.name()));
         return new SuggestionValues(true, list);
     }
-    
-    public static UgiDoAs getReadWriteUgiDoAs(SimpleFileIODataSet dataset,
-            UgiExceptionHandler.AccessType accessType) {
+
+    public static UgiDoAs getReadWriteUgiDoAs(SimpleFileIODataSet dataset, UgiExceptionHandler.AccessType accessType) {
         String path = dataset.getPath();
         SimpleFileIODataStore datastore = dataset.getDatastore();
         if (datastore.isUseKerberos()) {
-            UgiDoAs doAs = UgiDoAs.ofKerberos(datastore.getKerberosPrincipal(),
-            		datastore.getKerberosKeytab());
+            UgiDoAs doAs = UgiDoAs.ofKerberos(datastore.getKerberosPrincipal(), datastore.getKerberosKeytab());
             return new UgiExceptionHandler(doAs, accessType, datastore.getKerberosPrincipal(), path);
-        } else if (datastore.getUserName() != null && !datastore.getUsername().isEmpty()) {
-            UgiDoAs doAs = UgiDoAs.ofSimple(datastore.getUserName());
-            return new UgiExceptionHandler(doAs, accessType, datastore.getUserName(), path);
+        } else if (datastore.getUsername() != null && !datastore.getUsername().isEmpty()) {
+            UgiDoAs doAs = UgiDoAs.ofSimple(datastore.getUsername());
+            return new UgiExceptionHandler(doAs, accessType, datastore.getUsername(), path);
         } else {
             return new UgiExceptionHandler(UgiDoAs.ofNone(), accessType, null, path);
         }

@@ -42,13 +42,12 @@ public class SimpleFileIOOutput extends PTransform<PCollection<IndexedRecord>, P
 
     @Override
     public PDone expand(final PCollection<IndexedRecord> in) {
-    	// Controls the access security on the cluster.
-        UgiDoAs doAs = SimpleFileIOService.getReadWriteUgiDoAs(configuration.getDataset(),
-                UgiExceptionHandler.AccessType.Write);
+        // Controls the access security on the cluster.
+        UgiDoAs doAs = SimpleFileIOService.getReadWriteUgiDoAs(configuration.getDataset(), UgiExceptionHandler.AccessType.Write);
         String path = configuration.getDataset().getPath();
-        boolean overwrite = configuration.getOverwrite();
+        boolean overwrite = configuration.isOverwrite();
         int limit = -1; // limit is ignored for sinks
-        boolean mergeOutput = configuration.getMergeOutput();
+        boolean mergeOutput = configuration.isMergeOutput();
 
         SimpleRecordFormat rf = null;
         switch (configuration.getDataset().getFormat()) {
@@ -58,8 +57,9 @@ public class SimpleFileIOOutput extends PTransform<PCollection<IndexedRecord>, P
             break;
 
         case CSV:
-            rf = new SimpleRecordFormatCsvIO(doAs, path, overwrite, limit, configuration.getDataset().getRecordDelimiter(),
-            		configuration.getDataset().getFieldDelimiter(), mergeOutput);
+            rf = new SimpleRecordFormatCsvIO(doAs, path, overwrite, limit,
+                    configuration.getDataset().getRecordDelimiter().getDelimiter(),
+                    configuration.getDataset().getFieldDelimiter().getDelimiter(), mergeOutput);
             break;
 
         case PARQUET:
@@ -82,10 +82,10 @@ public class SimpleFileIOOutput extends PTransform<PCollection<IndexedRecord>, P
             }
         }
     }
-    
-    //TODO copy it from the tcompv0 output runtime, what is used for? need to recheck it when runtime platform is ready
+
+    // TODO copy it from the tcompv0 output runtime, what is used for? need to recheck it when runtime platform is ready
     public void runAtDriver() {
-        if (configuration.getOverwrite()) {
+        if (configuration.isOverwrite()) {
             UgiDoAs doAs = SimpleFileIOService.getReadWriteUgiDoAs(configuration.getDataset(),
                     UgiExceptionHandler.AccessType.Write);
             try {
@@ -99,7 +99,7 @@ public class SimpleFileIOOutput extends PTransform<PCollection<IndexedRecord>, P
                             boolean deleted = fs.delete(p, true);
                             if (!deleted)
                                 throw SimpleFileIOErrorCode.createOutputNotAuthorized(null, null,
-                                		configuration.getDataset().getPath());
+                                        configuration.getDataset().getPath());
                         }
                         return null;
                     }
