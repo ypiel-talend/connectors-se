@@ -18,8 +18,8 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.beam.sdk.coders.VoidCoder;
 import org.apache.parquet.avro.AvroParquetInputFormat;
 import org.talend.components.adapter.beam.coders.LazyAvroCoder;
-import org.talend.components.simplefileio.runtime.ExtraHadoopConfiguration;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.ExtraHadoopConfiguration;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 /**
  * Parquet implementation of HDFSFileSource.

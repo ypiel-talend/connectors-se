@@ -17,9 +17,9 @@ import java.io.IOException;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.talend.components.fileio.runtime.hadoop.csv.CSVFileInputFormat;
-import org.talend.components.simplefileio.runtime.ExtraHadoopConfiguration;
-import org.talend.components.simplefileio.runtime.SimpleFileIOAvroRegistry;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.ExtraHadoopConfiguration;
+import org.talend.components.fileio.runtime.SimpleFileIOAvroRegistry;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 /**
  * CSV implementation of HDFSFileSource.

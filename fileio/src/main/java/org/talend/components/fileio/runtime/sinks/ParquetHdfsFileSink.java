@@ -30,8 +30,8 @@ import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.apache.parquet.hadoop.metadata.FileMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
-import org.talend.components.simplefileio.runtime.utils.FileSystemUtil;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.utils.FileSystemUtil;
 
 /**
  * Sink for Parquet files.

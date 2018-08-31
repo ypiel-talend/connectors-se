@@ -20,9 +20,9 @@ import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
 import org.talend.components.adapter.beam.coders.LazyAvroCoder;
-import org.talend.components.simplefileio.ExcelFormat;
-import org.talend.components.simplefileio.runtime.sources.ExcelHdfsFileSource;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.configuration.ExcelFormat;
+import org.talend.components.fileio.runtime.sources.ExcelHdfsFileSource;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 public class SimpleRecordFormatExcelIO extends SimpleRecordFormatBase {
 

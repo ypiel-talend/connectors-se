@@ -27,12 +27,12 @@ import org.apache.beam.sdk.values.PDone;
 import org.apache.hadoop.io.NullWritable;
 import org.talend.components.adapter.beam.coders.LazyAvroCoder;
 import org.talend.components.adapter.beam.transform.ConvertToIndexedRecord;
-import org.talend.components.simplefileio.runtime.beamcopy.Write;
-import org.talend.components.simplefileio.runtime.coders.LazyAvroKeyWrapper;
-import org.talend.components.simplefileio.runtime.sinks.AvroHdfsFileSink;
-import org.talend.components.simplefileio.runtime.sinks.UnboundedWrite;
-import org.talend.components.simplefileio.runtime.sources.AvroHdfsFileSource;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.beamcopy.Write;
+import org.talend.components.fileio.runtime.coders.LazyAvroKeyWrapper;
+import org.talend.components.fileio.runtime.sinks.AvroHdfsFileSink;
+import org.talend.components.fileio.runtime.sinks.UnboundedWrite;
+import org.talend.components.fileio.runtime.sources.AvroHdfsFileSource;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 public class SimpleRecordFormatAvroIO extends SimpleRecordFormatBase {
 

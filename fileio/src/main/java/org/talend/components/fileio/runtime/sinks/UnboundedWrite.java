@@ -31,8 +31,8 @@ import org.apache.beam.sdk.values.WindowingStrategy;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.format.ISODateTimeFormat;
-import org.talend.components.simplefileio.runtime.beamcopy.ConfigurableHDFSFileSink;
-import org.talend.components.simplefileio.runtime.beamcopy.Sink;
+import org.talend.components.fileio.runtime.beamcopy.ConfigurableHDFSFileSink;
+import org.talend.components.fileio.runtime.beamcopy.Sink;
 
 /**
  * Helper transformations that can be used for writing to unbounded sinks.

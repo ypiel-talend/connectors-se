@@ -24,11 +24,11 @@ import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
 import org.talend.components.adapter.beam.coders.LazyAvroCoder;
-import org.talend.components.simplefileio.runtime.beamcopy.Write;
-import org.talend.components.simplefileio.runtime.sinks.ParquetHdfsFileSink;
-import org.talend.components.simplefileio.runtime.sinks.UnboundedWrite;
-import org.talend.components.simplefileio.runtime.sources.ParquetHdfsFileSource;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.beamcopy.Write;
+import org.talend.components.fileio.runtime.sinks.ParquetHdfsFileSink;
+import org.talend.components.fileio.runtime.sinks.UnboundedWrite;
+import org.talend.components.fileio.runtime.sources.ParquetHdfsFileSource;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 public class SimpleRecordFormatParquetIO extends SimpleRecordFormatBase {
 

@@ -8,7 +8,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.hadoop.mapreduce.lib.input.InvalidInputException;
 import org.apache.hadoop.security.AccessControlException;
-import org.talend.components.simplefileio.SimpleFileIOErrorCode;
+import org.talend.components.fileio.runtime.SimpleFileIOErrorCode;
 import org.talend.daikon.exception.TalendRuntimeException;
 
 /**

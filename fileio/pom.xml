@@ -28,6 +28,8 @@
 	<avro.version>1.8.1</avro.version>
 	<commons-lang3.version>3.4</commons-lang3.version>
 	<commons-csv.version>1.4</commons-csv.version>
+	<!-- TODO remove it -->
+	<components.version>0.25.0-SNAPSHOT</components.version>
   </properties>
 
   <dependencies>
@@ -35,16 +37,20 @@
       <groupId>org.apache.beam</groupId>
       <artifactId>beam-sdks-java-core</artifactId>
     </dependency>
+	<!--
     <dependency>
       <groupId>org.talend.components</groupId>
       <artifactId>simplefileio-runtime</artifactId>
       <version>${tcomp0.version}</version>
     </dependency>
+	-->
+
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-s3</artifactId>
-      <version>1.11.125</version>
+      <groupId>org.talend.components</groupId>
+      <artifactId>components-adapter-beam</artifactId>
+	  <version>${components.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>${hadoop.aws.artifactId}</artifactId>

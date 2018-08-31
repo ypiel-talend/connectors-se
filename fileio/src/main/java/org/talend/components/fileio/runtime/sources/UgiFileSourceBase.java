@@ -19,13 +19,13 @@ import java.util.List;
 
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.BoundedSource;
-import org.talend.components.simplefileio.runtime.beamcopy.RelaxedHDFSFileSource;
+import org.talend.components.fileio.runtime.beamcopy.RelaxedHDFSFileSource;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.values.KV;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.talend.components.simplefileio.runtime.ExtraHadoopConfiguration;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.ExtraHadoopConfiguration;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 /**
  * Extend the Beam {@link org.apache.beam.sdk.io.hdfs.HDFSFileSource} for extra functionality.

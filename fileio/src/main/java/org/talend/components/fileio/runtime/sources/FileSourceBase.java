@@ -29,8 +29,8 @@ import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.values.KV;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.talend.components.simplefileio.runtime.ExtraHadoopConfiguration;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.ExtraHadoopConfiguration;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 /**
  * Extend the Beam {@link org.apache.beam.sdk.io.hdfs.HDFSFileSource} for extra functionality.

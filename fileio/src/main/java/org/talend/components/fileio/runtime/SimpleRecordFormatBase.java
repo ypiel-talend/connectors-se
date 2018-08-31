@@ -12,7 +12,7 @@
 // ============================================================================
 package org.talend.components.fileio.runtime;
 
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 public abstract class SimpleRecordFormatBase implements SimpleRecordFormat {
 

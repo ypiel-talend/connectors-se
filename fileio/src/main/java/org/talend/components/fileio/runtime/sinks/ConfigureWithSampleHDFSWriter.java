@@ -12,9 +12,9 @@
 // ============================================================================
 package org.talend.components.fileio.runtime.sinks;
 
-import org.talend.components.simplefileio.runtime.beamcopy.ConfigurableHDFSFileSink;
 import org.apache.beam.sdk.values.KV;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.talend.components.fileio.runtime.beamcopy.ConfigurableHDFSFileSink;
 
 /**
  * An {@link ConfigurableHDFSFileSink.HDFSWriter} subclass that delays opening the

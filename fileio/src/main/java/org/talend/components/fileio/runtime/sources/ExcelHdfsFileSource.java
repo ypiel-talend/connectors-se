@@ -18,9 +18,9 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.beam.sdk.coders.VoidCoder;
 import org.talend.components.adapter.beam.coders.LazyAvroCoder;
 import org.talend.components.fileio.runtime.hadoop.excel.ExcelFileInputFormat;
-import org.talend.components.simplefileio.runtime.ExtraHadoopConfiguration;
-import org.talend.components.simplefileio.runtime.SimpleFileIOAvroRegistry;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.ExtraHadoopConfiguration;
+import org.talend.components.fileio.runtime.SimpleFileIOAvroRegistry;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 /**
  * Excel implementation of HDFSFileSource.

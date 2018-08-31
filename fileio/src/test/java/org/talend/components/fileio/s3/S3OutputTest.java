@@ -51,7 +51,7 @@ class S3OutputTest {
          * todo:
          * final S3DatasetProperties datasetProps =
          * configurationService.toOutputConfiguration(configuration).getDatasetProperties();
-         * final FileSystem s3FileSystem = S3Connection.createFileSystem(datasetProps);
+         * final FileSystem s3FileSystem = S3Service.createFileSystem(datasetProps);
          * MiniDfsResource.assertReadFile(s3FileSystem, s3.getS3APath(datasetProps), "1;one", "2;two");
          * MiniDfsResource.assertFileNumber(s3FileSystem, s3.getS3APath(datasetProps), 1);
          */

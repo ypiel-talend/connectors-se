@@ -58,7 +58,7 @@ import org.apache.hadoop.mapreduce.task.JobContextImpl;
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.simplefileio.runtime.utils.FileSystemUtil;
+import org.talend.components.fileio.runtime.utils.FileSystemUtil;
 
 /**
  * Copied from https://github.com/apache/beam/commit/89cf4613465647e2711983674879afd5f67c519d

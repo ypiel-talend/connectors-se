@@ -35,9 +35,9 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.simplefileio.runtime.ExtraHadoopConfiguration;
-import org.talend.components.simplefileio.runtime.beamcopy.ConfigurableHDFSFileSink;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.ExtraHadoopConfiguration;
+import org.talend.components.fileio.runtime.beamcopy.ConfigurableHDFSFileSink;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 /**
  * Subclass of ConfigurableHDFSFileSink that saves {@link org.apache.hadoop.security.UserGroupInformation}.

@@ -23,9 +23,9 @@ import org.apache.beam.sdk.util.CoderUtils;
 import org.apache.beam.sdk.values.KV;
 import org.apache.hadoop.io.NullWritable;
 import org.talend.components.adapter.beam.coders.LazyAvroCoder;
-import org.talend.components.simplefileio.runtime.ExtraHadoopConfiguration;
-import org.talend.components.simplefileio.runtime.coders.LazyAvroKeyWrapper;
-import org.talend.components.simplefileio.runtime.ugi.UgiDoAs;
+import org.talend.components.fileio.runtime.ExtraHadoopConfiguration;
+import org.talend.components.fileio.runtime.coders.LazyAvroKeyWrapper;
+import org.talend.components.fileio.runtime.ugi.UgiDoAs;
 
 /**
  * Avro implementation of HDFSFileSource.
