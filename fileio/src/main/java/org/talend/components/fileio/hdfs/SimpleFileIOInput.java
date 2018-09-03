@@ -6,6 +6,7 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.talend.components.fileio.runtime.SimpleFileIOAvroRegistry;
 import org.talend.components.fileio.runtime.SimpleRecordFormat;
 import org.talend.components.fileio.runtime.SimpleRecordFormatAvroIO;
 import org.talend.components.fileio.runtime.SimpleRecordFormatCsvIO;
@@ -24,6 +25,11 @@ import org.talend.sdk.component.api.meta.Documentation;
 @PartitionMapper(name = "SimpleFileIOInput")
 @Documentation("This component reads data from HDFS.")
 public class SimpleFileIOInput extends PTransform<PBegin, PCollection<IndexedRecord>> {
+
+    static {
+        // have to register the type converter firstly here now, not a good place in my view
+        SimpleFileIOAvroRegistry.get();
+    }
 
     private final SimpleFileIODataSet configuration;
 
@@ -48,10 +54,9 @@ public class SimpleFileIOInput extends PTransform<PBegin, PCollection<IndexedRec
             break;
 
         case CSV:
-            rf = new SimpleRecordFormatCsvIO(doAs, path, limit, configuration.getRecordDelimiter().getDelimiter(),
-                    configuration.getFieldDelimiter().getDelimiter(), configuration.getEncoding4CSV().getEncoding(),
-                    configuration.getHeaderLine4CSV(), configuration.getTextEnclosureCharacter(),
-                    configuration.getEscapeCharacter());
+            rf = new SimpleRecordFormatCsvIO(doAs, path, limit, configuration.getRecordDelimiterValue(),
+                    configuration.getFieldDelimiterValue(), configuration.getEncodingValue(), configuration.getHeaderLineValue(),
+                    configuration.getTextEnclosureCharacter(), configuration.getEscapeCharacter());
             break;
 
         case PARQUET:
@@ -59,9 +64,9 @@ public class SimpleFileIOInput extends PTransform<PBegin, PCollection<IndexedRec
             break;
 
         case EXCEL:
-            rf = new SimpleRecordFormatExcelIO(doAs, path, overwrite, limit, mergeOutput,
-                    configuration.getEncoding4EXCEL().getEncoding(), configuration.getSheet(),
-                    configuration.getHeaderLine4EXCEL(), configuration.getFooterLine4EXCEL(), configuration.getExcelFormat());
+            rf = new SimpleRecordFormatExcelIO(doAs, path, overwrite, limit, mergeOutput, configuration.getEncodingValue(),
+                    configuration.getSheet(), configuration.getHeaderLineValue(), configuration.getFooterLineValue(),
+                    configuration.getExcelFormat());
             break;
         }
 

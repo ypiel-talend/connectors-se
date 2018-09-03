@@ -47,10 +47,9 @@ public class S3Input extends PTransform<PBegin, PCollection<IndexedRecord>> {
             break;
 
         case CSV:
-            rf = new SimpleRecordFormatCsvIO(doAs, path, limit, configuration.getRecordDelimiter().getDelimiter(),
-                    configuration.getFieldDelimiter().getDelimiter(), configuration.getEncoding4CSV().getEncoding(),
-                    configuration.getHeaderLine4CSV(), configuration.getTextEnclosureCharacter(),
-                    configuration.getEscapeCharacter());
+            rf = new SimpleRecordFormatCsvIO(doAs, path, limit, configuration.getRecordDelimiterValue(),
+                    configuration.getFieldDelimiterValue(), configuration.getEncodingValue(), configuration.getHeaderLineValue(),
+                    configuration.getTextEnclosureCharacter(), configuration.getEscapeCharacter());
             break;
 
         case PARQUET:
@@ -58,9 +57,9 @@ public class S3Input extends PTransform<PBegin, PCollection<IndexedRecord>> {
             break;
 
         case EXCEL:
-            rf = new SimpleRecordFormatExcelIO(doAs, path, overwrite, limit, mergeOutput,
-                    configuration.getEncoding4EXCEL().getEncoding(), configuration.getSheet(),
-                    configuration.getHeaderLine4EXCEL(), configuration.getFooterLine4EXCEL(), configuration.getExcelFormat());
+            rf = new SimpleRecordFormatExcelIO(doAs, path, overwrite, limit, mergeOutput, configuration.getEncodingValue(),
+                    configuration.getSheet(), configuration.getHeaderLineValue(), configuration.getFooterLineValue(),
+                    configuration.getExcelFormat());
             break;
         }
 

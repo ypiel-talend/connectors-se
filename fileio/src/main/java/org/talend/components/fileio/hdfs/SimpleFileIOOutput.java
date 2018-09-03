@@ -57,9 +57,8 @@ public class SimpleFileIOOutput extends PTransform<PCollection<IndexedRecord>, P
             break;
 
         case CSV:
-            rf = new SimpleRecordFormatCsvIO(doAs, path, overwrite, limit,
-                    configuration.getDataset().getRecordDelimiter().getDelimiter(),
-                    configuration.getDataset().getFieldDelimiter().getDelimiter(), mergeOutput);
+            rf = new SimpleRecordFormatCsvIO(doAs, path, overwrite, limit, configuration.getDataset().getRecordDelimiterValue(),
+                    configuration.getDataset().getFieldDelimiterValue(), mergeOutput);
             break;
 
         case PARQUET:

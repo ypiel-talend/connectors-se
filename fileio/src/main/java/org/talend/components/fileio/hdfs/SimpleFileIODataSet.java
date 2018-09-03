@@ -54,7 +54,7 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "format", value = "CSV")
     @ActiveIf(target = "recordDelimiter", value = "OTHER")
     @Documentation("A custom delimiter if `recordDelimiter` is `OTHER`")
-    private String specificRecordDelimiter = ";";
+    private String specificRecordDelimiter = "\\n";
 
     @Option
     @ActiveIf(target = "format", value = "CSV")
@@ -76,7 +76,7 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "format", value = "CSV")
     @ActiveIf(target = "encoding4CSV", value = "OTHER")
     @Documentation("Set the custom encoding for CSV")
-    private String specificEncoding4CSV;
+    private String specificEncoding4CSV = "";
 
     @Option
     @ActiveIf(target = "format", value = "EXCEL")
@@ -89,7 +89,7 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "excelFormat", value = "HTML")
     @ActiveIf(target = "encoding4EXCEL", value = "OTHER")
     @Documentation("Set the custom encoding for EXCEL")
-    private String specificEncoding4EXCEL;
+    private String specificEncoding4EXCEL = "";
 
     // FIXME how to support the logic :
     // show if format is csv or excel
@@ -104,7 +104,7 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "format", value = "CSV")
     @ActiveIf(target = "setHeaderLine4CSV", value = "true")
     @Documentation("set the header number for CSV")
-    private long headerLine4CSV;
+    private long headerLine4CSV = 1l;
 
     @Option
     @ActiveIf(target = "format", value = "EXCEL")
@@ -115,7 +115,7 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "format", value = "EXCEL")
     @ActiveIf(target = "setHeaderLine4EXCEL", value = "true")
     @Documentation("set the header number for EXCEL")
-    private long headerLine4EXCEL;
+    private long headerLine4EXCEL = 1l;
 
     @Option
     @ActiveIf(target = "format", value = "CSV")
@@ -136,7 +136,7 @@ public class SimpleFileIODataSet implements Serializable {
     @ActiveIf(target = "format", value = "EXCEL")
     @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" })
     @Documentation("set the excel sheet name")
-    private String sheet;
+    private String sheet = "";
 
     @Option
     @ActiveIf(target = "format", value = "EXCEL")
@@ -159,13 +159,66 @@ public class SimpleFileIODataSet implements Serializable {
     @Documentation("Maximum number of data to handle if positive.")
     private int limit = -1;
 
-    /*
-     * @Option
-     * 
-     * @Suggestable(value = "findOptions", parameters = { "datastore", "format" })
-     * 
-     * @Documentation("a test for the trigger action")
-     * private String myoptions;
-     */
+    public String getRecordDelimiterValue() {
+        if (RecordDelimiterType.OTHER.equals(recordDelimiter)) {
+            return specificRecordDelimiter;
+        } else {
+            return recordDelimiter.getDelimiter();
+        }
+    }
+
+    public String getFieldDelimiterValue() {
+        if (FieldDelimiterType.OTHER.equals(fieldDelimiter)) {
+            return specificFieldDelimiter;
+        } else {
+            return fieldDelimiter.getDelimiter();
+        }
+    }
+
+    public String getEncodingValue() {
+        if (SimpleFileIOFormat.CSV == format) {
+            if (EncodingType.OTHER.equals(encoding4CSV)) {
+                return specificEncoding4CSV;
+            } else {
+                return encoding4CSV.getEncoding();
+            }
+        }
+
+        if ((SimpleFileIOFormat.EXCEL == format) && ExcelFormat.HTML == excelFormat) {
+            if (EncodingType.OTHER.equals(encoding4EXCEL)) {
+                return specificEncoding4EXCEL;
+            } else {
+                return encoding4EXCEL.getEncoding();
+            }
+        }
+
+        return EncodingType.UTF8.getEncoding();
+    }
+
+    public long getHeaderLineValue() {
+        if (SimpleFileIOFormat.CSV == format) {
+            if (setHeaderLine4CSV) {
+                return Math.max(0l, headerLine4CSV);
+            }
+        }
+
+        if ((SimpleFileIOFormat.EXCEL == format)) {
+            if (setHeaderLine4EXCEL) {
+                return Math.max(0l, headerLine4EXCEL);
+            }
+        }
+
+        return 0l;
+    }
+
+    public long getFooterLineValue() {
+        if ((SimpleFileIOFormat.EXCEL == format)) {
+            if (setFooterLine4EXCEL) {
+                return Math.max(0l, footerLine4EXCEL);
+            }
+        }
+
+        return 0l;
+    }
 
 }
