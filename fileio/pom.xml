@@ -28,6 +28,7 @@
 	<avro.version>1.8.1</avro.version>
 	<commons-lang3.version>3.4</commons-lang3.version>
 	<commons-csv.version>1.4</commons-csv.version>
+	<spark.version>2.2.1</spark.version>
 	<!-- TODO remove it -->
 	<components.version>0.25.0-SNAPSHOT</components.version>
   </properties>
@@ -154,11 +155,46 @@
 		<version>${parquet.version}</version>
 	</dependency>
 
-    <dependency>
-      <groupId>org.talend.daikon</groupId>
-      <artifactId>daikon</artifactId>
-      <classifier>tests</classifier>
-    </dependency>
+	<!-- Tests -->
+	<dependency>
+		<groupId>org.talend.daikon</groupId>
+		<artifactId>daikon</artifactId>
+		<classifier>tests</classifier>
+		<scope>test</scope>
+	</dependency>
+
+	<!-- For Spark integration tests. -->
+	<dependency>
+		<groupId>org.apache.beam</groupId>
+		<artifactId>beam-runners-spark</artifactId>
+		<version>${beam.version}</version>
+		<scope>test</scope>
+	</dependency>
+	<!-- necessary for Spark unit tests -->
+	<dependency>
+		<groupId>org.apache.spark</groupId>
+		<artifactId>spark-core_2.11</artifactId>
+		<version>${spark.version}</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.spark</groupId>
+		<artifactId>spark-streaming_2.11</artifactId>
+		<version>${spark.version}</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.hadoop</groupId>
+		<artifactId>hadoop-yarn-client</artifactId>
+		<version>${hadoop.version}</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.spark</groupId>
+		<artifactId>spark-yarn_2.11</artifactId>
+		<version>${spark.version}</version>
+		<scope>test</scope>
+	</dependency>
 
 	<!-- MiniDFSCluster -->
 	<dependency>

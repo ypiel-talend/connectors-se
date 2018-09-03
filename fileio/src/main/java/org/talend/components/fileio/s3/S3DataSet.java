@@ -147,12 +147,12 @@ public class S3DataSet implements Serializable {
     @Option
     @ActiveIf(target = "format", value = "CSV")
     @Documentation("set the text enclosure character")
-    private String textEnclosureCharacter;
+    private String textEnclosureCharacter = "";
 
     @Option
     @ActiveIf(target = "format", value = "CSV")
     @Documentation("set the escape character")
-    private String escapeCharacter;
+    private String escapeCharacter = "";
 
     @Option
     @ActiveIf(target = "format", value = "EXCEL")
