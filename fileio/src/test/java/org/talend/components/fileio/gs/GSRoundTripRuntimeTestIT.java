@@ -46,7 +46,7 @@ public class GSRoundTripRuntimeTestIT {
     static {
         SimpleFileIOAvroRegistry.get();
     }
-    
+
     private static SimpleFileIOOutputConfig createSimpleFileIOOutputConfig() {
         SimpleFileIOOutputConfig config = new SimpleFileIOOutputConfig();
         SimpleFileIODataSet dataset = new SimpleFileIODataSet();
@@ -55,7 +55,7 @@ public class GSRoundTripRuntimeTestIT {
         config.setDataset(dataset);
         return config;
     }
-    
+
     private static SimpleFileIODataSet createSimpleFileIODataSet() {
         SimpleFileIODataSet dataset = new SimpleFileIODataSet();
         SimpleFileIODataStore datastore = new SimpleFileIODataStore();
@@ -87,7 +87,7 @@ public class GSRoundTripRuntimeTestIT {
 
     @After
     public void clean() throws IOException {
-        //TODO the directory is not really be removed, need a way to fix it
+        // TODO the directory is not really be removed, need a way to fix it
         FileSystems.delete(Arrays.asList(FileSystems.matchNewResource(gsPath, true)),
                 MoveOptions.StandardMoveOptions.IGNORE_MISSING_FILES);
     }
@@ -102,7 +102,7 @@ public class GSRoundTripRuntimeTestIT {
         outputConfig.getDataset().setPath(gsPath);
 
         SimpleFileIOOutput outputRuntime = new SimpleFileIOOutput(outputConfig);
-        
+
         PCollection<IndexedRecord> input = writeP.apply(Create.of(expected));
         input.apply(outputRuntime);
         writeP.run(pipelineOptions).waitUntilFinish();
@@ -111,7 +111,7 @@ public class GSRoundTripRuntimeTestIT {
         dataset.setPath(gsPath + "*");
 
         SimpleFileIOInput inputRuntime = new SimpleFileIOInput(dataset);
-        
+
         PCollection<IndexedRecord> readRecords = readP.apply(inputRuntime);
         PAssert.that(readRecords).containsInAnyOrder(expected);
         readP.run(pipelineOptions).waitUntilFinish();

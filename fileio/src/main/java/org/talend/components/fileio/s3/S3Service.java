@@ -65,7 +65,7 @@ public class S3Service {
     }
 
     // get the correct endpoint
-    private static String getEndpoint(S3DataSet dataset) {
+    public static String getEndpoint(S3DataSet dataset) {
         String bucket = dataset.getBucket();
         S3DataStore datastore = dataset.getDatastore();
         AmazonS3 s3client = createClient(datastore);
