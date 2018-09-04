@@ -6,6 +6,7 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.talend.components.fileio.runtime.SimpleFileIOAvroRegistry;
 import org.talend.components.fileio.runtime.SimpleRecordFormatAvroIO;
 import org.talend.components.fileio.runtime.SimpleRecordFormatBase;
 import org.talend.components.fileio.runtime.SimpleRecordFormatCsvIO;
@@ -23,6 +24,11 @@ import org.talend.sdk.component.api.meta.Documentation;
 @PartitionMapper(name = "S3Input")
 @Documentation("This component reads data from S3.")
 public class S3Input extends PTransform<PBegin, PCollection<IndexedRecord>> {
+
+    static {
+        // have to register the type converter firstly here now, not a good place in my view
+        SimpleFileIOAvroRegistry.get();
+    }
 
     private final S3DataSet configuration;
 

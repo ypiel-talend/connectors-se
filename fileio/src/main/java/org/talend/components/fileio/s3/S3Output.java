@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.talend.components.fileio.runtime.ExtraHadoopConfiguration;
+import org.talend.components.fileio.runtime.SimpleFileIOAvroRegistry;
 import org.talend.components.fileio.runtime.SimpleFileIOErrorCode;
 import org.talend.components.fileio.runtime.SimpleRecordFormatAvroIO;
 import org.talend.components.fileio.runtime.SimpleRecordFormatBase;
@@ -28,6 +29,11 @@ import org.talend.sdk.component.api.processor.Processor;
 @Processor(name = "S3Output")
 @Documentation("This component writes data to S3.")
 public class S3Output extends PTransform<PCollection<IndexedRecord>, PDone> {
+
+    static {
+        // have to register the type converter firstly here now, not a good place in my view
+        SimpleFileIOAvroRegistry.get();
+    }
 
     private final S3OutputConfig configuration;
 
