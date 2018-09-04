@@ -353,7 +353,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <argLine>-Xms512m -Xmx1024m ${jacoco.agent.it.argLine}</argLine>
+                    <argLine>-Xms512m -Xmx1024m</argLine>
                     <systemPropertyVariables>
                         <s3.accesskey>${s3.accesskey}</s3.accesskey>
                         <s3.secretkey>${s3.secretkey}</s3.secretkey>

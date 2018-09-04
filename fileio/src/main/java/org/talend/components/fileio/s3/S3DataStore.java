@@ -25,7 +25,7 @@ public class S3DataStore implements Serializable {
 
     @Option
     @Documentation("Should this datastore be secured and use access/secret keys.")
-    private boolean specifyCredentials;
+    private boolean specifyCredentials = true;
 
     @Option
     // @Required // todo: ensure ui supports to bypass this validation if not visible
