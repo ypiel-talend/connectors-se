@@ -65,12 +65,21 @@ public class InputTableMapperConfiguration implements Serializable {
     private List<String> schema;
 
     private enum Function {
-        EQUAL,
-        NOT_EQUAL,
-        GREATER_THAN,
-        GT_OR_EQ,
-        LESS_THAN,
-        LT_OR_EQ
+        EQUAL ("EQUAL", TableQuery.QueryComparisons.EQUAL),
+        NOT_EQUAL ("NOT EQUAL", TableQuery.QueryComparisons.NOT_EQUAL),
+        GREATER_THAN ("GREATER THAN", TableQuery.QueryComparisons.GREATER_THAN),
+        GT_OR_EQ ("GREATER THAN OR EQUAL", TableQuery.QueryComparisons.GREATER_THAN_OR_EQUAL),
+        LESS_THAN ("LESS THAN", TableQuery.QueryComparisons.LESS_THAN),
+        LT_OR_EQ ("LESS THAN OR EQUAL", TableQuery.QueryComparisons.LESS_THAN_OR_EQUAL);
+
+        private final String displayName;
+
+        private final String queryComparison;
+
+        Function(String displayName, String queryComparison) {
+            this.displayName = displayName;
+            this.queryComparison = queryComparison;
+        }
     }
 
 
@@ -168,7 +177,7 @@ public class InputTableMapperConfiguration implements Serializable {
     @Data
 //    @OptionsOrder({"column", "function", "value", "predicate", "fieldType"})
 //    FIXME: OptionsOrder is not working now
-    private class FilterExpression {
+    public static class FilterExpression {
         @Option
         @Documentation("column name")
         //TODO take column list from schema
@@ -196,23 +205,17 @@ public class InputTableMapperConfiguration implements Serializable {
         String filter = "";
         if (isValidFilterExpression()) {
             for (FilterExpression filterExpression: filterExpressions) {
-                String c = filterExpression.column;
-                String cfn = filterExpression.function.toString();
+                String cfn = filterExpression.function.displayName;
                 String cop = filterExpression.predicate.toString();
                 String typ = filterExpression.fieldType.toString();
 
-                String f = Comparison.getQueryComparisons(cfn);
-                String value = filterExpression.value;
-                String p = Predicate.getOperator(cop);
-
-                EdmType t = FieldType.getEdmType(typ);
-
-                String flt = TableQuery.generateFilterCondition(c, f, value, t);
+                String filterB = TableQuery.generateFilterCondition(filterExpression.column,
+                        Comparison.getQueryComparisons(cfn), filterExpression.value, FieldType.getEdmType(typ));
 
                 if (!filter.isEmpty()) {
-                    filter = TableQuery.combineFilters(filter, p, flt);
+                    filter = TableQuery.combineFilters(filter, Predicate.getOperator(cop), filterB);
                 } else {
-                    filter = flt;
+                    filter = filterB;
                 }
             }
         }

@@ -25,6 +25,7 @@ import org.talend.sdk.component.api.service.schema.Schema;
 import org.talend.sdk.component.api.service.schema.Type;
 
 import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,7 @@ public class AzureConnectionService {
 
     }
 
-    private Iterable<DynamicTableEntity> executeQuery(CloudStorageAccount storageAccount, String tableName, TableQuery<DynamicTableEntity> partitionQuery)
+    public Iterable<DynamicTableEntity> executeQuery(CloudStorageAccount storageAccount, String tableName, TableQuery<DynamicTableEntity> partitionQuery)
             throws URISyntaxException, StorageException {
 
         CloudTable cloudTable = storageAccount.createCloudTableClient().getTableReference(tableName);

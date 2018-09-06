@@ -9,6 +9,7 @@ import org.talend.components.azure.common.NameMapping;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
 @GridLayout(value = {
@@ -21,7 +22,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 }, names = GridLayout.FormType.MAIN)
 
 @GridLayout(value = {
-        @GridLayout.Row("nameMappings")
+        @GridLayout.Row("nameMappings"),
+        @GridLayout.Row("schema")
 
 }, names = GridLayout.FormType.ADVANCED)
 @Documentation("TODO fill the documentation for this configuration")
@@ -61,6 +63,12 @@ public class OutputTableProcessorConfiguration implements Serializable {
     @Option
     @Documentation("")
     private List<NameMapping> nameMappings;
+
+    @Option
+    @Structure(discoverSchema = "guessSchema", type = Structure.Type.IN)
+    @Documentation("Schema")
+    private List<String> schema;
+
 
     private enum ActionOnData {
         INSERT,

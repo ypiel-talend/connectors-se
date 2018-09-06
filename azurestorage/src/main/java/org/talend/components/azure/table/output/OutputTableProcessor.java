@@ -64,8 +64,6 @@ public class OutputTableProcessor implements Serializable {
 
     @PreDestroy
     public void release() {
-        // this is the symmetric method of the init() one,
-        // release potential connections you created or data you cached
-        // Note: if you don't need it you can delete it
+        //NOOP
     }
 }
