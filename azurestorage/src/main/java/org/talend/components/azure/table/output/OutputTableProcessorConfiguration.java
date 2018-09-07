@@ -7,10 +7,13 @@ import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.common.NameMapping;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
+
+import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
 
 @GridLayout(value = {
         @GridLayout.Row("azureConnection"),
@@ -36,12 +39,13 @@ public class OutputTableProcessorConfiguration implements Serializable {
 
     //TODO make selection list from table columns
     @Option
+    @Suggestable(value = COLUMN_NAMES, parameters = "schema")
     @Documentation("")
     private String partitionName;
-
-    //TODO make selection list from table columns
+    
     @Option
     @Documentation("")
+    @Suggestable(value = COLUMN_NAMES, parameters = "schema")
     private String rowKey;
 
     @Option
@@ -65,7 +69,7 @@ public class OutputTableProcessorConfiguration implements Serializable {
     private List<NameMapping> nameMappings;
 
     @Option
-    @Structure(discoverSchema = "guessSchema", type = Structure.Type.IN)
+    @Structure
     @Documentation("Schema")
     private List<String> schema;
 

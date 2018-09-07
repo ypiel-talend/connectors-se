@@ -8,8 +8,10 @@ import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.common.NameMapping;
 import org.talend.components.azure.service.Comparison;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -19,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
 
 @GridLayout(value = {
     @GridLayout.Row("azureConnection"),
@@ -175,11 +179,11 @@ public class InputTableMapperConfiguration implements Serializable {
     }
 
     @Data
-//    @OptionsOrder({"column", "function", "value", "predicate", "fieldType"})
-//    FIXME: OptionsOrder is not working now
+    @OptionsOrder({"column", "function", "value", "predicate", "fieldType"})
     public static class FilterExpression {
         @Option
         @Documentation("column name")
+        @Suggestable(value = COLUMN_NAMES, parameters = "schema")
         //TODO take column list from schema
         private String column;
 

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.json.JsonObject;
 
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -22,7 +23,7 @@ import org.talend.components.azure.service.AzureConnectionService;
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
 @Icon(value = Icon.IconType.CUSTOM, custom = "outputTable") // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding icons/filename_icon32.png in resources
 @Processor(name = "OutputTable")
-@Documentation("TODO fill the documentation for this processor")
+@Documentation("Azure Output Table Component")
 public class OutputTableProcessor implements Serializable {
     private final OutputTableProcessorConfiguration configuration;
     private final AzureConnectionService service;
@@ -40,26 +41,10 @@ public class OutputTableProcessor implements Serializable {
         // Note: if you don't need it you can delete it
     }
 
-    @BeforeGroup
-    public void beforeGroup() {
-        // if the environment supports chunking this method is called at the beginning if a chunk
-        // it can be used to start a local transaction specific to the backend you use
-        // Note: if you don't need it you can delete it
-    }
-
     @ElementListener
     public void onNext(
-            @Input final OutputTableDefaultInput defaultInput,
-            @Output final OutputEmitter<OutputTableDefaultOutput> defaultOutput) {
-        // this is the method allowing you to handle the input(s) and emit the output(s)
-        // after some custom logic you put here, to send a value to next element you can use an
-        // output parameter and call emit(value).
-    }
-
-    @AfterGroup
-    public void afterGroup() {
-        // symmetric method of the beforeGroup() executed after the chunk processing
-        // Note: if you don't need it you can delete it
+            @Input final JsonObject incomingData) {
+        System.out.println(incomingData.toString());
     }
 
     @PreDestroy
