@@ -57,10 +57,12 @@
       <artifactId>${hadoop.aws.artifactId}</artifactId>
       <version>${hadoop.aws.version}</version>
       <exclusions>
+		<!--
         <exclusion>
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-common</artifactId>
         </exclusion>
+		-->
         <exclusion>
           <groupId>com.amazonaws</groupId>
           <artifactId>*</artifactId>
