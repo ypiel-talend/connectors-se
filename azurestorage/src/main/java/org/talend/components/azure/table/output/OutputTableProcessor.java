@@ -21,15 +21,19 @@ import org.talend.sdk.component.api.processor.Processor;
 import org.talend.components.azure.service.AzureConnectionService;
 
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
-@Icon(value = Icon.IconType.CUSTOM, custom = "outputTable") // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding icons/filename_icon32.png in resources
+@Icon(value = Icon.IconType.CUSTOM, custom = "outputTable") // you can use a custom one using @Icon(value=CUSTOM,
+                                                            // custom="filename") and adding icons/filename_icon32.png in
+                                                            // resources
 @Processor(name = "OutputTable")
 @Documentation("Azure Output Table Component")
 public class OutputTableProcessor implements Serializable {
+
     private final OutputTableProcessorConfiguration configuration;
+
     private final AzureConnectionService service;
 
     public OutputTableProcessor(@Option("configuration") final OutputTableProcessorConfiguration configuration,
-                          final AzureConnectionService service) {
+            final AzureConnectionService service) {
         this.configuration = configuration;
         this.service = service;
     }
@@ -42,13 +46,12 @@ public class OutputTableProcessor implements Serializable {
     }
 
     @ElementListener
-    public void onNext(
-            @Input final JsonObject incomingData) {
+    public void onNext(@Input final JsonObject incomingData) {
         System.out.println(incomingData.toString());
     }
 
     @PreDestroy
     public void release() {
-        //NOOP
+        // NOOP
     }
 }

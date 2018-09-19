@@ -39,15 +39,15 @@ public class AzureConnectionService {
         try {
             CloudStorageAccount cloudStorageAccount = createStorageAccount(azureConnection);
             final int MAX_TABLES = 1;
-            //TODO partner tag
+            // TODO partner tag
             final OperationContext operationContext = null;
-            //will throw an exception if not authorized
-            //FIXME too long if account not exists
+            // will throw an exception if not authorized
+            // FIXME too long if account not exists
             cloudStorageAccount.createCloudTableClient().listTablesSegmented(null, MAX_TABLES, null, null, operationContext);
         } catch (Exception e) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         }
-        //TODO i18n
+        // TODO i18n
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connected");
     }
 
@@ -68,11 +68,10 @@ public class AzureConnectionService {
         return new SuggestionValues(true, tableNames);
     }
 
-
     @DiscoverSchema("guessSchema")
     public Schema guessSchema(@Option final InputTableMapperConfiguration configuration) {
         List<Schema.Entry> columns = new ArrayList<>();
-        //add 3 default columns
+        // add 3 default columns
         columns.add(new Schema.Entry("PartitionKey", Type.STRING));
         columns.add(new Schema.Entry("RowKey", Type.STRING));
         columns.add(new Schema.Entry("Timestamp", Type.STRING));
@@ -116,8 +115,8 @@ public class AzureConnectionService {
 
     }
 
-    public Iterable<DynamicTableEntity> executeQuery(CloudStorageAccount storageAccount, String tableName, TableQuery<DynamicTableEntity> partitionQuery)
-            throws URISyntaxException, StorageException {
+    public Iterable<DynamicTableEntity> executeQuery(CloudStorageAccount storageAccount, String tableName,
+            TableQuery<DynamicTableEntity> partitionQuery) throws URISyntaxException, StorageException {
 
         CloudTable cloudTable = storageAccount.createCloudTableClient().getTableReference(tableName);
         return cloudTable.execute(partitionQuery, null, AzureConnectionUtils.getTalendOperationContext());
@@ -128,7 +127,7 @@ public class AzureConnectionService {
         if (!azureConnection.isUseAzureSharedSignature()) {
             credentials = new StorageCredentialsAccountAndKey(azureConnection.getAccountName(), azureConnection.getAccountKey());
         } else {
-            //TODO test it
+            // TODO test it
             credentials = new StorageCredentialsSharedAccessSignature(azureConnection.getAzureSharedAccessSignature());
         }
         return new CloudStorageAccount(credentials, azureConnection.getProtocol() == Protocol.HTTPS);

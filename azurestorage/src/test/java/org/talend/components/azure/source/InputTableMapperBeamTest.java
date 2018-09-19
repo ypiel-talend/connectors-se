@@ -21,6 +21,7 @@ import org.talend.sdk.component.runtime.beam.TalendIO;
 import org.talend.sdk.component.runtime.input.Mapper;
 
 public class InputTableMapperBeamTest implements Serializable {
+
     @ClassRule
     public static final SimpleComponentRule COMPONENT_FACTORY = new SimpleComponentRule("org.talend.components.azure");
 
@@ -31,7 +32,7 @@ public class InputTableMapperBeamTest implements Serializable {
     @Ignore("You need to complete this test with your own data and assertions")
     public void produce() {
         // Setup your component configuration for the test here
-        final InputTableMapperConfiguration configuration =  new InputTableMapperConfiguration();
+        final InputTableMapperConfiguration configuration = new InputTableMapperConfiguration();
 
         // We create the component mapper instance using the configuration filled above
         final Mapper mapper = COMPONENT_FACTORY.createMapper(InputTableMapper.class, configuration);

@@ -15,18 +15,12 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
 
-@GridLayout(value = {
-        @GridLayout.Row("azureConnection"),
-        @GridLayout.Row({"partitionName", "rowKey"}),
-        @GridLayout.Row({"actionOnData", "actionOnTable"}),
-        @GridLayout.Row("processInBatch"),
-        @GridLayout.Row("dieOnError")
+@GridLayout(value = { @GridLayout.Row("azureConnection"), @GridLayout.Row({ "partitionName", "rowKey" }),
+        @GridLayout.Row({ "actionOnData", "actionOnTable" }), @GridLayout.Row("processInBatch"), @GridLayout.Row("dieOnError")
 
 }, names = GridLayout.FormType.MAIN)
 
-@GridLayout(value = {
-        @GridLayout.Row("nameMappings"),
-        @GridLayout.Row("schema")
+@GridLayout(value = { @GridLayout.Row("nameMappings"), @GridLayout.Row("schema")
 
 }, names = GridLayout.FormType.ADVANCED)
 @Documentation("TODO fill the documentation for this configuration")
@@ -37,7 +31,7 @@ public class OutputTableProcessorConfiguration implements Serializable {
     @Documentation("")
     private AzureTableConnection azureConnection;
 
-    //TODO make selection list from table columns
+    // TODO make selection list from table columns
     @Option
     @Suggestable(value = COLUMN_NAMES, parameters = "schema")
     @Documentation("")
@@ -72,7 +66,6 @@ public class OutputTableProcessorConfiguration implements Serializable {
     @Structure
     @Documentation("Schema")
     private List<String> schema;
-
 
     private enum ActionOnData {
         INSERT,

@@ -4,6 +4,7 @@ import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.meta.Documentation;
+
 @Data
 public class AzureTableConnection {
 

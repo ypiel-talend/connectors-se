@@ -4,8 +4,10 @@ import com.microsoft.azure.storage.OperationContext;
 import lombok.Data;
 
 import java.util.HashMap;
+
 @Data
 public class AzureConnectionUtils {
+
     private static OperationContext talendOperationContext;
 
     private static final String USER_AGENT_KEY = "User-Agent";

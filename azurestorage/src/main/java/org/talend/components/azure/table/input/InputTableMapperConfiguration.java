@@ -24,21 +24,15 @@ import java.util.Map;
 
 import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
 
-@GridLayout(value = {
-    @GridLayout.Row("azureConnection"),
-        @GridLayout.Row("useFilterExpression"),
-        @GridLayout.Row("filterExpressions"),
-        @GridLayout.Row("dieOnError")
-}, names = GridLayout.FormType.MAIN)
+@GridLayout(value = { @GridLayout.Row("azureConnection"), @GridLayout.Row("useFilterExpression"),
+        @GridLayout.Row("filterExpressions"), @GridLayout.Row("dieOnError") }, names = GridLayout.FormType.MAIN)
 
-@GridLayout(value = {
-        @GridLayout.Row("nameMappings"),
-        @GridLayout.Row("schema")
-}, names = GridLayout.FormType.ADVANCED)
+@GridLayout(value = { @GridLayout.Row("nameMappings"), @GridLayout.Row("schema") }, names = GridLayout.FormType.ADVANCED)
 @Documentation("TODO fill the documentation for this configuration")
 @DataSet("Input")
 @Data
 public class InputTableMapperConfiguration implements Serializable {
+
     @Option
     @Documentation("bl")
     private AzureTableConnection azureConnection;
@@ -50,15 +44,14 @@ public class InputTableMapperConfiguration implements Serializable {
     @Option
     @Documentation("table")
     @ActiveIf(target = "useFilterExpression", value = "true")
-    //TODO sort columns
+    // TODO sort columns
     private List<FilterExpression> filterExpressions;
 
     @Option
     @Documentation("die")
     private boolean dieOnError = true;
 
-
-    //TODO sort columns
+    // TODO sort columns
     @Option
     @Documentation("ah")
     private List<NameMapping> nameMappings;
@@ -69,12 +62,12 @@ public class InputTableMapperConfiguration implements Serializable {
     private List<String> schema;
 
     private enum Function {
-        EQUAL ("EQUAL", TableQuery.QueryComparisons.EQUAL),
-        NOT_EQUAL ("NOT EQUAL", TableQuery.QueryComparisons.NOT_EQUAL),
-        GREATER_THAN ("GREATER THAN", TableQuery.QueryComparisons.GREATER_THAN),
-        GT_OR_EQ ("GREATER THAN OR EQUAL", TableQuery.QueryComparisons.GREATER_THAN_OR_EQUAL),
-        LESS_THAN ("LESS THAN", TableQuery.QueryComparisons.LESS_THAN),
-        LT_OR_EQ ("LESS THAN OR EQUAL", TableQuery.QueryComparisons.LESS_THAN_OR_EQUAL);
+        EQUAL("EQUAL", TableQuery.QueryComparisons.EQUAL),
+        NOT_EQUAL("NOT EQUAL", TableQuery.QueryComparisons.NOT_EQUAL),
+        GREATER_THAN("GREATER THAN", TableQuery.QueryComparisons.GREATER_THAN),
+        GT_OR_EQ("GREATER THAN OR EQUAL", TableQuery.QueryComparisons.GREATER_THAN_OR_EQUAL),
+        LESS_THAN("LESS THAN", TableQuery.QueryComparisons.LESS_THAN),
+        LT_OR_EQ("LESS THAN OR EQUAL", TableQuery.QueryComparisons.LESS_THAN_OR_EQUAL);
 
         private final String displayName;
 
@@ -85,7 +78,6 @@ public class InputTableMapperConfiguration implements Serializable {
             this.queryComparison = queryComparison;
         }
     }
-
 
     private enum Predicate {
         AND("AND", TableQuery.Operators.AND),
@@ -127,7 +119,6 @@ public class InputTableMapperConfiguration implements Serializable {
             return this.displayName;
         }
     }
-
 
     private enum FieldType {
         STRING("STRING", EdmType.STRING),
@@ -175,12 +166,12 @@ public class InputTableMapperConfiguration implements Serializable {
             return this.displayName;
         }
 
-
     }
 
     @Data
-    @OptionsOrder({"column", "function", "value", "predicate", "fieldType"})
+    @OptionsOrder({ "column", "function", "value", "predicate", "fieldType" })
     public static class FilterExpression {
+
         @Option
         @Documentation("column name")
         @Suggestable(value = COLUMN_NAMES, parameters = "../../schema")
@@ -202,18 +193,18 @@ public class InputTableMapperConfiguration implements Serializable {
         @Documentation("fieldType")
         private FieldType fieldType = FieldType.STRING;
     }
-    
-    //TODO move it to util class
+
+    // TODO move it to util class
     public String generateCombinedFilterConditions() {
         String filter = "";
         if (isValidFilterExpression()) {
-            for (FilterExpression filterExpression: filterExpressions) {
+            for (FilterExpression filterExpression : filterExpressions) {
                 String cfn = filterExpression.function.displayName;
                 String cop = filterExpression.predicate.toString();
                 String typ = filterExpression.fieldType.toString();
 
-                String filterB = TableQuery.generateFilterCondition(filterExpression.column,
-                        Comparison.getQueryComparisons(cfn), filterExpression.value, FieldType.getEdmType(typ));
+                String filterB = TableQuery.generateFilterCondition(filterExpression.column, Comparison.getQueryComparisons(cfn),
+                        filterExpression.value, FieldType.getEdmType(typ));
 
                 if (!filter.isEmpty()) {
                     filter = TableQuery.combineFilters(filter, Predicate.getOperator(cop), filterB);
@@ -241,7 +232,7 @@ public class InputTableMapperConfiguration implements Serializable {
         if (filterExpressions == null) {
             return false;
         }
-        for (FilterExpression filterExpression: filterExpressions) {
+        for (FilterExpression filterExpression : filterExpressions) {
             if (StringUtils.isEmpty(filterExpression.column) || filterExpression.fieldType == null
                     || filterExpression.function == null || StringUtils.isEmpty(filterExpression.value)
                     || filterExpression.predicate == null) {

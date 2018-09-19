@@ -26,11 +26,15 @@ import java.util.Map;
 
 @Documentation("TODO fill the documentation for this source")
 public class InputTableSource implements Serializable {
+
     private final InputTableMapperConfiguration configuration;
+
     private final AzureConnectionService service;
+
     private final transient JsonBuilderFactory jsonBuilderFactory;
 
     private String filter;
+
     private transient CloudStorageAccount connection;
 
     private transient Iterator<DynamicTableEntity> recordsIterator;
@@ -38,8 +42,7 @@ public class InputTableSource implements Serializable {
     private DynamicTableEntity current;
 
     public InputTableSource(@Option("configuration") final InputTableMapperConfiguration configuration,
-                        final AzureConnectionService service,
-                        final JsonBuilderFactory jsonBuilderFactory) {
+            final AzureConnectionService service, final JsonBuilderFactory jsonBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.jsonBuilderFactory = jsonBuilderFactory;
@@ -68,7 +71,8 @@ public class InputTableSource implements Serializable {
             }
             // Using execute will automatically and lazily follow the continuation tokens from page to page of results.
             // So, we bypass the 1000 entities limit.
-            Iterable<DynamicTableEntity> entities = service.executeQuery(connection, configuration.getAzureConnection().getTableName(), partitionQuery);
+            Iterable<DynamicTableEntity> entities = service.executeQuery(connection,
+                    configuration.getAzureConnection().getTableName(), partitionQuery);
             recordsIterator = entities.iterator();
             if (recordsIterator.hasNext()) {
                 current = recordsIterator.next();
@@ -82,7 +86,8 @@ public class InputTableSource implements Serializable {
     public JsonObject next() {
         JsonObject currentRecord = null;
         if (current != null) {
-            JsonObjectBuilder currentRecordBuilder = jsonBuilderFactory.createObjectBuilder().add("PartitionKey", current.getPartitionKey()).add("RowKey", current.getRowKey())
+            JsonObjectBuilder currentRecordBuilder = jsonBuilderFactory.createObjectBuilder()
+                    .add("PartitionKey", current.getPartitionKey()).add("RowKey", current.getRowKey())
                     .add("Timestamp", current.getTimestamp().toString());
             for (Map.Entry<String, EntityProperty> pair : current.getProperties().entrySet()) {
                 String columnName = pair.getKey();
@@ -125,6 +130,6 @@ public class InputTableSource implements Serializable {
 
     @PreDestroy
     public void release() {
-        //NOOP
+        // NOOP
     }
 }

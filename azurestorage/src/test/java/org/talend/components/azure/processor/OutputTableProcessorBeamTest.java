@@ -28,6 +28,7 @@ import org.talend.sdk.component.runtime.beam.TalendFn;
 import org.talend.sdk.component.runtime.output.Processor;
 
 public class OutputTableProcessorBeamTest {
+
     @ClassRule
     public static final SimpleComponentRule COMPONENT_FACTORY = new SimpleComponentRule("org.talend.components.azure");
 
@@ -39,7 +40,7 @@ public class OutputTableProcessorBeamTest {
     public void processor() {
         // Processor configuration
         // Setup your component configuration for the test here
-        final OutputTableProcessorConfiguration configuration =  new OutputTableProcessorConfiguration();
+        final OutputTableProcessorConfiguration configuration = new OutputTableProcessorConfiguration();
 
         // We create the component processor instance using the configuration filled above
         final Processor processor = COMPONENT_FACTORY.createProcessor(OutputTableProcessor.class, configuration);
@@ -47,12 +48,11 @@ public class OutputTableProcessorBeamTest {
         // The join input factory construct inputs test data for every input branch you have defined for this component
         // Make sure to fil in some test data for the branches you want to test
         // You can also remove the branches that you don't need from the factory below
-        final JoinInputFactory joinInputFactory =  new JoinInputFactory()
-                .withInput("__default__", asList(/* TODO - list of your input data for this branch. Instances of OutputTableDefaultInput.class */));
+        final JoinInputFactory joinInputFactory = new JoinInputFactory().withInput("__default__",
+                asList(/* TODO - list of your input data for this branch. Instances of OutputTableDefaultInput.class */));
 
         // Convert it to a beam "source"
-        final PCollection<JsonObject> inputs =
-                pipeline.apply(Data.of(processor.plugin(), joinInputFactory.asInputRecords()));
+        final PCollection<JsonObject> inputs = pipeline.apply(Data.of(processor.plugin(), joinInputFactory.asInputRecords()));
 
         // add our processor right after to see each data as configured previously
         final PCollection<Map<String, JsonObject>> outputs = inputs.apply(TalendFn.asFn(processor))
@@ -60,7 +60,7 @@ public class OutputTableProcessorBeamTest {
 
         PAssert.that(outputs).satisfies((SerializableFunction<Iterable<Map<String, JsonObject>>, Void>) input -> {
             final List<Map<String, JsonObject>> result = StreamSupport.stream(input.spliterator(), false).collect(toList());
-            //TODO - test the result here
+            // TODO - test the result here
 
             return null;
         });

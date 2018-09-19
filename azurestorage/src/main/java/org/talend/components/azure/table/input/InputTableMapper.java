@@ -23,17 +23,20 @@ import org.talend.components.azure.service.AzureConnectionService;
 // this class role is to enable the work to be distributed in environments supporting it.
 //
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
-@Icon(value = Icon.IconType.CUSTOM, custom = "inputTable") // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding icons/filename_icon32.png in resources
+@Icon(value = Icon.IconType.CUSTOM, custom = "inputTable") // you can use a custom one using @Icon(value=CUSTOM,
+                                                           // custom="filename") and adding icons/filename_icon32.png in resources
 @PartitionMapper(name = "InputTable")
 @Documentation("TODO fill the documentation for this mapper")
 public class InputTableMapper implements Serializable {
+
     private final InputTableMapperConfiguration configuration;
+
     private final AzureConnectionService service;
+
     private final JsonBuilderFactory jsonBuilderFactory;
 
     public InputTableMapper(@Option("configuration") final InputTableMapperConfiguration configuration,
-                        final AzureConnectionService service,
-                        final JsonBuilderFactory jsonBuilderFactory) {
+            final AzureConnectionService service, final JsonBuilderFactory jsonBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.jsonBuilderFactory = jsonBuilderFactory;

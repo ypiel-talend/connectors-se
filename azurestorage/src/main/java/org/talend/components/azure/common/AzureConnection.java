@@ -10,17 +10,13 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
-@GridLayout({
-        @GridLayout.Row({"accountName"}),
-        @GridLayout.Row({"accountKey"}),
-        @GridLayout.Row({"protocol"}),
-        @GridLayout.Row({"useAzureSharedSignature"}),
-        @GridLayout.Row({"azureSharedAccessSignature"})
-})
+@GridLayout({ @GridLayout.Row({ "accountName" }), @GridLayout.Row({ "accountKey" }), @GridLayout.Row({ "protocol" }),
+        @GridLayout.Row({ "useAzureSharedSignature" }), @GridLayout.Row({ "azureSharedAccessSignature" }) })
 @Data
 @DataStore
 @Checkable("testConnection")
 public class AzureConnection {
+
     @Option("accountName")
     @Documentation("Blah-blah")
     @ActiveIf(target = "useAzureSharedSignature", value = "false")
