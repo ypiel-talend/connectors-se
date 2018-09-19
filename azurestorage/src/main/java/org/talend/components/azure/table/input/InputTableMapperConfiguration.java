@@ -183,8 +183,7 @@ public class InputTableMapperConfiguration implements Serializable {
     public static class FilterExpression {
         @Option
         @Documentation("column name")
-        @Suggestable(value = COLUMN_NAMES, parameters = "schema")
-        //TODO take column list from schema
+        @Suggestable(value = COLUMN_NAMES, parameters = "../../schema")
         private String column;
 
         @Option

@@ -42,7 +42,7 @@ public class OutputTableProcessorConfiguration implements Serializable {
     @Suggestable(value = COLUMN_NAMES, parameters = "schema")
     @Documentation("")
     private String partitionName;
-    
+
     @Option
     @Documentation("")
     @Suggestable(value = COLUMN_NAMES, parameters = "schema")
