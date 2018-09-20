@@ -84,12 +84,15 @@
 		<artifactId>beam-sdks-java-extensions-google-cloud-platform-core</artifactId>
 		<version>${beam.version}</version>
 	</dependency>
+	
+	<!-- scope provided can't be imported for mvn:talend-component:web command, so if classnotfoundexception in this jar for the web tester page, it's normal, should use another scope-->
 	<dependency>
 		<groupId>org.apache.hadoop</groupId>
 		<artifactId>hadoop-client</artifactId>
 		<version>${hadoop.version}</version>
 		<scope>provided</scope>
 	</dependency>
+	
 	<dependency>
 		<groupId>org.apache.avro</groupId>
 		<artifactId>avro-mapred</artifactId>
