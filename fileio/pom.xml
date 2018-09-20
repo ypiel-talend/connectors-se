@@ -35,18 +35,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.beam</groupId>
-      <artifactId>beam-sdks-java-core</artifactId>
-    </dependency>
-	<!--
-    <dependency>
-      <groupId>org.talend.components</groupId>
-      <artifactId>simplefileio-runtime</artifactId>
-      <version>${tcomp0.version}</version>
-    </dependency>
-	-->
-
-    <dependency>
       <groupId>org.talend.components</groupId>
       <artifactId>components-adapter-beam</artifactId>
 	  <version>${components.version}</version>
@@ -57,12 +45,10 @@
       <artifactId>${hadoop.aws.artifactId}</artifactId>
       <version>${hadoop.aws.version}</version>
       <exclusions>
-		<!--
         <exclusion>
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-common</artifactId>
         </exclusion>
-		-->
         <exclusion>
           <groupId>com.amazonaws</groupId>
           <artifactId>*</artifactId>
