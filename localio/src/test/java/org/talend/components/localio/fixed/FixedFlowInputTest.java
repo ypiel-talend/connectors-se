@@ -51,19 +51,6 @@ class FixedFlowInputTest {
         r2.put("name", "two");
     }
 
-    static class InnerParDo {
-
-        static ParDo.SingleOutput<Record, IndexedRecord> of() {
-            return ParDo.of(new DoFn<Record, IndexedRecord>() {
-
-                @ProcessElement
-                public void processElement(@Element Record record, OutputReceiver<IndexedRecord> out) {
-                    out.output(((AvroRecord) record).unwrap(IndexedRecord.class));
-                }
-            });
-        }
-    }
-
     @Test
     void testAvroInput() {
         final FixedFlowInputConfiguration configuration = new FixedFlowInputConfiguration();
