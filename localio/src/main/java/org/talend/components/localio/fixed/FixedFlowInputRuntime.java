@@ -66,6 +66,8 @@ public class FixedFlowInputRuntime implements Serializable {
 
         private BufferizedProducerSupport<IndexedRecord> bufferedReader;
 
+        private boolean consumed = false;
+
         FixedFlowInputProducer(final FixedFlowInputConfiguration configuration) {
             this.configuration = configuration;
         }
@@ -73,37 +75,39 @@ public class FixedFlowInputRuntime implements Serializable {
         @PostConstruct
         public void init() {
             bufferedReader = new BufferizedProducerSupport<>(() -> {
-                FixedDataSetRuntime runtime = new FixedDataSetRuntime(configuration.getDataset());
-                List<IndexedRecord> values = new LinkedList<>();
+                if (consumed) {
+                    // TODO: fix this dirty way to stop emitting records.
+                    return null;
+                } else {
+                    consumed = true;
+                    FixedDataSetRuntime runtime = new FixedDataSetRuntime(configuration.getDataset());
+                    List<IndexedRecord> values = new LinkedList<>();
 
-                if (configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.NONE
-                        || configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.APPEND) {
-                    if (!configuration.getDataset().getValues().trim().isEmpty()) {
-                        values.addAll(runtime.getValues(Integer.MAX_VALUE));
+                    if (configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.NONE
+                            || configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.APPEND) {
+                        if (!configuration.getDataset().getValues().trim().isEmpty()) {
+                            values.addAll(runtime.getValues(Integer.MAX_VALUE));
+                        }
                     }
-                }
 
-                if (configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.APPEND
-                        || configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.REPLACE) {
-                    configuration.getDataset().setValues(configuration.getOverrideValues());
-                    if (!configuration.getDataset().getValues().trim().isEmpty()) {
-                        values.addAll(runtime.getValues(Integer.MAX_VALUE));
+                    if (configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.APPEND
+                            || configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.REPLACE) {
+                        configuration.getDataset().setValues(configuration.getOverrideValues());
+                        if (!configuration.getDataset().getValues().trim().isEmpty()) {
+                            values.addAll(runtime.getValues(Integer.MAX_VALUE));
+                        }
                     }
+                    logger.info("Number of records: " + String.valueOf(values.size()));
+                    return values.iterator();
                 }
-                logger.info("Number of records: " + String.valueOf(values.size()));
-                return values.iterator();
             });
         }
 
         @Producer
         public Record next() {
             IndexedRecord record = bufferedReader.next();
-            Record r = null;
             if (record != null) {
-                logger.info(record.get(0).toString());
-                r = new AvroRecord(record);
-                logger.info(r.toString());
-                return r;
+                return new AvroRecord(record);
             } else return null;
         }
     }
