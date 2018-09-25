@@ -1,16 +1,10 @@
 package org.talend.components.azure.service;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.OperationContext;
-import com.microsoft.azure.storage.StorageCredentials;
-import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
-import com.microsoft.azure.storage.StorageCredentialsSharedAccessSignature;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.table.CloudTable;
-import com.microsoft.azure.storage.table.DynamicTableEntity;
-import com.microsoft.azure.storage.table.EdmType;
-import com.microsoft.azure.storage.table.EntityProperty;
-import com.microsoft.azure.storage.table.TableQuery;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.Protocol;
 import org.talend.components.azure.table.input.InputTableMapperConfiguration;
@@ -24,11 +18,17 @@ import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 import org.talend.sdk.component.api.service.schema.Schema;
 import org.talend.sdk.component.api.service.schema.Type;
 
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.OperationContext;
+import com.microsoft.azure.storage.StorageCredentials;
+import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
+import com.microsoft.azure.storage.StorageCredentialsSharedAccessSignature;
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.table.CloudTable;
+import com.microsoft.azure.storage.table.DynamicTableEntity;
+import com.microsoft.azure.storage.table.EdmType;
+import com.microsoft.azure.storage.table.EntityProperty;
+import com.microsoft.azure.storage.table.TableQuery;
 
 @Service
 public class AzureConnectionService {
@@ -39,8 +39,7 @@ public class AzureConnectionService {
         try {
             CloudStorageAccount cloudStorageAccount = createStorageAccount(azureConnection);
             final int MAX_TABLES = 1;
-            // TODO partner tag
-            final OperationContext operationContext = null;
+            final OperationContext operationContext = AzureConnectionUtils.getTalendOperationContext();
             // will throw an exception if not authorized
             // FIXME too long if account not exists
             cloudStorageAccount.createCloudTableClient().listTablesSegmented(null, MAX_TABLES, null, null, operationContext);
@@ -127,7 +126,6 @@ public class AzureConnectionService {
         if (!azureConnection.isUseAzureSharedSignature()) {
             credentials = new StorageCredentialsAccountAndKey(azureConnection.getAccountName(), azureConnection.getAccountKey());
         } else {
-            // TODO test it
             credentials = new StorageCredentialsSharedAccessSignature(azureConnection.getAzureSharedAccessSignature());
         }
         return new CloudStorageAccount(credentials, azureConnection.getProtocol() == Protocol.HTTPS);
