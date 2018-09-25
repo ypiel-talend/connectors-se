@@ -34,29 +34,28 @@ public class FixedFlowInputRuntime implements Serializable {
 
     @Assessor
     public long estimateSize() {
-        // TODO: Estimate the size of the dataset data.
-        long estimatedSize = this.configuration.getDataset().getValues().getBytes().length;
-        logger.info("Estimated size: " + estimatedSize);
-        return estimatedSize;
+        switch (this.configuration.getOverrideValuesAction()) {
+        case NONE:
+            return this.configuration.getDataset().getValues().getBytes().length;
+        case REPLACE:
+            return this.configuration.getOverrideValues().getBytes().length;
+        case APPEND:
+        default:
+            return this.configuration.getDataset().getValues().getBytes().length
+                    + this.configuration.getOverrideValues().getBytes().length;
+        }
     }
 
     @Split
-    public List<FixedFlowInputRuntime> split() {
-        /*
-         * return LongStream.range(0, 1).mapToObj(i -> {
-         * return new FixedFlowInputRuntime(configuration);
-         * }).collect(Collectors.toList());
-         */
-        // TODO: Split the data according to a desired partition size.
+    public List<FixedFlowInputRuntime> split(@PartitionSize final long bundles) {
+        // No need to split the data at this point because the component will be used with a limited number of records.
         List<FixedFlowInputRuntime> mappers = new ArrayList<>();
         mappers.add(new FixedFlowInputRuntime(configuration));
-        logger.info("Return the list of mappers");
         return mappers;
     }
 
     @Emitter
     public FixedFlowInputProducer createWorker() {
-        logger.info("Create the worker");
         return new FixedFlowInputProducer(configuration);
     }
 
@@ -66,7 +65,7 @@ public class FixedFlowInputRuntime implements Serializable {
 
         private BufferizedProducerSupport<IndexedRecord> bufferedReader;
 
-        private boolean consumed = false;
+        private int repeat = 0;
 
         FixedFlowInputProducer(final FixedFlowInputConfiguration configuration) {
             this.configuration = configuration;
@@ -74,30 +73,28 @@ public class FixedFlowInputRuntime implements Serializable {
 
         @PostConstruct
         public void init() {
+            FixedDataSetRuntime runtime = new FixedDataSetRuntime(configuration.getDataset());
+            List<IndexedRecord> values = new LinkedList<>();
+
+            if (configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.NONE
+                    || configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.APPEND) {
+                if (!configuration.getDataset().getValues().trim().isEmpty()) {
+                    values.addAll(runtime.getValues(Integer.MAX_VALUE));
+                }
+            }
+
+            if (configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.APPEND
+                    || configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.REPLACE) {
+                configuration.getDataset().setValues(configuration.getOverrideValues());
+                if (!configuration.getDataset().getValues().trim().isEmpty()) {
+                    values.addAll(runtime.getValues(Integer.MAX_VALUE));
+                }
+            }
+
             bufferedReader = new BufferizedProducerSupport<>(() -> {
-                if (consumed) {
-                    // TODO: fix this dirty way to stop emitting records.
+                if (++repeat > configuration.getRepeat()) {
                     return null;
                 } else {
-                    consumed = true;
-                    FixedDataSetRuntime runtime = new FixedDataSetRuntime(configuration.getDataset());
-                    List<IndexedRecord> values = new LinkedList<>();
-
-                    if (configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.NONE
-                            || configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.APPEND) {
-                        if (!configuration.getDataset().getValues().trim().isEmpty()) {
-                            values.addAll(runtime.getValues(Integer.MAX_VALUE));
-                        }
-                    }
-
-                    if (configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.APPEND
-                            || configuration.getOverrideValuesAction() == FixedFlowInputConfiguration.OverrideValuesAction.REPLACE) {
-                        configuration.getDataset().setValues(configuration.getOverrideValues());
-                        if (!configuration.getDataset().getValues().trim().isEmpty()) {
-                            values.addAll(runtime.getValues(Integer.MAX_VALUE));
-                        }
-                    }
-                    logger.info("Number of records: " + String.valueOf(values.size()));
                     return values.iterator();
                 }
             });
@@ -106,9 +103,7 @@ public class FixedFlowInputRuntime implements Serializable {
         @Producer
         public Record next() {
             IndexedRecord record = bufferedReader.next();
-            if (record != null) {
-                return new AvroRecord(record);
-            } else return null;
+            return record != null ? new AvroRecord(record) : null;
         }
     }
 }

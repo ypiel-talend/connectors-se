@@ -21,7 +21,6 @@ import org.talend.sdk.component.runtime.beam.TalendIO;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
 import org.talend.sdk.component.runtime.input.Mapper;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,7 +29,6 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
-import static org.talend.sdk.component.runtime.manager.ComponentManager.ComponentType.MAPPER;
 
 @WithComponents("org.talend.components.localio")
 class FixedFlowInputTest {
@@ -54,15 +52,15 @@ class FixedFlowInputTest {
     }
 
     static class InnerParDo {
+
         static ParDo.SingleOutput<Record, IndexedRecord> of() {
-            return ParDo.of(
-                    new DoFn<Record, IndexedRecord>() {
-                        @ProcessElement
-                        public void processElement(@Element Record record, OutputReceiver<IndexedRecord> out) {
-                            out.output(((AvroRecord) record).unwrap(IndexedRecord.class));
-                        }
-                    }
-            );
+            return ParDo.of(new DoFn<Record, IndexedRecord>() {
+
+                @ProcessElement
+                public void processElement(@Element Record record, OutputReceiver<IndexedRecord> out) {
+                    out.output(((AvroRecord) record).unwrap(IndexedRecord.class));
+                }
+            });
         }
     }
 
@@ -76,17 +74,18 @@ class FixedFlowInputTest {
         final Map<String, String> asConfig = configurationByExample().forInstance(configuration).configured().toMap();
         final Pipeline pipeline = Pipeline.create();
         final PTransform<PBegin, PCollection<Record>> input = handler.asManager()
-                .findMapper("LocalIO", "FixedFlowInputRuntime", 1, asConfig)
-                .map(e -> TalendIO.read((Mapper) e))
+                .findMapper("LocalIO", "FixedFlowInputRuntime", 1, asConfig).map(e -> TalendIO.read((Mapper) e))
                 .orElseThrow(() -> new IllegalArgumentException("No component for fixed flow input"));
-        PAssert.that(pipeline.apply(input).apply(InnerParDo.of())).satisfies(it -> {
-            final List<IndexedRecord> records = StreamSupport.stream(it.spliterator(), false).collect(toList());
-            assertEquals(2, records.size()); // TODO: should be 4 taking the repeat into account
-            Map<Boolean, List<IndexedRecord>> groups = records.stream().collect(Collectors.groupingBy(r -> (int) r.get(0) == 1));
-            groups.get(true).forEach(record -> assertEquals(r1.toString(), record.toString()));
-            assertEquals(1, groups.get(true).size()); // TODO: should be 2 taking the repeat into account
-            groups.get(false).forEach(record -> assertEquals(r2.toString(), record.toString()));
-            assertEquals(1, groups.get(false).size()); // TODO: should be 2 taking the repeat into account
+        PAssert.that(pipeline.apply(input)).satisfies(it -> {
+            final List<Record> records = StreamSupport.stream(it.spliterator(), false).collect(toList());
+            assertEquals(4, records.size());
+            Map<Boolean, List<Record>> groups = records.stream().collect(Collectors.groupingBy(r -> r.getInt("id") == 1));
+            groups.get(true)
+                    .forEach(record -> assertEquals(r1.toString(), ((AvroRecord) record).unwrap(IndexedRecord.class).toString()));
+            assertEquals(2, groups.get(true).size());
+            groups.get(false)
+                    .forEach(record -> assertEquals(r2.toString(), ((AvroRecord) record).unwrap(IndexedRecord.class).toString()));
+            assertEquals(2, groups.get(false).size());
             return null;
         });
         pipeline.run().waitUntilFinish();
@@ -101,18 +100,19 @@ class FixedFlowInputTest {
         configuration.getDataset().setValues("1;one\n2;two");
         final Map<String, String> asConfig = configurationByExample().forInstance(configuration).configured().toMap();
         final Pipeline pipeline = Pipeline.create();
-        final PTransform<PBegin, PCollection<IndexedRecord>> input = handler.asManager()
-                .createComponent("LocalIO", "FixedFlowInputRuntime", MAPPER, 1, asConfig)
-                .map(e -> (PTransform<PBegin, PCollection<IndexedRecord>>) e)
+        final PTransform<PBegin, PCollection<Record>> input = handler.asManager()
+                .findMapper("LocalIO", "FixedFlowInputRuntime", 1, asConfig).map(e -> TalendIO.read((Mapper) e))
                 .orElseThrow(() -> new IllegalArgumentException("No component for fixed flow input"));
         PAssert.that(pipeline.apply(input)).satisfies(it -> {
-            final List<IndexedRecord> records = StreamSupport.stream(it.spliterator(), false).collect(toList());
+            final List<Record> records = StreamSupport.stream(it.spliterator(), false).collect(toList());
             assertEquals(6, records.size());
-            Map<Boolean, List<IndexedRecord>> groups = records.stream()
-                    .collect(Collectors.groupingBy(r -> ((org.apache.avro.util.Utf8) r.get(0)).toString().equals("1")));
-            groups.get(true).forEach(record -> assertEquals("{\"id\": \"1\", \"name\": \"one\"}", record.toString()));
+            Map<Boolean, List<Record>> groups = records.stream()
+                    .collect(Collectors.groupingBy(r -> (r.getString("id")).equals("1")));
+            groups.get(true).forEach(record -> assertEquals("{\"id\": \"1\", \"name\": \"one\"}",
+                    ((AvroRecord) record).unwrap(IndexedRecord.class).toString()));
             assertEquals(3, groups.get(true).size());
-            groups.get(false).forEach(record -> assertEquals("{\"id\": \"2\", \"name\": \"two\"}", record.toString()));
+            groups.get(false).forEach(record -> assertEquals("{\"id\": \"2\", \"name\": \"two\"}",
+                    ((AvroRecord) record).unwrap(IndexedRecord.class).toString()));
             assertEquals(3, groups.get(false).size());
             return null;
         });
@@ -127,17 +127,18 @@ class FixedFlowInputTest {
         configuration.getDataset().setValues("{'id':1, 'name':'one'} {'id':2, 'name':'two'}".replace('\'', '"'));
         final Map<String, String> asConfig = configurationByExample().forInstance(configuration).configured().toMap();
         final Pipeline pipeline = Pipeline.create();
-        final PTransform<PBegin, PCollection<IndexedRecord>> input = handler.asManager()
-                .createComponent("LocalIO", "FixedFlowInputRuntime", MAPPER, 1, asConfig)
-                .map(e -> (PTransform<PBegin, PCollection<IndexedRecord>>) e)
+        final PTransform<PBegin, PCollection<Record>> input = handler.asManager()
+                .findMapper("LocalIO", "FixedFlowInputRuntime", 1, asConfig).map(e -> TalendIO.read((Mapper) e))
                 .orElseThrow(() -> new IllegalArgumentException("No component for fixed flow input"));
         PAssert.that(pipeline.apply(input)).satisfies(it -> {
-            final List<IndexedRecord> records = StreamSupport.stream(it.spliterator(), false).collect(toList());
+            final List<Record> records = StreamSupport.stream(it.spliterator(), false).collect(toList());
             assertEquals(4, records.size());
-            Map<Boolean, List<IndexedRecord>> groups = records.stream().collect(Collectors.groupingBy(r -> (int) r.get(0) == 1));
-            groups.get(true).forEach(record -> assertEquals("{\"id\": 1, \"name\": \"one\"}", record.toString()));
+            Map<Boolean, List<Record>> groups = records.stream().collect(Collectors.groupingBy(r -> r.getInt("id") == 1));
+            groups.get(true).forEach(record -> assertEquals("{\"id\": 1, \"name\": \"one\"}",
+                    ((AvroRecord) record).unwrap(IndexedRecord.class).toString()));
             assertEquals(2, groups.get(true).size());
-            groups.get(false).forEach(record -> assertEquals("{\"id\": 2, \"name\": \"two\"}", record.toString()));
+            groups.get(false).forEach(record -> assertEquals("{\"id\": 2, \"name\": \"two\"}",
+                    ((AvroRecord) record).unwrap(IndexedRecord.class).toString()));
             assertEquals(2, groups.get(false).size());
             return null;
         });
