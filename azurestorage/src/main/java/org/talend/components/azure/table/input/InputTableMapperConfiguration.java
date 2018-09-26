@@ -61,7 +61,7 @@ public class InputTableMapperConfiguration implements Serializable {
     @Documentation("SOS")
     private List<String> schema;
 
-    private enum Function {
+    enum Function {
         EQUAL("EQUAL", TableQuery.QueryComparisons.EQUAL),
         NOT_EQUAL("NOT EQUAL", TableQuery.QueryComparisons.NOT_EQUAL),
         GREATER_THAN("GREATER THAN", TableQuery.QueryComparisons.GREATER_THAN),
@@ -120,7 +120,7 @@ public class InputTableMapperConfiguration implements Serializable {
         }
     }
 
-    private enum FieldType {
+    enum FieldType {
         STRING("STRING", EdmType.STRING),
 
         NUMERIC("NUMERIC", EdmType.INT32),

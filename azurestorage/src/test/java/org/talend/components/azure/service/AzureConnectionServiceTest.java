@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -156,13 +157,17 @@ public class AzureConnectionServiceTest {
     }
 
     @Test
-    public void testCreateStorageAccountWithPass() {
+    public void testCreateStorageAccountWithPass() throws Exception {
+        AzureConnection connectionProperties = new AzureConnection();
+        String expectedAccountKey = "someAccountName";
+        connectionProperties.setUseAzureSharedSignature(false);
+        connectionProperties.setAccountName(expectedAccountKey);
+        String accountKey = "someKey";
+        connectionProperties.setAccountKey(new String(Base64.getEncoder().encode(accountKey.getBytes())));
+        CloudStorageAccount account = new AzureConnectionService().createStorageAccount(connectionProperties);
 
-    }
-
-    @Test
-    public void testCreateStorageAccountWithSharedKey() {
-
+        assertNotNull(account);
+        assertEquals(expectedAccountKey, account.getCredentials().getAccountName());
     }
 
 }
