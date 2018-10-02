@@ -29,15 +29,13 @@ class DevNullOutputTest {
     @Test
     void ensureItRuns() {
         final Pipeline pipeline = Pipeline.create();
-        final Optional<Processor> processor = handler.asManager()
-                .findProcessor("LocalIO", "DevNullOutputRuntime", 1, emptyMap());
+        final Optional<Processor> processor = handler.asManager().findProcessor("LocalIO", "DevNullOutputRuntime", 1, emptyMap());
 
-        final PTransform<PCollection<Record>, PDone> input = processor
-                .map(TalendIO::write)
+        final PTransform<PCollection<Record>, PDone> input = processor.map(TalendIO::write)
                 .orElseThrow(() -> new IllegalArgumentException("No component for fixed flow input"));
 
-        pipeline.apply(Create.of((Record) new AvroRecord(GenericDataRecordHelper.createRecord(new Object[]{"a", 1}))).withCoder(SchemaRegistryCoder.of()))
-                .apply("Normalizer", RecordNormalizer.of(processor.get().plugin()))
+        pipeline.apply(Create.of((Record) new AvroRecord(GenericDataRecordHelper.createRecord(new Object[] { "a", 1 })))
+                .withCoder(SchemaRegistryCoder.of())).apply("Normalizer", RecordNormalizer.of(processor.get().plugin()))
                 .apply(input);
         pipeline.run().waitUntilFinish();
     }

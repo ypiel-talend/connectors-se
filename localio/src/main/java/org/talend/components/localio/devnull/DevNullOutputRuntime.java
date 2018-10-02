@@ -2,7 +2,6 @@ package org.talend.components.localio.devnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.localio.fixed.FixedDataSetConfiguration;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -23,12 +22,16 @@ public class DevNullOutputRuntime implements Serializable {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public DevNullOutputRuntime(@Option("configuration") final FixedDataSetConfiguration configuration) {
-        // no-op
+    private final DevNullOutputConfiguration configuration;
+
+    public DevNullOutputRuntime(@Option("configuration") final DevNullOutputConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     @ElementListener
     public void onElement(final Record record) {
-        logger.info(record.toString());
+        if (configuration.getShouldPrint()) {
+            logger.info(record.toString());
+        }
     }
 }
