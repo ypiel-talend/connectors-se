@@ -17,6 +17,8 @@ import org.talend.sdk.component.api.processor.Output;
 import org.talend.sdk.component.api.processor.OutputEmitter;
 import org.talend.sdk.component.api.processor.Processor;
 
+import javax.json.JsonObject;
+
 @Version
 @Icon(REPLICATE)
 @Processor(name = "Replicate")
@@ -25,14 +27,14 @@ public class Replicate implements BeamJobBuilder, Serializable {
 
     private final ReplicateConfiguration configuration;
 
-    private final static String MAIN_CONNECTOR = "MAIN";
+    private final static String MAIN_CONNECTOR = "__default__";
 
     // TODO: It would be really useful if we could differentiate between named outputs for the
     // component. For the moment this works because we want the two to be exactly the same in all
     // cases.
-    private final static String FLOW_CONNECTOR = "MAIN";
+    private final static String FLOW_CONNECTOR = "__default__";
 
-    private final static String SECOND_FLOW_CONNECTOR = "MAIN";
+    private final static String SECOND_FLOW_CONNECTOR = "second";
 
     private boolean hasFlow;
 
@@ -47,6 +49,13 @@ public class Replicate implements BeamJobBuilder, Serializable {
 
     public Replicate(@Option("configuration") final ReplicateConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    @ElementListener
+    public void onElement(final JsonObject ignored, @Output final OutputEmitter<JsonObject> output,
+            @Output("second") final OutputEmitter<JsonObject> second) {
+        // Dummy method to pass validate
+        // no-op
     }
 
     @Override
