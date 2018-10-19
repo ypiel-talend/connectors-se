@@ -18,6 +18,7 @@ import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import org.talend.components.azure.service.AzureConnectionService;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 //
 // this class role is to enable the work to be distributed in environments supporting it.
@@ -33,13 +34,13 @@ public class InputTableMapper implements Serializable {
 
     private final AzureConnectionService service;
 
-    private final JsonBuilderFactory jsonBuilderFactory;
+    private final RecordBuilderFactory recordBuilderFactory;
 
     public InputTableMapper(@Option("configuration") final InputTableMapperConfiguration configuration,
-            final AzureConnectionService service, final JsonBuilderFactory jsonBuilderFactory) {
+            final AzureConnectionService service, final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
-        this.jsonBuilderFactory = jsonBuilderFactory;
+        this.recordBuilderFactory = recordBuilderFactory;
     }
 
     @Assessor
@@ -67,6 +68,6 @@ public class InputTableMapper implements Serializable {
         // here we create an actual worker,
         // you are free to rework the configuration etc but our default generated implementation
         // propagates the partition mapper entries.
-        return new InputTableSource(configuration, service, jsonBuilderFactory);
+        return new InputTableSource(configuration, service, recordBuilderFactory);
     }
 }

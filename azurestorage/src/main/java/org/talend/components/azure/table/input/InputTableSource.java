@@ -1,28 +1,26 @@
 package org.talend.components.azure.table.input;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.table.DynamicTableEntity;
-import com.microsoft.azure.storage.table.EntityProperty;
-import com.microsoft.azure.storage.table.TableQuery;
+import java.io.Serializable;
+import java.net.URISyntaxException;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.service.AzureConnectionService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.service.schema.Type;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import java.io.Serializable;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.table.DynamicTableEntity;
+import com.microsoft.azure.storage.table.EntityProperty;
+import com.microsoft.azure.storage.table.TableQuery;
 
 @Documentation("TODO fill the documentation for this source")
 public class InputTableSource implements Serializable {
@@ -30,8 +28,6 @@ public class InputTableSource implements Serializable {
     private final InputTableMapperConfiguration configuration;
 
     private final AzureConnectionService service;
-
-    private final transient JsonBuilderFactory jsonBuilderFactory;
 
     private String filter;
 
@@ -41,11 +37,13 @@ public class InputTableSource implements Serializable {
 
     private DynamicTableEntity current;
 
+    private RecordBuilderFactory recordBuilderFactory;
+
     public InputTableSource(@Option("configuration") final InputTableMapperConfiguration configuration,
-            final AzureConnectionService service, final JsonBuilderFactory jsonBuilderFactory) {
+            final AzureConnectionService service, final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
-        this.jsonBuilderFactory = jsonBuilderFactory;
+        this.recordBuilderFactory = recordBuilderFactory;
     }
 
     @PostConstruct
@@ -83,48 +81,55 @@ public class InputTableSource implements Serializable {
     }
 
     @Producer
-    public JsonObject next() {
-        JsonObject currentRecord = null;
+    public Record next() {
+        Record currentRecord = null;
+        Record.Builder builder = recordBuilderFactory.newRecordBuilder();
         if (current != null) {
-            JsonObjectBuilder currentRecordBuilder = jsonBuilderFactory.createObjectBuilder()
-                    .add("PartitionKey", current.getPartitionKey()).add("RowKey", current.getRowKey())
-                    .add("Timestamp", current.getTimestamp().toString());
+            builder.withString("PartitionKey", current.getPartitionKey()).withString("RowKey", current.getRowKey())
+                    .withDateTime("Timestamp", current.getTimestamp());
             for (Map.Entry<String, EntityProperty> pair : current.getProperties().entrySet()) {
                 String columnName = pair.getKey();
                 EntityProperty columnValue = pair.getValue();
                 if (configuration.getSchema().contains(columnName)) {
-                    addValue(currentRecordBuilder, columnName, columnValue);
+                    addValue(builder, columnName, columnValue);
                 }
             }
-            currentRecord = currentRecordBuilder.build();
+            currentRecord = builder.build();
         }
         if (recordsIterator.hasNext()) {
             current = recordsIterator.next();
         } else {
             current = null;
         }
+        // HOW???
+        recordBuilderFactory.newRecordBuilder();
         return currentRecord;
     }
 
-    private void addValue(JsonObjectBuilder currentRecordBuilder, String columnName, EntityProperty columnValue) {
+    private void addValue(Record.Builder currentRecordBuilder, String columnName, EntityProperty columnValue) {
         switch (columnValue.getEdmType()) {
         case BOOLEAN:
-            currentRecordBuilder.add(columnName, columnValue.getValueAsBoolean());
+            currentRecordBuilder.withBoolean(columnName, columnValue.getValueAsBoolean());
             break;
         case BYTE:
         case SBYTE:
         case INT16:
         case INT32:
-            currentRecordBuilder.add(columnName, columnValue.getValueAsInteger());
+            currentRecordBuilder.withInt(columnName, columnValue.getValueAsInteger());
             break;
         case INT64:
+            currentRecordBuilder.withLong(columnName, columnValue.getValueAsInteger());
+            break;
         case DECIMAL:
         case SINGLE:
         case DOUBLE:
-            currentRecordBuilder.add(columnName, columnValue.getValueAsDouble());
+            currentRecordBuilder.withDouble(columnName, columnValue.getValueAsDouble());
             break;
+        case TIME:
+        case DATE_TIME:
+            currentRecordBuilder.withDateTime(columnName, columnValue.getValueAsDate());
         default:
-            currentRecordBuilder.add(columnName, columnValue.getValueAsString());
+            currentRecordBuilder.withString(columnName, columnValue.getValueAsString());
         }
     }
 

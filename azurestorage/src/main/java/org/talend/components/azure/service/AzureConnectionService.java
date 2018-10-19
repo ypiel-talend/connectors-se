@@ -9,14 +9,14 @@ import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.Protocol;
 import org.talend.components.azure.table.input.InputTableMapperConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
-import org.talend.sdk.component.api.service.schema.Schema;
-import org.talend.sdk.component.api.service.schema.Type;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
@@ -68,12 +68,13 @@ public class AzureConnectionService {
     }
 
     @DiscoverSchema("guessSchema")
-    public Schema guessSchema(@Option final InputTableMapperConfiguration configuration) {
-        List<Schema.Entry> columns = new ArrayList<>();
+    public Schema guessSchema(@Option final InputTableMapperConfiguration configuration, final RecordBuilderFactory factory) {
+        final Schema.Entry.Builder entryBuilder = factory.newEntryBuilder();
+        final Schema.Builder schemaBuilder = factory.newSchemaBuilder(Schema.Type.RECORD);
         // add 3 default columns
-        columns.add(new Schema.Entry("PartitionKey", Type.STRING));
-        columns.add(new Schema.Entry("RowKey", Type.STRING));
-        columns.add(new Schema.Entry("Timestamp", Type.STRING));
+        schemaBuilder.withEntry(entryBuilder.withName("PartitionKey").withType(Schema.Type.STRING).build())
+                .withEntry(entryBuilder.withName("RowKey").withType(Schema.Type.STRING).build())
+                .withEntry(entryBuilder.withName("Timestamp").withType(Schema.Type.DATETIME).build());
         String tableName = configuration.getAzureConnection().getTableName();
         try {
             AzureConnection connection = configuration.getAzureConnection().getConnection();
@@ -83,33 +84,33 @@ public class AzureConnectionService {
                 DynamicTableEntity result = entities.iterator().next();
                 for (Map.Entry<String, EntityProperty> f : result.getProperties().entrySet()) {
                     String fieldName = f.getKey();
-                    columns.add(new Schema.Entry(fieldName, getAppropriateType(f.getValue().getEdmType())));
+                    schemaBuilder.withEntry(
+                            entryBuilder.withName(fieldName).withType(getAppropriateType(f.getValue().getEdmType())).build());
                 }
             }
 
         } catch (Exception e) {
             throw new RuntimeException("Can't get schema", e);
         }
-
-        return new Schema(columns);
+        return schemaBuilder.build();
     }
 
-    private Type getAppropriateType(EdmType edmType) {
+    private Schema.Type getAppropriateType(EdmType edmType) {
         switch (edmType) {
         case BOOLEAN:
-            return Type.BOOLEAN;
+            return Schema.Type.BOOLEAN;
         case BYTE:
         case SBYTE:
         case INT16:
         case INT32:
-            return Type.INT;
+            return Schema.Type.INT;
         case INT64:
         case DECIMAL:
         case SINGLE:
         case DOUBLE:
-            return Type.DOUBLE;
+            return Schema.Type.DOUBLE;
         default:
-            return Type.STRING;
+            return Schema.Type.STRING;
         }
 
     }

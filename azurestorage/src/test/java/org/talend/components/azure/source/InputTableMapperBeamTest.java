@@ -16,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.talend.components.azure.table.input.InputTableMapper;
 import org.talend.components.azure.table.input.InputTableMapperConfiguration;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.runtime.beam.TalendIO;
 import org.talend.sdk.component.runtime.input.Mapper;
@@ -38,7 +39,7 @@ public class InputTableMapperBeamTest implements Serializable {
         final Mapper mapper = COMPONENT_FACTORY.createMapper(InputTableMapper.class, configuration);
 
         // create a pipeline starting with the mapper
-        final PCollection<JsonObject> out = pipeline.apply(TalendIO.read(mapper));
+        final PCollection<Record> out = pipeline.apply(TalendIO.read(mapper));
 
         // then append some assertions to the output of the mapper,
         // PAssert is a beam utility to validate part of the pipeline
