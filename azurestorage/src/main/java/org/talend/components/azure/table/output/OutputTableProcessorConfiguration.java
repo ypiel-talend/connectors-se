@@ -15,6 +15,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
 
+import lombok.Data;
+
 @GridLayout(value = { @GridLayout.Row("azureConnection"), @GridLayout.Row({ "partitionName", "rowKey" }),
         @GridLayout.Row({ "actionOnData", "actionOnTable" }), @GridLayout.Row("processInBatch"), @GridLayout.Row("dieOnError")
 
@@ -25,6 +27,7 @@ import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
 }, names = GridLayout.FormType.ADVANCED)
 @Documentation("TODO fill the documentation for this configuration")
 @DataSet("Output")
+@Data
 public class OutputTableProcessorConfiguration implements Serializable {
 
     @Option
@@ -67,7 +70,7 @@ public class OutputTableProcessorConfiguration implements Serializable {
     @Documentation("Schema")
     private List<String> schema;
 
-    private enum ActionOnData {
+    enum ActionOnData {
         INSERT,
         INSERT_OR_REPLACE,
         INSERT_OR_MERGE,
@@ -76,7 +79,7 @@ public class OutputTableProcessorConfiguration implements Serializable {
         DELETE
     }
 
-    private enum ActionOnTable {
+    enum ActionOnTable {
         DEFAULT,
         DROP_AND_CREATE,
         CREATE,

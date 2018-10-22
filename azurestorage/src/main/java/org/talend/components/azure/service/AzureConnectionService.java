@@ -109,6 +109,9 @@ public class AzureConnectionService {
         case SINGLE:
         case DOUBLE:
             return Schema.Type.DOUBLE;
+        case DATE_TIME:
+        case DATE_TIME_OFFSET:
+            return Schema.Type.DATETIME;
         default:
             return Schema.Type.STRING;
         }
