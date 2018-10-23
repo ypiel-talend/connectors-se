@@ -96,13 +96,6 @@ public class InputTableSource implements Serializable {
             }
             currentRecord = builder.build();
         }
-        if (recordsIterator.hasNext()) {
-            current = recordsIterator.next();
-        } else {
-            current = null;
-        }
-        // HOW???
-        recordBuilderFactory.newRecordBuilder();
         return currentRecord;
     }
 

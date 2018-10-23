@@ -83,9 +83,8 @@ public class AzureConnectionService {
             if (entities.iterator().hasNext()) {
                 DynamicTableEntity result = entities.iterator().next();
                 for (Map.Entry<String, EntityProperty> f : result.getProperties().entrySet()) {
-                    String fieldName = f.getKey();
-                    schemaBuilder.withEntry(
-                            entryBuilder.withName(fieldName).withType(getAppropriateType(f.getValue().getEdmType())).build());
+                    schemaBuilder.withEntry(entryBuilder.withName(f.getKey())
+                            .withType(getAppropriateType(f.getValue().getEdmType())).withNullable(true).build());
                 }
             }
 

@@ -51,7 +51,6 @@ public class InputTableMapperConfiguration implements Serializable {
     @Documentation("die")
     private boolean dieOnError = true;
 
-    // TODO sort columns
     @Option
     @Documentation("ah")
     private List<NameMapping> nameMappings;

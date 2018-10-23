@@ -14,6 +14,8 @@ public class AzureConnectionUtils {
 
     private static final String USER_AGENT_VALUE = "APN/1.0 Talend/7.1 TaCoKit/1.0.3";
 
+    public static final String TABLE_TIMESTAMP = "Timestamp";
+
     public static OperationContext getTalendOperationContext() {
         if (talendOperationContext == null) {
             talendOperationContext = new OperationContext();

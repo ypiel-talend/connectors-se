@@ -5,28 +5,25 @@ import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.talend.components.azure.common.NameMapping;
+import org.talend.components.azure.service.AzureConnectionService;
 import org.talend.components.azure.service.AzureConnectionUtils;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.processor.AfterGroup;
-import org.talend.sdk.component.api.processor.BeforeGroup;
 import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Input;
-import org.talend.sdk.component.api.processor.Output;
-import org.talend.sdk.component.api.processor.OutputEmitter;
 import org.talend.sdk.component.api.processor.Processor;
-
-import org.talend.components.azure.service.AzureConnectionService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
@@ -35,7 +32,10 @@ import com.microsoft.azure.storage.StorageErrorCodeStrings;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.table.CloudTable;
 import com.microsoft.azure.storage.table.DynamicTableEntity;
+import com.microsoft.azure.storage.table.EntityProperty;
+import com.microsoft.azure.storage.table.TableBatchOperation;
 import com.microsoft.azure.storage.table.TableOperation;
+import com.microsoft.azure.storage.table.TableResult;
 import com.microsoft.azure.storage.table.TableServiceException;
 
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
@@ -45,6 +45,7 @@ import com.microsoft.azure.storage.table.TableServiceException;
 @Processor(name = "OutputTable")
 @Documentation("Azure Output Table Component")
 public class OutputTableProcessor implements Serializable {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OutputTableProcessor.class);
 
     private final OutputTableProcessorConfiguration configuration;
@@ -54,6 +55,14 @@ public class OutputTableProcessor implements Serializable {
     private transient CloudStorageAccount connection;
 
     private transient List<Record> recordToEnqueue = new ArrayList<>();
+
+    private transient List<TableOperation> batchOperations = new ArrayList<>();
+
+    private transient int batchOperationsCount;
+
+    private transient String latestPartitionKey;
+
+    private static final int MAX_RECORDS_TO_ENQUEUE = 250;
 
     public OutputTableProcessor(@Option("configuration") final OutputTableProcessorConfiguration configuration,
             final AzureConnectionService service) {
@@ -72,72 +81,50 @@ public class OutputTableProcessor implements Serializable {
         handleActionOnTable();
     }
 
-    public void handleActionOnTable()
-            throws IOException, StorageException, InvalidKeyException, URISyntaxException {
-        CloudTable cloudTable = connection.createCloudTableClient().getTableReference(configuration.getAzureConnection().getTableName());
-        switch (configuration.getActionOnTable()) {
-        case CREATE:
-            cloudTable.create(null, AzureConnectionUtils.getTalendOperationContext());
-            break;
-        case CREATE_IF_NOT_EXIST:
-            cloudTable.createIfNotExists(null, AzureConnectionUtils.getTalendOperationContext());
-            break;
-        case DROP_AND_CREATE:
-            cloudTable.delete(null, AzureConnectionUtils.getTalendOperationContext());
-            createTableAfterDeletion(cloudTable);
-            break;
-        case DROP_IF_EXIST_CREATE:
-            cloudTable.deleteIfExists(null, AzureConnectionUtils.getTalendOperationContext());
-            createTableAfterDeletion(cloudTable);
-            break;
-        case DEFAULT:
-        default:
-            return;
-        }
-
-    }
-
     @ElementListener
     public void onNext(@Input final Record incomingRecord) throws Exception {
         if (incomingRecord == null) {
             return;
         }
-        Schema writeSchema = incomingRecord.getSchema();
         if (configuration.isProcessInBatch()) {
-            DynamicTableEntity entity = createDynamicEntityFromInputRecord(incomingRecord, writeSchema);
+            DynamicTableEntity entity = createDynamicEntityFromInputRecord(incomingRecord);
             addOperationToBatch(entity, incomingRecord);
         } else {
             recordToEnqueue.add(incomingRecord);
-           /* if (recordToEnqueue.size() >= MAX_RECORDS_TO_ENQUEUE) {
+            if (recordToEnqueue.size() >= MAX_RECORDS_TO_ENQUEUE) {
                 processParallelRecords();
-            }*/
+            }
         }
-        System.out.println(incomingRecord.toString());
-    }
-
-    private DynamicTableEntity createDynamicEntityFromInputRecord(Record incomingRecord, Schema writeSchema) {
-        return null;
-    }
-
-    private void addOperationToBatch(DynamicTableEntity entity, Record record) throws IOException {
-        /*if (latestPartitionKey == null || latestPartitionKey.isEmpty()) {
-            latestPartitionKey = entity.getPartitionKey();
-        }
-        // we reached the threshold for batch OR changed PartitionKey
-        if (batchOperationsCount == 100 || !entity.getPartitionKey().equals(latestPartitionKey)) {
-            processBatch();
-            latestPartitionKey = entity.getPartitionKey();
-        }
-        TableOperation to = getTableOperation(entity);
-        batchOperations.add(to);
-        batchRecords.add(record);
-        batchOperationsCount++;
-        latestPartitionKey = entity.getPartitionKey();*/
     }
 
     @PreDestroy
     public void release() {
-        // NOOP
+        if (batchOperationsCount > 0) {
+            LOGGER.debug("Executing last batch");
+            processBatch();
+        }
+
+        if (recordToEnqueue.size() > 0) {
+            processParallelRecords();
+        }
+    }
+
+    private void processParallelRecords() {
+        recordToEnqueue.parallelStream().forEach(record -> {
+            try {
+                DynamicTableEntity entity = createDynamicEntityFromInputRecord(record);
+                TableResult r = executeOperation(getTableOperation(entity));
+            } catch (StorageException e) {
+                // TODO log message
+                if (configuration.isDieOnError()) {
+                    throw new RuntimeException(e);
+                }
+
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e); // connection problem so next operation will also fail, we stop the process
+            }
+        });
+        recordToEnqueue.clear();
     }
 
     /**
@@ -170,6 +157,166 @@ public class OutputTableProcessor implements Serializable {
             }
             cloudTable.create(null, AzureConnectionUtils.getTalendOperationContext());
             LOGGER.debug("Table {} created.", cloudTable.getName());
+        }
+    }
+
+    private void handleActionOnTable() throws IOException, StorageException, URISyntaxException {
+        CloudTable cloudTable = connection.createCloudTableClient()
+                .getTableReference(configuration.getAzureConnection().getTableName());
+        switch (configuration.getActionOnTable()) {
+        case CREATE:
+            cloudTable.create(null, AzureConnectionUtils.getTalendOperationContext());
+            break;
+        case CREATE_IF_NOT_EXIST:
+            cloudTable.createIfNotExists(null, AzureConnectionUtils.getTalendOperationContext());
+            break;
+        case DROP_AND_CREATE:
+            cloudTable.delete(null, AzureConnectionUtils.getTalendOperationContext());
+            createTableAfterDeletion(cloudTable);
+            break;
+        case DROP_IF_EXIST_CREATE:
+            cloudTable.deleteIfExists(null, AzureConnectionUtils.getTalendOperationContext());
+            createTableAfterDeletion(cloudTable);
+            break;
+        case DEFAULT:
+        default:
+            return;
+        }
+
+    }
+
+    private ArrayList<TableResult> executeOperation(TableBatchOperation batchOpe) throws URISyntaxException, StorageException {
+
+        CloudTable cloudTable = connection.createCloudTableClient()
+                .getTableReference(configuration.getAzureConnection().getTableName());
+        return cloudTable.execute(batchOpe, null, AzureConnectionUtils.getTalendOperationContext());
+    }
+
+    private void processBatch() {
+        TableBatchOperation batch = new TableBatchOperation();
+        batch.addAll(batchOperations);
+        //
+        try {
+            executeOperation(batch);
+
+        } catch (StorageException e) {
+            // TODO logger
+            if (configuration.isDieOnError()) {
+                throw new RuntimeException(e);
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e); // connection problem so next operation will also fail, we stop the process
+        }
+        // reset operations, count and marker
+        batchOperations.clear();
+        batchOperationsCount = 0;
+        latestPartitionKey = "";
+    }
+
+    private DynamicTableEntity createDynamicEntityFromInputRecord(Record incomingRecord) {
+        DynamicTableEntity entity = new DynamicTableEntity();
+        HashMap<String, EntityProperty> entityProps = new HashMap<>();
+        for (Schema.Entry f : incomingRecord.getSchema().getEntries()) {
+
+            if (incomingRecord.get(Object.class, f.getName()) == null) {
+                continue; // record value may be null, No need to set the property in azure in this case
+            }
+
+            String sName = f.getName(); // schema name
+            String mName = getMappedNameIfNecessary(sName); // mapped name
+
+            if (f.getType() == Schema.Type.RECORD) {
+                /*
+                 * for (Schema.Entry s : f.getElementSchema().getEntries()) {
+                 * if (s.getType() != Schema.Type.) {
+                 * fSchema = s;
+                 * break;
+                 * }
+                 * }
+                 */
+            } // WTF?
+
+            if (sName.equals(configuration.getPartitionName())) {
+                entity.setPartitionKey(incomingRecord.getString(sName));
+            } else if (sName.equals(configuration.getRowKey())) {
+                entity.setRowKey(incomingRecord.getString(sName));
+            } else if (mName.equals(AzureConnectionUtils.TABLE_TIMESTAMP)) {
+                // nop : managed by server
+            } else { // that's some properties !
+                if (f.getType().equals(Schema.Type.BOOLEAN)) {
+                    entityProps.put(mName, new EntityProperty(incomingRecord.getBoolean(sName)));
+                } else if (f.getType().equals(Schema.Type.DOUBLE)) {
+                    entityProps.put(mName, new EntityProperty(incomingRecord.getDouble(sName)));
+                } else if (f.getType().equals(Schema.Type.INT)) {
+                    entityProps.put(mName, new EntityProperty(incomingRecord.getInt(sName)));
+                } else if (f.getType().equals(Schema.Type.BYTES)) {
+                    entityProps.put(mName, new EntityProperty(incomingRecord.getBytes(sName)));
+                } else if (f.getType().equals(Schema.Type.LONG)) {
+                    entityProps.put(mName, new EntityProperty(incomingRecord.getLong(sName)));
+                    // TODO datetime
+                } else { // use string as default type for string and other types...
+                    entityProps.put(mName, new EntityProperty(incomingRecord.getString(sName)));
+
+                }
+            }
+        }
+        // Etag is needed for some operations (delete, merge, replace) but we rely only on PK and RK for those ones.
+        entity.setEtag("*");
+        entity.setProperties(entityProps);
+        return entity;
+    }
+
+    private String getMappedNameIfNecessary(String sName) {
+        if (configuration.getNameMappings().size() > 0) {
+            NameMapping usedNameMapping = configuration.getNameMappings().stream()
+                    .filter(nameMapping -> sName.equals(nameMapping.getSchemaColumnName())).findFirst().get();
+            if (usedNameMapping != null) {
+                return usedNameMapping.getEntityPropertyName();
+            }
+        }
+
+        return sName;
+    }
+
+    private void addOperationToBatch(DynamicTableEntity entity, Record record) {
+        if (latestPartitionKey == null || latestPartitionKey.isEmpty()) {
+            latestPartitionKey = entity.getPartitionKey();
+        }
+        // we reached the threshold for batch OR changed PartitionKey
+        if (batchOperationsCount == 100 || !entity.getPartitionKey().equals(latestPartitionKey)) {
+            processBatch();
+            latestPartitionKey = entity.getPartitionKey();
+        }
+        TableOperation to = getTableOperation(entity);
+        batchOperations.add(to);
+        batchOperationsCount++;
+        latestPartitionKey = entity.getPartitionKey();
+    }
+
+    private TableResult executeOperation(TableOperation ope) throws URISyntaxException, StorageException {
+
+        CloudTable cloudTable = connection.createCloudTableClient()
+                .getTableReference(configuration.getAzureConnection().getTableName());
+        return cloudTable.execute(ope, null, AzureConnectionUtils.getTalendOperationContext());
+    }
+
+    private TableOperation getTableOperation(DynamicTableEntity entity) {
+        switch (configuration.getActionOnData()) {
+        case INSERT:
+            return TableOperation.insert(entity);
+        case INSERT_OR_MERGE:
+            return TableOperation.insertOrMerge(entity);
+        case INSERT_OR_REPLACE:
+            return TableOperation.insertOrReplace(entity);
+        case MERGE:
+            return TableOperation.merge(entity);
+        case REPLACE:
+            return TableOperation.replace(entity);
+        case DELETE:
+            return TableOperation.delete(entity);
+        default:
+            LOGGER.error("No specified operation for table");
+            return null;
         }
     }
 }
