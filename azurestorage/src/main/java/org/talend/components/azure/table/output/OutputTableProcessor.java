@@ -3,9 +3,7 @@ package org.talend.components.azure.table.output;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.azure.common.NameMapping;
 import org.talend.components.azure.service.AzureConnectionService;
-import org.talend.components.azure.service.AzureConnectionUtils;
+import org.talend.components.azure.service.AzureTableUtils;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -48,7 +46,7 @@ public class OutputTableProcessor implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OutputTableProcessor.class);
 
-    private final OutputTableProcessorConfiguration configuration;
+    private final OutputProperties configuration;
 
     private final AzureConnectionService service;
 
@@ -64,7 +62,7 @@ public class OutputTableProcessor implements Serializable {
 
     private static final int MAX_RECORDS_TO_ENQUEUE = 250;
 
-    public OutputTableProcessor(@Option("configuration") final OutputTableProcessorConfiguration configuration,
+    public OutputTableProcessor(@Option("configuration") final OutputProperties configuration,
             final AzureConnectionService service) {
         this.configuration = configuration;
         this.service = service;
@@ -116,6 +114,7 @@ public class OutputTableProcessor implements Serializable {
                 TableResult r = executeOperation(getTableOperation(entity));
             } catch (StorageException e) {
                 // TODO log message
+                e.printStackTrace();
                 if (configuration.isDieOnError()) {
                     throw new RuntimeException(e);
                 }
@@ -142,7 +141,7 @@ public class OutputTableProcessor implements Serializable {
      */
     private void createTableAfterDeletion(CloudTable cloudTable) throws StorageException, IOException {
         try {
-            cloudTable.create(null, AzureConnectionUtils.getTalendOperationContext());
+            cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
         } catch (TableServiceException e) {
             if (!e.getErrorCode().equals(StorageErrorCodeStrings.TABLE_BEING_DELETED)) {
                 throw e;
@@ -155,7 +154,7 @@ public class OutputTableProcessor implements Serializable {
             } catch (InterruptedException eint) {
                 throw new IOException("Wait process for recreating table interrupted.");
             }
-            cloudTable.create(null, AzureConnectionUtils.getTalendOperationContext());
+            cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
             LOGGER.debug("Table {} created.", cloudTable.getName());
         }
     }
@@ -165,17 +164,17 @@ public class OutputTableProcessor implements Serializable {
                 .getTableReference(configuration.getAzureConnection().getTableName());
         switch (configuration.getActionOnTable()) {
         case CREATE:
-            cloudTable.create(null, AzureConnectionUtils.getTalendOperationContext());
+            cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
             break;
         case CREATE_IF_NOT_EXIST:
-            cloudTable.createIfNotExists(null, AzureConnectionUtils.getTalendOperationContext());
+            cloudTable.createIfNotExists(null, AzureTableUtils.getTalendOperationContext());
             break;
         case DROP_AND_CREATE:
-            cloudTable.delete(null, AzureConnectionUtils.getTalendOperationContext());
+            cloudTable.delete(null, AzureTableUtils.getTalendOperationContext());
             createTableAfterDeletion(cloudTable);
             break;
         case DROP_IF_EXIST_CREATE:
-            cloudTable.deleteIfExists(null, AzureConnectionUtils.getTalendOperationContext());
+            cloudTable.deleteIfExists(null, AzureTableUtils.getTalendOperationContext());
             createTableAfterDeletion(cloudTable);
             break;
         case DEFAULT:
@@ -189,7 +188,7 @@ public class OutputTableProcessor implements Serializable {
 
         CloudTable cloudTable = connection.createCloudTableClient()
                 .getTableReference(configuration.getAzureConnection().getTableName());
-        return cloudTable.execute(batchOpe, null, AzureConnectionUtils.getTalendOperationContext());
+        return cloudTable.execute(batchOpe, null, AzureTableUtils.getTalendOperationContext());
     }
 
     private void processBatch() {
@@ -240,7 +239,7 @@ public class OutputTableProcessor implements Serializable {
                 entity.setPartitionKey(incomingRecord.getString(sName));
             } else if (sName.equals(configuration.getRowKey())) {
                 entity.setRowKey(incomingRecord.getString(sName));
-            } else if (mName.equals(AzureConnectionUtils.TABLE_TIMESTAMP)) {
+            } else if (mName.equals(AzureTableUtils.TABLE_TIMESTAMP)) {
                 // nop : managed by server
             } else { // that's some properties !
                 if (f.getType().equals(Schema.Type.BOOLEAN)) {
@@ -267,7 +266,8 @@ public class OutputTableProcessor implements Serializable {
     }
 
     private String getMappedNameIfNecessary(String sName) {
-        if (configuration.getNameMappings().size() > 0) {
+        // TODO nameMappings should be not nullable - bug of studio integration
+        if (configuration.getNameMappings() != null && configuration.getNameMappings().size() > 0) {
             NameMapping usedNameMapping = configuration.getNameMappings().stream()
                     .filter(nameMapping -> sName.equals(nameMapping.getSchemaColumnName())).findFirst().get();
             if (usedNameMapping != null) {
@@ -297,7 +297,7 @@ public class OutputTableProcessor implements Serializable {
 
         CloudTable cloudTable = connection.createCloudTableClient()
                 .getTableReference(configuration.getAzureConnection().getTableName());
-        return cloudTable.execute(ope, null, AzureConnectionUtils.getTalendOperationContext());
+        return cloudTable.execute(ope, null, AzureTableUtils.getTalendOperationContext());
     }
 
     private TableOperation getTableOperation(DynamicTableEntity entity) {

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.Protocol;
-import org.talend.components.azure.table.input.InputTableMapperConfiguration;
+import org.talend.components.azure.table.input.InputProperties;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
@@ -39,7 +39,7 @@ public class AzureConnectionService {
         try {
             CloudStorageAccount cloudStorageAccount = createStorageAccount(azureConnection);
             final int MAX_TABLES = 1;
-            final OperationContext operationContext = AzureConnectionUtils.getTalendOperationContext();
+            final OperationContext operationContext = AzureTableUtils.getTalendOperationContext();
             // will throw an exception if not authorized
             // FIXME too long if account not exists
             cloudStorageAccount.createCloudTableClient().listTablesSegmented(null, MAX_TABLES, null, null, operationContext);
@@ -55,7 +55,7 @@ public class AzureConnectionService {
         List<SuggestionValues.Item> tableNames = new ArrayList<>();
         try {
             CloudStorageAccount storageAccount = createStorageAccount(azureConnection);
-            final OperationContext operationContext = AzureConnectionUtils.getTalendOperationContext();
+            final OperationContext operationContext = AzureTableUtils.getTalendOperationContext();
             for (String tableName : storageAccount.createCloudTableClient().listTables(null, null, operationContext)) {
                 tableNames.add(new SuggestionValues.Item(tableName, tableName));
             }
@@ -68,7 +68,7 @@ public class AzureConnectionService {
     }
 
     @DiscoverSchema("guessSchema")
-    public Schema guessSchema(@Option final InputTableMapperConfiguration configuration, final RecordBuilderFactory factory) {
+    public Schema guessSchema(@Option final InputProperties configuration, final RecordBuilderFactory factory) {
         final Schema.Entry.Builder entryBuilder = factory.newEntryBuilder();
         final Schema.Builder schemaBuilder = factory.newSchemaBuilder(Schema.Type.RECORD);
         // add 3 default columns
@@ -121,7 +121,7 @@ public class AzureConnectionService {
             TableQuery<DynamicTableEntity> partitionQuery) throws URISyntaxException, StorageException {
 
         CloudTable cloudTable = storageAccount.createCloudTableClient().getTableReference(tableName);
-        return cloudTable.execute(partitionQuery, null, AzureConnectionUtils.getTalendOperationContext());
+        return cloudTable.execute(partitionQuery, null, AzureTableUtils.getTalendOperationContext());
     }
 
     public CloudStorageAccount createStorageAccount(AzureConnection azureConnection) throws URISyntaxException {

@@ -10,6 +10,7 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.service.AzureConnectionService;
+import org.talend.components.azure.service.AzureTableUtils;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -25,7 +26,7 @@ import com.microsoft.azure.storage.table.TableQuery;
 @Documentation("TODO fill the documentation for this source")
 public class InputTableSource implements Serializable {
 
-    private final InputTableMapperConfiguration configuration;
+    private final InputProperties configuration;
 
     private final AzureConnectionService service;
 
@@ -39,8 +40,8 @@ public class InputTableSource implements Serializable {
 
     private RecordBuilderFactory recordBuilderFactory;
 
-    public InputTableSource(@Option("configuration") final InputTableMapperConfiguration configuration,
-            final AzureConnectionService service, final RecordBuilderFactory recordBuilderFactory) {
+    public InputTableSource(@Option("configuration") final InputProperties configuration, final AzureConnectionService service,
+            final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
@@ -51,7 +52,7 @@ public class InputTableSource implements Serializable {
         try {
             connection = service.createStorageAccount(configuration.getAzureConnection().getConnection());
             if (configuration.isUseFilterExpression()) {
-                filter = configuration.generateCombinedFilterConditions();
+                filter = AzureTableUtils.generateCombinedFilterConditions(configuration);
             }
             executeSelect();
         } catch (URISyntaxException e) {

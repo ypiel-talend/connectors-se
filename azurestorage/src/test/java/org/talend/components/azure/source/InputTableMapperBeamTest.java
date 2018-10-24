@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.Serializable;
 
-import javax.json.JsonObject;
-
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.testing.PAssert;
 import org.apache.beam.sdk.testing.TestPipeline;
@@ -14,8 +12,8 @@ import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.talend.components.azure.table.input.InputProperties;
 import org.talend.components.azure.table.input.InputTableMapper;
-import org.talend.components.azure.table.input.InputTableMapperConfiguration;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.runtime.beam.TalendIO;
@@ -33,7 +31,7 @@ public class InputTableMapperBeamTest implements Serializable {
     @Ignore("You need to complete this test with your own data and assertions")
     public void produce() {
         // Setup your component configuration for the test here
-        final InputTableMapperConfiguration configuration = new InputTableMapperConfiguration();
+        final InputProperties configuration = new InputProperties();
 
         // We create the component mapper instance using the configuration filled above
         final Mapper mapper = COMPONENT_FACTORY.createMapper(InputTableMapper.class, configuration);

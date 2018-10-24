@@ -28,7 +28,7 @@ import lombok.Data;
 @Documentation("TODO fill the documentation for this configuration")
 @DataSet("Output")
 @Data
-public class OutputTableProcessorConfiguration implements Serializable {
+public class OutputProperties implements Serializable {
 
     @Option
     @Documentation("")

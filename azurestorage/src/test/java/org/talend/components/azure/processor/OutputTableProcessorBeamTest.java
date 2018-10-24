@@ -21,11 +21,11 @@ public class OutputTableProcessorBeamTest {
         /*
          * // Processor configuration
          * // Setup your component configuration for the test here
-         * final OutputTableProcessorConfiguration configuration = new OutputTableProcessorConfiguration();
-         * 
+         * final OutputProperties configuration = new OutputProperties();
+         *
          * // We create the component processor instance using the configuration filled above
          * final Processor processor = COMPONENT_FACTORY.createProcessor(OutputTableProcessor.class, configuration);
-         * 
+         *
          * // The join input factory construct inputs test data for every input branch you have defined for this component
          * // Make sure to fil in some test data for the branches you want to test
          * // You can also remove the branches that you don't need from the factory below
@@ -33,7 +33,7 @@ public class OutputTableProcessorBeamTest {
          * asList(
          *//* TODO - list of your input data for this branch. Instances of OutputTableDefaultInput.class *//*
                                                                                                             * ));
-                                                                                                            * 
+                                                                                                            *
                                                                                                             * // Convert it to a
                                                                                                             * beam "source"
                                                                                                             * final
@@ -43,7 +43,7 @@ public class OutputTableProcessorBeamTest {
                                                                                                             * of(processor.plugin(
                                                                                                             * ), joinInputFactory.
                                                                                                             * asInputRecords()));
-                                                                                                            * 
+                                                                                                            *
                                                                                                             * // add our processor
                                                                                                             * right after to see
                                                                                                             * each data as
@@ -59,7 +59,7 @@ public class OutputTableProcessorBeamTest {
                                                                                                             * .apply(Data.map(
                                                                                                             * processor.plugin(),
                                                                                                             * Record.class));
-                                                                                                            * 
+                                                                                                            *
                                                                                                             * PAssert.that(outputs
                                                                                                             * ).satisfies((
                                                                                                             * SerializableFunction
@@ -75,7 +75,7 @@ public class OutputTableProcessorBeamTest {
                                                                                                             * toList());
                                                                                                             * // TODO - test the
                                                                                                             * result here
-                                                                                                            * 
+                                                                                                            *
                                                                                                             * return null;
                                                                                                             * });
                                                                                                             * // run the pipeline

@@ -7,24 +7,17 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Base64;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.talend.components.azure.common.AzureConnection;
-import org.talend.components.azure.common.AzureTableConnection;
-import org.talend.components.azure.table.input.InputTableMapperConfiguration;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-import org.talend.sdk.component.api.service.schema.Schema;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.table.CloudTable;
 import com.microsoft.azure.storage.table.CloudTableClient;
-import com.microsoft.azure.storage.table.DynamicTableEntity;
-import com.microsoft.azure.storage.table.EntityProperty;
 import com.microsoft.azure.storage.table.TableQuery;
 
 public class AzureConnectionServiceTest {
@@ -46,7 +39,7 @@ public class AzureConnectionServiceTest {
     @Test
     public void testHealthCheckFailed() throws Exception {
         CloudTableClient mockedTableClient = Mockito.mock(CloudTableClient.class);
-        Mockito.when(mockedTableClient.listTablesSegmented(null, 1, null, null, AzureConnectionUtils.getTalendOperationContext()))
+        Mockito.when(mockedTableClient.listTablesSegmented(null, 1, null, null, AzureTableUtils.getTalendOperationContext()))
                 .thenThrow(RuntimeException.class);
         AzureConnection connection = new AzureConnection();
         CloudStorageAccount mockedStorageAccount = Mockito.mock(CloudStorageAccount.class);
@@ -63,7 +56,7 @@ public class AzureConnectionServiceTest {
     public void testGetTableList() throws Exception {
         CloudTableClient mockedTableClient = Mockito.mock(CloudTableClient.class);
         String expectedTableName = "someTableName";
-        Mockito.when(mockedTableClient.listTables(null, null, AzureConnectionUtils.getTalendOperationContext()))
+        Mockito.when(mockedTableClient.listTables(null, null, AzureTableUtils.getTalendOperationContext()))
                 .thenReturn(Collections.singletonList(expectedTableName));
         AzureConnection connection = new AzureConnection();
         CloudStorageAccount mockedStorageAccount = Mockito.mock(CloudStorageAccount.class);
@@ -83,7 +76,7 @@ public class AzureConnectionServiceTest {
     @Test(expected = RuntimeException.class)
     public void testGetTableListFailed() throws Exception {
         CloudTableClient mockedTableClient = Mockito.mock(CloudTableClient.class);
-        Mockito.when(mockedTableClient.listTables(null, null, AzureConnectionUtils.getTalendOperationContext()))
+        Mockito.when(mockedTableClient.listTables(null, null, AzureTableUtils.getTalendOperationContext()))
                 .thenThrow(new RuntimeException());
         AzureConnection connection = new AzureConnection();
         CloudStorageAccount mockedStorageAccount = Mockito.mock(CloudStorageAccount.class);
@@ -101,7 +94,7 @@ public class AzureConnectionServiceTest {
     public void testGuessSchema() throws Exception {
         /*
          * String testTableName = "someTableName";
-         * InputTableMapperConfiguration testDataSet = new InputTableMapperConfiguration();
+         * InputProperties testDataSet = new InputProperties();
          * testDataSet.setAzureConnection(new AzureTableConnection());
          * testDataSet.getAzureConnection().setTableName(testTableName);
          * AzureConnectionService connectionService = Mockito.mock(AzureConnectionService.class);
@@ -137,7 +130,7 @@ public class AzureConnectionServiceTest {
     public void testGuessSchemaFailing() throws Exception {
         /*
          * String testTableName = "someTableName";
-         * InputTableMapperConfiguration testDataSet = new InputTableMapperConfiguration();
+         * InputProperties testDataSet = new InputProperties();
          * testDataSet.setAzureConnection(new AzureTableConnection());
          * testDataSet.getAzureConnection().setTableName(testTableName);
          * AzureConnectionService connectionService = Mockito.mock(AzureConnectionService.class);
@@ -162,7 +155,7 @@ public class AzureConnectionServiceTest {
         Mockito.when(mockedAccount.createCloudTableClient()).thenReturn(mockedTableClient);
         new AzureConnectionService().executeQuery(mockedAccount, someTableName, mockedQuery);
 
-        Mockito.verify(mockedTable).execute(mockedQuery, null, AzureConnectionUtils.getTalendOperationContext());
+        Mockito.verify(mockedTable).execute(mockedQuery, null, AzureTableUtils.getTalendOperationContext());
     }
 
     @Test

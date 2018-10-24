@@ -5,8 +5,6 @@ import static java.util.Collections.singletonList;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.json.JsonBuilderFactory;
-
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -30,14 +28,14 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 @Documentation("TODO fill the documentation for this mapper")
 public class InputTableMapper implements Serializable {
 
-    private final InputTableMapperConfiguration configuration;
+    private final InputProperties configuration;
 
     private final AzureConnectionService service;
 
     private final RecordBuilderFactory recordBuilderFactory;
 
-    public InputTableMapper(@Option("configuration") final InputTableMapperConfiguration configuration,
-            final AzureConnectionService service, final RecordBuilderFactory recordBuilderFactory) {
+    public InputTableMapper(@Option("configuration") final InputProperties configuration, final AzureConnectionService service,
+            final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;

@@ -1,12 +1,15 @@
 package org.talend.components.azure.table.input;
 
-import com.microsoft.azure.storage.table.EdmType;
-import com.microsoft.azure.storage.table.TableQuery;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
+import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.common.NameMapping;
-import org.talend.components.azure.service.Comparison;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -16,13 +19,10 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.microsoft.azure.storage.table.EdmType;
+import com.microsoft.azure.storage.table.TableQuery;
 
-import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
+import lombok.Data;
 
 @GridLayout(value = { @GridLayout.Row("azureConnection"), @GridLayout.Row("useFilterExpression"),
         @GridLayout.Row("filterExpressions"), @GridLayout.Row("dieOnError") }, names = GridLayout.FormType.MAIN)
@@ -31,7 +31,7 @@ import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
 @Documentation("TODO fill the documentation for this configuration")
 @DataSet("Input")
 @Data
-public class InputTableMapperConfiguration implements Serializable {
+public class InputProperties implements Serializable {
 
     @Option
     @Documentation("bl")
@@ -44,7 +44,6 @@ public class InputTableMapperConfiguration implements Serializable {
     @Option
     @Documentation("table")
     @ActiveIf(target = "useFilterExpression", value = "true")
-    // TODO sort columns
     private List<FilterExpression> filterExpressions;
 
     @Option
@@ -60,7 +59,7 @@ public class InputTableMapperConfiguration implements Serializable {
     @Documentation("SOS")
     private List<String> schema;
 
-    enum Function {
+    public enum Function {
         EQUAL("EQUAL", TableQuery.QueryComparisons.EQUAL),
         NOT_EQUAL("NOT EQUAL", TableQuery.QueryComparisons.NOT_EQUAL),
         GREATER_THAN("GREATER THAN", TableQuery.QueryComparisons.GREATER_THAN),
@@ -72,13 +71,21 @@ public class InputTableMapperConfiguration implements Serializable {
 
         private final String queryComparison;
 
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public String getQueryComparison() {
+            return queryComparison;
+        }
+
         Function(String displayName, String queryComparison) {
             this.displayName = displayName;
             this.queryComparison = queryComparison;
         }
     }
 
-    private enum Predicate {
+    public enum Predicate {
         AND("AND", TableQuery.Operators.AND),
         OR("OR", TableQuery.Operators.OR);
 
@@ -119,7 +126,7 @@ public class InputTableMapperConfiguration implements Serializable {
         }
     }
 
-    enum FieldType {
+    public enum FieldType {
         STRING("STRING", EdmType.STRING),
 
         NUMERIC("NUMERIC", EdmType.INT32),
@@ -191,54 +198,5 @@ public class InputTableMapperConfiguration implements Serializable {
         @Option
         @Documentation("fieldType")
         private FieldType fieldType = FieldType.STRING;
-    }
-
-    // TODO move it to util class
-    public String generateCombinedFilterConditions() {
-        String filter = "";
-        if (isValidFilterExpression()) {
-            for (FilterExpression filterExpression : filterExpressions) {
-                String cfn = filterExpression.function.displayName;
-                String cop = filterExpression.predicate.toString();
-                String typ = filterExpression.fieldType.toString();
-
-                String filterB = TableQuery.generateFilterCondition(filterExpression.column, Comparison.getQueryComparisons(cfn),
-                        filterExpression.value, FieldType.getEdmType(typ));
-
-                if (!filter.isEmpty()) {
-                    filter = TableQuery.combineFilters(filter, Predicate.getOperator(cop), filterB);
-                } else {
-                    filter = filterB;
-                }
-            }
-        }
-        return filter;
-    }
-
-    /**
-     * this method check if the data in the Filter expression is valid and can produce a Query filter.<br/>
-     * the table is valid if :<br>
-     * 1) all column, fieldType, function, operand and predicate lists are not null<br/>
-     * 2) values in the lists column, fieldType, function, operand and predicate are not empty
-     *
-     * <br/>
-     *
-     * @return {@code true } if the two above condition are true
-     *
-     */
-    private boolean isValidFilterExpression() {
-
-        if (filterExpressions == null) {
-            return false;
-        }
-        for (FilterExpression filterExpression : filterExpressions) {
-            if (StringUtils.isEmpty(filterExpression.column) || filterExpression.fieldType == null
-                    || filterExpression.function == null || StringUtils.isEmpty(filterExpression.value)
-                    || filterExpression.predicate == null) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }
