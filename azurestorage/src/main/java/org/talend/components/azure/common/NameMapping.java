@@ -10,8 +10,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@GridLayout(value = { @GridLayout.Row("schemaColumnName"),
-        @GridLayout.Row("entityPropertyName") }, names = GridLayout.FormType.ADVANCED)
+@GridLayout(value = { @GridLayout.Row({ "schemaColumnName", "entityPropertyName" }) }, names = GridLayout.FormType.ADVANCED)
 // @OptionsOrder({ "schemaColumnName", "entityPropertyName" })
 public class NameMapping {
 

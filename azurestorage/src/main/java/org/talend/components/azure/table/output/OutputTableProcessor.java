@@ -38,11 +38,10 @@ import com.microsoft.azure.storage.table.TableServiceException;
 
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
 @Icon(value = Icon.IconType.CUSTOM, custom = "outputTable") // you can use a custom one using @Icon(value=CUSTOM,
-                                                            // custom="filename") and adding icons/filename_icon32.png in
-                                                            // resources
-@Processor(name = "OutputTable")
-@Documentation("Azure Output Table Component")
-public class OutputTableProcessor implements Serializable {
+// custom="filename") and adding icons/filename_icon32.png in
+// resources
+@Processor(name = "OutputTable") @Documentation("Azure Output Table Component") public class OutputTableProcessor
+        implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OutputTableProcessor.class);
 
@@ -134,10 +133,8 @@ public class OutputTableProcessor implements Serializable {
      * {@link StorageErrorCodeStrings.TABLE_BEING_DELETED } exception code
      *
      * @param cloudTable
-     *
      * @throws StorageException
      * @throws IOException
-     *
      */
     private void createTableAfterDeletion(CloudTable cloudTable) throws StorageException, IOException {
         try {
@@ -221,19 +218,12 @@ public class OutputTableProcessor implements Serializable {
                 continue; // record value may be null, No need to set the property in azure in this case
             }
 
+            if (f.getType() == Schema.Type.RECORD) {
+                continue; //NOOP needed for nested Records for now
+            }
             String sName = f.getName(); // schema name
             String mName = getMappedNameIfNecessary(sName); // mapped name
 
-            if (f.getType() == Schema.Type.RECORD) {
-                /*
-                 * for (Schema.Entry s : f.getElementSchema().getEntries()) {
-                 * if (s.getType() != Schema.Type.) {
-                 * fSchema = s;
-                 * break;
-                 * }
-                 * }
-                 */
-            } // WTF?
 
             if (sName.equals(configuration.getPartitionName())) {
                 entity.setPartitionKey(incomingRecord.getString(sName));
