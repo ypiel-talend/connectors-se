@@ -40,8 +40,9 @@ import com.microsoft.azure.storage.table.TableServiceException;
 @Icon(value = Icon.IconType.CUSTOM, custom = "outputTable") // you can use a custom one using @Icon(value=CUSTOM,
 // custom="filename") and adding icons/filename_icon32.png in
 // resources
-@Processor(name = "OutputTable") @Documentation("Azure Output Table Component") public class OutputTableProcessor
-        implements Serializable {
+@Processor(name = "OutputTable")
+@Documentation("Azure Output Table Component")
+public class OutputTableProcessor implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OutputTableProcessor.class);
 
@@ -219,11 +220,10 @@ import com.microsoft.azure.storage.table.TableServiceException;
             }
 
             if (f.getType() == Schema.Type.RECORD) {
-                continue; //NOOP needed for nested Records for now
+                continue; // NOOP needed for nested Records for now
             }
             String sName = f.getName(); // schema name
             String mName = getMappedNameIfNecessary(sName); // mapped name
-
 
             if (sName.equals(configuration.getPartitionName())) {
                 entity.setPartitionKey(incomingRecord.getString(sName));

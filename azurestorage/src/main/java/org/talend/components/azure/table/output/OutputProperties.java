@@ -24,7 +24,6 @@ import lombok.Data;
 
 @GridLayout(value = { @GridLayout.Row("nameMappings"), @GridLayout.Row("schema") }, names = GridLayout.FormType.ADVANCED)
 @Documentation("TODO fill the documentation for this configuration")
-@DataSet("Output")
 @Data
 public class OutputProperties implements Serializable {
 

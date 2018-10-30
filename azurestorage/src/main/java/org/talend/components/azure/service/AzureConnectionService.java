@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.talend.components.azure.common.AzureConnection;
+import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.common.Protocol;
 import org.talend.components.azure.table.input.InputProperties;
 import org.talend.sdk.component.api.configuration.Option;
@@ -32,6 +33,9 @@ import com.microsoft.azure.storage.table.TableQuery;
 
 @Service
 public class AzureConnectionService {
+
+    @Service
+    private RecordBuilderFactory factory;
 
     // you can put logic here you can reuse in components
     @HealthCheck("testConnection")
@@ -68,18 +72,20 @@ public class AzureConnectionService {
     }
 
     @DiscoverSchema("guessSchema")
-    public Schema guessSchema(@Option final InputProperties configuration, final RecordBuilderFactory factory) {
+    public Schema guessSchema(@Option final AzureTableConnection configuration) {
         final Schema.Entry.Builder entryBuilder = factory.newEntryBuilder();
         final Schema.Builder schemaBuilder = factory.newSchemaBuilder(Schema.Type.RECORD);
         // add 3 default columns
         schemaBuilder.withEntry(entryBuilder.withName("PartitionKey").withType(Schema.Type.STRING).build())
                 .withEntry(entryBuilder.withName("RowKey").withType(Schema.Type.STRING).build())
                 .withEntry(entryBuilder.withName("Timestamp").withType(Schema.Type.DATETIME).build());
-        String tableName = configuration.getAzureConnection().getTableName();
+        String tableName = configuration.getTableName();
         try {
-            AzureConnection connection = configuration.getAzureConnection().getConnection();
+            AzureConnection connection = configuration.getConnection();
             TableQuery<DynamicTableEntity> partitionQuery = TableQuery.from(DynamicTableEntity.class).take(1);
-            Iterable<DynamicTableEntity> entities = executeQuery(createStorageAccount(connection), tableName, partitionQuery);
+            CloudStorageAccount account = createStorageAccount(connection);
+            System.out.println(account);
+            Iterable<DynamicTableEntity> entities = executeQuery(account, tableName, partitionQuery);
             if (entities.iterator().hasNext()) {
                 DynamicTableEntity result = entities.iterator().next();
                 for (Map.Entry<String, EntityProperty> f : result.getProperties().entrySet()) {
