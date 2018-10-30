@@ -1,6 +1,7 @@
 package org.talend.components.azure.service;
 
 import com.microsoft.azure.storage.OperationContext;
+import com.microsoft.azure.storage.table.EdmType;
 import com.microsoft.azure.storage.table.TableQuery;
 
 import lombok.Data;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.table.input.InputProperties;
+import org.talend.sdk.component.api.record.Schema;
 
 @Data
 public class AzureTableUtils {
@@ -79,5 +81,27 @@ public class AzureTableUtils {
         }
 
         return true;
+    }
+
+    public static Schema.Type getAppropriateType(EdmType edmType) {
+        switch (edmType) {
+        case BOOLEAN:
+            return Schema.Type.BOOLEAN;
+        case BYTE:
+        case SBYTE:
+        case INT16:
+        case INT32:
+            return Schema.Type.INT;
+        case INT64:
+        case DECIMAL:
+        case SINGLE:
+        case DOUBLE:
+            return Schema.Type.DOUBLE;
+        case DATE_TIME:
+        case DATE_TIME_OFFSET:
+            return Schema.Type.DATETIME;
+        default:
+            return Schema.Type.STRING;
+        }
     }
 }

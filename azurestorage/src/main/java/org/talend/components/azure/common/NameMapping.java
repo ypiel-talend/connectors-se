@@ -1,9 +1,8 @@
 package org.talend.components.azure.common;
 
-import org.talend.components.azure.service.UIServices;
+import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
-import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -16,7 +15,7 @@ public class NameMapping {
 
     @Option
     @Documentation("Schema column to map")
-    @Suggestable(UIServices.COLUMN_NAMES)
+    @Suggestable(AzureComponentServices.COLUMN_NAMES)
     private String schemaColumnName;
 
     @Option

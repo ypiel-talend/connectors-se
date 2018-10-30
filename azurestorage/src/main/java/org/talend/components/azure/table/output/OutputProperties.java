@@ -3,17 +3,15 @@ package org.talend.components.azure.table.output;
 import java.io.Serializable;
 import java.util.List;
 
-import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.common.NameMapping;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
-import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
+import static org.talend.components.azure.service.AzureComponentServices.COLUMN_NAMES;
 
 import lombok.Data;
 

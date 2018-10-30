@@ -1,6 +1,6 @@
 package org.talend.components.azure.table.input;
 
-import static org.talend.components.azure.service.UIServices.COLUMN_NAMES;
+import static org.talend.components.azure.service.AzureComponentServices.COLUMN_NAMES;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,7 +13,6 @@ import org.talend.components.azure.common.NameMapping;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
