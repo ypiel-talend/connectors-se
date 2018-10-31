@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.microsoft.azure.storage.OperationContext;
 
-public class AzureConnectionUtilsTest {
+public class AzureTableUtilsTest {
 
     @Test
     public void testOpContextCreatedForFirstTime() {

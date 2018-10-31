@@ -1,4 +1,4 @@
-package org.talend.components.azure.service;
+package org.talend.components.azure.common;
 
 import com.microsoft.azure.storage.table.TableQuery;
 

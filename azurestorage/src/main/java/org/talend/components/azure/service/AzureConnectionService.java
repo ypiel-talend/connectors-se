@@ -17,6 +17,7 @@ import com.microsoft.azure.storage.table.TableQuery;
 
 @Service
 public class AzureConnectionService {
+
     public Iterable<DynamicTableEntity> executeQuery(CloudStorageAccount storageAccount, String tableName,
             TableQuery<DynamicTableEntity> partitionQuery) throws URISyntaxException, StorageException {
 

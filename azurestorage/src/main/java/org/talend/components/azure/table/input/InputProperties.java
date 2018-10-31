@@ -24,9 +24,10 @@ import com.microsoft.azure.storage.table.TableQuery;
 import lombok.Data;
 
 @GridLayout(value = { @GridLayout.Row("azureConnection"), @GridLayout.Row("useFilterExpression"),
-        @GridLayout.Row("filterExpressions"), @GridLayout.Row("dieOnError") }, names = GridLayout.FormType.MAIN)
+        @GridLayout.Row("filterExpressions"), @GridLayout.Row("dieOnError"),
+        @GridLayout.Row("schema") }, names = GridLayout.FormType.MAIN)
 
-@GridLayout(value = { @GridLayout.Row("nameMappings"), @GridLayout.Row("schema") }, names = GridLayout.FormType.ADVANCED)
+@GridLayout(value = { @GridLayout.Row("nameMappings") }, names = GridLayout.FormType.ADVANCED)
 @Documentation("TODO fill the documentation for this configuration")
 @Data
 public class InputProperties implements Serializable {

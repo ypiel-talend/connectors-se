@@ -18,9 +18,14 @@ import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
+import com.microsoft.azure.storage.RetryLinearRetry;
+import com.microsoft.azure.storage.RetryNoRetry;
+import com.microsoft.azure.storage.RetryPolicy;
+import com.microsoft.azure.storage.table.CloudTableClient;
 import com.microsoft.azure.storage.table.DynamicTableEntity;
 import com.microsoft.azure.storage.table.EntityProperty;
 import com.microsoft.azure.storage.table.TableQuery;
+import com.microsoft.azure.storage.table.TableRequestOptions;
 
 @Service
 public class AzureComponentServices {
@@ -31,17 +36,20 @@ public class AzureComponentServices {
     RecordBuilderFactory factory;
 
     @Service
-    AzureConnectionService connectionService;
+    AzureConnectionService connectionService = new AzureConnectionService();
 
     @HealthCheck("testConnection")
     public HealthCheckStatus testConnection(@Option AzureConnection azureConnection) {
         try {
             CloudStorageAccount cloudStorageAccount = connectionService.createStorageAccount(azureConnection);
+            TableRequestOptions options = new TableRequestOptions();
+            options.setRetryPolicyFactory(new RetryNoRetry());
             final int MAX_TABLES = 1;
             final OperationContext operationContext = AzureTableUtils.getTalendOperationContext();
-            // will throw an exception if not authorized
-            // FIXME too long if account not exists
-            cloudStorageAccount.createCloudTableClient().listTablesSegmented(null, MAX_TABLES, null, null, operationContext);
+            CloudTableClient tableClient = cloudStorageAccount.createCloudTableClient();
+            tableClient.setDefaultRequestOptions(options);
+            // will throw an exception if not authorized or account not exist
+            tableClient.listTablesSegmented(null, MAX_TABLES, null, null, operationContext);
         } catch (Exception e) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         }
@@ -93,7 +101,7 @@ public class AzureComponentServices {
                 DynamicTableEntity result = entities.iterator().next();
                 for (Map.Entry<String, EntityProperty> f : result.getProperties().entrySet()) {
                     schemaBuilder.withEntry(entryBuilder.withName(f.getKey())
-                             .withType(AzureTableUtils.getAppropriateType(f.getValue().getEdmType())).withNullable(true).build());
+                            .withType(AzureTableUtils.getAppropriateType(f.getValue().getEdmType())).withNullable(true).build());
                 }
             }
 

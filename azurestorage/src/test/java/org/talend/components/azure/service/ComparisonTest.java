@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.talend.components.azure.common.Comparison;
 
 public class ComparisonTest {
 

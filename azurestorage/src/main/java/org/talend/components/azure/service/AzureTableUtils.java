@@ -9,12 +9,14 @@ import lombok.Data;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.talend.components.azure.common.Comparison;
 import org.talend.components.azure.table.input.InputProperties;
 import org.talend.sdk.component.api.record.Schema;
 
 @Data
 public class AzureTableUtils {
 
+    // TODO OPContext move to connection service
     private static OperationContext talendOperationContext;
 
     private static final String USER_AGENT_KEY = "User-Agent";
@@ -93,6 +95,7 @@ public class AzureTableUtils {
         case INT32:
             return Schema.Type.INT;
         case INT64:
+            return Schema.Type.LONG;
         case DECIMAL:
         case SINGLE:
         case DOUBLE:
