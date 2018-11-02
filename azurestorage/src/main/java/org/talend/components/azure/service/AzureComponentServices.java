@@ -18,19 +18,23 @@ import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
-import com.microsoft.azure.storage.RetryLinearRetry;
 import com.microsoft.azure.storage.RetryNoRetry;
-import com.microsoft.azure.storage.RetryPolicy;
 import com.microsoft.azure.storage.table.CloudTableClient;
 import com.microsoft.azure.storage.table.DynamicTableEntity;
+import com.microsoft.azure.storage.table.EdmType;
 import com.microsoft.azure.storage.table.EntityProperty;
 import com.microsoft.azure.storage.table.TableQuery;
 import com.microsoft.azure.storage.table.TableRequestOptions;
 
 @Service
+/**
+ * UI services for connection: Test connection, Tables list, guess schema
+ */
 public class AzureComponentServices {
 
     public static final String COLUMN_NAMES = "COLUMN_NAMES";
+
+    public static final String TEST_CONNECTION = "testConnection";
 
     @Service
     RecordBuilderFactory factory;
@@ -41,14 +45,14 @@ public class AzureComponentServices {
     @Service
     AzureConnectionService connectionService = new AzureConnectionService();
 
-    @HealthCheck("testConnection")
+    @HealthCheck(TEST_CONNECTION)
     public HealthCheckStatus testConnection(@Option AzureConnection azureConnection) {
         try {
             CloudStorageAccount cloudStorageAccount = connectionService.createStorageAccount(azureConnection);
             TableRequestOptions options = new TableRequestOptions();
             options.setRetryPolicyFactory(new RetryNoRetry());
             final int MAX_TABLES = 1;
-            final OperationContext operationContext = AzureTableUtils.getTalendOperationContext();
+            final OperationContext operationContext = AzureConnectionService.getTalendOperationContext();
             CloudTableClient tableClient = cloudStorageAccount.createCloudTableClient();
             tableClient.setDefaultRequestOptions(options);
             // will throw an exception if not authorized or account not exist
@@ -64,7 +68,7 @@ public class AzureComponentServices {
         List<SuggestionValues.Item> tableNames = new ArrayList<>();
         try {
             CloudStorageAccount storageAccount = connectionService.createStorageAccount(azureConnection);
-            final OperationContext operationContext = AzureTableUtils.getTalendOperationContext();
+            final OperationContext operationContext = AzureConnectionService.getTalendOperationContext();
             for (String tableName : storageAccount.createCloudTableClient().listTables(null, null, operationContext)) {
                 tableNames.add(new SuggestionValues.Item(tableName, tableName));
             }
@@ -103,7 +107,7 @@ public class AzureComponentServices {
                 DynamicTableEntity result = entities.iterator().next();
                 for (Map.Entry<String, EntityProperty> f : result.getProperties().entrySet()) {
                     schemaBuilder.withEntry(entryBuilder.withName(f.getKey())
-                            .withType(AzureTableUtils.getAppropriateType(f.getValue().getEdmType())).withNullable(true).build());
+                            .withType(getAppropriateType(f.getValue().getEdmType())).withNullable(true).build());
                 }
             }
 
@@ -111,5 +115,28 @@ public class AzureComponentServices {
             throw new RuntimeException(i18nService.errorRetrieveSchema(), e);
         }
         return schemaBuilder.build();
+    }
+
+    private Schema.Type getAppropriateType(EdmType edmType) {
+        switch (edmType) {
+        case BOOLEAN:
+            return Schema.Type.BOOLEAN;
+        case BYTE:
+        case SBYTE:
+        case INT16:
+        case INT32:
+            return Schema.Type.INT;
+        case INT64:
+            return Schema.Type.LONG;
+        case DECIMAL:
+        case SINGLE:
+        case DOUBLE:
+            return Schema.Type.DOUBLE;
+        case DATE_TIME:
+        case DATE_TIME_OFFSET:
+            return Schema.Type.DATETIME;
+        default:
+            return Schema.Type.STRING;
+        }
     }
 }

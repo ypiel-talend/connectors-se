@@ -16,25 +16,7 @@ import org.talend.sdk.component.api.record.Schema;
 @Data
 public class AzureTableUtils {
 
-    // TODO OPContext move to connection service
-    private static OperationContext talendOperationContext;
-
-    private static final String USER_AGENT_KEY = "User-Agent";
-
-    private static final String USER_AGENT_VALUE = "APN/1.0 Talend/7.1 TaCoKit/1.0.3";
-
     public static final String TABLE_TIMESTAMP = "Timestamp";
-
-    public static OperationContext getTalendOperationContext() {
-        if (talendOperationContext == null) {
-            talendOperationContext = new OperationContext();
-            HashMap<String, String> talendUserHeaders = new HashMap<>();
-            talendUserHeaders.put(USER_AGENT_KEY, USER_AGENT_VALUE);
-            talendOperationContext.setUserHeaders(talendUserHeaders);
-        }
-
-        return talendOperationContext;
-    }
 
     public static String generateCombinedFilterConditions(InputProperties options) {
         String filter = "";
@@ -83,28 +65,5 @@ public class AzureTableUtils {
         }
 
         return true;
-    }
-
-    public static Schema.Type getAppropriateType(EdmType edmType) {
-        switch (edmType) {
-        case BOOLEAN:
-            return Schema.Type.BOOLEAN;
-        case BYTE:
-        case SBYTE:
-        case INT16:
-        case INT32:
-            return Schema.Type.INT;
-        case INT64:
-            return Schema.Type.LONG;
-        case DECIMAL:
-        case SINGLE:
-        case DOUBLE:
-            return Schema.Type.DOUBLE;
-        case DATE_TIME:
-        case DATE_TIME_OFFSET:
-            return Schema.Type.DATETIME;
-        default:
-            return Schema.Type.STRING;
-        }
     }
 }

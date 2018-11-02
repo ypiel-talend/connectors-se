@@ -47,9 +47,6 @@ public class OutputTableProcessor implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OutputTableProcessor.class);
 
-    @Service
-    private MessageService i18nService;
-
     private final OutputProperties configuration;
 
     private final AzureConnectionService service;
@@ -66,6 +63,9 @@ public class OutputTableProcessor implements Serializable {
 
     private static final int MAX_RECORDS_TO_ENQUEUE = 250;
 
+    // @Service
+    // private MessageService i18nService;
+
     @Service
     private AzureConnectionService connectionService;
 
@@ -79,9 +79,10 @@ public class OutputTableProcessor implements Serializable {
     public void init() throws Exception {
         try {
             connection = service.createStorageAccount(configuration.getAzureConnection().getConnection());
-            LOGGER.debug(i18nService.connected());
+            // LOGGER.debug(i18nService.connected());
+            // FIXME: i18n service not injected
         } catch (URISyntaxException e) {
-            throw new RuntimeException(i18nService.connectionError(), e);
+            throw new RuntimeException("Can't connect", e);
         }
 
         handleActionOnTable();
@@ -94,7 +95,7 @@ public class OutputTableProcessor implements Serializable {
         }
         if (configuration.isProcessInBatch()) {
             DynamicTableEntity entity = createDynamicEntityFromInputRecord(incomingRecord);
-            addOperationToBatch(entity, incomingRecord);
+            addOperationToBatch(entity);
         } else {
             recordToEnqueue.add(incomingRecord);
             if (recordToEnqueue.size() >= MAX_RECORDS_TO_ENQUEUE) {
@@ -159,7 +160,7 @@ public class OutputTableProcessor implements Serializable {
 
         CloudTable cloudTable = connection.createCloudTableClient()
                 .getTableReference(configuration.getAzureConnection().getTableName());
-        return cloudTable.execute(batchOpe, null, AzureTableUtils.getTalendOperationContext());
+        return cloudTable.execute(batchOpe, null, AzureConnectionService.getTalendOperationContext());
     }
 
     private void processBatch() {
@@ -242,7 +243,7 @@ public class OutputTableProcessor implements Serializable {
         return sName;
     }
 
-    private void addOperationToBatch(DynamicTableEntity entity, Record record) {
+    private void addOperationToBatch(DynamicTableEntity entity) {
         if (latestPartitionKey == null || latestPartitionKey.isEmpty()) {
             latestPartitionKey = entity.getPartitionKey();
         }
@@ -261,7 +262,7 @@ public class OutputTableProcessor implements Serializable {
 
         CloudTable cloudTable = connection.createCloudTableClient()
                 .getTableReference(configuration.getAzureConnection().getTableName());
-        return cloudTable.execute(ope, null, AzureTableUtils.getTalendOperationContext());
+        return cloudTable.execute(ope, null, AzureConnectionService.getTalendOperationContext());
     }
 
     private TableOperation getTableOperation(DynamicTableEntity entity) {
@@ -279,7 +280,7 @@ public class OutputTableProcessor implements Serializable {
         case DELETE:
             return TableOperation.delete(entity);
         default:
-            LOGGER.error("No specified operation for table");
+            LOGGER.warn("No specified operation for table");
             return null;
         }
     }

@@ -10,7 +10,7 @@ public class AzureTableUtilsTest {
 
     @Test
     public void testOpContextCreatedForFirstTime() {
-        OperationContext context = AzureTableUtils.getTalendOperationContext();
+        OperationContext context = AzureConnectionService.getTalendOperationContext();
 
         assertNotNull(context);
         assertFalse(context.getUserHeaders().isEmpty());
@@ -19,8 +19,8 @@ public class AzureTableUtilsTest {
 
     @Test
     public void testOpContextIsSingleTone() {
-        OperationContext contextFirst = AzureTableUtils.getTalendOperationContext();
+        OperationContext contextFirst = AzureConnectionService.getTalendOperationContext();
 
-        assertEquals(contextFirst, AzureTableUtils.getTalendOperationContext());
+        assertEquals(contextFirst, AzureConnectionService.getTalendOperationContext());
     }
 }

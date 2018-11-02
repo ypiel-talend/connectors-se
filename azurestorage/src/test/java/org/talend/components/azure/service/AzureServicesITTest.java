@@ -18,7 +18,7 @@ import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
 
 @WithComponents("org.talend.components.azure")
-public class AzureServicesTestIT {
+public class AzureServicesITTest {
 
     @Service
     private AzureComponentServices componentServices;

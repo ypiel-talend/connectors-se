@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.service.AzureConnectionService;
-import org.talend.components.azure.service.AzureTableUtils;
+import org.talend.components.azure.service.MessageService;
 import org.talend.components.azure.table.input.InputProperties;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
@@ -35,7 +36,7 @@ import com.microsoft.azure.storage.table.CloudTable;
 
 @SuppressWarnings("ConstantConditions")
 @WithComponents("org.talend.components.azure")
-public class AzureOutputTestIT {
+public class AzureOutputITTest {
 
     private String tableName;
 
@@ -80,7 +81,7 @@ public class AzureOutputTestIT {
         long longValue = Long.MAX_VALUE;
         int intValue = Integer.MIN_VALUE;
         double doubleValue = 0.01;
-        ZonedDateTime dateValue = Instant.now().atZone(ZoneId.systemDefault());
+        Instant dateValue = Instant.now();
         List<String> schema = new ArrayList<>();
         schema.add("PartitionKey");
         schema.add("RowKey");
@@ -93,7 +94,8 @@ public class AzureOutputTestIT {
         Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder()
                 .withString("PartitionKey", "testKey").withString("RowKey", "SomeKey").withBoolean("booleanValue", booleanValue)
                 .withLong("longValue", longValue).withInt("intValue", intValue).withDouble("doubleValue", doubleValue)
-                .withDateTime("dateValue", dateValue).build();
+                .withDateTime("dateValue", Date.from(dateValue)).build();
+        COMPONENT.findService(MessageService.class);
 
         COMPONENT.setInputData(Collections.singletonList(testRecord));
 
@@ -116,12 +118,12 @@ public class AzureOutputTestIT {
         Assertions.assertEquals(longValue, insertedRecord.getLong("longValue"));
         Assertions.assertEquals(intValue, insertedRecord.getInt("intValue"));
         Assertions.assertEquals(doubleValue, insertedRecord.getDouble("doubleValue"));
-        Assertions.assertEquals(dateValue, insertedRecord.getDateTime("dateValue"));
+        Assertions.assertEquals(dateValue, insertedRecord.getDateTime("dateValue").toInstant());
     }
 
     @AfterEach
     public void dropTestTable() throws Exception {
         CloudTable cloudTable = storageAccount.createCloudTableClient().getTableReference(tableName);
-        cloudTable.delete(null, AzureTableUtils.getTalendOperationContext());
+        cloudTable.delete(null, AzureConnectionService.getTalendOperationContext());
     }
 }

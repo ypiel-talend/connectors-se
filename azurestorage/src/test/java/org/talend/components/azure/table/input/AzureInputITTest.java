@@ -7,13 +7,12 @@ import java.util.stream.Collectors;
 
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.service.AzureComponentServices;
-import org.talend.components.azure.service.AzureConnectionService;
+import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
@@ -24,10 +23,13 @@ import org.talend.sdk.component.maven.Server;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 @WithComponents("org.talend.components.azure")
-public class AzureInputTestIT {
+public class AzureInputITTest {
 
     @Service
     private AzureComponentServices componentService;
+
+    @Service
+    private MessageService i18nService;
 
     @ClassRule
     public static final SimpleComponentRule COMPONENT = new SimpleComponentRule("org.talend.components.azure");

@@ -27,7 +27,7 @@ public class AzureConnectionServiceTest {
         Mockito.when(mockedAccount.createCloudTableClient()).thenReturn(mockedTableClient);
         new AzureConnectionService().executeQuery(mockedAccount, someTableName, mockedQuery);
 
-        Mockito.verify(mockedTable).execute(mockedQuery, null, AzureTableUtils.getTalendOperationContext());
+        Mockito.verify(mockedTable).execute(mockedQuery, null, AzureConnectionService.getTalendOperationContext());
     }
 
     @Test

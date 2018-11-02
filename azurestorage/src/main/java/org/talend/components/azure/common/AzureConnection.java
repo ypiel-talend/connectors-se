@@ -1,11 +1,12 @@
 package org.talend.components.azure.common;
 
+import static org.talend.components.azure.service.AzureComponentServices.TEST_CONNECTION;
+
 import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataStore;
-import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -14,7 +15,7 @@ import org.talend.sdk.component.api.meta.Documentation;
         @GridLayout.Row({ "useAzureSharedSignature" }), @GridLayout.Row({ "azureSharedAccessSignature" }) })
 @Data
 @DataStore
-@Checkable("testConnection")
+@Checkable(TEST_CONNECTION)
 public class AzureConnection {
 
     @Option("accountName")
@@ -34,14 +35,13 @@ public class AzureConnection {
     @Option
     @Documentation("The protocol for connection to be created.")
     @ActiveIf(target = "useAzureSharedSignature", value = "false")
-    @DefaultValue("HTTPS")
     private Protocol protocol = Protocol.HTTPS;
 
     @Option
     @Documentation("Use a shared access signature (SAS) to access the storage resources without need for the account key. "
             + "For more information, see Using Shared Access Signatures (SAS): "
             + "https://docs.microsoft.com/en-us/azure/storage/storage-dotnet-shared-access-signature-part-1")
-    private boolean useAzureSharedSignature = false;
+    private boolean useAzureSharedSignature;
 
     @Option
     @Documentation("Enter your account SAS URL between double quotation marks.\n"

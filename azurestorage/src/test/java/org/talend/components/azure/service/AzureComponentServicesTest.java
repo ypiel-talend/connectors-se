@@ -86,7 +86,8 @@ public class AzureComponentServicesTest {
     @Test
     public void testHealthCheckFailed() throws Exception {
         CloudTableClient mockedTableClient = Mockito.mock(CloudTableClient.class);
-        Mockito.when(mockedTableClient.listTablesSegmented(null, 1, null, null, AzureTableUtils.getTalendOperationContext()))
+        Mockito.when(
+                mockedTableClient.listTablesSegmented(null, 1, null, null, AzureConnectionService.getTalendOperationContext()))
                 .thenThrow(RuntimeException.class);
         AzureConnection connection = new AzureConnection();
         CloudStorageAccount mockedStorageAccount = Mockito.mock(CloudStorageAccount.class);
@@ -104,7 +105,7 @@ public class AzureComponentServicesTest {
     public void testGetTableList() throws Exception {
         CloudTableClient mockedTableClient = Mockito.mock(CloudTableClient.class);
         String expectedTableName = "someTableName";
-        Mockito.when(mockedTableClient.listTables(null, null, AzureTableUtils.getTalendOperationContext()))
+        Mockito.when(mockedTableClient.listTables(null, null, AzureConnectionService.getTalendOperationContext()))
                 .thenReturn(Collections.singletonList(expectedTableName));
         AzureConnection connection = new AzureConnection();
         CloudStorageAccount mockedStorageAccount = Mockito.mock(CloudStorageAccount.class);
@@ -125,7 +126,7 @@ public class AzureComponentServicesTest {
     @Test
     public void testGetTableListFailed() throws Exception {
         CloudTableClient mockedTableClient = Mockito.mock(CloudTableClient.class);
-        Mockito.when(mockedTableClient.listTables(null, null, AzureTableUtils.getTalendOperationContext()))
+        Mockito.when(mockedTableClient.listTables(null, null, AzureConnectionService.getTalendOperationContext()))
                 .thenThrow(new RuntimeException());
         AzureConnection connection = new AzureConnection();
         CloudStorageAccount mockedStorageAccount = Mockito.mock(CloudStorageAccount.class);

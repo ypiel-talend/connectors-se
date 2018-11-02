@@ -2,6 +2,7 @@ package org.talend.components.azure.service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.talend.components.azure.common.Protocol;
 import org.talend.sdk.component.api.service.Service;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.OperationContext;
 import com.microsoft.azure.storage.StorageCredentials;
 import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
 import com.microsoft.azure.storage.StorageCredentialsSharedAccessSignature;
@@ -25,11 +27,29 @@ public class AzureConnectionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureConnectionService.class);
 
+    private static final String USER_AGENT_KEY = "User-Agent";
+
+    // TODO dehardcode it
+    private static final String USER_AGENT_VALUE = "APN/1.0 Talend/7.1 TaCoKit/1.0.3";
+
+    private static OperationContext talendOperationContext;
+
+    public static OperationContext getTalendOperationContext() {
+        if (talendOperationContext == null) {
+            talendOperationContext = new OperationContext();
+            HashMap<String, String> talendUserHeaders = new HashMap<>();
+            talendUserHeaders.put(USER_AGENT_KEY, USER_AGENT_VALUE);
+            talendOperationContext.setUserHeaders(talendUserHeaders);
+        }
+
+        return talendOperationContext;
+    }
+
     public Iterable<DynamicTableEntity> executeQuery(CloudStorageAccount storageAccount, String tableName,
             TableQuery<DynamicTableEntity> partitionQuery) throws URISyntaxException, StorageException {
         LOGGER.debug("Executing query for table {} with filter: {}", tableName, partitionQuery.getFilterString());
         CloudTable cloudTable = createTableClient(storageAccount, tableName);
-        return cloudTable.execute(partitionQuery, null, AzureTableUtils.getTalendOperationContext());
+        return cloudTable.execute(partitionQuery, null, getTalendOperationContext());
     }
 
     public CloudStorageAccount createStorageAccount(AzureConnection azureConnection) throws URISyntaxException {
@@ -44,19 +64,19 @@ public class AzureConnectionService {
 
     public void createTable(CloudStorageAccount connection, String tableName) throws StorageException, URISyntaxException {
         CloudTable cloudTable = createTableClient(connection, tableName);
-        cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
+        cloudTable.create(null, getTalendOperationContext());
     }
 
     public void createTableIfNotExists(CloudStorageAccount connection, String tableName)
             throws StorageException, URISyntaxException {
         CloudTable cloudTable = createTableClient(connection, tableName);
-        cloudTable.createIfNotExists(null, AzureTableUtils.getTalendOperationContext());
+        cloudTable.createIfNotExists(null, getTalendOperationContext());
     }
 
     public void deleteTableAndCreate(CloudStorageAccount connection, String tableName)
             throws URISyntaxException, StorageException, IOException {
         CloudTable cloudTable = createTableClient(connection, tableName);
-        cloudTable.delete(null, AzureTableUtils.getTalendOperationContext());
+        cloudTable.delete(null, getTalendOperationContext());
         createTableAfterDeletion(cloudTable);
     }
 
@@ -73,7 +93,7 @@ public class AzureConnectionService {
      */
     private void createTableAfterDeletion(CloudTable cloudTable) throws StorageException, IOException {
         try {
-            cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
+            cloudTable.create(null, getTalendOperationContext());
         } catch (TableServiceException e) {
             if (!e.getErrorCode().equals(StorageErrorCodeStrings.TABLE_BEING_DELETED)) {
                 throw e;
@@ -86,7 +106,7 @@ public class AzureConnectionService {
             } catch (InterruptedException eint) {
                 throw new IOException("Wait process for recreating table interrupted.");
             }
-            cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
+            cloudTable.create(null, getTalendOperationContext());
             LOGGER.debug("Table {} created.", cloudTable.getName());
         }
     }
@@ -94,7 +114,7 @@ public class AzureConnectionService {
     public void deleteTableIfExists(CloudStorageAccount connection, String tableName)
             throws URISyntaxException, StorageException, IOException {
         CloudTable cloudTable = createTableClient(connection, tableName);
-        cloudTable.deleteIfExists(null, AzureTableUtils.getTalendOperationContext());
+        cloudTable.deleteIfExists(null, getTalendOperationContext());
         createTableAfterDeletion(cloudTable);
     }
 
