@@ -36,6 +36,9 @@ public class AzureComponentServices {
     RecordBuilderFactory factory;
 
     @Service
+    MessageService i18nService;
+
+    @Service
     AzureConnectionService connectionService = new AzureConnectionService();
 
     @HealthCheck("testConnection")
@@ -53,8 +56,7 @@ public class AzureComponentServices {
         } catch (Exception e) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         }
-        // TODO i18n
-        return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connected");
+        return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18nService.connected());
     }
 
     @Suggestions("getTableNames")
@@ -68,7 +70,7 @@ public class AzureComponentServices {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Can't get tableNames", e);
+            throw new RuntimeException(i18nService.errorRetrieveTables(), e);
         }
 
         return new SuggestionValues(true, tableNames);
@@ -106,7 +108,7 @@ public class AzureComponentServices {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Can't get schema", e);
+            throw new RuntimeException(i18nService.errorRetrieveSchema(), e);
         }
         return schemaBuilder.build();
     }

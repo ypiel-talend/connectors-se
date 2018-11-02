@@ -22,48 +22,50 @@ import lombok.Data;
 }, names = GridLayout.FormType.MAIN)
 
 @GridLayout(value = { @GridLayout.Row("nameMappings") }, names = GridLayout.FormType.ADVANCED)
-@Documentation("TODO fill the documentation for this configuration")
+@Documentation("These properties are used to configure AzureStorageTableOutput")
 @Data
 public class OutputProperties implements Serializable {
 
     @Option
-    @Documentation("")
+    @Documentation("Azure Table Connection")
     private AzureTableConnection azureConnection;
 
-    // TODO make selection list from table columns
+    // FIXME not working in studio
     @Option
     @Suggestable(value = COLUMN_NAMES, parameters = "schema")
-    @Documentation("")
+    @Documentation("Schema column that holds the partition key value")
     private String partitionName;
 
     @Option
-    @Documentation("")
+    @Documentation("Schema column that holds the row key value ")
     @Suggestable(value = COLUMN_NAMES, parameters = "schema")
     private String rowKey;
 
     @Option
-    @Documentation("")
+    @Documentation("An action to be performed on data of the table defined")
     private ActionOnData actionOnData = ActionOnData.INSERT;
 
     @Option
-    @Documentation("")
+    @Documentation("An operation to be performed on the table defined")
     private ActionOnTable actionOnTable = ActionOnTable.DEFAULT;
 
     @Option
-    @Documentation("")
+    @Documentation("Process the input entities in batch.\n"
+            + "Note that the entities to be processed in batch should belong to the same partition group, "
+            + "which means, they should have the same partition key value.")
     private boolean processInBatch;
 
     @Option
-    @Documentation("")
+    @Documentation("Stop the execution of the Job when an error occurs")
     private boolean dieOnError = true;
 
     @Option
-    @Documentation("")
+    @Documentation("Mapping the column name of the component schema with the property name of the Azure table entity if they are different.")
     private List<NameMapping> nameMappings;
 
     @Option
     @Structure
-    @Documentation("Schema")
+    @Documentation("A schema is a row description. It defines the number of fields (columns) to be processed and passed on to the next component.")
     private List<String> schema;
 
     enum ActionOnData {

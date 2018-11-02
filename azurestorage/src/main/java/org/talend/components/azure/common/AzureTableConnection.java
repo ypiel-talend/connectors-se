@@ -11,11 +11,11 @@ import org.talend.sdk.component.api.meta.Documentation;
 public class AzureTableConnection {
 
     @Option
-    @Documentation("Connection")
+    @Documentation("Azure Connection")
     private AzureConnection connection;
 
     @Option
-    @Documentation("Table Name")
+    @Documentation("The name of the table to access")
     @Suggestable(value = "getTableNames", parameters = "connection")
     private String tableName;
 }

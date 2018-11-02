@@ -28,34 +28,34 @@ import lombok.Data;
         @GridLayout.Row("schema") }, names = GridLayout.FormType.MAIN)
 
 @GridLayout(value = { @GridLayout.Row("nameMappings") }, names = GridLayout.FormType.ADVANCED)
-@Documentation("TODO fill the documentation for this configuration")
+@Documentation("These properties are used to configure AzureStorageTableInput")
 @Data
 public class InputProperties implements Serializable {
 
     @Option
-    @Documentation("bl")
+    @Documentation("Azure Table Connection")
     private AzureTableConnection azureConnection;
 
     @Option
-    @Documentation("bol bl")
+    @Documentation("Use conditions to filter the entities to be retrieved")
     private boolean useFilterExpression;
 
     @Option
-    @Documentation("table")
+    @Documentation("Conditions to filter the entities to be retrieved")
     @ActiveIf(target = "useFilterExpression", value = "true")
     private List<FilterExpression> filterExpressions;
 
     @Option
-    @Documentation("die")
+    @Documentation("Stop the execution of the Job when an error occurs.")
     private boolean dieOnError = true;
 
     @Option
-    @Documentation("ah")
+    @Documentation("Mapping the column name of the component schema with the property name of the Azure table entity if they are different.")
     private List<NameMapping> nameMappings;
 
     @Option
     @Structure(discoverSchema = "guessSchema", type = Structure.Type.OUT)
-    @Documentation("SOS")
+    @Documentation("A schema is a row description. It defines the number of fields (columns) to be processed and passed on to the next component.")
     private List<String> schema;
 
     public enum Function {
@@ -109,7 +109,7 @@ public class InputProperties implements Serializable {
         }
 
         /**
-         * Convert String predicat to Azure Type {@link TableQuery.Operators}
+         * Convert String predicate to Azure Type {@link TableQuery.Operators}
          */
         public static String getOperator(String p) {
 
@@ -178,24 +178,24 @@ public class InputProperties implements Serializable {
     public static class FilterExpression {
 
         @Option
-        @Documentation("column name")
+        @Documentation("Name of the property on which you want to apply for the condition.")
         @Suggestable(value = COLUMN_NAMES, parameters = "../../schema")
         private String column;
 
         @Option
-        @Documentation("func")
+        @Documentation("The comparison operator you want to use.")
         private Function function = Function.EQUAL;
 
         @Option
-        @Documentation("value")
+        @Documentation("The value used to compare the property to")
         private String value;
 
         @Option
-        @Documentation("doc")
+        @Documentation("The predicate used to combine the conditions. Use any if you have only one condition")
         private Predicate predicate = Predicate.AND;
 
         @Option
-        @Documentation("fieldType")
+        @Documentation("Type of the column ")
         private FieldType fieldType = FieldType.STRING;
     }
 }

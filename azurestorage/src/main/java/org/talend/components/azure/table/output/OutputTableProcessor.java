@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.talend.components.azure.common.NameMapping;
 import org.talend.components.azure.service.AzureConnectionService;
 import org.talend.components.azure.service.AzureTableUtils;
+import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -24,9 +26,9 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.Service;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageErrorCodeStrings;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.table.CloudTable;
 import com.microsoft.azure.storage.table.DynamicTableEntity;
@@ -34,7 +36,6 @@ import com.microsoft.azure.storage.table.EntityProperty;
 import com.microsoft.azure.storage.table.TableBatchOperation;
 import com.microsoft.azure.storage.table.TableOperation;
 import com.microsoft.azure.storage.table.TableResult;
-import com.microsoft.azure.storage.table.TableServiceException;
 
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
 @Icon(value = Icon.IconType.CUSTOM, custom = "outputTable") // you can use a custom one using @Icon(value=CUSTOM,
@@ -45,6 +46,9 @@ import com.microsoft.azure.storage.table.TableServiceException;
 public class OutputTableProcessor implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OutputTableProcessor.class);
+
+    @Service
+    private MessageService i18nService;
 
     private final OutputProperties configuration;
 
@@ -62,6 +66,9 @@ public class OutputTableProcessor implements Serializable {
 
     private static final int MAX_RECORDS_TO_ENQUEUE = 250;
 
+    @Service
+    private AzureConnectionService connectionService;
+
     public OutputTableProcessor(@Option("configuration") final OutputProperties configuration,
             final AzureConnectionService service) {
         this.configuration = configuration;
@@ -72,8 +79,9 @@ public class OutputTableProcessor implements Serializable {
     public void init() throws Exception {
         try {
             connection = service.createStorageAccount(configuration.getAzureConnection().getConnection());
+            LOGGER.debug(i18nService.connected());
         } catch (URISyntaxException e) {
-            throw new RuntimeException("Can't establish connection", e);
+            throw new RuntimeException(i18nService.connectionError(), e);
         }
 
         handleActionOnTable();
@@ -111,10 +119,9 @@ public class OutputTableProcessor implements Serializable {
         recordToEnqueue.parallelStream().forEach(record -> {
             try {
                 DynamicTableEntity entity = createDynamicEntityFromInputRecord(record);
-                TableResult r = executeOperation(getTableOperation(entity));
+                executeOperation(getTableOperation(entity));
             } catch (StorageException e) {
-                // TODO log message
-                e.printStackTrace();
+                LOGGER.error("Exception occurred during executing operation", e);
                 if (configuration.isDieOnError()) {
                     throw new RuntimeException(e);
                 }
@@ -126,54 +133,20 @@ public class OutputTableProcessor implements Serializable {
         recordToEnqueue.clear();
     }
 
-    /**
-     * This method create a table after it's deletion.<br/>
-     * the table deletion take about 40 seconds to be effective on azure CF.
-     * https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/Delete-Table#Remarks <br/>
-     * So we try to wait 50 seconds if the first table creation return an
-     * {@link StorageErrorCodeStrings.TABLE_BEING_DELETED } exception code
-     *
-     * @param cloudTable
-     * @throws StorageException
-     * @throws IOException
-     */
-    private void createTableAfterDeletion(CloudTable cloudTable) throws StorageException, IOException {
-        try {
-            cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
-        } catch (TableServiceException e) {
-            if (!e.getErrorCode().equals(StorageErrorCodeStrings.TABLE_BEING_DELETED)) {
-                throw e;
-            }
-            LOGGER.warn("Table '{}' is currently being deleted. We'll retry in a few moments...", cloudTable.getName());
-            // wait 50 seconds (min is 40s) before retrying.
-            // See https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/Delete-Table#Remarks
-            try {
-                Thread.sleep(50000);
-            } catch (InterruptedException eint) {
-                throw new IOException("Wait process for recreating table interrupted.");
-            }
-            cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
-            LOGGER.debug("Table {} created.", cloudTable.getName());
-        }
-    }
-
     private void handleActionOnTable() throws IOException, StorageException, URISyntaxException {
-        CloudTable cloudTable = connection.createCloudTableClient()
-                .getTableReference(configuration.getAzureConnection().getTableName());
+        String tableName = configuration.getAzureConnection().getTableName();
         switch (configuration.getActionOnTable()) {
         case CREATE:
-            cloudTable.create(null, AzureTableUtils.getTalendOperationContext());
+            connectionService.createTable(connection, tableName);
             break;
         case CREATE_IF_NOT_EXIST:
-            cloudTable.createIfNotExists(null, AzureTableUtils.getTalendOperationContext());
+            connectionService.createTableIfNotExists(connection, tableName);
             break;
         case DROP_AND_CREATE:
-            cloudTable.delete(null, AzureTableUtils.getTalendOperationContext());
-            createTableAfterDeletion(cloudTable);
+            connectionService.deleteTableAndCreate(connection, tableName);
             break;
         case DROP_IF_EXIST_CREATE:
-            cloudTable.deleteIfExists(null, AzureTableUtils.getTalendOperationContext());
-            createTableAfterDeletion(cloudTable);
+            connectionService.deleteTableIfExists(connection, tableName);
             break;
         case DEFAULT:
         default:
@@ -197,7 +170,7 @@ public class OutputTableProcessor implements Serializable {
             executeOperation(batch);
 
         } catch (StorageException e) {
-            // TODO logger
+            LOGGER.error("Exception occurred during executing batch", e);
             if (configuration.isDieOnError()) {
                 throw new RuntimeException(e);
             }
@@ -242,7 +215,8 @@ public class OutputTableProcessor implements Serializable {
                     entityProps.put(mName, new EntityProperty(incomingRecord.getBytes(sName)));
                 } else if (f.getType().equals(Schema.Type.LONG)) {
                     entityProps.put(mName, new EntityProperty(incomingRecord.getLong(sName)));
-                    // TODO datetime
+                } else if (f.getType().equals(Schema.Type.DATETIME)) {
+                    entityProps.put(mName, new EntityProperty(Date.from(incomingRecord.getDateTime(sName).toInstant())));
                 } else { // use string as default type for string and other types...
                     entityProps.put(mName, new EntityProperty(incomingRecord.getString(sName)));
 
@@ -256,7 +230,7 @@ public class OutputTableProcessor implements Serializable {
     }
 
     private String getMappedNameIfNecessary(String sName) {
-        // TODO nameMappings should be not nullable - bug of studio integration
+        // FIXME nameMappings should not be null - bug of studio integration plugin
         if (configuration.getNameMappings() != null && configuration.getNameMappings().size() > 0) {
             NameMapping usedNameMapping = configuration.getNameMappings().stream()
                     .filter(nameMapping -> sName.equals(nameMapping.getSchemaColumnName())).findFirst().get();

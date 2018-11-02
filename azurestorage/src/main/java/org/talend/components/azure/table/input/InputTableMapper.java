@@ -25,7 +25,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 @Icon(value = Icon.IconType.CUSTOM, custom = "inputTable") // you can use a custom one using @Icon(value=CUSTOM,
                                                            // custom="filename") and adding icons/filename_icon32.png in resources
 @PartitionMapper(name = "InputTable")
-@Documentation("TODO fill the documentation for this mapper")
+@Documentation("Used to create reader only for now")
 public class InputTableMapper implements Serializable {
 
     private final InputProperties configuration;

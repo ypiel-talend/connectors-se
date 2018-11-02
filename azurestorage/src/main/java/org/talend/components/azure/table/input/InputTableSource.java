@@ -23,7 +23,7 @@ import com.microsoft.azure.storage.table.DynamicTableEntity;
 import com.microsoft.azure.storage.table.EntityProperty;
 import com.microsoft.azure.storage.table.TableQuery;
 
-@Documentation("TODO fill the documentation for this source")
+@Documentation("Reader for AzureInputTable component")
 public class InputTableSource implements Serializable {
 
     private final InputProperties configuration;
@@ -118,7 +118,7 @@ public class InputTableSource implements Serializable {
             currentRecordBuilder.withInt(columnName, columnValue.getValueAsInteger());
             break;
         case INT64:
-            currentRecordBuilder.withLong(columnName, columnValue.getValueAsInteger());
+            currentRecordBuilder.withLong(columnName, columnValue.getValueAsLong());
             break;
         case DECIMAL:
         case SINGLE:

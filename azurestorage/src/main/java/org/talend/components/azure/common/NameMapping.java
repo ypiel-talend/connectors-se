@@ -10,15 +10,16 @@ import lombok.Data;
 
 @Data
 @GridLayout(value = { @GridLayout.Row({ "schemaColumnName", "entityPropertyName" }) }, names = GridLayout.FormType.ADVANCED)
+// TODO replace with optionsorder instead of gridlayout when it would be fixed
 // @OptionsOrder({ "schemaColumnName", "entityPropertyName" })
 public class NameMapping {
 
     @Option
-    @Documentation("Schema column to map")
+    @Documentation("The column name of the component schema between double quotation marks")
     @Suggestable(AzureComponentServices.COLUMN_NAMES)
     private String schemaColumnName;
 
     @Option
-    @Documentation("Mapped value")
+    @Documentation("The property name of the Azure table entity between double quotation marks")
     private String entityPropertyName;
 }
