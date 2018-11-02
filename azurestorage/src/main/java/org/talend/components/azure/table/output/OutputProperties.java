@@ -30,14 +30,13 @@ public class OutputProperties implements Serializable {
     @Documentation("Azure Table Connection")
     private AzureTableConnection azureConnection;
 
-    // FIXME not working in studio
     @Option
     @Suggestable(value = COLUMN_NAMES, parameters = "schema")
     @Documentation("Schema column that holds the partition key value")
     private String partitionName;
 
     @Option
-    @Documentation("Schema column that holds the row key value ")
+    @Documentation("Schema column that holds the row key value")
     @Suggestable(value = COLUMN_NAMES, parameters = "schema")
     private String rowKey;
 

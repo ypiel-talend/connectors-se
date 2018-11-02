@@ -30,11 +30,8 @@ public class AzureTableUtils {
                         Comparison.getQueryComparisons(cfn), filterExpression.getValue(),
                         InputProperties.FieldType.getEdmType(typ));
 
-                if (!filter.isEmpty()) {
-                    filter = TableQuery.combineFilters(filter, InputProperties.Predicate.getOperator(cop), filterB);
-                } else {
-                    filter = filterB;
-                }
+                filter = filter.isEmpty() ? filterB
+                        : TableQuery.combineFilters(filter, InputProperties.Predicate.getOperator(cop), filterB);
             }
         }
         return filter;

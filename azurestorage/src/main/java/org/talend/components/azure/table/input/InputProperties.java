@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.common.NameMapping;
+import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -54,7 +55,7 @@ public class InputProperties implements Serializable {
     private List<NameMapping> nameMappings;
 
     @Option
-    @Structure(discoverSchema = "guessSchema", type = Structure.Type.OUT)
+    @Structure(discoverSchema = AzureComponentServices.GUESS_SCHEMA, type = Structure.Type.OUT)
     @Documentation("A schema is a row description. It defines the number of fields (columns) to be processed and passed on to the next component.")
     private List<String> schema;
 

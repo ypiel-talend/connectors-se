@@ -36,6 +36,10 @@ public class AzureComponentServices {
 
     public static final String TEST_CONNECTION = "testConnection";
 
+    public static final String GET_TABLE_NAMES = "getTableNames";
+
+    public static final String GUESS_SCHEMA = "guessSchema";
+
     @Service
     RecordBuilderFactory factory;
 
@@ -43,7 +47,7 @@ public class AzureComponentServices {
     MessageService i18nService;
 
     @Service
-    AzureConnectionService connectionService = new AzureConnectionService();
+    AzureConnectionService connectionService;
 
     @HealthCheck(TEST_CONNECTION)
     public HealthCheckStatus testConnection(@Option AzureConnection azureConnection) {
@@ -63,7 +67,7 @@ public class AzureComponentServices {
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18nService.connected());
     }
 
-    @Suggestions("getTableNames")
+    @Suggestions(GET_TABLE_NAMES)
     public SuggestionValues getTableNames(@Option AzureConnection azureConnection) {
         List<SuggestionValues.Item> tableNames = new ArrayList<>();
         try {
@@ -89,7 +93,7 @@ public class AzureComponentServices {
         return new SuggestionValues(false, suggestionItemList);
     }
 
-    @DiscoverSchema("guessSchema")
+    @DiscoverSchema(GUESS_SCHEMA)
     public Schema guessSchema(@Option final AzureTableConnection configuration) {
         final Schema.Entry.Builder entryBuilder = factory.newEntryBuilder();
         final Schema.Builder schemaBuilder = factory.newSchemaBuilder(Schema.Type.RECORD);

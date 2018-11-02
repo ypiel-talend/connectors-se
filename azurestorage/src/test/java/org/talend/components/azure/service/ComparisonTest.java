@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.talend.components.azure.common.Comparison;
 
 public class ComparisonTest {
@@ -26,9 +27,9 @@ public class ComparisonTest {
         assertEquals(expectedQueryComparison, queryComparison);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void verifyGetQueryComparisonThrowAnException() {
         String illegalValue = "abc";
-        Comparison.getQueryComparisons(illegalValue);
+        Assertions.assertThrows(RuntimeException.class, () -> Comparison.getQueryComparisons(illegalValue));
     }
 }
