@@ -27,7 +27,7 @@ public class AzureConnectionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureConnectionService.class);
 
-    private static final String USER_AGENT_KEY = "User-Agent";
+    static final String USER_AGENT_KEY = "User-Agent";
 
     // TODO dehardcode it
     private static final String USER_AGENT_VALUE = "APN/1.0 Talend/7.1 TaCoKit/1.0.3";

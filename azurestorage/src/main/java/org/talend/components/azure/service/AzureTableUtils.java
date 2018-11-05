@@ -1,17 +1,12 @@
 package org.talend.components.azure.service;
 
-import com.microsoft.azure.storage.OperationContext;
-import com.microsoft.azure.storage.table.EdmType;
-import com.microsoft.azure.storage.table.TableQuery;
-
-import lombok.Data;
-
-import java.util.HashMap;
-
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.common.Comparison;
 import org.talend.components.azure.table.input.InputProperties;
-import org.talend.sdk.component.api.record.Schema;
+
+import com.microsoft.azure.storage.table.TableQuery;
+
+import lombok.Data;
 
 @Data
 public class AzureTableUtils {

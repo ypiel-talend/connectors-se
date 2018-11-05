@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.AzureTableConnection;

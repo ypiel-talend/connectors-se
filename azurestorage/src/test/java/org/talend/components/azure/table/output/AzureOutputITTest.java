@@ -3,8 +3,6 @@ package org.talend.components.azure.table.output;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;

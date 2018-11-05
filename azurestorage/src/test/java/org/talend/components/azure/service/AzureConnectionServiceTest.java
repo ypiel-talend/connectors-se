@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Base64;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.talend.components.azure.common.AzureConnection;
 
