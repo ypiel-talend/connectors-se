@@ -214,6 +214,7 @@ public class OutputTableProcessor implements Serializable {
                 entity.setRowKey(incomingRecord.getString(sName));
             } else if (mName.equals(AzureTableUtils.TABLE_TIMESTAMP)) {
                 // nop : managed by server
+                continue;
             } else { // that's some properties !
                 if (f.getType().equals(Schema.Type.BOOLEAN)) {
                     entityProps.put(mName, new EntityProperty(incomingRecord.getBoolean(sName)));
@@ -244,9 +245,7 @@ public class OutputTableProcessor implements Serializable {
         if (configuration.getNameMappings() != null && configuration.getNameMappings().size() > 0) {
             NameMapping usedNameMapping = configuration.getNameMappings().stream()
                     .filter(nameMapping -> sName.equals(nameMapping.getSchemaColumnName())).findFirst().get();
-            if (usedNameMapping != null) {
-                return usedNameMapping.getEntityPropertyName();
-            }
+            return usedNameMapping.getEntityPropertyName();
         }
 
         return sName;
