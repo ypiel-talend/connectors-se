@@ -63,16 +63,13 @@ public class OutputTableProcessor implements Serializable {
 
     private static final int MAX_RECORDS_TO_ENQUEUE = 250;
 
-    // @Service
-    // private MessageService i18nService;
-
-    @Service
-    private AzureConnectionService connectionService;
+    private MessageService i18nService;
 
     public OutputTableProcessor(@Option("configuration") final OutputProperties configuration,
-            final AzureConnectionService service) {
+            final AzureConnectionService service, final MessageService i18nService) {
         this.configuration = configuration;
         this.service = service;
+        this.i18nService = i18nService;
     }
 
     @PostConstruct
@@ -82,7 +79,7 @@ public class OutputTableProcessor implements Serializable {
             // LOGGER.debug(i18nService.connected());
             // FIXME: i18n service not injected
         } catch (URISyntaxException e) {
-            throw new RuntimeException("Can't connect", e);
+            throw new RuntimeException(i18nService.connectionError(), e);
         }
 
         handleActionOnTable();
@@ -138,16 +135,16 @@ public class OutputTableProcessor implements Serializable {
         String tableName = configuration.getAzureConnection().getTableName();
         switch (configuration.getActionOnTable()) {
         case CREATE:
-            connectionService.createTable(connection, tableName);
+            service.createTable(connection, tableName);
             break;
         case CREATE_IF_NOT_EXIST:
-            connectionService.createTableIfNotExists(connection, tableName);
+            service.createTableIfNotExists(connection, tableName);
             break;
         case DROP_AND_CREATE:
-            connectionService.deleteTableAndCreate(connection, tableName);
+            service.deleteTableAndCreate(connection, tableName);
             break;
         case DROP_IF_EXIST_CREATE:
-            connectionService.deleteTableIfExists(connection, tableName);
+            service.deleteTableIfExists(connection, tableName);
             break;
         case DEFAULT:
         default:
