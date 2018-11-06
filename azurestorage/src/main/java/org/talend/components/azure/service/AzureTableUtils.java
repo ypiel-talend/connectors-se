@@ -17,7 +17,7 @@ public class AzureTableUtils {
         String filter = "";
         if (isValidFilterExpression(options)) {
             for (InputProperties.FilterExpression filterExpression : options.getFilterExpressions()) {
-                String cfn = filterExpression.getFunction().getDisplayName();
+                String cfn = filterExpression.getFunction().toString();
                 String cop = filterExpression.getPredicate().toString();
                 String typ = filterExpression.getFieldType().toString();
 

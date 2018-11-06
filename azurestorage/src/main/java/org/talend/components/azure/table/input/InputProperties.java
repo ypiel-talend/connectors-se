@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.talend.components.azure.common.AzureTableConnection;
+import org.talend.components.azure.common.Comparison;
 import org.talend.components.azure.common.NameMapping;
 import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.configuration.Option;
@@ -58,32 +59,6 @@ public class InputProperties implements Serializable {
     @Structure(discoverSchema = AzureComponentServices.GUESS_SCHEMA, type = Structure.Type.OUT)
     @Documentation("A schema is a row description. It defines the number of fields (columns) to be processed and passed on to the next component.")
     private List<String> schema;
-
-    public enum Function {
-        EQUAL("EQUAL", TableQuery.QueryComparisons.EQUAL),
-        NOT_EQUAL("NOT EQUAL", TableQuery.QueryComparisons.NOT_EQUAL),
-        GREATER_THAN("GREATER THAN", TableQuery.QueryComparisons.GREATER_THAN),
-        GT_OR_EQ("GREATER THAN OR EQUAL", TableQuery.QueryComparisons.GREATER_THAN_OR_EQUAL),
-        LESS_THAN("LESS THAN", TableQuery.QueryComparisons.LESS_THAN),
-        LT_OR_EQ("LESS THAN OR EQUAL", TableQuery.QueryComparisons.LESS_THAN_OR_EQUAL);
-
-        private final String displayName;
-
-        private final String queryComparison;
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        public String getQueryComparison() {
-            return queryComparison;
-        }
-
-        Function(String displayName, String queryComparison) {
-            this.displayName = displayName;
-            this.queryComparison = queryComparison;
-        }
-    }
 
     public enum Predicate {
         AND("AND", TableQuery.Operators.AND),
@@ -185,7 +160,7 @@ public class InputProperties implements Serializable {
 
         @Option
         @Documentation("The comparison operator you want to use.")
-        private Function function = Function.EQUAL;
+        private Comparison function = Comparison.EQUAL;
 
         @Option
         @Documentation("The value used to compare the property to")
