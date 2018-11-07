@@ -15,8 +15,8 @@
   <artifactId>azurestorage</artifactId>
   <packaging>jar</packaging>
 
-  <name>Azure Storage</name>
-  <description>Azure Storage, Blob, Container components </description>
+  <name>Components :: Azure Storage</name>
+  <description>Azure Table I/O components </description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,12 +45,6 @@
           <groupId>org.mockito</groupId>
           <artifactId>mockito-core</artifactId>
           <version>2.22.0</version>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.talend.sdk.component</groupId>
-          <artifactId>component-runtime-impl</artifactId>
-          <version>${component-runtime.version}</version>
           <scope>test</scope>
       </dependency>
   </dependencies>

@@ -39,9 +39,6 @@ import com.microsoft.azure.storage.table.TableQuery;
 import com.microsoft.azure.storage.table.TableRequestOptions;
 
 @Service
-/**
- * UI services for connection: Test connection, Tables list, guess schema
- */
 public class AzureComponentServices {
 
     public static final String COLUMN_NAMES = "COLUMN_NAMES";

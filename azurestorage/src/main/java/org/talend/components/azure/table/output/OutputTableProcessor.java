@@ -88,8 +88,7 @@ public class OutputTableProcessor implements Serializable {
     public void init() throws Exception {
         try {
             connection = service.createStorageAccount(configuration.getAzureConnection().getConnection());
-            // LOGGER.debug(i18nService.connected());
-            // FIXME: i18n service not injected
+            LOGGER.debug(i18nService.connected());
         } catch (URISyntaxException e) {
             throw new RuntimeException(i18nService.connectionError(), e);
         }

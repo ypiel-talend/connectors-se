@@ -65,8 +65,7 @@ public class AzureComponentServicesTest {
     @Test
     public void testColumnNamesRemainsTheSame() {
         String expectedColumn = "expectedName";
-        List<String> expectedColumnList = new ArrayList<>();
-        expectedColumnList.add(expectedColumn);
+        List<String> expectedColumnList = Collections.singletonList(expectedColumn);
 
         SuggestionValues columns = new AzureComponentServices().getColumnNames(expectedColumnList);
 

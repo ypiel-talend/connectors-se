@@ -94,6 +94,5 @@ public class OutputProperties implements Serializable {
         CREATE,
         CREATE_IF_NOT_EXIST,
         DROP_IF_EXIST_CREATE
-
     }
 }
