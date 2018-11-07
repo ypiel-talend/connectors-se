@@ -38,7 +38,6 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.Service;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -157,7 +156,6 @@ public class OutputTableProcessor implements Serializable {
             break;
         case DEFAULT:
         default:
-            return;
         }
 
     }
@@ -285,8 +283,7 @@ public class OutputTableProcessor implements Serializable {
         case DELETE:
             return TableOperation.delete(entity);
         default:
-            LOGGER.warn("No specified operation for table");
-            return null;
+            throw new IllegalArgumentException("Wrong or no action on data was selected");
         }
     }
 }
