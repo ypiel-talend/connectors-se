@@ -15,6 +15,7 @@ package org.talend.components.azure.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.AzureTableConnection;
@@ -41,7 +42,7 @@ import com.microsoft.azure.storage.table.TableRequestOptions;
 @Service
 public class AzureComponentServices {
 
-    public static final String COLUMN_NAMES = "COLUMN_NAMES";
+    public static final String COLUMN_NAMES = "getColumnNames";
 
     public static final String TEST_CONNECTION = "testConnection";
 
@@ -95,9 +96,8 @@ public class AzureComponentServices {
 
     @Suggestions(value = COLUMN_NAMES)
     public SuggestionValues getColumnNames(@Option List<String> schema) {
-        List<SuggestionValues.Item> suggestionItemList = new ArrayList<>();
-
-        schema.stream().map(s -> new SuggestionValues.Item(s, s)).forEach(suggestionItemList::add);
+        List<SuggestionValues.Item> suggestionItemList =
+                schema.stream().map(s -> new SuggestionValues.Item(s, s)).collect(Collectors.toList());
 
         return new SuggestionValues(false, suggestionItemList);
     }
