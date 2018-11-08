@@ -6,6 +6,8 @@ import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.talend.components.fileio.input.RecordReader;
+import org.talend.components.fileio.input.RecordReaderFactory;
 import org.talend.components.fileio.s3.configuration.S3DataSet;
 import org.talend.components.fileio.s3.service.S3Service;
 import org.talend.sdk.component.api.configuration.Option;
@@ -23,6 +25,10 @@ public class S3InputSource implements Serializable {
 
     private final RecordBuilderFactory builderFactory;
 
+    private RecordReader recordReader;
+
+    private S3InputStreamProvider inputStreamProvider;
+
     public S3InputSource(@Option("configuration") final S3DataSet configuration, final S3Service service,
             final RecordBuilderFactory builderFactory) {
         this.configuration = configuration;
@@ -31,15 +37,21 @@ public class S3InputSource implements Serializable {
     }
 
     @PostConstruct
-    public void init() {
+    public void init() throws IOException {
+        inputStreamProvider = new S3InputStreamProvider(configuration, service);
+        this.recordReader = RecordReaderFactory.createRecordReader(configuration.getFileFormatConfiguration(),
+                inputStreamProvider, builderFactory);
     }
 
     @Producer
     public Record next() throws IOException {
-        return null;
+        return recordReader.nextRecord();
     }
 
     @PreDestroy
     public void release() throws IOException {
+        inputStreamProvider.close();
+        inputStreamProvider = null;
+        recordReader = null;
     }
 }
