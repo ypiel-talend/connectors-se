@@ -5,16 +5,19 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 import java.util.Queue;
 
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.talend.components.fileio.components.DataCollector;
 import org.talend.components.fileio.s3.configuration.S3DataSet;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.junit5.WithComponents;
+import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-@WithComponents("org.talend.components.fileio")
 public class DataReadingTest {
 
+	@ClassRule
+    public static final SimpleComponentRule RU = new SimpleComponentRule("org.talend.components.fileio");
+	
     private static final S3TestResource testResource = new S3TestResource();
 
     @Test
