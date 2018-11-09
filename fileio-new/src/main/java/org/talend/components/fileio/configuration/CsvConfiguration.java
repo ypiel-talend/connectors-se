@@ -1,5 +1,7 @@
 package org.talend.components.fileio.configuration;
 
+import java.io.Serializable;
+
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
@@ -13,7 +15,7 @@ import lombok.Data;
 @OptionsOrder({ "recordDelimiter", "specificRecordDelimiter", "fieldDelimiter", "specificFieldDelimiter",
         "textEnclosureCharacter", "escapeCharacter", "encoding4CSV", "specificEncoding4CSV", "setHeaderLine4CSV",
         "headerLine4CSV" })
-public class CsvConfiguration {
+public class CsvConfiguration implements Serializable {
 
     @Option
     @Documentation("The record delimiter to split the file in records")

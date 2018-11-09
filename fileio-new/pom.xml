@@ -20,6 +20,16 @@
 	  <artifactId>commons-csv</artifactId>
 	  <version>${commons-csv.version}</version>
 	</dependency>
+	<dependency>
+	  <groupId>org.talend.sdk.component</groupId>
+	  <artifactId>component-runtime-beam</artifactId>
+	  <scope>test</scope>
+	</dependency>
+	<dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-runners-direct-java</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   
   <build>
@@ -50,11 +60,39 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.0</version>
-        <configuration>
-          <trimStackTrace>false</trimStackTrace>
-          <runOrder>alphabetical</runOrder>
-        </configuration>
+        <version>${surefire.version}</version>
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <classpathDependencyExcludes>
+                <classpathDependencyExclude>org.talend.sdk.component:component-runtime-beam</classpathDependencyExclude>
+                <classpathDependencyExclude>org.apache.beam:beam-runners-direct-java</classpathDependencyExclude>
+              </classpathDependencyExcludes>
+              <systemPropertyVariables>
+                <s3.accesskey>${s3.accesskey}</s3.accesskey>
+                <s3.secretkey>${s3.secretkey}</s3.secretkey>
+                <s3.bucket>${s3.bucket}</s3.bucket>
+                <s3.ssekmskey>${s3.ssekmskey}</s3.ssekmskey>
+                <s3.csekmskey>${s3.csekmskey}</s3.csekmskey>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
+          <execution>
+            <id>beam-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <testFailureIgnore>true</testFailureIgnore>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

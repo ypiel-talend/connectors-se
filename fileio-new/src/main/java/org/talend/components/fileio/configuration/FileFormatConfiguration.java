@@ -1,5 +1,7 @@
 package org.talend.components.fileio.configuration;
 
+import java.io.Serializable;
+
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
@@ -11,7 +13,7 @@ import lombok.Data;
 @Data
 @Documentation("File format configuration properties.")
 @OptionsOrder({ "format", "csvConfiguration" })
-public class FileFormatConfiguration {
+public class FileFormatConfiguration implements Serializable {
 
     // This will be required later, when we implement other types of files
     @Option
