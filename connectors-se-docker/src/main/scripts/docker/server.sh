@@ -20,6 +20,7 @@ work_dir="$BASEDIR/target/docker_server"
 mkdir -p "$work_dir"
 cd "$work_dir"
     cp "$BASEDIR/src/main/docker/Dockerfile.server" Dockerfile
+    rm -Rf m2
     cp -r "$BASEDIR/target/docker-m2/" m2
     cp "$BASEDIR/target/connectors-se-docker-setup-shade.jar" setup.jar
     createComponentRegistry
@@ -32,7 +33,7 @@ cd "$work_dir"
     echo 'export MEECROWAVE_OPTS="$MEECROWAVE_OPTS -Dtalend.component.server.component.registry=/opt/talend/connectors-se/component-registry.properties"' >> ./component-kit/bin/setenv.sh
     echo 'export MEECROWAVE_OPTS="$MEECROWAVE_OPTS -Dtalend.component.server.maven.repository=/opt/talend/connectors-se"' >> ./component-kit/bin/setenv.sh
     echo '' >> ./component-kit/bin/setenv.sh
-    echo '[ ! -z "$CONNECTORS_SE_SETUP_OPTS" ] && java -jar /opt/talend/setup.jar' >> ./component-kit/bin/setenv.sh
+    echo '[ ! -z "$CONNECTORS_SE_SETUP_OPTS" ] && java -jar /opt/talend/setup.jar $CONNECTORS_SE_SETUP_OPTS' >> ./component-kit/bin/setenv.sh
     echo '' >> ./component-kit/bin/setenv.sh
     echo "" >> ./component-kit/bin/setenv.sh
 
