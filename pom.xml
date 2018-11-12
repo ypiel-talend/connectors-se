@@ -309,6 +309,9 @@
             <goals>
               <goal>icon-report</goal>
             </goals>
+            <configuration>
+              <skip>${talend.icon-report.skip}</skip>
+            </configuration>
           </execution>
           <execution>
             <id>talend-component-bundle</id>
