@@ -96,8 +96,8 @@ public class AzureComponentServices {
 
     @Suggestions(value = COLUMN_NAMES)
     public SuggestionValues getColumnNames(@Option List<String> schema) {
-        List<SuggestionValues.Item> suggestionItemList =
-                schema.stream().map(s -> new SuggestionValues.Item(s, s)).collect(Collectors.toList());
+        List<SuggestionValues.Item> suggestionItemList = schema.stream().map(s -> new SuggestionValues.Item(s, s))
+                .collect(Collectors.toList());
 
         return new SuggestionValues(false, suggestionItemList);
     }

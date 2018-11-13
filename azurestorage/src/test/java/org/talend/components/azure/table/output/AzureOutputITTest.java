@@ -105,7 +105,6 @@ public class AzureOutputITTest {
                 .withString("PartitionKey", "testKey").withString("RowKey", "SomeKey").withBoolean("booleanValue", booleanValue)
                 .withLong("longValue", longValue).withInt("intValue", intValue).withDouble("doubleValue", doubleValue)
                 .withDateTime("dateValue", Date.from(dateValue)).build();
-        COMPONENT.findService(MessageService.class);
 
         COMPONENT.setInputData(Collections.singletonList(testRecord));
 
