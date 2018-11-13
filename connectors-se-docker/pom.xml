@@ -32,6 +32,12 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>azurestorage</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>jdbc</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
@@ -95,12 +101,6 @@
           <artifactId>jline</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>azurestorage</artifactId>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
     </dependency>
   </dependencies>
 
