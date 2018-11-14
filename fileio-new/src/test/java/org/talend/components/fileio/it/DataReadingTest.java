@@ -31,7 +31,6 @@ public class DataReadingTest {
 
         Queue<Record> records = DataCollector.getData();
         int actualSize = records.size();
-        System.out.println(actualSize);
         assertEquals(28, actualSize);
     }
 

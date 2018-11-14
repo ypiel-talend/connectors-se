@@ -1,4 +1,4 @@
-package org.talend.components.fileio.input.csv;
+package org.talend.components.fileio.common.csv;
 
 import org.apache.commons.csv.CSVFormat;
 import org.talend.components.fileio.configuration.CsvConfiguration;

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.talend.components.fileio.common.csv.CsvFormatFactory;
 import org.talend.components.fileio.configuration.CsvConfiguration;
 import org.talend.components.fileio.configuration.EncodingType;
 import org.talend.components.fileio.input.RecordParser;

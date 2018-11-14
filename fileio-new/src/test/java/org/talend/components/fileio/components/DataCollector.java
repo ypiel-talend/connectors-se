@@ -21,17 +21,14 @@ public class DataCollector implements Serializable {
     private static Queue<Record> data = new ConcurrentLinkedQueue<>();
 
     public DataCollector() {
-
     }
 
     @PostConstruct
     public void init() {
-
     }
 
     @ElementListener
     public void onElement(@Input final Record record) {
-        System.out.println("got record " + record);
         data.add(record);
     }
 
