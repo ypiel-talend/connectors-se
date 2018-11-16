@@ -162,8 +162,7 @@ public class OutputTableProcessor implements Serializable {
 
     private ArrayList<TableResult> executeOperation(TableBatchOperation batchOpe) throws URISyntaxException, StorageException {
 
-        CloudTable cloudTable = connection.createCloudTableClient()
-                .getTableReference(configuration.getAzureConnection().getTableName());
+        CloudTable cloudTable = service.createTableClient(connection, configuration.getAzureConnection().getTableName());
         return cloudTable.execute(batchOpe, null, AzureConnectionService.getTalendOperationContext());
     }
 
@@ -263,8 +262,7 @@ public class OutputTableProcessor implements Serializable {
 
     private TableResult executeOperation(TableOperation ope) throws URISyntaxException, StorageException {
 
-        CloudTable cloudTable = connection.createCloudTableClient()
-                .getTableReference(configuration.getAzureConnection().getTableName());
+        CloudTable cloudTable = service.createTableClient(connection, configuration.getAzureConnection().getTableName());
         return cloudTable.execute(ope, null, AzureConnectionService.getTalendOperationContext());
     }
 

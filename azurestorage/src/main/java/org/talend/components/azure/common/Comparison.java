@@ -15,6 +15,7 @@ package org.talend.components.azure.common;
 import com.microsoft.azure.storage.table.TableQuery;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,22 +39,13 @@ public enum Comparison {
 
     private static Map<String, Comparison> mapPossibleValues = new HashMap<>();
 
-    private static List<String> possibleValues = new ArrayList<>();
-
     static {
-        for (Comparison comparison : values()) {
-            mapPossibleValues.put(comparison.displayName, comparison);
-            possibleValues.add(comparison.displayName);
-        }
+        Arrays.stream(values()).forEach(comparison -> mapPossibleValues.put(comparison.displayName, comparison));
     }
 
     Comparison(String displayName, String queryComparison) {
         this.displayName = displayName;
         this.queryComparison = queryComparison;
-    }
-
-    public static List<String> possibleValues() {
-        return possibleValues;
     }
 
     /**

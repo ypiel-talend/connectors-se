@@ -31,7 +31,6 @@ import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
-import com.microsoft.azure.storage.RetryNoRetry;
 import com.microsoft.azure.storage.table.CloudTableClient;
 import com.microsoft.azure.storage.table.DynamicTableEntity;
 import com.microsoft.azure.storage.table.EdmType;
@@ -61,16 +60,16 @@ public class AzureComponentServices {
 
     @HealthCheck(TEST_CONNECTION)
     public HealthCheckStatus testConnection(@Option AzureConnection azureConnection) {
+        final int maxTables = 1;
         try {
             CloudStorageAccount cloudStorageAccount = connectionService.createStorageAccount(azureConnection);
             TableRequestOptions options = new TableRequestOptions();
-            options.setRetryPolicyFactory(new RetryNoRetry());
-            final int MAX_TABLES = 1;
+            options.setRetryPolicyFactory(AzureConnectionService.DEFAULT_RETRY_POLICY);
             final OperationContext operationContext = AzureConnectionService.getTalendOperationContext();
             CloudTableClient tableClient = cloudStorageAccount.createCloudTableClient();
             tableClient.setDefaultRequestOptions(options);
             // will throw an exception if not authorized or account not exist
-            tableClient.listTablesSegmented(null, MAX_TABLES, null, null, operationContext);
+            tableClient.listTablesSegmented(null, maxTables, null, null, operationContext);
         } catch (Exception e) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         }

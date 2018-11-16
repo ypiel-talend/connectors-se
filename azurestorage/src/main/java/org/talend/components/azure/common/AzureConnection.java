@@ -30,7 +30,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Checkable(TEST_CONNECTION)
 public class AzureConnection {
 
-    @Option("accountName")
+    @Option
     @Documentation("Name of the storage account you need to access. "
             + "A storage account name can be found in the Storage accounts dashboard of the Microsoft Azure Storage system to be used. "
             + "Ensure that the administrator of the system has granted you the appropriate access permissions to this storage account.")

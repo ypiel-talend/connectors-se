@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.azure.common.AzureConnection;
@@ -24,12 +25,15 @@ import org.talend.sdk.component.api.service.Service;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
+import com.microsoft.azure.storage.RetryExponentialRetry;
+import com.microsoft.azure.storage.RetryPolicy;
 import com.microsoft.azure.storage.StorageCredentials;
 import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
 import com.microsoft.azure.storage.StorageCredentialsSharedAccessSignature;
 import com.microsoft.azure.storage.StorageErrorCodeStrings;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.table.CloudTable;
+import com.microsoft.azure.storage.table.CloudTableClient;
 import com.microsoft.azure.storage.table.DynamicTableEntity;
 import com.microsoft.azure.storage.table.TableQuery;
 import com.microsoft.azure.storage.table.TableServiceException;
@@ -39,10 +43,20 @@ public class AzureConnectionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureConnectionService.class);
 
+    public static final RetryPolicy DEFAULT_RETRY_POLICY = new RetryExponentialRetry(10, 3);
+
     static final String USER_AGENT_KEY = "User-Agent";
 
-    // TODO dehardcode it
-    private static final String USER_AGENT_VALUE = "APN/1.0 Talend/7.1 TaCoKit/1.0.3";
+    /**
+     * Would be set as User-agent when real user-agent creation would fail
+     */
+    private static final String USER_AGENT_FORMAT = "APN/1.0 Talend/%s TaCoKit/%s";
+
+    private static final String UNKNOWN_VERSION = "UNKNOWN";
+
+    private static String applicationVersion = UNKNOWN_VERSION;
+
+    private static String componentVersion = UNKNOWN_VERSION;
 
     private static OperationContext talendOperationContext;
 
@@ -50,11 +64,27 @@ public class AzureConnectionService {
         if (talendOperationContext == null) {
             talendOperationContext = new OperationContext();
             HashMap<String, String> talendUserHeaders = new HashMap<>();
-            talendUserHeaders.put(USER_AGENT_KEY, USER_AGENT_VALUE);
+            talendUserHeaders.put(USER_AGENT_KEY, getUserAgentString());
             talendOperationContext.setUserHeaders(talendUserHeaders);
         }
 
         return talendOperationContext;
+    }
+
+    public static void setApplicationVersion(String applicationVersion) {
+        if (StringUtils.isNotEmpty(applicationVersion)) {
+            AzureConnectionService.applicationVersion = applicationVersion;
+        }
+    }
+
+    public static void setComponentVersion(String componentVersion) {
+        if (StringUtils.isNotEmpty(componentVersion)) {
+            AzureConnectionService.componentVersion = componentVersion;
+        }
+    }
+
+    private static String getUserAgentString() {
+        return String.format(USER_AGENT_FORMAT, applicationVersion, componentVersion);
     }
 
     public Iterable<DynamicTableEntity> executeQuery(CloudStorageAccount storageAccount, String tableName,
@@ -130,8 +160,15 @@ public class AzureConnectionService {
         createTableAfterDeletion(cloudTable);
     }
 
-    private CloudTable createTableClient(CloudStorageAccount connection, String tableName)
+    public CloudTable createTableClient(CloudStorageAccount connection, String tableName)
             throws URISyntaxException, StorageException {
-        return connection.createCloudTableClient().getTableReference(tableName);
+        return createTableClient(connection, tableName, DEFAULT_RETRY_POLICY);
+    }
+
+    public CloudTable createTableClient(CloudStorageAccount connection, String tableName, RetryPolicy retryPolicy)
+            throws URISyntaxException, StorageException {
+        CloudTableClient tableClient = connection.createCloudTableClient();
+        tableClient.getDefaultRequestOptions().setRetryPolicyFactory(retryPolicy);
+        return tableClient.getTableReference(tableName);
     }
 }

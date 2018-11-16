@@ -25,6 +25,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.table.CloudTable;
 import com.microsoft.azure.storage.table.CloudTableClient;
 import com.microsoft.azure.storage.table.TableQuery;
+import com.microsoft.azure.storage.table.TableRequestOptions;
 
 public class AzureConnectionServiceTest {
 
@@ -36,6 +37,8 @@ public class AzureConnectionServiceTest {
         CloudTableClient mockedTableClient = Mockito.mock(CloudTableClient.class);
         CloudTable mockedTable = Mockito.mock(CloudTable.class);
         Mockito.when(mockedTableClient.getTableReference(someTableName)).thenReturn(mockedTable);
+        TableRequestOptions mockedTableRequestOptions = Mockito.mock(TableRequestOptions.class);
+        Mockito.when(mockedTableClient.getDefaultRequestOptions()).thenReturn(mockedTableRequestOptions);
         Mockito.when(mockedAccount.createCloudTableClient()).thenReturn(mockedTableClient);
         new AzureConnectionService().executeQuery(mockedAccount, someTableName, mockedQuery);
 
