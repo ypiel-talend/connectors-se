@@ -13,25 +13,21 @@ pipeline {
 apiVersion: v1
 kind: Pod
 spec:
-  containers:
-    - name: main
-      image: jenkinsxio/builder-maven:0.1.60
-      command:
-      - cat
-      tty: true
-      volumeMounts:
-      - name: docker
-        mountPath: /var/run/docker.sock
-      - name: m2main
-        mountPath: /root/.m2/repository
-
-  volumes:
-  - name: docker
-    hostPath:
-      path: /var/run/docker.sock
-  - name: m2main
-    hostPath:
-      path: /tmp/jenkins/tdi/m2
+    containers:
+        -
+            name: main
+            image: 'jenkinsxio/builder-maven:0.1.60'
+            command: [cat]
+            tty: true
+            volumeMounts: [{name: docker, mountPath: /var/run/docker.sock}, {name: m2main, mountPath: /root/.m2/repository}]
+            resources: {requests: {memory: 3G, cpu: '2'}, limits: {memory: 3G, cpu: '2'}}
+    volumes:
+        -
+            name: docker
+            hostPath: {path: /var/run/docker.sock}
+        -
+            name: m2main
+            hostPath: {path: /tmp/jenkins/tdi/m2}
 """
         }
     }
@@ -44,7 +40,7 @@ spec:
     parameters {
         string(
                 name: 'COMPONENT_SERVER_IMAGE_VERSION',
-                defaultValue: '1.1.2_20181108161652',
+                defaultValue: '1.1.2',
                 description: 'The Component Server docker image tag')
     }
 
@@ -74,6 +70,10 @@ spec:
                     publishHTML(target: [
                             allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true,
                             reportDir   : 'target/talend-component-kit', reportFiles: 'icon-report.html', reportName: "Icon Report"
+                    ])
+                    publishHTML(target: [
+                            allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true,
+                            reportDir   : 'target/talend-component-kit', reportFiles: 'repository-dependency-report.html', reportName: "Dependencies Report"
                     ])
                 }
             }
