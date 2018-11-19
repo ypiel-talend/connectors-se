@@ -169,10 +169,9 @@ public class OutputTableProcessor implements Serializable {
     private void processBatch() {
         TableBatchOperation batch = new TableBatchOperation();
         batch.addAll(batchOperations);
-        //
+
         try {
             executeOperation(batch);
-
         } catch (StorageException e) {
             LOGGER.error("Exception occurred during executing batch", e);
             if (configuration.isDieOnError()) {
@@ -181,7 +180,10 @@ public class OutputTableProcessor implements Serializable {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e); // connection problem so next operation will also fail, we stop the process
         }
-        // reset operations, count and marker
+        resetBatch();
+    }
+
+    private void resetBatch() {
         batchOperations.clear();
         batchOperationsCount = 0;
         latestPartitionKey = "";
@@ -190,48 +192,56 @@ public class OutputTableProcessor implements Serializable {
     private DynamicTableEntity createDynamicEntityFromInputRecord(Record incomingRecord) {
         DynamicTableEntity entity = new DynamicTableEntity();
         HashMap<String, EntityProperty> entityProps = new HashMap<>();
-        for (Schema.Entry f : incomingRecord.getSchema().getEntries()) {
-
-            if (incomingRecord.get(Object.class, f.getName()) == null) {
+        for (Schema.Entry field : incomingRecord.getSchema().getEntries()) {
+            if (incomingRecord.get(Object.class, field.getName()) == null) {
                 continue; // record value may be null, No need to set the property in azure in this case
             }
-
-            if (f.getType() == Schema.Type.RECORD) {
+            if (field.getType() == Schema.Type.RECORD) {
                 continue; // NOOP needed for nested Records for now
             }
-            String sName = f.getName(); // schema name
-            String mName = getMappedNameIfNecessary(sName); // mapped name
+            String columnName = field.getName();
+            String mappedName = getMappedNameIfNecessary(columnName);
 
-            if (sName.equals(configuration.getPartitionName())) {
-                entity.setPartitionKey(incomingRecord.getString(sName));
-            } else if (sName.equals(configuration.getRowKey())) {
-                entity.setRowKey(incomingRecord.getString(sName));
-            } else if (mName.equals(AzureTableUtils.TABLE_TIMESTAMP)) {
-                // nop : managed by server
-                continue;
-            } else { // that's some properties !
-                if (f.getType().equals(Schema.Type.BOOLEAN)) {
-                    entityProps.put(mName, new EntityProperty(incomingRecord.getBoolean(sName)));
-                } else if (f.getType().equals(Schema.Type.DOUBLE)) {
-                    entityProps.put(mName, new EntityProperty(incomingRecord.getDouble(sName)));
-                } else if (f.getType().equals(Schema.Type.INT)) {
-                    entityProps.put(mName, new EntityProperty(incomingRecord.getInt(sName)));
-                } else if (f.getType().equals(Schema.Type.BYTES)) {
-                    entityProps.put(mName, new EntityProperty(incomingRecord.getBytes(sName)));
-                } else if (f.getType().equals(Schema.Type.LONG)) {
-                    entityProps.put(mName, new EntityProperty(incomingRecord.getLong(sName)));
-                } else if (f.getType().equals(Schema.Type.DATETIME)) {
-                    entityProps.put(mName, new EntityProperty(Date.from(incomingRecord.getDateTime(sName).toInstant())));
-                } else { // use string as default type for string and other types...
-                    entityProps.put(mName, new EntityProperty(incomingRecord.getString(sName)));
-
-                }
-            }
+            if (columnName.equals(configuration.getPartitionName())) {
+                entity.setPartitionKey(incomingRecord.getString(columnName));
+            } else if (columnName.equals(configuration.getRowKey())) {
+                entity.setRowKey(incomingRecord.getString(columnName));
+            } else if (!mappedName.equals(AzureTableUtils.TABLE_TIMESTAMP)) {
+                EntityProperty propertyValue = createEntityProperty(incomingRecord, field, columnName);
+                entityProps.put(mappedName, propertyValue);
+            }  // nop for timestamp: managed by server
         }
         // Etag is needed for some operations (delete, merge, replace) but we rely only on PK and RK for those ones.
         entity.setEtag("*");
         entity.setProperties(entityProps);
         return entity;
+    }
+
+    private EntityProperty createEntityProperty(Record incomingRecord, Schema.Entry entry, String schemaName) {
+        EntityProperty propertyValue;
+        switch (entry.getType()) {
+        case BOOLEAN:
+            propertyValue = new EntityProperty(incomingRecord.getBoolean(schemaName));
+            break;
+        case DOUBLE:
+            propertyValue = new EntityProperty(incomingRecord.getDouble(schemaName));
+            break;
+        case INT:
+            propertyValue = new EntityProperty(incomingRecord.getInt(schemaName));
+            break;
+        case LONG:
+            propertyValue = new EntityProperty(incomingRecord.getLong(schemaName));
+            break;
+        case BYTES:
+            propertyValue = new EntityProperty(incomingRecord.getBytes(schemaName));
+            break;
+        case DATETIME:
+            propertyValue = new EntityProperty(Date.from(incomingRecord.getDateTime(schemaName).toInstant()));
+            break;
+        default: // use string as default type for string and other types...
+            propertyValue = new EntityProperty(incomingRecord.getString(schemaName));
+        }
+        return propertyValue;
     }
 
     private String getMappedNameIfNecessary(String sName) {
