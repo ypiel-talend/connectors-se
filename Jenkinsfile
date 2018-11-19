@@ -34,7 +34,7 @@ spec:
 
     environment {
         MAVEN_OPTS = '-Dmaven.artifact.threads=128 -Dorg.slf4j.simpleLogger.showThreadName=true -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss'
-        TALEND_REGISTRY = 'registry.datapwn.com'
+        TALEND_REGISTRY = 'talendregistry-tlnd-docker-dev.jfrog.io/talend/components'
     }
 
     parameters {
@@ -85,7 +85,7 @@ spec:
                         container('main') {
                             withCredentials([
                                     usernamePassword(
-                                            credentialsId: 'docker-registry-credentials',
+                                            credentialsId: 'artifactory-credentials',
                                             passwordVariable: 'DOCKER_PASSWORD',
                                             usernameVariable: 'DOCKER_LOGIN')
                             ]) {
