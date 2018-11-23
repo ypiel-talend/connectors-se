@@ -23,6 +23,7 @@ import javax.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.service.AzureConnectionService;
 import org.talend.components.azure.service.AzureTableUtils;
+import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -52,11 +53,14 @@ public class InputTableSource implements Serializable {
 
     private RecordBuilderFactory recordBuilderFactory;
 
+    private MessageService i18nService;
+
     public InputTableSource(@Option("configuration") final InputProperties configuration, final AzureConnectionService service,
-            final RecordBuilderFactory recordBuilderFactory) {
+            final RecordBuilderFactory recordBuilderFactory, final MessageService i18nService) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
+        this.i18nService = i18nService;
     }
 
     @PostConstruct
@@ -68,7 +72,7 @@ public class InputTableSource implements Serializable {
             }
             executeSelect();
         } catch (URISyntaxException e) {
-            throw new RuntimeException("Can't establish connection", e);
+            throw new RuntimeException(i18nService.connectionError(), e);
         }
     }
 
@@ -89,7 +93,7 @@ public class InputTableSource implements Serializable {
                 current = recordsIterator.next();
             }
         } catch (URISyntaxException | StorageException e) {
-            throw new RuntimeException("Can't retrieve table content", e);
+            throw new RuntimeException(i18nService.errorRetrieveData(), e);
         }
     }
 

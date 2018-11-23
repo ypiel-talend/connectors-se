@@ -13,6 +13,7 @@
 package org.talend.components.azure.service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -114,9 +115,10 @@ public class AzureComponentServices {
             AzureConnection connection = configuration.getConnection();
             TableQuery<DynamicTableEntity> partitionQuery = TableQuery.from(DynamicTableEntity.class).take(1);
             CloudStorageAccount account = connectionService.createStorageAccount(connection);
-            Iterable<DynamicTableEntity> entities = connectionService.executeQuery(account, tableName, partitionQuery);
-            if (entities.iterator().hasNext()) {
-                DynamicTableEntity result = entities.iterator().next();
+            Iterator<DynamicTableEntity> entitiesIterator = connectionService.executeQuery(account, tableName, partitionQuery)
+                    .iterator();
+            if (entitiesIterator.hasNext()) {
+                DynamicTableEntity result = entitiesIterator.next();
                 for (Map.Entry<String, EntityProperty> f : result.getProperties().entrySet()) {
                     schemaBuilder.withEntry(entryBuilder.withName(f.getKey())
                             .withType(getAppropriateType(f.getValue().getEdmType())).withNullable(true).build());
@@ -133,15 +135,19 @@ public class AzureComponentServices {
         switch (edmType) {
         case BOOLEAN:
             return Schema.Type.BOOLEAN;
+        case BINARY:
+            return Schema.Type.BYTES;
         case BYTE:
         case SBYTE:
         case INT16:
         case INT32:
             return Schema.Type.INT;
+        case GUID:
         case INT64:
             return Schema.Type.LONG;
-        case DECIMAL:
         case SINGLE:
+            return Schema.Type.FLOAT;
+        case DECIMAL:
         case DOUBLE:
             return Schema.Type.DOUBLE;
         case DATE_TIME:

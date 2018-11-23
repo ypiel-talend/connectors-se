@@ -24,4 +24,6 @@ public interface MessageService {
     String errorRetrieveTables();
 
     String errorRetrieveSchema();
+
+    String errorRetrieveData();
 }

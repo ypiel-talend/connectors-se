@@ -209,7 +209,7 @@ public class OutputTableProcessor implements Serializable {
             } else if (!mappedName.equals(AzureTableUtils.TABLE_TIMESTAMP)) {
                 EntityProperty propertyValue = createEntityProperty(incomingRecord, field, columnName);
                 entityProps.put(mappedName, propertyValue);
-            }  // nop for timestamp: managed by server
+            } // nop for timestamp: managed by server
         }
         // Etag is needed for some operations (delete, merge, replace) but we rely only on PK and RK for those ones.
         entity.setEtag("*");

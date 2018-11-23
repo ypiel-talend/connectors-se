@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.talend.components.azure.service.AzureConnectionService;
+import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -45,11 +46,14 @@ public class InputTableMapper implements Serializable {
 
     private final RecordBuilderFactory recordBuilderFactory;
 
+    private MessageService messages;
+
     public InputTableMapper(@Option("configuration") final InputProperties configuration, final AzureConnectionService service,
-            final RecordBuilderFactory recordBuilderFactory) {
+            final RecordBuilderFactory recordBuilderFactory, MessageService messages) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
+        this.messages = messages;
     }
 
     @Assessor
@@ -77,6 +81,6 @@ public class InputTableMapper implements Serializable {
         // here we create an actual worker,
         // you are free to rework the configuration etc but our default generated implementation
         // propagates the partition mapper entries.
-        return new InputTableSource(configuration, service, recordBuilderFactory);
+        return new InputTableSource(configuration, service, recordBuilderFactory, messages);
     }
 }
