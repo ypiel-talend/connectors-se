@@ -74,6 +74,8 @@ public class OutputTableProcessor implements Serializable {
 
     private MessageService i18nService;
 
+    private int DEFAULT_BATCH_SIZE = 100;
+
     public OutputTableProcessor(@Option("configuration") final OutputProperties configuration,
             final AzureConnectionService service, final MessageService i18nService) {
         this.configuration = configuration;
@@ -152,7 +154,7 @@ public class OutputTableProcessor implements Serializable {
             service.deleteTableAndCreate(connection, tableName);
             break;
         case DROP_IF_EXIST_CREATE:
-            service.deleteTableIfExists(connection, tableName);
+            service.deleteTableIfExistsAndCreate(connection, tableName);
             break;
         case DEFAULT:
         default:
@@ -260,14 +262,13 @@ public class OutputTableProcessor implements Serializable {
             latestPartitionKey = entity.getPartitionKey();
         }
         // we reached the threshold for batch OR changed PartitionKey
-        if (batchOperationsCount == 100 || !entity.getPartitionKey().equals(latestPartitionKey)) {
+        if (batchOperationsCount == DEFAULT_BATCH_SIZE || !entity.getPartitionKey().equals(latestPartitionKey)) {
             processBatch();
-            latestPartitionKey = entity.getPartitionKey();
         }
+        latestPartitionKey = entity.getPartitionKey();
         TableOperation to = getTableOperation(entity);
         batchOperations.add(to);
         batchOperationsCount++;
-        latestPartitionKey = entity.getPartitionKey();
     }
 
     private TableResult executeOperation(TableOperation ope) throws URISyntaxException, StorageException {

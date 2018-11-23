@@ -153,7 +153,7 @@ public class AzureConnectionService {
         }
     }
 
-    public void deleteTableIfExists(CloudStorageAccount connection, String tableName)
+    public void deleteTableIfExistsAndCreate(CloudStorageAccount connection, String tableName)
             throws URISyntaxException, StorageException, IOException {
         CloudTable cloudTable = createTableClient(connection, tableName);
         cloudTable.deleteIfExists(null, getTalendOperationContext());

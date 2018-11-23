@@ -49,7 +49,7 @@ public class InputTableSource implements Serializable {
 
     private transient Iterator<DynamicTableEntity> recordsIterator;
 
-    private DynamicTableEntity current;
+    private DynamicTableEntity currentEntity;
 
     private RecordBuilderFactory recordBuilderFactory;
 
@@ -90,7 +90,7 @@ public class InputTableSource implements Serializable {
                     configuration.getAzureConnection().getTableName(), partitionQuery);
             recordsIterator = entities.iterator();
             if (recordsIterator.hasNext()) {
-                current = recordsIterator.next();
+                currentEntity = recordsIterator.next();
             }
         } catch (URISyntaxException | StorageException e) {
             throw new RuntimeException(i18nService.errorRetrieveData(), e);
@@ -101,10 +101,10 @@ public class InputTableSource implements Serializable {
     public Record next() {
         Record currentRecord = null;
         Record.Builder builder = recordBuilderFactory.newRecordBuilder();
-        if (current != null) {
-            builder.withString("PartitionKey", current.getPartitionKey()).withString("RowKey", current.getRowKey())
-                    .withDateTime("Timestamp", current.getTimestamp());
-            for (Map.Entry<String, EntityProperty> pair : current.getProperties().entrySet()) {
+        if (currentEntity != null) {
+            builder.withString("PartitionKey", currentEntity.getPartitionKey()).withString("RowKey", currentEntity.getRowKey())
+                    .withDateTime("Timestamp", currentEntity.getTimestamp());
+            for (Map.Entry<String, EntityProperty> pair : currentEntity.getProperties().entrySet()) {
                 String columnName = pair.getKey();
                 EntityProperty columnValue = pair.getValue();
                 if (configuration.getSchema().contains(columnName)) {
@@ -114,9 +114,9 @@ public class InputTableSource implements Serializable {
             currentRecord = builder.build();
             // read record for next iteration
             if (recordsIterator.hasNext()) {
-                current = recordsIterator.next();
+                currentEntity = recordsIterator.next();
             } else {
-                current = null;
+                currentEntity = null;
             }
         }
         return currentRecord;
