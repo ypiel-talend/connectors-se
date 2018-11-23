@@ -127,6 +127,9 @@ public class InputTableSource implements Serializable {
         case BOOLEAN:
             currentRecordBuilder.withBoolean(columnName, columnValue.getValueAsBoolean());
             break;
+        case BINARY:
+            currentRecordBuilder.withBytes(columnName, columnValue.getValueAsByteArray());
+            break;
         case BYTE:
         case SBYTE:
         case INT16:
@@ -134,6 +137,7 @@ public class InputTableSource implements Serializable {
             currentRecordBuilder.withInt(columnName, columnValue.getValueAsInteger());
             break;
         case INT64:
+        case GUID:
             currentRecordBuilder.withLong(columnName, columnValue.getValueAsLong());
             break;
         case DECIMAL:
@@ -141,9 +145,10 @@ public class InputTableSource implements Serializable {
         case DOUBLE:
             currentRecordBuilder.withDouble(columnName, columnValue.getValueAsDouble());
             break;
-        case TIME:
         case DATE_TIME:
+        case DATE_TIME_OFFSET:
             currentRecordBuilder.withDateTime(columnName, columnValue.getValueAsDate());
+            break;
         default:
             currentRecordBuilder.withString(columnName, columnValue.getValueAsString());
         }
