@@ -54,6 +54,8 @@ public class AzureConnectionService {
 
     private static final String UNKNOWN_VERSION = "UNKNOWN";
 
+    public static final int DEFAULT_CREATE_TABLE_TIMEOUT = 50000;
+
     private static String applicationVersion = UNKNOWN_VERSION;
 
     private static String componentVersion = UNKNOWN_VERSION;
@@ -144,7 +146,7 @@ public class AzureConnectionService {
             // wait 50 seconds (min is 40s) before retrying.
             // See https://docs.microsoft.com/en-us/rest/api/storageservices/fileservices/Delete-Table#Remarks
             try {
-                Thread.sleep(50000);
+                Thread.sleep(DEFAULT_CREATE_TABLE_TIMEOUT);
             } catch (InterruptedException eint) {
                 throw new IOException("Wait process for recreating table interrupted.");
             }
