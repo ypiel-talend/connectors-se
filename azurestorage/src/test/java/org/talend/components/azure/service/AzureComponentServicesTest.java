@@ -82,10 +82,8 @@ public class AzureComponentServicesTest {
     public void testHealthCheckOK() throws Exception {
         CloudTableClient mockedTableClient = Mockito.mock(CloudTableClient.class);
         AzureConnection connection = new AzureConnection();
-        CloudStorageAccount mockedStorageAccount = Mockito.mock(CloudStorageAccount.class);
-        Mockito.when(mockedStorageAccount.createCloudTableClient()).thenReturn(mockedTableClient);
         AzureConnectionService connectionService = Mockito.mock(AzureConnectionService.class);
-        Mockito.when(connectionService.createStorageAccount(connection)).thenReturn(mockedStorageAccount);
+        Mockito.when(connectionService.createCloudTableClient(any(), any())).thenReturn(mockedTableClient);
         AzureComponentServices componentServices = new AzureComponentServices();
         componentServices.i18nService = Mockito.mock(MessageService.class);
         componentServices.connectionService = connectionService;
@@ -152,6 +150,7 @@ public class AzureComponentServicesTest {
 
     @Test
     public void testGuessSchema() throws Exception {
+        int defaultColumnsSize = 3;
         AzureComponentServices componentServices = new AzureComponentServices();
         RecordBuilderFactory factory = Mockito.mock(RecordBuilderFactory.class);
 
@@ -179,7 +178,7 @@ public class AzureComponentServicesTest {
         componentServices.guessSchema(testDataSet);
 
         Mockito.verify(mockedSchemaBuilder).build();
-        Mockito.verify(mockedSchemaBuilder, Mockito.times(3 + propertyHashMap.size())).withEntry(any());
+        Mockito.verify(mockedSchemaBuilder, Mockito.times(defaultColumnsSize + propertyHashMap.size())).withEntry(any());
     }
 
     private Schema.Builder prepareSchemaBuilderMock() {

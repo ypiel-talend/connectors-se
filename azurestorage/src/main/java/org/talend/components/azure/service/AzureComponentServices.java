@@ -64,13 +64,10 @@ public class AzureComponentServices {
         final int maxTables = 1;
         try {
             CloudStorageAccount cloudStorageAccount = connectionService.createStorageAccount(azureConnection);
-            TableRequestOptions options = new TableRequestOptions();
-            options.setRetryPolicyFactory(AzureConnectionService.DEFAULT_RETRY_POLICY);
-            final OperationContext operationContext = AzureConnectionService.getTalendOperationContext();
-            CloudTableClient tableClient = cloudStorageAccount.createCloudTableClient();
-            tableClient.setDefaultRequestOptions(options);
+            CloudTableClient tableClient = connectionService.createCloudTableClient(cloudStorageAccount,
+                    AzureConnectionService.DEFAULT_RETRY_POLICY);
             // will throw an exception if not authorized or account not exist
-            tableClient.listTablesSegmented(null, maxTables, null, null, operationContext);
+            tableClient.listTablesSegmented(null, maxTables, null, null, AzureConnectionService.getTalendOperationContext());
         } catch (Exception e) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         }

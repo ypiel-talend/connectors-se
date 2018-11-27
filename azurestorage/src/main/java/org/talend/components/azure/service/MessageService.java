@@ -26,4 +26,8 @@ public interface MessageService {
     String errorRetrieveSchema();
 
     String errorRetrieveData();
+
+    String errorExecutingBatch();
+
+    String errorExecutingOperation();
 }

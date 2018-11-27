@@ -129,7 +129,7 @@ public class OutputTableProcessor implements Serializable {
                 DynamicTableEntity entity = createDynamicEntityFromInputRecord(record);
                 executeOperation(getTableOperation(entity));
             } catch (StorageException e) {
-                LOGGER.error("Exception occurred during executing operation", e);
+                LOGGER.error(i18nService.errorExecutingOperation(), e);
                 if (configuration.isDieOnError()) {
                     throw new RuntimeException(e);
                 }
@@ -175,7 +175,7 @@ public class OutputTableProcessor implements Serializable {
         try {
             executeOperation(batch);
         } catch (StorageException e) {
-            LOGGER.error("Exception occurred during executing batch", e);
+            LOGGER.error(i18nService.errorExecutingBatch(), e);
             if (configuration.isDieOnError()) {
                 throw new RuntimeException(e);
             }

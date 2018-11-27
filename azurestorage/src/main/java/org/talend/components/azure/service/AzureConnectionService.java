@@ -162,6 +162,13 @@ public class AzureConnectionService {
         createTableAfterDeletion(cloudTable);
     }
 
+    CloudTableClient createCloudTableClient(CloudStorageAccount connection, RetryPolicy retryPolicy) {
+        CloudTableClient tableClient = connection.createCloudTableClient();
+        tableClient.getDefaultRequestOptions().setRetryPolicyFactory(retryPolicy);
+
+        return tableClient;
+    }
+
     public CloudTable createTableClient(CloudStorageAccount connection, String tableName)
             throws URISyntaxException, StorageException {
         return createTableClient(connection, tableName, DEFAULT_RETRY_POLICY);
@@ -169,8 +176,6 @@ public class AzureConnectionService {
 
     public CloudTable createTableClient(CloudStorageAccount connection, String tableName, RetryPolicy retryPolicy)
             throws URISyntaxException, StorageException {
-        CloudTableClient tableClient = connection.createCloudTableClient();
-        tableClient.getDefaultRequestOptions().setRetryPolicyFactory(retryPolicy);
-        return tableClient.getTableReference(tableName);
+        return createCloudTableClient(connection, retryPolicy).getTableReference(tableName);
     }
 }

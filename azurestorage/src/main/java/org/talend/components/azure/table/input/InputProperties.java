@@ -82,12 +82,9 @@ public class InputProperties implements Serializable {
 
         private static Map<String, Predicate> mapPossibleValues = new HashMap<>();
 
-        private static List<String> possibleValues = new ArrayList<>();
-
         static {
             for (Predicate predicate : values()) {
                 mapPossibleValues.put(predicate.displayName, predicate);
-                possibleValues.add(predicate.displayName);
             }
         }
 
@@ -102,7 +99,8 @@ public class InputProperties implements Serializable {
         public static String getOperator(String p) {
 
             if (!mapPossibleValues.containsKey(p)) {
-                throw new IllegalArgumentException(String.format("Invalid value %s, it must be %s", p, possibleValues));
+                throw new IllegalArgumentException(
+                        String.format("Invalid value %s, it must be %s", p, mapPossibleValues.keySet()));
             }
             return mapPossibleValues.get(p).operator;
         }
