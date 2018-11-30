@@ -14,6 +14,8 @@ package org.talend.components.azure.common;
 
 import static org.talend.components.azure.service.AzureComponentServices.TEST_CONNECTION;
 
+import java.io.Serializable;
+
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -29,7 +31,7 @@ import lombok.Data;
 @Data
 @DataStore
 @Checkable(TEST_CONNECTION)
-public class AzureConnection {
+public class AzureConnection implements Serializable {
 
     @Option
     @Documentation("Name of the storage account you need to access. "

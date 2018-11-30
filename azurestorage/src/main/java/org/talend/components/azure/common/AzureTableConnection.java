@@ -12,6 +12,8 @@
  */
 package org.talend.components.azure.common;
 
+import java.io.Serializable;
+
 import lombok.Data;
 
 import org.talend.components.azure.service.AzureComponentServices;
@@ -22,7 +24,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
 @DataSet("AzureDataSet")
-public class AzureTableConnection {
+public class AzureTableConnection implements Serializable {
 
     @Option
     @Documentation("Azure Connection")
