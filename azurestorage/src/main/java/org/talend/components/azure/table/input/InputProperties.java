@@ -161,7 +161,7 @@ public class InputProperties implements Serializable {
 
     @Data
     @OptionsOrder({ "column", "function", "value", "predicate", "fieldType" })
-    public static class FilterExpression {
+    public static class FilterExpression implements Serializable {
 
         @Option
         @Documentation("Name of the property on which you want to apply for the condition.")

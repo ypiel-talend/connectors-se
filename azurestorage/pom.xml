@@ -43,6 +43,14 @@
           <version>2.22.0</version>
           <scope>test</scope>
       </dependency>
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-runners-direct-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-runtime-beam-junit</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -57,6 +65,9 @@
         <version>${surefire.version}</version>
         <configuration>
           <trimStackTrace>false</trimStackTrace>
+          <systemPropertyVariables>
+            <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>

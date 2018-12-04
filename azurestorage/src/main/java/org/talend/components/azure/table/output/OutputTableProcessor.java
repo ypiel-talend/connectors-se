@@ -60,15 +60,15 @@ public class OutputTableProcessor implements Serializable {
 
     private final AzureConnectionService service;
 
-    private transient CloudStorageAccount connection;
+    private CloudStorageAccount connection;
 
-    private transient List<Record> recordToEnqueue = new ArrayList<>();
+    private List<Record> recordToEnqueue = new ArrayList<>();
 
-    private transient List<TableOperation> batchOperations = new ArrayList<>();
+    private List<TableOperation> batchOperations = new ArrayList<>();
 
-    private transient int batchOperationsCount;
+    private int batchOperationsCount;
 
-    private transient String latestPartitionKey;
+    private String latestPartitionKey;
 
     private static final int MAX_RECORDS_TO_ENQUEUE = 250;
 

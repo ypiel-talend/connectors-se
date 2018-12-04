@@ -45,9 +45,9 @@ public class InputTableSource implements Serializable {
 
     private String filter;
 
-    private transient CloudStorageAccount connection;
+    private CloudStorageAccount connection;
 
-    private transient Iterator<DynamicTableEntity> recordsIterator;
+    private Iterator<DynamicTableEntity> recordsIterator;
 
     private DynamicTableEntity currentEntity;
 

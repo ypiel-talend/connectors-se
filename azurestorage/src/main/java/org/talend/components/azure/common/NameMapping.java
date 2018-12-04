@@ -12,6 +12,8 @@
  */
 package org.talend.components.azure.common;
 
+import java.io.Serializable;
+
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -22,7 +24,7 @@ import lombok.Data;
 @GridLayout(value = { @GridLayout.Row({ "schemaColumnName", "entityPropertyName" }) }, names = GridLayout.FormType.ADVANCED)
 // TODO replace with optionsorder instead of gridlayout when it would be fixed TUP-21029
 // @OptionsOrder({ "schemaColumnName", "entityPropertyName" })
-public class NameMapping {
+public class NameMapping implements Serializable {
 
     @Option
     @Documentation("The column name of the component schema between double quotation marks")
