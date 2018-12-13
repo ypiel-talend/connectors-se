@@ -70,4 +70,15 @@ mvn clean install -DskipTests talend-component:web
 
 This start a web server accessible from http://localhost:8080
 
+== Deploy the project components to the studio
+You can deploy this project to *Talend Open Studio* _(version >= 7.1.1)_
 
+* Download and install Talend Open Studio from https://sourceforge.net/projects/talend-studio/files/Talend%20Open%20Studio/[https://sourceforge.net/projects/talend-studio]
+* Build and deploy the project connectors
+```
+mvn clean install -DskipTests \
+     talend-component:deploy-in-studio \
+     -Dtalend.component.studioHome="<path to Talend Open Studio home>"
+```
+
+You will need to install _(in maven format)_ the required drivers manually to `<path to Talend Open Studio home>/configuration/.m2`
