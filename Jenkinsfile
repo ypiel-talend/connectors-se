@@ -113,7 +113,7 @@ spec:
                         always {
                             publishHTML(target: [
                                     allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true,
-                                    reportDir   : 'ci_docker/connectors-se-docker/target', reportFiles: 'docker.html', reportName: "Docker Images"
+                                    reportDir   : 'ci_docker/connectors-se-docker/target', includes: 'docker.html', reportFiles: 'docker.html', reportName: "Docker Images"
                             ])
                             publishHTML(target: [
                                     allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true,
