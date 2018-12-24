@@ -18,12 +18,15 @@ import java.util.List;
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.common.NameMapping;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Proposable;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import static org.talend.components.azure.service.AzureComponentServices.COLUMN_NAMES;
+import static org.talend.components.azure.service.AzureComponentServices.SUPPORTED_ACTION_ON_TABLE;
 
 import lombok.Data;
 
@@ -57,8 +60,9 @@ public class OutputProperties implements Serializable {
     private ActionOnData actionOnData = ActionOnData.INSERT;
 
     @Option
+    @Proposable(SUPPORTED_ACTION_ON_TABLE)
     @Documentation("An operation to be performed on the table defined")
-    private ActionOnTable actionOnTable = ActionOnTable.DEFAULT;
+    private String actionOnTable = ActionOnTable.DEFAULT.toString();
 
     @Option
     @Documentation("Process the input entities in batch.\n"
@@ -88,7 +92,7 @@ public class OutputProperties implements Serializable {
         DELETE
     }
 
-    enum ActionOnTable {
+    public enum ActionOnTable {
         DEFAULT,
         DROP_AND_CREATE,
         CREATE,

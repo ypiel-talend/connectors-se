@@ -12,19 +12,19 @@
  */
 package org.talend.components.azure.service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.AzureTableConnection;
+import org.talend.components.azure.table.output.OutputProperties;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.completion.DynamicValues;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
+import org.talend.sdk.component.api.service.completion.Values;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -49,6 +49,8 @@ public class AzureComponentServices {
     public static final String GET_TABLE_NAMES = "getTableNames";
 
     public static final String GUESS_SCHEMA = "guessSchema";
+
+    public static final String SUPPORTED_ACTION_ON_TABLE = "supportedActionOnTable";
 
     @Service
     RecordBuilderFactory factory;
@@ -153,5 +155,19 @@ public class AzureComponentServices {
         default:
             return Schema.Type.STRING;
         }
+    }
+
+    /**
+     * Before writer init would be implemented in framework, we can't fulfil all actions on table implementation in cloud
+     * Therefore it's needed to show only DEFAULT and CREATE_IF_NOT_EXIST options
+     * 
+     * @return supported actions on table
+     */
+    @DynamicValues(SUPPORTED_ACTION_ON_TABLE)
+    public Values loadSupportedActionOnTables() {
+        Collection<Values.Item> item = new ArrayList<>();
+        item.add(new Values.Item(OutputProperties.ActionOnTable.DEFAULT.name(), "Default"));
+        item.add(new Values.Item(OutputProperties.ActionOnTable.CREATE_IF_NOT_EXIST.name(), "Create table if not exist"));
+        return new Values(item);
     }
 }

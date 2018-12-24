@@ -143,7 +143,7 @@ public class OutputTableProcessor implements Serializable {
 
     private void handleActionOnTable() throws IOException, StorageException, URISyntaxException {
         String tableName = configuration.getAzureConnection().getTableName();
-        switch (configuration.getActionOnTable()) {
+        switch (OutputProperties.ActionOnTable.valueOf(configuration.getActionOnTable())) {
         case CREATE:
             service.createTable(connection, tableName);
             break;
