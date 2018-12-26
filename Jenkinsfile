@@ -86,7 +86,7 @@ spec:
                     ]) {
                        sh """#! /bin/bash
                         set +x
-                        echo $DOCKER_PASSWORD | docker login ${DOCKER_LEGACY_REGISTRY} -u $DOCKER_LOGIN --password-stdin
+                        echo $DOCKER_PASSWORD | docker login $TALEND_REGISTRY -u $DOCKER_LOGIN --password-stdin
                        """
                     }
                 }
