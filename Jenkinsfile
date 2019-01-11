@@ -1,6 +1,4 @@
 def slackChannel = 'components-ci'
-def version = 'will be replaced'
-def image = 'will be replaced'
 
 def deploymentSuffix = env.BRANCH_NAME == "master" ? "" : ("tdi/${env.BRANCH_NAME}")
 def deploymentRepository = "https://artifacts-zl.talend.com/nexus/content/repositories/snapshots/${deploymentSuffix}"
@@ -35,17 +33,6 @@ spec:
     environment {
         MAVEN_OPTS = '-Dmaven.artifact.threads=128 -Dorg.slf4j.simpleLogger.showThreadName=true -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss'
         TALEND_REGISTRY = 'registry.datapwn.com'
-    }
-
-    parameters {
-        string(
-                name: 'COMPONENT_SERVER_IMAGE_VERSION',
-                defaultValue: '1.1.5_20190111085718', // todo: migrate to 1.1.5 when released
-                description: 'The Component Server docker image tag')
-        booleanParam(
-	        name: 'PUSH_DOCKER_IMAGE',
-	        defaultValue: false,
-		description: 'If dev branch, push generated docker image to datapwn (it is always done for master).')
     }
 
     options {
@@ -85,9 +72,6 @@ spec:
         stage('Post Build Steps') {
             parallel {
                 stage('Documentation') {
-                    when {
-		        expression { sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim() == 'master' || params.PUSH_DOCKER_IMAGE == true }
-                    }
                     steps {
                         container('main') {
                             withCredentials([
@@ -148,13 +132,6 @@ spec:
     post {
         success {
             slackSend(color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
-            script {
-                if (params.COMPONENT_SERVER_IMAGE_VERSION) {
-                    build job: '/connectors-ee/master',
-                            parameters: [string(name: 'COMPONENT_SERVER_IMAGE_VERSION', value: "${params.COMPONENT_SERVER_IMAGE_VERSION}")],
-                            wait: false, propagate: false
-                }
-            }
         }
         failure {
             slackSend(color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
