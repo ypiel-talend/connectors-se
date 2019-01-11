@@ -40,7 +40,7 @@ spec:
     parameters {
         string(
                 name: 'COMPONENT_SERVER_IMAGE_VERSION',
-                defaultValue: '1.1.4',
+                defaultValue: '1.1.5_20190111085718', // todo: migrate to 1.1.5 when released
                 description: 'The Component Server docker image tag')
         booleanParam(
 	        name: 'PUSH_DOCKER_IMAGE',
@@ -63,9 +63,9 @@ spec:
             steps {
                 container('main') {
                     // for next concurrent builds
-                    sh 'for i in ci_docker ci_nexus ci_site; do rm -Rf $i; rsync -av . $i; done'
+                    sh 'for i in ci_documentation ci_nexus ci_site; do rm -Rf $i; rsync -av . $i; done'
                     // real task
-                    sh 'mvn clean install -T1C -Pdocker -PITs -e'
+                    sh 'mvn clean install -T1C -PITs -e'
                 }
             }
             post {
@@ -84,7 +84,7 @@ spec:
         }
         stage('Post Build Steps') {
             parallel {
-                stage('Docker') {
+                stage('Documentation') {
                     when {
 		        expression { sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim() == 'master' || params.PUSH_DOCKER_IMAGE == true }
                     }
@@ -97,13 +97,8 @@ spec:
                                             usernameVariable: 'DOCKER_LOGIN')
                             ]) {
                                 sh """
-                     |cd ci_docker
-                     |mvn clean install -Pdocker -DskipTests
-                     |chmod +x ./connectors-se-docker/src/main/scripts/docker/*.sh
-                     |revision=`git rev-parse --abbrev-ref HEAD | tr / _`
-                     |./connectors-se-docker/src/main/scripts/docker/all.sh \$revision
-                     |
-                     |# collect doc
+                     |cd ci_documentation
+                     |mvn clean install -DskipTests
                      |chmod +x .jenkins/generate-doc.sh && .jenkins/generate-doc.sh
                      |""".stripMargin()
                             }
@@ -113,11 +108,7 @@ spec:
                         always {
                             publishHTML(target: [
                                     allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true,
-                                    reportDir   : 'ci_docker/connectors-se-docker/target', includes: 'docker.html', reportFiles: 'docker.html', reportName: "Docker Images"
-                            ])
-                            publishHTML(target: [
-                                    allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true,
-                                    reportDir   : 'ci_docker/target/talend-component-kit_documentation/', reportFiles: 'index.html', reportName: "Component Documentation"
+                                    reportDir   : 'ci_documentation/target/talend-component-kit_documentation/', reportFiles: 'index.html', reportName: "Component Documentation"
                             ])
                         }
                     }
@@ -159,7 +150,6 @@ spec:
             slackSend(color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
             script {
                 if (params.COMPONENT_SERVER_IMAGE_VERSION) {
-                    println "Launching Connectors EE build with component server docker image >${params.COMPONENT_SERVER_IMAGE_VERSION}<"
                     build job: '/connectors-ee/master',
                             parameters: [string(name: 'COMPONENT_SERVER_IMAGE_VERSION', value: "${params.COMPONENT_SERVER_IMAGE_VERSION}")],
                             wait: false, propagate: false
