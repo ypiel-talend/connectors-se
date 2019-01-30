@@ -1,7 +1,13 @@
 def slackChannel = 'components-ci'
 
 def PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
-def escapedBranch = env.BRANCH_NAME.toLowerCase().replaceAll("/","_")
+
+def branchName = env.BRANCH_NAME
+if (BRANCH_NAME.startsWith("PR-") {
+    branchName = env.SOURCE_BRANCH
+}
+
+def escapedBranch = branchName.toLowerCase().replaceAll("/","_")
 def deploymentSuffix = env.BRANCH_NAME == "master" ? "${PRODUCTION_DEPLOYMENT_REPOSITORY}" : ("dev_branch_snapshots/branch_${escapedBranch}")
 def deploymentRepository = "https://artifacts-zl.talend.com/nexus/content/repositories/${deploymentSuffix}"
 def m2 = "/tmp/jenkins/tdi/m2/${deploymentSuffix}"
