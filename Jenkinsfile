@@ -3,7 +3,7 @@ def slackChannel = 'components-ci'
 def PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
 
 def branchName = env.BRANCH_NAME
-if (BRANCH_NAME.startsWith("PR-") {
+if (BRANCH_NAME.startsWith("PR-")) {
     branchName = env.SOURCE_BRANCH
 }
 
