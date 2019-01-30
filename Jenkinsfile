@@ -4,7 +4,7 @@ def PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
 
 def branchName = env.BRANCH_NAME
 if (BRANCH_NAME.startsWith("PR-")) {
-    branchName = env.SOURCE_BRANCH
+    branchName = env.CHANGE_BRANCH
 }
 
 def escapedBranch = branchName.toLowerCase().replaceAll("/","_")
