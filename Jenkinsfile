@@ -68,7 +68,7 @@ spec:
                                     usernameVariable: 'NEXUS_USER',
                                     passwordVariable: 'NEXUS_PASSWORD')
                     ]) {
-                        sh "mvn -s .jenkins/settings.xml clean install -PITs -e ${talendOssRepositoryArg}"
+                        sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -e ${talendOssRepositoryArg}"
                     }
                 }
             }
@@ -99,7 +99,7 @@ spec:
                             ]) {
                                 sh """
                      |cd ci_documentation
-                     |mvn clean install -DskipTests
+                     |mvn -U -B clean install -DskipTests
                      |chmod +x .jenkins/generate-doc.sh && .jenkins/generate-doc.sh
                      |""".stripMargin()
                             }
@@ -117,7 +117,7 @@ spec:
                 stage('Site') {
                     steps {
                         container('main') {
-                            sh 'cd ci_site && mvn clean site site:stage -Dmaven.test.failure.ignore=true'
+                            sh 'cd ci_site && mvn -U -B clean site site:stage -Dmaven.test.failure.ignore=true'
                         }
                     }
                     post {
@@ -138,7 +138,7 @@ spec:
                                             usernameVariable: 'NEXUS_USER',
                                             passwordVariable: 'NEXUS_PASSWORD')
                             ]) {
-                                sh "cd ci_nexus && mvn -s .jenkins/settings.xml clean deploy -e -Pdocker -DskipTests ${talendOssRepositoryArg}"
+                                sh "cd ci_nexus && mvn -U -B -s .jenkins/settings.xml clean deploy -e -Pdocker -DskipTests ${talendOssRepositoryArg}"
                             }
                         }
                     }
