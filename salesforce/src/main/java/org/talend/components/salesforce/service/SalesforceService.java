@@ -91,8 +91,9 @@ public class SalesforceService {
         final Integer timeout = (localConfiguration != null && localConfiguration.get(TIMEOUT_PROPERTY_KEY) != null)
                 ? Integer.parseInt(localConfiguration.get(TIMEOUT_PROPERTY_KEY))
                 : DEFAULT_TIMEOUT;
-        ConnectorConfig config = newConnectorConfig(datastore.getEndpoint());
-        config.setAuthEndpoint(datastore.getEndpoint());
+        String endpoint = getEndpoint(datastore, localConfiguration);
+        ConnectorConfig config = newConnectorConfig(endpoint);
+        config.setAuthEndpoint(endpoint);
         config.setUsername(datastore.getUserId());
         String password = datastore.getPassword();
         String securityKey = datastore.getSecurityKey();
@@ -126,18 +127,21 @@ public class SalesforceService {
      *
      * @return the datastore endpoint value.
      */
-    protected String getEndpoint(final LocalConfiguration localConfiguration) {
-
-        if (localConfiguration != null) {
-            String endpointProp = localConfiguration.get(ENDPOINT_PROPERTY_KEY);
-            if (endpointProp != null && !endpointProp.isEmpty()) {
-                if (endpointProp.contains(RETIRED_ENDPOINT)) {
-                    endpointProp = endpointProp.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
-                }
-                return endpointProp;
+    protected String getEndpoint(final BasicDataStore datastore, final LocalConfiguration localConfiguration) {
+        String endpoint = datastore.getEndpoint();
+        if (endpoint == null || endpoint.isEmpty()) {
+            if (localConfiguration != null) {
+                endpoint = localConfiguration.get(ENDPOINT_PROPERTY_KEY);
             }
         }
-        return URL;
+        if (endpoint != null && !endpoint.isEmpty()) {
+            if (endpoint.contains(RETIRED_ENDPOINT)) {
+                endpoint = endpoint.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
+            }
+            return endpoint;
+        } else {
+            return URL;
+        }
     }
 
     private ConnectorConfig newConnectorConfig(final String ep) {
@@ -159,7 +163,7 @@ public class SalesforceService {
 
         final PartnerConnection partnerConnection = connect(datastore, configuration);
         final ConnectorConfig partnerConfig = partnerConnection.getConfig();
-        ConnectorConfig bulkConfig = newConnectorConfig(datastore.getEndpoint());
+        ConnectorConfig bulkConfig = newConnectorConfig(getEndpoint(datastore, configuration));
         bulkConfig.setSessionId(partnerConfig.getSessionId());
         // For session renew
         bulkConfig.setSessionRenewer(partnerConfig.getSessionRenewer());
@@ -257,6 +261,15 @@ public class SalesforceService {
             final LocalConfiguration localConfiguration) {
         try {
             PartnerConnection connection = connect(dataStore, localConfiguration);
+            return getFieldMap(connection, moduleName);
+
+        } catch (ConnectionException e) {
+            throw handleConnectionException(e);
+        }
+    }
+
+    public Map<String, Field> getFieldMap(PartnerConnection connection, String moduleName) {
+        try {
             DescribeSObjectResult module = connection.describeSObject(moduleName);
             Map<String, Field> fieldMap = new TreeMap<>();
             for (Field field : module.getFields()) {
