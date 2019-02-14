@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.talend.components.salesforce.configuration.InputModuleConfig;
-import org.talend.components.salesforce.configuration.InputSOQLConfig;
 import org.talend.components.salesforce.dataset.ModuleDataSet;
 import org.talend.components.salesforce.service.Messages;
 import org.talend.components.salesforce.service.SalesforceService;
@@ -110,7 +109,7 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
 
     @Override
     List<String> getColumnNames() {
-        return ((ModuleDataSet) inputConfig.getDataSet()).getColumnSelectionConfig().getSelectColumnNames();
+        return ((ModuleDataSet) inputConfig.getDataSet()).getSelectColumnNames();
     }
 
     private List<String> getColumnNames(DescribeSObjectResult in) {
