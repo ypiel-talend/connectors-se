@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,8 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.talend.components.azure.table.input;
-
-import static java.util.Collections.singletonList;
 
 import java.io.Serializable;
 import java.util.List;
@@ -29,6 +27,8 @@ import org.talend.sdk.component.api.input.PartitionSize;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
+import static java.util.Collections.singletonList;
 
 //
 // this class role is to enable the work to be distributed in environments supporting it.

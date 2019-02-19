@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -20,15 +20,13 @@ import org.talend.components.azure.common.NameMapping;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Proposable;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
+import lombok.Data;
 import static org.talend.components.azure.service.AzureComponentServices.COLUMN_NAMES;
 import static org.talend.components.azure.service.AzureComponentServices.SUPPORTED_ACTION_ON_TABLE;
-
-import lombok.Data;
 
 @GridLayout(value = { @GridLayout.Row("azureConnection"), @GridLayout.Row({ "partitionName", "rowKey" }),
         @GridLayout.Row({ "actionOnData", "actionOnTable" }), @GridLayout.Row("processInBatch"), @GridLayout.Row("dieOnError"),

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,8 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.talend.components.azure.table.output;
-
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -30,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.azure.common.AzureConnection;
 import org.talend.components.azure.common.AzureTableConnection;
 import org.talend.components.azure.service.AzureConnectionService;
-import org.talend.components.azure.service.MessageService;
 import org.talend.components.azure.table.input.InputProperties;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
@@ -43,6 +40,7 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.table.CloudTable;
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @SuppressWarnings("ConstantConditions")
 @WithComponents("org.talend.components.azure")

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,8 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.talend.components.azure.table.input;
-
-import static org.talend.components.azure.service.AzureComponentServices.COLUMN_NAMES;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,8 +32,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import com.microsoft.azure.storage.table.EdmType;
 import com.microsoft.azure.storage.table.TableQuery;
-
 import lombok.Data;
+import static org.talend.components.azure.service.AzureComponentServices.COLUMN_NAMES;
 
 @GridLayout(value = { @GridLayout.Row("azureConnection"), @GridLayout.Row("useFilterExpression"),
         @GridLayout.Row("filterExpressions"), @GridLayout.Row("dieOnError"),
