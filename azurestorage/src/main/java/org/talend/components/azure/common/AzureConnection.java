@@ -59,7 +59,7 @@ public class AzureConnection implements Serializable {
     private boolean useAzureSharedSignature;
 
     @Option
-    @Documentation("Enter your account SAS URL.\n"
+    @Documentation("Enter your account SAS URL between double quotation marks.\n"
             + "You can get the SAS URL for each allowed service on Microsoft Azure portal after generating SAS.\n"
             + "The SAS URL format is https://<$storagename>.<$service>.core.windows.net/<$sastoken>, "
             + "where <$storagename> is the storage account name, "
