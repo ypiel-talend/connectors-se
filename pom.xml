@@ -47,12 +47,12 @@
   </scm>
   <distributionManagement>
     <snapshotRepository>
-      <id>talend.snapshots</id>
-      <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot</url>
+      <id>talend_nexus_deployment</id>
+      <url>${talend_oss_snapshots}</url>
     </snapshotRepository>
     <repository>
-      <id>talend.releases</id>
-      <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceRelease</url>
+      <id>talend_nexus_deployment</id>
+      <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
     </repository>
     <site>
       <id>documentation.website</id>
@@ -63,8 +63,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <component-api.version>1.1.1</component-api.version>
-    <component-runtime.version>1.1.4-SNAPSHOT</component-runtime.version>
+    <component-api.version>1.1.4</component-api.version>
+    <component-runtime.version>1.1.6</component-runtime.version>
     <slf4j.version>1.7.25</slf4j.version>
 
     <beam.version>2.8.0</beam.version>
@@ -72,7 +72,7 @@
     <jackson-codehaus.version>1.9.14-TALEND</jackson-codehaus.version>
 
     <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
-    <daikon.version>0.23.0</daikon.version>
+    <daikon.version>0.31.0</daikon.version>
 
     <junit5.version>5.3.1</junit5.version>
 
@@ -83,6 +83,7 @@
     <guava.version>20.0</guava.version>
 
     <validation.model>true</validation.model>
+    <talend_oss_snapshots>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</talend_oss_snapshots>
   </properties>
 
   <dependencyManagement>
@@ -240,8 +241,24 @@
 
   <repositories>
     <repository>
+      <id>talend.oss.snapshots</id>
+      <url>${talend_oss_snapshots}</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>TalendOpenSourceRelease</id>
       <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
     <repository>
       <id>SonatypeSnapshotsOSS</id>
@@ -256,8 +273,24 @@
   </repositories>
   <pluginRepositories>
     <pluginRepository>
-      <id>TalendOpenSourceRelease</id>
+      <id>talend.oss.snapshots</id>
+      <url>${talend_oss_snapshots}</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>talend.oss.releases</id>
       <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </pluginRepository>
     <pluginRepository>
       <id>SonatypeSnapshotsOSS</id>
@@ -274,13 +307,44 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>2.2.4</version>
+        <executions>
+          <execution>
+            <id>get-the-git-infos</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <generateGitPropertiesFile>false</generateGitPropertiesFile>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
+              <Git-Sha>${git.commit.id}</Git-Sha>
+              <Git-Branch>${git.branch}</Git-Branch>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>tidy-maven-plugin</artifactId>
         <version>1.1.0</version>
         <executions>
           <execution>
             <id>tidy-pom</id>
-            <phase>validate</phase>
+            <phase>initialize</phase>
             <goals>
               <goal>pom</goal>
             </goals>
@@ -559,12 +623,6 @@
   </reporting>
 
   <profiles>
-    <profile>
-      <id>docker</id>
-      <modules>
-        <module>connectors-se-docker</module>
-      </modules>
-    </profile>
     <profile>
       <id>documentation-html</id>
       <build>
