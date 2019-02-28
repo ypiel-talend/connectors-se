@@ -108,9 +108,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     public void testModuleQuery() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
-        ModuleDataSet.ColumnSelectionConfig selectionConfig = new ModuleDataSet.ColumnSelectionConfig();
-        selectionConfig.setSelectColumnNames(Arrays.asList("Id", "Name"));
-        moduleDataSet.setColumnSelectionConfig(selectionConfig);
+        moduleDataSet.setSelectColumnNames(Arrays.asList("Id", "Name"));
         moduleDataSet.setDataStore(getDataStore());
         moduleDataSet.setCondition("Name Like 'TestName_%" + UNIQUE_ID + "%'");
 
@@ -130,9 +128,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     public void testQueryNullValues() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
-        ModuleDataSet.ColumnSelectionConfig selectionConfig = new ModuleDataSet.ColumnSelectionConfig();
-        selectionConfig.setSelectColumnNames(Arrays.asList("Id", "Name", "NumberOfEmployees", "AnnualRevenue"));
-        moduleDataSet.setColumnSelectionConfig(selectionConfig);
+        moduleDataSet.setSelectColumnNames(Arrays.asList("Id", "Name", "NumberOfEmployees", "AnnualRevenue"));
         moduleDataSet.setDataStore(getDataStore());
         moduleDataSet.setCondition(
                 "NumberOfEmployees = null and AnnualRevenue = null and Name Like 'TestName_%" + UNIQUE_ID + "%' limit 5");
@@ -157,9 +153,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     public void testModuleQueryWithLimit() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
-        ModuleDataSet.ColumnSelectionConfig selectionConfig = new ModuleDataSet.ColumnSelectionConfig();
-        selectionConfig.setSelectColumnNames(Arrays.asList("Name"));
-        moduleDataSet.setColumnSelectionConfig(selectionConfig);
+        moduleDataSet.setSelectColumnNames(Arrays.asList("Name"));
         moduleDataSet.setDataStore(getDataStore());
         moduleDataSet.setCondition("Name Like 'TestName_%" + UNIQUE_ID + "%' limit 10");
 
@@ -177,8 +171,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     public void testQueryAllType() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
-        ModuleDataSet.ColumnSelectionConfig selectionConfig = new ModuleDataSet.ColumnSelectionConfig();
-        selectionConfig.setSelectColumnNames(Arrays.asList("Id", "IsDeleted", "MasterRecordId", "Name", "Type", "ParentId",
+        moduleDataSet.setSelectColumnNames(Arrays.asList("Id", "IsDeleted", "MasterRecordId", "Name", "Type", "ParentId",
                 "BillingStreet", "BillingCity", "BillingState", "BillingPostalCode", "BillingCountry", "BillingLatitude",
                 "BillingLongitude", "ShippingStreet", "ShippingCity", "ShippingState", "ShippingPostalCode", "ShippingCountry",
                 "ShippingLatitude", "ShippingLongitude", "Phone", "Fax", "AccountNumber", "Website", "PhotoUrl", "Sic",
@@ -186,7 +179,6 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
                 "OwnerId", "CreatedDate", "CreatedById", "LastModifiedDate", "LastModifiedById", "SystemModstamp",
                 "LastActivityDate", "LastViewedDate", "LastReferencedDate", "Jigsaw", "JigsawCompanyId", "AccountSource",
                 "SicDesc"));
-        moduleDataSet.setColumnSelectionConfig(selectionConfig);
         moduleDataSet.setDataStore(getDataStore());
         moduleDataSet.setCondition("Name Like 'TestName_%" + UNIQUE_ID + "%' and NumberOfEmployees != null");
 
@@ -235,9 +227,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     public void testModuleQueryWithInvalidField() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("account");
-        ModuleDataSet.ColumnSelectionConfig selectionConfig = new ModuleDataSet.ColumnSelectionConfig();
-        selectionConfig.setSelectColumnNames(singletonList("InvalidField10x"));
-        moduleDataSet.setColumnSelectionConfig(selectionConfig);
+        moduleDataSet.setSelectColumnNames(singletonList("InvalidField10x"));
         moduleDataSet.setDataStore(getDataStore());
         final String config = configurationByExample().forInstance(moduleDataSet).configured().toQueryString();
         IllegalStateException ex = assertThrows(IllegalStateException.class,
