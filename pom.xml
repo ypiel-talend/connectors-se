@@ -455,6 +455,7 @@
           <localCheckout>true</localCheckout>
           <pushChanges>false</pushChanges>
           <releaseProfiles>release</releaseProfiles>
+          <tagNameFormat>release/{project.version}</tagNameFormat>
         </configuration>
       </plugin>
       <plugin>
