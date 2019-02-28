@@ -9,10 +9,10 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
+import org.talend.components.salesforce.configuration.InputModuleConfig;
 import org.talend.components.salesforce.dataset.ModuleDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
-import org.talend.components.salesforce.output.OutputConfiguration;
+import org.talend.components.salesforce.configuration.OutputConfig;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
@@ -52,14 +52,17 @@ public class SalesforceTestBase implements Serializable {
         inputDataSet.setSelectColumnNames(Arrays.asList("Id"));
         inputDataSet.setDataStore(getDataStore());
         inputDataSet.setCondition(condition);
-        final String inputConfig = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
+
+        InputModuleConfig inputModuleConfig = new InputModuleConfig();
+        inputModuleConfig.setDataSet(inputDataSet);
+        final String inputConfig = configurationByExample().forInstance(inputModuleConfig).configured().toQueryString();
 
         // output
-        final OutputConfiguration configuration = new OutputConfiguration();
+        final OutputConfig configuration = new OutputConfig();
         final ModuleDataSet outDataSet = new ModuleDataSet();
         outDataSet.setModuleName(module);
         outDataSet.setDataStore(getDataStore());
-        configuration.setOutputAction(OutputConfiguration.OutputAction.DELETE);
+        configuration.setOutputAction(OutputConfig.OutputAction.DELETE);
         configuration.setModuleDataSet(outDataSet);
 
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
@@ -75,7 +78,10 @@ public class SalesforceTestBase implements Serializable {
         dataSet.setSelectColumnNames(singletonList("Id"));
         dataSet.setDataStore(getDataStore());
         dataSet.setCondition(condition);
-        final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
+
+        InputModuleConfig inputModuleConfig = new InputModuleConfig();
+        inputModuleConfig.setDataSet(dataSet);
+        final String config = configurationByExample().forInstance(inputModuleConfig).configured().toQueryString();
         Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
                 .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
