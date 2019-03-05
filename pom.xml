@@ -81,16 +81,6 @@
     <commons-csv.version>1.4</commons-csv.version>
     <guava.version>20.0</guava.version>
 
-    <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
-    <junit5.version>5.3.1</junit5.version>
-
-    <docker-maven-plugin.version>0.26.0</docker-maven-plugin.version>
-    <amqp-client.version>5.4.3</amqp-client.version>
-    <testcontainers.version>1.10.3</testcontainers.version>
-    <spring-web.version>5.1.4.RELEASE</spring-web.version>
-    <rabbitmq.httpclient.version>3.1.0.RELEASE</rabbitmq.httpclient.version>
-    <apache.httpclient.version>4.5.7</apache.httpclient.version>
-
     <validation.model>true</validation.model>
     <talend_oss_snapshots>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</talend_oss_snapshots>
   </properties>
