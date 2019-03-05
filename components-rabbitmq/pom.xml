@@ -17,23 +17,17 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- overrides parent pom property to fix dataset validation issue -->
-        <validation.model>false</validation.model>
-        <!--
-        Set it to true if you want the documentation to be rendered as HTML and PDF
-
-        You can also use it on the command line: -Dtalend.documentation.htmlAndPdf=true
-        -->
         <talend.documentation.htmlAndPdf>false</talend.documentation.htmlAndPdf>
 
-        <!--
-        if you want to deploy into the studio you can use the related goal:
+        <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
+        <junit5.version>5.3.1</junit5.version>
 
-        mvn package talend-component:deploy-in-studio -Dtalend.component.studioHome=/path/to/studio
-
-        TIP: it is recommended to set this property into your settings.xml in an active by default profile.
-        -->
         <talend-docker-registry>registry.datapwn.com</talend-docker-registry>
+        <amqp-client.version>5.4.3</amqp-client.version>
+        <testcontainers.version>1.10.3</testcontainers.version>
+        <spring-web.version>5.1.4.RELEASE</spring-web.version>
+        <rabbitmq.httpclient.version>3.1.0.RELEASE</rabbitmq.httpclient.version>
+        <apache.httpclient.version>4.5.7</apache.httpclient.version>
         <talend.component.studioHome/>
     </properties>
 
@@ -41,6 +35,7 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
+            <version>${amqp-client.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -51,14 +46,17 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
+            <version>${spring-web.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>http-client</artifactId>
+            <version>${rabbitmq.httpclient.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+            <version>${apache.httpclient.version}</version>
         </dependency>
     </dependencies>
 
