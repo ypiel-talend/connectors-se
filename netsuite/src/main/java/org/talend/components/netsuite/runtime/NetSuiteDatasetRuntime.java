@@ -60,7 +60,8 @@ public class NetSuiteDatasetRuntime {
         metaDataSource.getTypeInfo(typeName).getFields().stream()
                 .filter(field -> schemaNotDesigned
                         || stringSchema.stream().anyMatch(element -> element.equalsIgnoreCase(field.getName())))
-                .sorted(FieldDescComparator.INSTANCE).map(this::buildEntryFromFieldDescription).forEach(builder::withEntry);
+                .sorted(FieldDescComparator.INSTANCE)
+                .map(this::buildEntryFromFieldDescription).forEach(builder::withEntry);
         return builder.build();
     }
 
