@@ -2,9 +2,11 @@ package org.talend.components.mongodb.input;
 
 import lombok.Data;
 import org.talend.components.mongodb.datastore.MongoDBDataStore;
+import org.talend.components.mongodb.datastore.MongoDBDataset;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
@@ -13,25 +15,15 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.util.List;
 
 @Data
-@DataSet("Input")
-@GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("collection"), @GridLayout.Row("schema"),
+@GridLayout(value = { @GridLayout.Row("dataset"),
         @GridLayout.Row({ "setReadPreference", "readPreference" }), @GridLayout.Row("query"), @GridLayout.Row("mapping"),
         @GridLayout.Row("sort"), @GridLayout.Row("limite") })
-@Documentation("MongoDBInputDataset")
-public class MongoDBInputDataset {
+@Documentation("MongoDBInputConfig")
+public class MongoDBInputConfig {
 
     @Option
-    @Documentation("datastore")
-    private MongoDBDataStore dataStore;
-
-    @Option
-    @Documentation("collection")
-    private String collection;
-
-    @Option
-    @Structure
-    @Documentation("schema")
-    private List<String> schema;
+    @Documentation("MongoDBDataset")
+    private MongoDBDataset dataset;
 
     @Option
     @Documentation("setReadPreference")

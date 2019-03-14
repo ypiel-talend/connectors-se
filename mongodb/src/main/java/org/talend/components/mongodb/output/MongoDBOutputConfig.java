@@ -2,6 +2,7 @@ package org.talend.components.mongodb.output;
 
 import lombok.Data;
 import org.talend.components.mongodb.datastore.MongoDBDataStore;
+import org.talend.components.mongodb.datastore.MongoDBDataset;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataSet;
@@ -14,25 +15,15 @@ import java.util.List;
 
 @Data
 @DataSet("Output")
-@GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("collection"), @GridLayout.Row("schema"),
+@GridLayout(value = { @GridLayout.Row("dataset"),
         @GridLayout.Row({ "setWriteConcern", "writeConcern" }), @GridLayout.Row({ "setBuckWrite", "bulkType" }),
         @GridLayout.Row("mapping"), @GridLayout.Row("bulkWriteSize") })
-
-@Documentation("MongoDBOutputDataset")
-public class MongoDBOutputDataset {
-
-    @Option
-    @Documentation("datastore")
-    private MongoDBDataStore dataStore;
+@Documentation("MongoDBOutputConfig")
+public class MongoDBOutputConfig {
 
     @Option
-    @Documentation("collection")
-    private String collection;
-
-    @Option
-    @Structure
-    @Documentation("schema")
-    private List<String> schema;
+    @Documentation("MongoDBDataset")
+    private MongoDBDataset dataset;
 
     @Option
     @Documentation("setWriteConcern")
