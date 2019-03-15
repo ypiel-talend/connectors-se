@@ -23,7 +23,7 @@
         <junit5.version>5.3.1</junit5.version>
 
         <talend-docker-registry>registry.datapwn.com</talend-docker-registry>
-        <amqp-client.version>5.4.3</amqp-client.version>
+        <amqp-client.version>5.6.0</amqp-client.version>
         <testcontainers.version>1.10.3</testcontainers.version>
         <spring-web.version>5.1.4.RELEASE</spring-web.version>
         <rabbitmq.httpclient.version>3.1.0.RELEASE</rabbitmq.httpclient.version>
@@ -147,8 +147,8 @@
                         <javax.net.ssl.keyStorePassword>password</javax.net.ssl.keyStorePassword>
                         <javax.net.ssl.trustStore>${project.basedir}/src/test/resources/rabbitstore</javax.net.ssl.trustStore>
                         <javax.net.ssl.trustStorePassword>password</javax.net.ssl.trustStorePassword>
-                        <ssl.debug>true</ssl.debug>
-                        <javax.net.debug>ssl,handshake,verbose</javax.net.debug>
+<!--                        <ssl.debug>true</ssl.debug>
+                        <javax.net.debug>ssl,handshake,verbose</javax.net.debug>-->
                         <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
                     </systemPropertyVariables>
                 </configuration>
