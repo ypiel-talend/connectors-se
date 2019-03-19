@@ -140,6 +140,11 @@ public class RabbitMQTestIT {
 
         Thread thread = new Thread(() -> {
             while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 if (isInputSubscribed()) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.DIRECT,
                             DIRECT_EXCHANGE_NAME);
