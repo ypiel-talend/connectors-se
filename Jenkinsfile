@@ -113,7 +113,7 @@ spec:
                             ]) {
                                 sh """
                      |cd ci_documentation
-                     |mvn -U -B clean install -DskipTests -DskipITs
+                     |mvn -U -B clean install -DskipTests
                      |chmod +x .jenkins/generate-doc.sh && .jenkins/generate-doc.sh
                      |""".stripMargin()
                             }
@@ -152,7 +152,7 @@ spec:
                                             usernameVariable: 'NEXUS_USER',
                                             passwordVariable: 'NEXUS_PASSWORD')
                             ]) {
-                                sh "cd ci_nexus && mvn -U -B -s .jenkins/settings.xml clean deploy -e -Pdocker -DskipTests -DskipITs ${talendOssRepositoryArg}"
+                                sh "cd ci_nexus && mvn -U -B -s .jenkins/settings.xml clean deploy -e -Pdocker -DskipTests ${talendOssRepositoryArg}"
                             }
                         }
                     }
