@@ -16,7 +16,7 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 
-import org.talend.components.azure.service.ComponentAzureBlobService;
+import org.talend.components.azure.service.AzureBlobComponentServices;
 
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
 @Icon(value = Icon.IconType.CUSTOM, custom = "AzureOutput")
@@ -26,10 +26,10 @@ public class OutputOutput implements Serializable {
 
     private final OutputOutputConfiguration configuration;
 
-    private final ComponentAzureBlobService service;
+    private final AzureBlobComponentServices service;
 
     public OutputOutput(@Option("configuration") final OutputOutputConfiguration configuration,
-            final ComponentAzureBlobService service) {
+            final AzureBlobComponentServices service) {
         this.configuration = configuration;
         this.service = service;
     }

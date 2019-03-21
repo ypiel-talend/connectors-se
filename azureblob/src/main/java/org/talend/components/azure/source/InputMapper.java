@@ -16,7 +16,7 @@ import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import org.talend.components.azure.service.ComponentAzureBlobService;
+import org.talend.components.azure.service.AzureBlobComponentServices;
 
 //
 // this class role is to enable the work to be distributed in environments supporting it.
@@ -29,12 +29,12 @@ public class InputMapper implements Serializable {
 
     private final InputMapperConfiguration configuration;
 
-    private final ComponentAzureBlobService service;
+    private final AzureBlobComponentServices service;
 
     private final RecordBuilderFactory recordBuilderFactory;
 
     public InputMapper(@Option("configuration") final InputMapperConfiguration configuration,
-            final ComponentAzureBlobService service, final RecordBuilderFactory recordBuilderFactory) {
+            final AzureBlobComponentServices service, final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;

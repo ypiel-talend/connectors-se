@@ -11,19 +11,19 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import org.talend.components.azure.service.ComponentAzureBlobService;
+import org.talend.components.azure.service.AzureBlobComponentServices;
 
 @Documentation("TODO fill the documentation for this source")
 public class InputSource implements Serializable {
 
     private final InputMapperConfiguration configuration;
 
-    private final ComponentAzureBlobService service;
+    private final AzureBlobComponentServices service;
 
     private final RecordBuilderFactory builderFactory;
 
     public InputSource(@Option("configuration") final InputMapperConfiguration configuration,
-            final ComponentAzureBlobService service, final RecordBuilderFactory builderFactory) {
+            final AzureBlobComponentServices service, final RecordBuilderFactory builderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;

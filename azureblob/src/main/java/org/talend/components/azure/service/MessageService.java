@@ -20,4 +20,6 @@ public interface MessageService {
     String connected();
 
     String connectionError();
+
+    String errorRetrieveContainers();
 }

@@ -34,6 +34,12 @@
   </properties>
 
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/com.microsoft.azure/azure-storage -->
+    <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-storage</artifactId>
+      <version>8.1.0</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -18,7 +18,10 @@ import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.excel.ExcelFormatOptions;
 import org.talend.components.azure.datastore.AzureConnection;
+import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -38,7 +41,7 @@ public class AzureBlobDataset implements Serializable {
 
     @Option
     @Documentation("The name of the container to access")
-    // @Suggestable(value = AzureComponentServices.GET_TABLE_NAMES, parameters = "connection")
+    @Suggestable(value = AzureBlobComponentServices.GET_CONTAINER_NAMES, parameters = "connection")
     private String containerName;
 
     @Option
