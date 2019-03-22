@@ -100,6 +100,65 @@ spec:
                 }
             }
         }
+        stage('Post Build Steps') {
+            parallel {
+                stage('Documentation') {
+                    steps {
+                        container('main') {
+                            withCredentials([
+                                    usernamePassword(
+                                            credentialsId: 'docker-registry-credentials',
+                                            passwordVariable: 'DOCKER_PASSWORD',
+                                            usernameVariable: 'DOCKER_LOGIN')
+                            ]) {
+                                sh """
+                     |cd ci_documentation
+                     |mvn -U -B clean install -DskipTests
+                     |chmod +x .jenkins/generate-doc.sh && .jenkins/generate-doc.sh
+                     |""".stripMargin()
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            publishHTML(target: [
+                                    allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true,
+                                    reportDir   : 'ci_documentation/target/talend-component-kit_documentation/', reportFiles: 'index.html', reportName: "Component Documentation"
+                            ])
+                        }
+                    }
+                }
+                stage('Site') {
+                    steps {
+                        container('main') {
+                            sh 'cd ci_site && mvn -U -B clean site site:stage -Dmaven.test.failure.ignore=true'
+                        }
+                    }
+                    post {
+                        always {
+                            publishHTML(target: [
+                                    allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true,
+                                    reportDir   : 'ci_site/target/staging', reportFiles: 'index.html', reportName: "Maven Site"
+                            ])
+                        }
+                    }
+                }
+                stage('Nexus') {
+                    steps {
+                        container('main') {
+                            withCredentials([
+                                    usernamePassword(
+                                            credentialsId: 'nexus-artifact-zl-credentials',
+                                            usernameVariable: 'NEXUS_USER',
+                                            passwordVariable: 'NEXUS_PASSWORD')
+                            ]) {
+                                sh "cd ci_nexus && mvn -U -B -s .jenkins/settings.xml clean deploy -e -Pdocker -DskipTests ${talendOssRepositoryArg}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     post {
         success {
