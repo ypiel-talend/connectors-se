@@ -4,7 +4,7 @@ public class RabbitMQTestConstants {
 
     public static final String HOSTNAME = "localhost";
 
-    public static final Integer PORT = 5672;
+    public static final Integer PORT = 5671;
 
     public final static Integer HTTP_PORT = 15672;
 
