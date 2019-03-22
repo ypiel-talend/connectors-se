@@ -49,7 +49,7 @@ public class RabbitMQTestExtention implements ExtensionContext.Store.CloseableRe
 
         dataStore.setHostname(dockerHostAddress);
         dataStore.setPort(amqpPort);
-        dataStore.setTLS(false);
+        dataStore.setTLS(true);
         dataStore.setUserName(USER_NAME);
         dataStore.setPassword(PASSWORD);
         testContext.dataStore = dataStore;
