@@ -24,7 +24,7 @@ public class CouchbaseInputMapperTest {
         // Source configuration
         // Setup your component configuration for the test here
         final CouchbaseInputMapperConfiguration configuration = new CouchbaseInputMapperConfiguration()
-        /* .setDataset() */;
+        /* .setDataSet() */;
 
         // We create the component mapper instance using the configuration filled above
         final Mapper mapper = COMPONENT_FACTORY.createMapper(CouchbaseInputMapper.class, configuration);

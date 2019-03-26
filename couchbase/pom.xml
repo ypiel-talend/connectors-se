@@ -29,6 +29,7 @@
 
     TIP: it is recommended to set this property into your settings.xml in an active by default profile.
     -->
+    <component-runtime.version>1.1.6</component-runtime.version>
     <talend.component.studioHome />
   </properties>
 
@@ -51,10 +52,25 @@
       <version>1.1.7</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.couchbase.client</groupId>
+      <artifactId>java-client</artifactId>
+      <version>2.7.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.couchbase.client</groupId>
+      <artifactId>dcp-client</artifactId>
+      <version>0.22.0</version>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.talend.sdk.component</groupId>
+        <artifactId>talend-component-maven-plugin</artifactId>
+        <version>1.1.7</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

@@ -1,35 +1,32 @@
 package org.talend.components.couchbase.output;
 
-import java.io.Serializable;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.talend.components.couchbase.service.ConnectorsSeService;
+import lombok.extern.slf4j.Slf4j;
+import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.processor.AfterGroup;
-import org.talend.sdk.component.api.processor.BeforeGroup;
-import org.talend.sdk.component.api.processor.ElementListener;
-import org.talend.sdk.component.api.processor.Input;
-import org.talend.sdk.component.api.processor.Processor;
+import org.talend.sdk.component.api.processor.*;
 import org.talend.sdk.component.api.record.Record;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.Serializable;
+
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
+@Slf4j
 @Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
                           // icons/filename_icon32.png in resources
 @Processor(name = "CouchbaseOutput")
 @Documentation("TODO fill the documentation for this processor")
-public class CouchbaseOutputOutput implements Serializable {
+public class CouchbaseOutput implements Serializable {
 
-    private final CouchbaseOutputOutputConfiguration configuration;
+    private final CouchbaseOutputConfiguration configuration;
 
-    private final ConnectorsSeService service;
+    private final CouchbaseService service;
 
-    public CouchbaseOutputOutput(@Option("configuration") final CouchbaseOutputOutputConfiguration configuration,
-            final ConnectorsSeService service) {
+    public CouchbaseOutput(@Option("configuration") final CouchbaseOutputConfiguration configuration,
+            final CouchbaseService service) {
         this.configuration = configuration;
         this.service = service;
     }

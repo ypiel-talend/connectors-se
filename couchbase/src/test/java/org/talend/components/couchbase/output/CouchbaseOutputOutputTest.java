@@ -23,11 +23,11 @@ public class CouchbaseOutputOutputTest {
 
         // Output configuration
         // Setup your component configuration for the test here
-        final CouchbaseOutputOutputConfiguration configuration = new CouchbaseOutputOutputConfiguration()
+        final CouchbaseOutputConfiguration configuration = new CouchbaseOutputConfiguration()
         /* .setConfiguration1() */;
 
         // We create the component processor instance using the configuration filled above
-        final Processor processor = COMPONENT_FACTORY.createProcessor(CouchbaseOutputOutput.class, configuration);
+        final Processor processor = COMPONENT_FACTORY.createProcessor(CouchbaseOutput.class, configuration);
 
         // The join input factory construct inputs test data for every input branch you have defined for this component
         // Make sure to fil in some test data for the branches you want to test
