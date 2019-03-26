@@ -1,8 +1,8 @@
 package org.talend.components.mongodb.source;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
@@ -44,6 +44,10 @@ public class MongoDBInputSource implements Serializable {
 
     private Schema schema;
 
+    private Map<String, String> pathMap = new HashMap<>();
+
+    private final List<String> columnsList = new ArrayList<>();
+
     public MongoDBInputSource(@Option("configuration") final MongoDBInputMapperConfiguration configuration,
             final MongoDBService service, final RecordBuilderFactory builderFactory) {
         this.configuration = configuration;
@@ -81,20 +85,32 @@ public class MongoDBInputSource implements Serializable {
         Document myQuery = Document.parse(configuration.getQuery());
         FindIterable<Document> fi = collection.find(myQuery).noCursorTimeout(configuration.isNoQueryTimeout());
         fi.limit(configuration.getLimit());
-        // Map<String, String> pathMap = new HashMap<String, String>();
-        // fi = fi.limit(inputConfig.getLimite());
+        pathMap = parsePathMap(configuration.getMapping());
+        if (configuration.getDataset().getSchema() != null && !configuration.getDataset().getSchema().isEmpty()) {
+            columnsList.addAll(configuration.getDataset().getSchema());
+        }
         cursor = fi.iterator();
+    }
+
+    private final Map<String, String> parsePathMap(List<InputMapping> mapping) {
+        if (mapping == null || mapping.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return mapping.stream().collect(Collectors.toMap(InputMapping::getColumn, InputMapping::getParentNodePath));
     }
 
     @Producer
     public Record next() {
         if (cursor.hasNext()) {
             Document document = cursor.next();
+            if (columnsList.isEmpty()) {
+                columnsList.addAll(document.keySet());
+            }
             if (schema == null) {
                 schema = parseSchema(document);
             }
             final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-            document.entrySet().stream().forEach(entry -> addColumn(recordBuilder, entry));
+            columnsList.stream().forEach(name -> addColumn(recordBuilder, name, getValue(pathMap.get(name), name, document)));
             return recordBuilder.build();
         }
         return null;
@@ -102,14 +118,13 @@ public class MongoDBInputSource implements Serializable {
 
     private Schema parseSchema(Document document) {
         final Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
-        document.entrySet().stream().forEach(entry -> addField(schemaBuilder, entry));
+        columnsList.stream().forEach(name -> addField(schemaBuilder, name, getValue(pathMap.get(name), name, document)));
         return schemaBuilder.build();
     }
 
-    private void addField(final Schema.Builder schemaBuilder, final Map.Entry<String, Object> entry) {
-        final Object value = entry.getValue();
+    private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        entryBuilder.withName(entry.getKey()).withNullable(true);
+        entryBuilder.withName(name).withNullable(true);
         if (value instanceof ObjectId) {
             schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.STRING).build());
         } else if (value instanceof String) {
@@ -131,10 +146,9 @@ public class MongoDBInputSource implements Serializable {
         }
     }
 
-    private void addColumn(final Record.Builder builder, final Map.Entry<String, Object> entry) {
-        final Object value = entry.getValue();
+    private void addColumn(final Record.Builder builder, final String name, Object value) {
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        entryBuilder.withName(entry.getKey()).withNullable(true);
+        entryBuilder.withName(name).withNullable(true);
         if (value instanceof ObjectId) {
             builder.withString(entryBuilder.withType(Schema.Type.STRING).build(), value == null ? null : value.toString());
         } else if (value instanceof String) {

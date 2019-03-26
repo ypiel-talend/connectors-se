@@ -1,6 +1,7 @@
 package org.talend.components.mongodb.source;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.Data;
 import org.talend.components.mongodb.dataset.MongoDBDataset;
@@ -13,9 +14,10 @@ import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
-@GridLayouts({ @GridLayout(value = { @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "setReadPreference" }),
-        @GridLayout.Row({ "readPreference" }), @GridLayout.Row({ "query" }), @GridLayout.Row({ "limit" }),
-                /* @GridLayout.Row({ "mapping" }), @GridLayout.Row({ "sort" }) */ }, names = GridLayout.FormType.MAIN),
+@GridLayouts({
+        @GridLayout(value = { @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "setReadPreference" }),
+                @GridLayout.Row({ "readPreference" }), @GridLayout.Row({ "query" }), @GridLayout.Row({ "limit" }),
+                @GridLayout.Row({ "mapping" }), @GridLayout.Row({ "sort" }) }, names = GridLayout.FormType.MAIN),
         @GridLayout(value = { @GridLayout.Row({ "noQueryTimeout" }) }, names = GridLayout.FormType.ADVANCED), })
 @Documentation("TODO fill the documentation for this configuration")
 public class MongoDBInputMapperConfiguration implements Serializable {
@@ -50,13 +52,13 @@ public class MongoDBInputMapperConfiguration implements Serializable {
     @Documentation("limit")
     private int limit;
 
-    // @Option
-    // @Documentation("mapping")
-    // private List<InputMapping> mapping;
-    //
-    // @Option
-    // @Documentation("sort")
-    // private List<Sort> sort;
+    @Option
+    @Documentation("mapping")
+    private List<InputMapping> mapping;
+
+    @Option
+    @Documentation("sort")
+    private List<Sort> sort;
 
     @Option
     @Documentation("No timeout for queries")
