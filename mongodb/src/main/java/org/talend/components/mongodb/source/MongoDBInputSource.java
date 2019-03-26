@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -85,11 +86,21 @@ public class MongoDBInputSource implements Serializable {
         Document myQuery = Document.parse(configuration.getQuery());
         FindIterable<Document> fi = collection.find(myQuery).noCursorTimeout(configuration.isNoQueryTimeout());
         fi.limit(configuration.getLimit());
+        setSorting(fi);
         pathMap = parsePathMap(configuration.getMapping());
         if (configuration.getDataset().getSchema() != null && !configuration.getDataset().getSchema().isEmpty()) {
             columnsList.addAll(configuration.getDataset().getSchema());
         }
         cursor = fi.iterator();
+    }
+
+    private final void setSorting(final FindIterable<Document> findIterable) {
+        if(configuration.getSort() == null || configuration.getSort().isEmpty()) {
+            return;
+        }
+        BasicDBObject orderBy = new BasicDBObject();
+        configuration.getSort().stream().forEach(s -> orderBy.put(s.getColumn(), (s.getOrder() == Sort.SortingOrder.asc) ? 1: -1));
+        findIterable.sort(orderBy);
     }
 
     private final Map<String, String> parsePathMap(List<InputMapping> mapping) {
