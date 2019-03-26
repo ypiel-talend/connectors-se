@@ -3,7 +3,6 @@ package org.talend.components.mongodb.source;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -49,11 +48,16 @@ public class MongoDBInputSource implements Serializable {
 
     private final List<String> columnsList = new ArrayList<>();
 
+    private final QueryDataFinder<Document> dataFinder;
+
     public MongoDBInputSource(@Option("configuration") final MongoDBInputMapperConfiguration configuration,
             final MongoDBService service, final RecordBuilderFactory builderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;
+        this.dataFinder = configuration.getQueryType() == MongoDBInputMapperConfiguration.QueryType.FIND_QUERY
+                ? new FindQueryDataFinder()
+                : new AggregationPipelineQueryDataFinder();
     }
 
     @PostConstruct
@@ -62,6 +66,17 @@ public class MongoDBInputSource implements Serializable {
                 new MongoDBService.InputClientOptionsFactory(configuration));
         MongoCollection<Document> collection = service.getCollection(configuration.getDataset(), mongoClient);
 
+        checkIndexList(collection);
+
+        pathMap = parsePathMap(configuration.getMapping());
+        if (configuration.getDataset().getSchema() != null && !configuration.getDataset().getSchema().isEmpty()) {
+            columnsList.addAll(configuration.getDataset().getSchema());
+        }
+        cursor = dataFinder.findData(collection, configuration);
+    }
+
+    // Do we still need this? it will be run on cloud, not sure anyone would pay attention to this warning.
+    private void checkIndexList(MongoCollection<?> collection) {
         boolean needIndexWarning = true;
         String indexList = "";
         for (DBObject index : collection.listIndexes(DBObject.class)) {
@@ -83,24 +98,6 @@ public class MongoDBInputSource implements Serializable {
         if ((!"".equals(indexList)) && (needIndexWarning)) {
             log.warn("tMongoDBInput_1 - The query does not contain any reference an index.  [" + indexList.substring(1) + " ]");
         }
-        Document myQuery = Document.parse(configuration.getQuery());
-        FindIterable<Document> fi = collection.find(myQuery).noCursorTimeout(configuration.isNoQueryTimeout());
-        fi.limit(configuration.getLimit());
-        setSorting(fi);
-        pathMap = parsePathMap(configuration.getMapping());
-        if (configuration.getDataset().getSchema() != null && !configuration.getDataset().getSchema().isEmpty()) {
-            columnsList.addAll(configuration.getDataset().getSchema());
-        }
-        cursor = fi.iterator();
-    }
-
-    private final void setSorting(final FindIterable<Document> findIterable) {
-        if(configuration.getSort() == null || configuration.getSort().isEmpty()) {
-            return;
-        }
-        BasicDBObject orderBy = new BasicDBObject();
-        configuration.getSort().stream().forEach(s -> orderBy.put(s.getColumn(), (s.getOrder() == Sort.SortingOrder.asc) ? 1: -1));
-        findIterable.sort(orderBy);
     }
 
     private final Map<String, String> parsePathMap(List<InputMapping> mapping) {

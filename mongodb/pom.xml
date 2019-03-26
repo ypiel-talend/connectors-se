@@ -79,19 +79,19 @@
     <dependency>
       <groupId>org.talend.sdk.component</groupId>
       <artifactId>component-runtime-beam</artifactId>
-      <version>1.1.7</version>
+      <version>${component-runtime.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.talend.sdk.component</groupId>
       <artifactId>component-runtime-beam-junit</artifactId>
-      <version>1.1.7</version>
+      <version>${component-runtime.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.talend.sdk.component</groupId>
       <artifactId>component-runtime-junit</artifactId>
-      <version>1.1.7</version>
+      <version>${component-runtime.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -135,7 +135,7 @@
       <extension>
         <groupId>org.talend.sdk.component</groupId>
         <artifactId>talend-component-maven-plugin</artifactId>
-        <version>1.1.7</version>
+        <version>${component-runtime.version}</version>
       </extension>
     </extensions>
   </build>

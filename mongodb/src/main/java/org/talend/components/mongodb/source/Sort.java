@@ -28,6 +28,7 @@ public class Sort implements Serializable {
     private SortingOrder order;
 
     public enum SortingOrder {
-        asc, desc;
+        asc,
+        desc;
     }
 }
