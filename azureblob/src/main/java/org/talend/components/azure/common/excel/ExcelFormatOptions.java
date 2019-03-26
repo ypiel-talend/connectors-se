@@ -26,12 +26,12 @@ public class ExcelFormatOptions {
 
     @Option
     @Documentation("Excel format")
-    private ExcelFormat excelFormat;
+    private ExcelFormat excelFormat = ExcelFormat.EXCEL2007;
 
     @Option
     @ActiveIf(target = "excelFormat", value = "HTML")
     @Documentation("Encoding")
-    private Encoding encoding;
+    private Encoding encoding = Encoding.UFT8;
 
     @Option
     @ActiveIfs({ @ActiveIf(target = "excelFormat", value = "HTML"), @ActiveIf(target = "encoding", value = "OTHER") })

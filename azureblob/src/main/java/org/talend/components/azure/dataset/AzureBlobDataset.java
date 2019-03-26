@@ -46,7 +46,7 @@ public class AzureBlobDataset implements Serializable {
 
     @Option
     @Documentation("File format")
-    private FileFormat fileFormat;
+    private FileFormat fileFormat = FileFormat.AVRO;
 
     @Option
     @ActiveIf(target = "fileFormat", value = "CSV")

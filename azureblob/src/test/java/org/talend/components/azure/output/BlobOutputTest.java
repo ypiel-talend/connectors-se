@@ -12,7 +12,7 @@ import org.talend.sdk.component.junit.JoinInputFactory;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.runtime.output.Processor;
 
-public class OutputOutputTest {
+public class BlobOutputTest {
 
     @ClassRule
     public static final SimpleComponentRule COMPONENT_FACTORY = new SimpleComponentRule("org.talend.components");
@@ -26,7 +26,7 @@ public class OutputOutputTest {
         final OutputOutputConfiguration configuration = new OutputOutputConfiguration();
 
         // We create the component processor instance using the configuration filled above
-        final Processor processor = COMPONENT_FACTORY.createProcessor(OutputOutput.class, configuration);
+        final Processor processor = COMPONENT_FACTORY.createProcessor(BlobOutput.class, configuration);
 
         // The join input factory construct inputs test data for every input branch you have defined for this component
         // Make sure to fil in some test data for the branches you want to test

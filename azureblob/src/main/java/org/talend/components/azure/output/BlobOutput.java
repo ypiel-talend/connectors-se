@@ -22,13 +22,13 @@ import org.talend.components.azure.service.AzureBlobComponentServices;
 @Icon(value = Icon.IconType.CUSTOM, custom = "AzureOutput")
 @Processor(name = "Output")
 @Documentation("TODO fill the documentation for this processor")
-public class OutputOutput implements Serializable {
+public class BlobOutput implements Serializable {
 
     private final OutputOutputConfiguration configuration;
 
     private final AzureBlobComponentServices service;
 
-    public OutputOutput(@Option("configuration") final OutputOutputConfiguration configuration,
+    public BlobOutput(@Option("configuration") final OutputOutputConfiguration configuration,
             final AzureBlobComponentServices service) {
         this.configuration = configuration;
         this.service = service;

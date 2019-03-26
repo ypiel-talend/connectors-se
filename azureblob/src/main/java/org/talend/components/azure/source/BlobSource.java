@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -14,7 +15,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 
 @Documentation("TODO fill the documentation for this source")
-public class InputSource implements Serializable {
+public class BlobSource implements Serializable {
 
     private final InputMapperConfiguration configuration;
 
@@ -22,11 +23,16 @@ public class InputSource implements Serializable {
 
     private final RecordBuilderFactory builderFactory;
 
-    public InputSource(@Option("configuration") final InputMapperConfiguration configuration,
-            final AzureBlobComponentServices service, final RecordBuilderFactory builderFactory) {
+    private final MessageService i18n;
+
+    private int i = 0;
+
+    public BlobSource(@Option("configuration") final InputMapperConfiguration configuration,
+            final AzureBlobComponentServices service, final RecordBuilderFactory builderFactory, final MessageService i18n) {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;
+        this.i18n = i18n;
     }
 
     @PostConstruct

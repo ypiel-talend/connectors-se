@@ -34,12 +34,21 @@
   </properties>
 
   <dependencies>
-    <!-- https://mvnrepository.com/artifact/com.microsoft.azure/azure-storage -->
+    <!-- AzureBlob library -->
     <dependency>
       <groupId>com.microsoft.azure</groupId>
       <artifactId>azure-storage</artifactId>
       <version>8.1.0</version>
     </dependency>
+
+
+    <!-- CSV format -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+      <version>${commons-csv.version}</version>
+    </dependency>
+
   </dependencies>
 
   <build>

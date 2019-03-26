@@ -25,7 +25,7 @@ public class CSVFormatOptions {
 
     @Option
     @Documentation("Record delimiter")
-    private RecordDelimiter recordDelimiter;
+    private RecordDelimiter recordDelimiter = RecordDelimiter.CRLF;
 
     @Option
     @ActiveIf(target = "recordDelimiter", value = "OTHER")
@@ -34,7 +34,7 @@ public class CSVFormatOptions {
 
     @Option
     @Documentation("Field delimiter")
-    private FieldDelimiter fieldDelimiter;
+    private FieldDelimiter fieldDelimiter = FieldDelimiter.SEMICOLON;
 
     @Option
     @ActiveIf(target = "fieldDelimiter", value = "OTHER")
@@ -43,7 +43,7 @@ public class CSVFormatOptions {
 
     @Option
     @Documentation("Encoding")
-    private Encoding encoding;
+    private Encoding encoding = Encoding.UFT8;
 
     @Option
     @ActiveIf(target = "encoding", value = "OTHER")
