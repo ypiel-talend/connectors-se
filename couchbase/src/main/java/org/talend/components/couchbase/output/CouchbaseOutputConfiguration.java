@@ -1,5 +1,6 @@
 package org.talend.components.couchbase.output;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.sdk.component.api.configuration.Option;
@@ -9,23 +10,20 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Slf4j
-@GridLayout({
-        // the generated layout put one configuration entry per line,
-        // customize it as much as needed
-        @GridLayout.Row({ "configuration1" }) })
+@Data
+@GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "idFieldName" }), @GridLayout.Row({ "dieOnError" }) })
 @Documentation("TODO fill the documentation for this configuration")
 public class CouchbaseOutputConfiguration implements Serializable {
 
     @Option
     @Documentation("TODO fill the documentation for this parameter")
-    private CouchbaseDataSet configuration1;
+    private CouchbaseDataSet dataSet;
 
-    public CouchbaseDataSet getConfiguration1() {
-        return configuration1;
-    }
+    @Option
+    @Documentation("")
+    private String idFieldName;
 
-    public CouchbaseOutputConfiguration setConfiguration1(CouchbaseDataSet configuration1) {
-        this.configuration1 = configuration1;
-        return this;
-    }
+    @Option
+    @Documentation("")
+    private boolean dieOnError;
 }

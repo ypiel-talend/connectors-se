@@ -24,7 +24,7 @@ public class CouchbaseOutputOutputTest {
         // Output configuration
         // Setup your component configuration for the test here
         final CouchbaseOutputConfiguration configuration = new CouchbaseOutputConfiguration()
-        /* .setConfiguration1() */;
+        /* .setDataSet() */;
 
         // We create the component processor instance using the configuration filled above
         final Processor processor = COMPONENT_FACTORY.createProcessor(CouchbaseOutput.class, configuration);
