@@ -131,7 +131,7 @@ spec:
                 stage('Site') {
                     steps {
                         container('main') {
-                            sh 'cd ci_site && mvn -U -B clean site site:stage -Dmaven.test.failure.ignore=true'
+                            sh 'cd ci_site && mvn -U -B clean site site:stage -DskipTests -Dmaven.test.failure.ignore=true'
                         }
                     }
                     post {
