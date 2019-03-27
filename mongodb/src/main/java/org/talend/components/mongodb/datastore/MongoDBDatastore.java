@@ -22,8 +22,8 @@ import org.talend.sdk.component.api.meta.Documentation;
         // customize it as much as needed
         @GridLayout.Row({ "server", "port" }), @GridLayout.Row({ "database" }), @GridLayout.Row({ "useSSL" }),
         @GridLayout.Row({ "authentication" }), @GridLayout.Row({ "authenticationMechanism" }),
-        @GridLayout.Row({ "username", "password" }), @GridLayout.Row({ "setAuthenticationDatabase" }),
-        @GridLayout.Row({ "authenticationDatabase" }) })
+        @GridLayout.Row({ "kerberosCreds" }), @GridLayout.Row({ "username", "password" }),
+        @GridLayout.Row({ "setAuthenticationDatabase" }), @GridLayout.Row({ "authenticationDatabase" }) })
 @Documentation("TODO fill the documentation for this configuration")
 public class MongoDBDatastore implements Serializable {
 
@@ -57,8 +57,8 @@ public class MongoDBDatastore implements Serializable {
     public enum AuthenticationMechanism {
         NEGOTIATE_MEC,
         PLAIN_MEC,
-        SCRAMSHA1_MEC
-        // ,KERBEROS_MEC
+        SCRAMSHA1_MEC,
+        KERBEROS_MEC
     }
 
     @Option
@@ -75,14 +75,23 @@ public class MongoDBDatastore implements Serializable {
     private String authenticationDatabase;
 
     @Option
-    @ActiveIf(target = "authentication", value = "true")
+    @ActiveIfs(value = { @ActiveIf(target = "authentication", value = "true"),
+            @ActiveIf(target = "authenticationMechanism", value = { "NEGOTIATE_MEC", "SCRAMSHA1_MEC", "PLAIN_MEC" }) })
     @Documentation("Enter the username")
     private String username;
 
     @Option
     @Credential
-    @ActiveIf(target = "authentication", value = "true")
+    @ActiveIfs(value = { @ActiveIf(target = "authentication", value = "true"),
+            @ActiveIf(target = "authenticationMechanism", value = { "NEGOTIATE_MEC", "SCRAMSHA1_MEC", "PLAIN_MEC" }) })
     @Documentation("Enter the password")
     private String password;
+
+    @Option
+    @Credential
+    @ActiveIfs(value = { @ActiveIf(target = "authentication", value = "true"),
+            @ActiveIf(target = "authenticationMechanism", value = { "KERBEROS_MEC" }) })
+    @Documentation("Credentials for Kerberos authentication")
+    private KerberosCredentials kerberosCreds;
 
 }

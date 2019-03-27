@@ -70,26 +70,26 @@ public class MongoDBService {
         if (datastore.isAuthentication()) {
             MongoCredential mongoCredential = null;
             String username = datastore.getUsername();
-            String database = datastore.isSetAuthenticationDatabase() ? datastore.getAuthenticationDatabase()
+            String database = datastore.getDatabase();
+            String authDatabase = datastore.isSetAuthenticationDatabase() ? datastore.getAuthenticationDatabase()
                     : datastore.getDatabase();
             char[] pass = datastore.getPassword().toCharArray();
             switch (datastore.getAuthenticationMechanism()) {
             case NEGOTIATE_MEC:
-                mongoCredential = MongoCredential.createCredential(username, database, pass);
+                mongoCredential = MongoCredential.createCredential(username, authDatabase, pass);
                 break;
             case PLAIN_MEC:
                 mongoCredential = MongoCredential.createPlainCredential(username, database, pass);
                 break;
             case SCRAMSHA1_MEC:
-                mongoCredential = MongoCredential.createScramSha1Credential(username, database, pass);
+                mongoCredential = MongoCredential.createScramSha1Credential(username, authDatabase, pass);
                 break;
-            // case KERBEROS_MEC:
-            // // TODO impliment
-            // System.setProperty("java.security.krb5.realm", "krbRealm");
-            // System.setProperty("java.security.krb5.kdc", "krbKdc");
-            // System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-            // mongoCredential = MongoCredential.createGSSAPICredential("krbUserPrincipal");
-            // break;
+            case KERBEROS_MEC:
+                System.setProperty("java.security.krb5.realm", datastore.getKerberosCreds().getRealm());
+                System.setProperty("java.security.krb5.kdc", datastore.getKerberosCreds().getKdcServer());
+                System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
+                mongoCredential = MongoCredential.createGSSAPICredential(datastore.getKerberosCreds().getUserPrincipal());
+                break;
             }
             mongo = new MongoClient(serverAddress, mongoCredential, clientOptions);
         } else {
