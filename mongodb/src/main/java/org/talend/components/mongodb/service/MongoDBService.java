@@ -61,49 +61,14 @@ public class MongoDBService {
 
     }
 
-    public MongoClient getMongoClient(final MongoDBDatastore datastore, ClientOptionsFactory optionsFactory) {
-        MongoClient mongo = null;
-        MongoClientOptions clientOptions = optionsFactory.createOptions();
-
-        ServerAddress serverAddress = new ServerAddress(datastore.getServer(), datastore.getPort());
-
-        if (datastore.isAuthentication()) {
-            MongoCredential mongoCredential = null;
-            String username = datastore.getUsername();
-            String database = datastore.getDatabase();
-            String authDatabase = datastore.isSetAuthenticationDatabase() ? datastore.getAuthenticationDatabase()
-                    : datastore.getDatabase();
-            char[] pass = datastore.getPassword().toCharArray();
-            switch (datastore.getAuthenticationMechanism()) {
-            case NEGOTIATE_MEC:
-                mongoCredential = MongoCredential.createCredential(username, authDatabase, pass);
-                break;
-            case PLAIN_MEC:
-                mongoCredential = MongoCredential.createPlainCredential(username, database, pass);
-                break;
-            case SCRAMSHA1_MEC:
-                mongoCredential = MongoCredential.createScramSha1Credential(username, authDatabase, pass);
-                break;
-            case KERBEROS_MEC:
-                System.setProperty("java.security.krb5.realm", datastore.getKerberosCreds().getRealm());
-                System.setProperty("java.security.krb5.kdc", datastore.getKerberosCreds().getKdcServer());
-                System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-                mongoCredential = MongoCredential.createGSSAPICredential(datastore.getKerberosCreds().getUserPrincipal());
-                break;
-            }
-            mongo = new MongoClient(serverAddress, mongoCredential, clientOptions);
-        } else {
-            mongo = new MongoClient(serverAddress, clientOptions);
-        }
-
-        // TODO useReplicaSet
-
+    public MongoClient getMongoClient(final MongoDBDatastore datastore, final ClientOptionsFactory optionsFactory) {
+        MongoClientFactory factory = MongoClientFactory.getInstance(datastore, optionsFactory.createOptions());
+        MongoClient mongo = factory.createClient();
         return mongo;
     }
 
     public MongoCollection<Document> getCollection(final MongoDBDataset dataset, final MongoClient client) {
         MongoDatabase db = client.getDatabase(dataset.getDatastore().getDatabase());
-        log.debug("Retrieving records from the datasource.");
         return db.getCollection(dataset.getCollection());
     }
 

@@ -1,6 +1,7 @@
 package org.talend.components.mongodb.datastore;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.Data;
 import org.talend.components.mongodb.service.UIMongoDBService;
@@ -18,8 +19,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 @DataStore("MongoDBDatastore")
 @Checkable(UIMongoDBService.HEALTH_CHECK)
 @GridLayout({
-        // the generated layout put one configuration entry per line,
-        // customize it as much as needed
+        @GridLayout.Row({ "useReplicaSetAddress" }), @GridLayout.Row({ "replicaAddresses" }),
         @GridLayout.Row({ "server", "port" }), @GridLayout.Row({ "database" }), @GridLayout.Row({ "useSSL" }),
         @GridLayout.Row({ "authentication" }), @GridLayout.Row({ "authenticationMechanism" }),
         @GridLayout.Row({ "kerberosCreds" }), @GridLayout.Row({ "username", "password" }),
@@ -28,12 +28,23 @@ import org.talend.sdk.component.api.meta.Documentation;
 public class MongoDBDatastore implements Serializable {
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Use replica addresses instead of single server")
+    private boolean useReplicaSetAddress;
+
+    @Option
+    @Documentation("Replica addresses set")
+    @ActiveIf(target = "useReplicaSetAddress", value = "true")
+    private List<ReplicaAddress> replicaAddresses;
+
+    @Option
+    @Documentation("Server address")
+    @ActiveIf(target = "useReplicaSetAddress", value = "false")
     private String server;
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Server port")
     @DefaultValue("27017")
+    @ActiveIf(target = "useReplicaSetAddress", value = "false")
     private int port;
 
     @Option
