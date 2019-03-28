@@ -80,7 +80,7 @@ public class CouchbaseOutput implements Serializable {
         // this is the method allowing you to handle the input(s) and emit the output(s)
         // after some custom logic you put here, to send a value to next element you can use an
         // output parameter and call emit(value).
-        bucket.upsert(toJsonDocument(defaultInput));
+        bucket.upsert(toJsonDocument(idFieldName, defaultInput));
     }
 
     @AfterGroup
@@ -98,46 +98,55 @@ public class CouchbaseOutput implements Serializable {
         cluster.disconnect();
     }
 
-    private JsonDocument toJsonDocument(Record record) {
+    private JsonDocument toJsonDocument(String idFieldName, Record record) {
         List<Schema.Entry> entries = record.getSchema().getEntries();
         JsonObject jsonObject = JsonObject.create();
         for (Schema.Entry entry : entries) {
             String entryName = entry.getName();
 
+            Object value = null;
+
             switch (entry.getType()) {
             case INT:
-                jsonObject.put(entryName, record.getInt(entryName));
+                value = record.getInt(entryName);
                 break;
             case LONG:
-                jsonObject.put(entryName, record.getLong(entryName));
+                value = record.getLong(entryName);
                 break;
             case BYTES:
-                jsonObject.put(entryName, record.getBytes(entryName));
+                value = record.getBytes(entryName);
                 break;
             case FLOAT:
-                jsonObject.put(entryName, record.getFloat(entryName));
+                value = record.getFloat(entryName);
                 break;
             case DOUBLE:
-                jsonObject.put(entryName, record.getDouble(entryName));
+                value = record.getDouble(entryName);
                 break;
             case STRING:
-                jsonObject.put(entryName, record.getString(entryName));
+                value = record.getString(entryName);
                 break;
             case BOOLEAN:
-                jsonObject.put(entryName, record.getBoolean(entryName));
+                value = record.getBoolean(entryName);
                 break;
             case ARRAY:
-                jsonObject.put(entryName, record.getArray(List.class, entryName));
+                value = record.getArray(List.class, entryName);
                 break;
             case DATETIME:
-                jsonObject.put(entryName, record.getDateTime(entryName));
+                value = record.getDateTime(entryName);
                 break;
             case RECORD:
-                jsonObject.put(entryName, record.getRecord(entryName));
+                value = record.getRecord(entryName);
                 break;
+            default:
+                value = record.get(Object.class, entryName);
+                throw new IllegalArgumentException("Unknown Type " + entry.getType());
             }
+
+            if (entryName.equals(idFieldName)) {
+                value = String.valueOf(value);
+            }
+            jsonObject.put(entryName, value);
         }
-        return JsonDocument.create(String.valueOf(record.getInt(idFieldName)), jsonObject);
-        // todo: now only INT id possible to use
+        return JsonDocument.create(String.valueOf(jsonObject.get(idFieldName)), jsonObject);
     }
 }
