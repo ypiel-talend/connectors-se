@@ -41,6 +41,12 @@
       <version>8.1.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- CSV format -->
     <dependency>

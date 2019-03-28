@@ -16,6 +16,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import lombok.Getter;
 
 @Service
 public class AzureBlobComponentServices {
@@ -27,6 +28,7 @@ public class AzureBlobComponentServices {
 
     public static final String GET_CONTAINER_NAMES = "getContainers";
 
+    @Getter
     @Service
     AzureBlobConnectionServices connectionService;
 

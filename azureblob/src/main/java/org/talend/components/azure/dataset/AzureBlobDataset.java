@@ -19,7 +19,6 @@ import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.excel.ExcelFormatOptions;
 import org.talend.components.azure.datastore.AzureConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -29,8 +28,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
-@GridLayout({ @GridLayout.Row({ "connection" }), @GridLayout.Row({ "containerName" }), @GridLayout.Row({ "fileFormat" }),
-        @GridLayout.Row({ "csvOptions" }), @GridLayout.Row("excelOptions") })
+@GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row("containerName"), @GridLayout.Row("directory"),
+        @GridLayout.Row("fileFormat"), @GridLayout.Row("csvOptions"), @GridLayout.Row("excelOptions") })
 @Data
 @DataSet("AzureDataSet")
 public class AzureBlobDataset implements Serializable {
@@ -45,8 +44,12 @@ public class AzureBlobDataset implements Serializable {
     private String containerName;
 
     @Option
+    @Documentation("The full path of folder in the selected container")
+    private String directory;
+
+    @Option
     @Documentation("File format")
-    private FileFormat fileFormat = FileFormat.AVRO;
+    private FileFormat fileFormat;
 
     @Option
     @ActiveIf(target = "fileFormat", value = "CSV")

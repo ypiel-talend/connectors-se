@@ -26,8 +26,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 import static org.talend.components.azure.service.AzureBlobComponentServices.TEST_CONNECTION;
 
-@GridLayout({ @GridLayout.Row({ "accountName" }), @GridLayout.Row({ "accountKey" }), @GridLayout.Row({ "protocol" }),
-        @GridLayout.Row({ "useAzureSharedSignature" }), @GridLayout.Row({ "azureSharedAccessSignature" }) })
+@GridLayout({ @GridLayout.Row("accountName"), @GridLayout.Row("accountKey"), @GridLayout.Row("protocol"),
+        @GridLayout.Row("useAzureSharedSignature"), @GridLayout.Row("azureSharedAccessSignature") })
 @Data
 @DataStore
 @Checkable(TEST_CONNECTION)

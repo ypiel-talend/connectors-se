@@ -5,14 +5,14 @@ import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.talend.components.azure.common.runtime.BlobFileReader;
+import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
-import org.talend.components.azure.service.AzureBlobComponentServices;
 
 @Documentation("TODO fill the documentation for this source")
 public class BlobSource implements Serializable {
@@ -25,7 +25,7 @@ public class BlobSource implements Serializable {
 
     private final MessageService i18n;
 
-    private int i = 0;
+    private BlobFileReader reader;
 
     public BlobSource(@Option("configuration") final InputMapperConfiguration configuration,
             final AzureBlobComponentServices service, final RecordBuilderFactory builderFactory, final MessageService i18n) {
@@ -36,24 +36,18 @@ public class BlobSource implements Serializable {
     }
 
     @PostConstruct
-    public void init() {
-        // this method will be executed once for the whole component execution,
-        // this is where you can establish a connection for instance
+    public void init() throws Exception {
+        reader = BlobFileReader.BlobFileReaderFactory.getReader(configuration.getDataset(), builderFactory,
+                service.getConnectionService());
     }
 
     @Producer
     public Record next() {
-        // this is the method allowing you to go through the dataset associated
-        // to the component configuration
-        //
-        // return null means the dataset has no more data to go through
-        // you can use the builderFactory to create a new Record.
-        return null;
+        return reader.readRecord();
     }
 
     @PreDestroy
     public void release() {
-        // this is the symmetric method of the init() one,
-        // release potential connections you created or data you cached
+        // NOOP
     }
 }

@@ -48,8 +48,6 @@ public class AzureBlobConnectionServices {
 
     private static final String UNKNOWN_VERSION = "UNKNOWN";
 
-    public static final int DEFAULT_CREATE_TABLE_TIMEOUT = 50000;
-
     private static String applicationVersion = UNKNOWN_VERSION;
 
     private static String componentVersion = UNKNOWN_VERSION;
@@ -83,7 +81,7 @@ public class AzureBlobConnectionServices {
         return String.format(USER_AGENT_FORMAT, applicationVersion, componentVersion);
     }
 
-    CloudStorageAccount createStorageAccount(AzureConnection azureConnection) throws URISyntaxException {
+    public CloudStorageAccount createStorageAccount(AzureConnection azureConnection) throws URISyntaxException {
         StorageCredentials credentials = null;
         if (!azureConnection.isUseAzureSharedSignature()) {
             credentials = new StorageCredentialsAccountAndKey(azureConnection.getAccountName(), azureConnection.getAccountKey());
@@ -93,7 +91,7 @@ public class AzureBlobConnectionServices {
         return new CloudStorageAccount(credentials, azureConnection.getProtocol() == Protocol.HTTPS);
     }
 
-    CloudBlobClient createCloudBlobClient(CloudStorageAccount connection, RetryPolicy retryPolicy) {
+    public CloudBlobClient createCloudBlobClient(CloudStorageAccount connection, RetryPolicy retryPolicy) {
         CloudBlobClient tableClient = connection.createCloudBlobClient();
         tableClient.getDefaultRequestOptions().setRetryPolicyFactory(retryPolicy);
 
