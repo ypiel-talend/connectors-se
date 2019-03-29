@@ -455,6 +455,7 @@
           <pushChanges>false</pushChanges>
           <releaseProfiles>release</releaseProfiles>
           <tagNameFormat>release/@{project.version}</tagNameFormat>
+          <goals>deploy</goals> <!-- we can't deploy the mvn site for now-->
         </configuration>
       </plugin>
       <plugin>
