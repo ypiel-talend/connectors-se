@@ -21,8 +21,9 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @GridLayout(value = { @GridLayout.Row("recordDelimiter"), @GridLayout.Row("customRecordDelimiter"),
-        @GridLayout.Row("fieldDelimiter"), @GridLayout.Row("customFieldDelimiter"), @GridLayout.Row("encoding"),
-        @GridLayout.Row("customEncoding"), @GridLayout.Row("useHeader"), @GridLayout.Row("header") })
+        @GridLayout.Row("fieldDelimiter"), @GridLayout.Row("customFieldDelimiter"), @GridLayout.Row("textEnclosureCharacter"),
+        @GridLayout.Row("escapeCharacter"), @GridLayout.Row("encoding"), @GridLayout.Row("customEncoding"),
+        @GridLayout.Row("useHeader"), @GridLayout.Row("header") })
 @Data
 public class CSVFormatOptions {
 
@@ -43,6 +44,14 @@ public class CSVFormatOptions {
     @ActiveIf(target = "fieldDelimiter", value = "OTHER")
     @Documentation("Your custom field delimiter")
     private String customFieldDelimiter;
+
+    @Option
+    @Documentation("Text enclosure character")
+    private String textEnclosureCharacter;
+
+    @Option
+    @Documentation("Escape character")
+    private String escapeCharacter;
 
     @Option
     @Documentation("Encoding")

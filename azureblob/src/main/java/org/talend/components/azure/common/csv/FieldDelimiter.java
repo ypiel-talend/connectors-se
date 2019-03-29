@@ -13,10 +13,19 @@
 
 package org.talend.components.azure.common.csv;
 
+import lombok.Getter;
+
 public enum FieldDelimiter {
-    SEMICOLON,
-    COMMA,
-    TAB,
-    SPACE,
-    OTHER
+    SEMICOLON(":"),
+    COMMA(","),
+    TAB("\t"),
+    SPACE(" "),
+    OTHER("");
+
+    @Getter
+    private String delimiterValue;
+
+    FieldDelimiter(String delimiter) {
+        this.delimiterValue = delimiter;
+    }
 }
