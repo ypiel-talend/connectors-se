@@ -18,8 +18,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Data
 @DataStore("MongoDBDatastore")
 @Checkable(UIMongoDBService.HEALTH_CHECK)
-@GridLayout({
-        @GridLayout.Row({ "useReplicaSetAddress" }), @GridLayout.Row({ "replicaAddresses" }),
+@GridLayout({ @GridLayout.Row({ "useReplicaSetAddress" }), @GridLayout.Row({ "replicaAddresses" }),
         @GridLayout.Row({ "server", "port" }), @GridLayout.Row({ "database" }), @GridLayout.Row({ "useSSL" }),
         @GridLayout.Row({ "authentication" }), @GridLayout.Row({ "authenticationMechanism" }),
         @GridLayout.Row({ "kerberosCreds" }), @GridLayout.Row({ "username", "password" }),

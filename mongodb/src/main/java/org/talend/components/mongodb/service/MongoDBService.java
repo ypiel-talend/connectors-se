@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.talend.components.mongodb.dataset.MongoDBDataset;
 import org.talend.components.mongodb.datastore.MongoDBDatastore;
+import org.talend.components.mongodb.output.MongoDBOutputConfiguration;
 import org.talend.components.mongodb.source.MongoDBInputMapperConfiguration;
 import org.talend.sdk.component.api.service.Service;
 
@@ -56,6 +57,39 @@ public class MongoDBService {
                 return ReadPreference.secondaryPreferred();
             default:
                 throw new IllegalArgumentException("Unknown read preference");
+            }
+        }
+
+    }
+
+    public static class OutputClientOptionsFactory extends ClientOptionsFactory {
+
+        private final MongoDBOutputConfiguration properties;
+
+        public OutputClientOptionsFactory(final MongoDBOutputConfiguration properties) {
+            super(properties.getDataset().getDatastore());
+            this.properties = properties;
+        }
+
+        @Override
+        protected void setSpecificOptions(final MongoClientOptions.Builder builder) {
+            if (properties.isSetWriteConcern() && properties.getWriteConcern() != null) {
+                builder.writeConcern(convertWriteConcern(properties.getWriteConcern())).build();
+            }
+        }
+
+        private WriteConcern convertWriteConcern(MongoDBOutputConfiguration.WriteConcern writeConcern) {
+            switch (writeConcern) {
+            case ACKNOWLEDGED:
+                return WriteConcern.ACKNOWLEDGED;
+            case UNACKNOWLEDGED:
+                return WriteConcern.UNACKNOWLEDGED;
+            case JOURNALED:
+                return WriteConcern.JOURNALED;
+            case REPLICA_ACKNOWLEDGED:
+                return WriteConcern.W2;
+            default:
+                throw new IllegalArgumentException("Unknown write concern");
             }
         }
 

@@ -43,9 +43,9 @@ public abstract class MongoClientFactory {
 
     protected List<ServerAddress> getServerAddresses() {
         List<ServerAddress> addressesList;
-        if(datastore.isUseReplicaSetAddress()) {
-            addressesList = datastore.getReplicaAddresses().stream().map(a -> new ServerAddress(a.getAddress(), a.getPort())).collect(
-                    Collectors.toList());
+        if (datastore.isUseReplicaSetAddress()) {
+            addressesList = datastore.getReplicaAddresses().stream().map(a -> new ServerAddress(a.getAddress(), a.getPort()))
+                    .collect(Collectors.toList());
         } else {
             addressesList = Collections.singletonList(new ServerAddress(datastore.getServer(), datastore.getPort()));
         }
