@@ -5,10 +5,6 @@ import com.couchbase.client.dcp.message.DcpExpirationMessage;
 import com.couchbase.client.dcp.message.DcpMutationMessage;
 import com.couchbase.client.deps.io.netty.buffer.ByteBuf;
 import com.couchbase.client.deps.io.netty.util.CharsetUtil;
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.CouchbaseCluster;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.RawJsonDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +20,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -92,7 +85,7 @@ public class CouchbaseInputSource implements Serializable {
                     return record;
                 }
             } catch (InterruptedException e) {
-                LOG.error("Failed to poll event from the results queue", e);
+                LOG.error("Failed to poll event from the results queue ", e);
             }
             if (!connection.isStreaming() && resultsQueue.isEmpty()) {
                 break;

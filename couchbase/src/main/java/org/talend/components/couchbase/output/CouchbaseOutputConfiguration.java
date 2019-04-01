@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -20,6 +21,7 @@ public class CouchbaseOutputConfiguration implements Serializable {
     private CouchbaseDataSet dataSet;
 
     @Option
+    @Required
     @Documentation("")
     private String idFieldName;
 

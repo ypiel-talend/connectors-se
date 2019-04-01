@@ -1,22 +1,18 @@
 package org.talend.components.couchbase.source;
 
-import static java.util.Collections.singletonList;
-
-import java.io.Serializable;
-import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.input.Assessor;
-import org.talend.sdk.component.api.input.Emitter;
-import org.talend.sdk.component.api.input.PartitionMapper;
-import org.talend.sdk.component.api.input.PartitionSize;
-import org.talend.sdk.component.api.input.Split;
+import org.talend.sdk.component.api.input.*;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
+import java.io.Serializable;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 //
 // this class role is to enable the work to be distributed in environments supporting it.

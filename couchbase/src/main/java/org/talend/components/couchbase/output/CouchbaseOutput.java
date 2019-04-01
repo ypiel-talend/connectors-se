@@ -3,7 +3,6 @@ package org.talend.components.couchbase.output;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.RawJsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
@@ -20,10 +19,6 @@ import org.talend.sdk.component.api.record.Schema;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler

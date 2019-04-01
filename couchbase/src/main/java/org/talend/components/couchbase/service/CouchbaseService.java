@@ -14,7 +14,6 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
-import java.net.URL;
 import java.util.List;
 
 @Slf4j
