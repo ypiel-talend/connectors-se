@@ -41,12 +41,12 @@ public abstract class AbstractFilterValueModelProducer<T extends WriteModel<Docu
     @Override
     public T createRecord() {
         Document filter = queryObjectUtil.getObject();
-        if (filter.keySet().isEmpty()) {
-            return null;
-        }
         Document object = dbObjectUtil.getObject();
         queryObjectUtil = null;
         dbObjectUtil = null;
+        if (filter.keySet().isEmpty()) {
+            return null;
+        }
         return doCreateModel(filter, object);
     }
 
