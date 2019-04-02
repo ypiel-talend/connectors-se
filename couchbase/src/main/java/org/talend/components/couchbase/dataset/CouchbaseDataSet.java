@@ -1,7 +1,6 @@
 package org.talend.components.couchbase.dataset;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -14,15 +13,14 @@ import java.io.Serializable;
 import java.util.List;
 
 @Version(1)
-@Slf4j
 @Data
 @DataSet("CouchbaseDataSet")
 @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "schema" }) })
-@Documentation("CouchbaseDataSet")
+@Documentation("Couchbase DataSet")
 public class CouchbaseDataSet implements Serializable {
 
     @Option
-    @Documentation("")
+    @Documentation("Schema")
     @Structure
     private List<String> schema;
 

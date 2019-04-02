@@ -1,12 +1,15 @@
 package org.talend.components.couchbase.output;
 
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -26,14 +29,16 @@ import java.util.List;
 @Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
                           // icons/filename_icon32.png in resources
 @Processor(name = "CouchbaseOutput")
-@Documentation("TODO fill the documentation for this processor")
+@Documentation("This component writes data to Couchbase")
 public class CouchbaseOutput implements Serializable {
+
+    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseOutput.class);
 
     private final CouchbaseOutputConfiguration configuration;
 
     private final CouchbaseService service;
 
-    private CouchbaseCluster cluster;
+    private Cluster cluster;
 
     private Bucket bucket;
 
@@ -56,7 +61,6 @@ public class CouchbaseOutput implements Serializable {
         String bucketName = configuration.getDataSet().getDatastore().getBucket();
         String password = configuration.getDataSet().getDatastore().getPassword();
         idFieldName = configuration.getIdFieldName();
-        dieOnError = configuration.isDieOnError();
 
         CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
         this.cluster = CouchbaseCluster.create(environment, bootstrapNodes);

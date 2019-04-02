@@ -1,6 +1,5 @@
 package org.talend.components.couchbase.source;
 
-import lombok.extern.slf4j.Slf4j;
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -18,11 +17,10 @@ import static java.util.Collections.singletonList;
 // this class role is to enable the work to be distributed in environments supporting it.
 //
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
-@Slf4j
 @Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
                           // icons/filename_icon32.png in resources
 @PartitionMapper(name = "CouchbaseInput")
-@Documentation("TODO fill the documentation for this mapper")
+@Documentation("Couchbase input Mapper")
 public class CouchbaseInputMapper implements Serializable {
 
     private final CouchbaseInputMapperConfiguration configuration;

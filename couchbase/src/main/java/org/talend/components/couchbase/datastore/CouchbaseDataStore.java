@@ -1,7 +1,6 @@
 package org.talend.components.couchbase.datastore;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
@@ -14,7 +13,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Version(1)
-@Slf4j
 @Data
 @DataStore("CouchbaseDataStore")
 @Checkable("healthCheck")
@@ -24,17 +22,17 @@ public class CouchbaseDataStore implements Serializable {
 
     @Option
     @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Bucket name")
     private String bucket;
 
     @Required
     @Option
     @Credential
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Password")
     private String password;
 
     @Option
     @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Bootstrap nodes")
     private String bootstrapNodes;
 }

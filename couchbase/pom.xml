@@ -57,11 +57,6 @@
       <artifactId>java-client</artifactId>
       <version>2.7.4</version>
     </dependency>
-    <dependency>
-      <groupId>com.couchbase.client</groupId>
-      <artifactId>dcp-client</artifactId>
-      <version>0.22.0</version>
-    </dependency>
   </dependencies>
 
   <build>

@@ -8,7 +8,10 @@ import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
+import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
@@ -16,12 +19,15 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
 import java.util.List;
 
+@Version(1)
 @Slf4j
 @Service
 public class CouchbaseService {
 
     @Service
     private CouchbaseDataStore couchBaseConnection;
+
+    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
 
     // @Service
     // private I18nMessage i18n;
