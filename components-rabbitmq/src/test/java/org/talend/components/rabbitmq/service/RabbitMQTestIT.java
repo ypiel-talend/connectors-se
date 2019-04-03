@@ -66,8 +66,6 @@ public class RabbitMQTestIT {
 
     private RabbitMQTestExtention.TestContext testContext;
 
-    private Client client;
-
     @BeforeAll
     private void init(RabbitMQTestExtention.TestContext testContext) {
         this.testContext = testContext;
@@ -75,6 +73,7 @@ public class RabbitMQTestIT {
 
     @Test
     public void sendAndReceiveQueueMessage() {
+        System.out.println("sendAndReceiveQueueMessage start");
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
@@ -92,18 +91,20 @@ public class RabbitMQTestIT {
         assertTrue(optional.isPresent(), "Message was not received");
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
+        System.out.println("sendAndReceiveQueueMessage end");
     }
 
     @Test
     public void receiveFanoutMessage() throws MalformedURLException, URISyntaxException {
+        System.out.println("receiveFanoutMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
-        client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
+        Client client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
                 USER_NAME, PASSWORD);
 
         Thread thread = new Thread(() -> {
             while (true) {
-                if (isInputSubscribed()) {
+                if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.FANOUT,
                             FANOUT_EXCHANGE_NAME);
                     break;
@@ -129,18 +130,20 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
+        System.out.println("receiveFanoutMessage end");
     }
 
     @Test
     public void receiveDirectMessage() throws MalformedURLException, URISyntaxException {
+        System.out.println("receiveDirectMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
-        client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
+        Client client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
                 USER_NAME, PASSWORD);
 
         Thread thread = new Thread(() -> {
             while (true) {
-                if (isInputSubscribed()) {
+                if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.DIRECT,
                             DIRECT_EXCHANGE_NAME);
                     break;
@@ -166,6 +169,7 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
+        System.out.println("receiveDirectMessage end");
     }
 
     private void sendMessageToExchange(RabbitMQDataStore store, BuiltinExchangeType exchangeType, String exchangeName) {
@@ -208,7 +212,7 @@ public class RabbitMQTestIT {
         return configuration;
     }
 
-    private boolean isInputSubscribed() {
+    private boolean isInputSubscribed(Client client) {
         return !client.getConnections().isEmpty()
                 && client.getConnection(client.getConnections().get(0).getName()).getChannels() > 0;
     }
