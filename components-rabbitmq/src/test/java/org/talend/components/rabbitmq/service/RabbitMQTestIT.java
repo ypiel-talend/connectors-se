@@ -92,7 +92,7 @@ public class RabbitMQTestIT {
         assertTrue(optional.isPresent(), "Message was not received");
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println(getLogDate() + " sendAndReceiveQueueMessage end");
+        System.out.println(getLogDate() + " sendAndReceiveQueueMessage end\n");
     }
 
     @Test
@@ -107,10 +107,6 @@ public class RabbitMQTestIT {
         Thread thread = new Thread(() -> {
             while (true) {
                 System.out.println(getLogDate() + " trying to send message. receiveFanoutMessage");
-                if (Thread.currentThread().isInterrupted()) {
-                    System.out.println(getLogDate() + " is interrupted. receiveFanoutMessage");
-                    break;
-                }
                 if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.FANOUT,
                             FANOUT_EXCHANGE_NAME);
@@ -119,8 +115,6 @@ public class RabbitMQTestIT {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    System.out.println(getLogDate() + " is interrupted. receiveFanoutMessage");
-                    break;
                 }
             }
             System.out.println(getLogDate() + " is finished. receiveFanoutMessage");
@@ -137,8 +131,6 @@ public class RabbitMQTestIT {
         Job.components().component("rabbitmq-output", "RabbitMQ://Input?" + inputConfig)
                 .component("collector", "test://collector").connections().from("rabbitmq-output").to("collector").build().run();
 
-        thread.interrupt();
-
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
         Optional optional = res.stream().findFirst();
 
@@ -146,7 +138,7 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println(getLogDate() + " receiveFanoutMessage end");
+        System.out.println(getLogDate() + " receiveFanoutMessage end\n");
     }
 
     @Test
@@ -161,10 +153,6 @@ public class RabbitMQTestIT {
         Thread thread = new Thread(() -> {
             while (true) {
                 System.out.println(getLogDate() + " trying to send message. receiveDirectMessage");
-                if (Thread.currentThread().isInterrupted()) {
-                    System.out.println(getLogDate() + " is interrupted. receiveDirectMessage");
-                    break;
-                }
                 if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.DIRECT,
                             DIRECT_EXCHANGE_NAME);
@@ -173,8 +161,6 @@ public class RabbitMQTestIT {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    System.out.println(getLogDate() + " is interrupted. receiveDirectMessage");
-                    break;
                 }
                 System.out.println(getLogDate() + " is finished. receiveDirectMessage");
             }
@@ -194,13 +180,12 @@ public class RabbitMQTestIT {
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
         Optional optional = res.stream().findFirst();
 
-        thread.interrupt();
-
         assertTrue(optional.isPresent(), "Message was not received");
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println(getLogDate() + " receiveDirectMessage end");
+
+        System.out.println(getLogDate() + " receiveDirectMessage end\n");
     }
 
     private void sendMessageToExchange(RabbitMQDataStore store, BuiltinExchangeType exchangeType, String exchangeName) {
@@ -221,15 +206,11 @@ public class RabbitMQTestIT {
             System.out.println(getLogDate() + " sendMessageToExchange basicPublish end");
             channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
             System.out.println(getLogDate() + " sendMessageToExchange basicPublish2 end");
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
             System.out.println(getLogDate() + " sendMessageToExchange trying to close connection");
             connection.close();
             System.out.println(getLogDate() + " sendMessageToExchange connection closed");
-            
+
         } catch (IOException | TimeoutException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
