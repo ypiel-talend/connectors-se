@@ -173,6 +173,11 @@ public class RabbitMQTestIT {
         factory.setHost(store.getHostname());
         factory.setUsername(store.getUserName());
         factory.setPassword(store.getPassword());
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         try (Connection connection = service.getConnection(store); Channel channel = connection.createChannel()) {
             channel.exchangeDeclare(exchangeName, exchangeType);
             channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
