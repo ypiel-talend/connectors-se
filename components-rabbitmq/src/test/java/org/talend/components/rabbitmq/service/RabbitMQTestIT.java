@@ -92,12 +92,12 @@ public class RabbitMQTestIT {
         assertTrue(optional.isPresent(), "Message was not received");
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println(getLogDate()  + " sendAndReceiveQueueMessage end");
+        System.out.println(getLogDate() + " sendAndReceiveQueueMessage end");
     }
 
     @Test
     public void receiveFanoutMessage() throws MalformedURLException, URISyntaxException {
-        System.out.println(getLogDate()  + " receiveFanoutMessage start");
+        System.out.println(getLogDate() + " receiveFanoutMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
         Client client = new Client(
@@ -106,9 +106,9 @@ public class RabbitMQTestIT {
 
         Thread thread = new Thread(() -> {
             while (true) {
-                System.out.println(getLogDate()  + " trying to send message. receiveFanoutMessage");
+                System.out.println(getLogDate() + " trying to send message. receiveFanoutMessage");
                 if (Thread.currentThread().isInterrupted()) {
-                    System.out.println(getLogDate()  + " is interrupted. receiveFanoutMessage");
+                    System.out.println(getLogDate() + " is interrupted. receiveFanoutMessage");
                     break;
                 }
                 if (isInputSubscribed(client)) {
@@ -119,11 +119,11 @@ public class RabbitMQTestIT {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    System.out.println(getLogDate()  + " is interrupted. receiveFanoutMessage");
+                    System.out.println(getLogDate() + " is interrupted. receiveFanoutMessage");
                     break;
                 }
             }
-            System.out.println(getLogDate()  + " is finished. receiveFanoutMessage");
+            System.out.println(getLogDate() + " is finished. receiveFanoutMessage");
         });
         thread.start();
 
@@ -146,12 +146,12 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println(getLogDate()  + " receiveFanoutMessage end");
+        System.out.println(getLogDate() + " receiveFanoutMessage end");
     }
 
     @Test
     public void receiveDirectMessage() throws MalformedURLException, URISyntaxException {
-        System.out.println(getLogDate()  + " receiveDirectMessage start");
+        System.out.println(getLogDate() + " receiveDirectMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
         Client client = new Client(
@@ -160,9 +160,9 @@ public class RabbitMQTestIT {
 
         Thread thread = new Thread(() -> {
             while (true) {
-                System.out.println(getLogDate()  + " trying to send message. receiveDirectMessage");
+                System.out.println(getLogDate() + " trying to send message. receiveDirectMessage");
                 if (Thread.currentThread().isInterrupted()) {
-                    System.out.println(getLogDate()  + " is interrupted. receiveDirectMessage");
+                    System.out.println(getLogDate() + " is interrupted. receiveDirectMessage");
                     break;
                 }
                 if (isInputSubscribed(client)) {
@@ -173,9 +173,10 @@ public class RabbitMQTestIT {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    System.out.println(getLogDate()  + " is interrupted. receiveDirectMessage");
+                    System.out.println(getLogDate() + " is interrupted. receiveDirectMessage");
                     break;
                 }
+                System.out.println(getLogDate() + " is finished. receiveDirectMessage");
             }
         });
         thread.start();
@@ -199,26 +200,26 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println(getLogDate()  + " receiveDirectMessage end");
+        System.out.println(getLogDate() + " receiveDirectMessage end");
     }
 
     private void sendMessageToExchange(RabbitMQDataStore store, BuiltinExchangeType exchangeType, String exchangeName) {
-        System.out.println(getLogDate()  + " sendMessageToExchange start");
+        System.out.println(getLogDate() + " sendMessageToExchange start");
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(store.getHostname());
         factory.setUsername(store.getUserName());
         factory.setPassword(store.getPassword());
         try (Connection connection = service.getConnection(store); Channel channel = connection.createChannel()) {
-            System.out.println(getLogDate()  + " sendMessageToExchange exchangeDeclare start");
+            System.out.println(getLogDate() + " sendMessageToExchange exchangeDeclare start");
             channel.exchangeDeclare(exchangeName, exchangeType);
-            System.out.println(getLogDate()  + " sendMessageToExchange basicPublish start");
+            System.out.println(getLogDate() + " sendMessageToExchange basicPublish start");
             channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
-            System.out.println(getLogDate()  + " sendMessageToExchange basicPublish end");
+            System.out.println(getLogDate() + " sendMessageToExchange basicPublish end");
         } catch (IOException | TimeoutException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(getLogDate()  + " sendMessageToExchange end");
+        System.out.println(getLogDate() + " sendMessageToExchange end");
 
     }
 
@@ -254,7 +255,7 @@ public class RabbitMQTestIT {
                 && client.getConnection(client.getConnections().get(0).getName()).getChannels() > 0;
     }
 
-    private String getLogDate(){
+    private String getLogDate() {
         return new SimpleDateFormat("HH:mm:ss.SSS").format(new Date());
     }
 
