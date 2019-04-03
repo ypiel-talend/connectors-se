@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.talend.components.azure.common.runtime.BlobFileReader;
+import org.talend.components.azure.common.runtime.input.BlobFileReader;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.configuration.Option;

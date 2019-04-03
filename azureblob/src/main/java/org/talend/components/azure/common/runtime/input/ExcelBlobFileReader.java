@@ -11,11 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.runtime;
+package org.talend.components.azure.common.runtime.input;
 
 import org.talend.sdk.component.api.record.Record;
 
-public class ParquetBlobFileReader extends BlobFileReader {
+public class ExcelBlobFileReader extends BlobFileReader {
 
     @Override
     public Record readRecord() {

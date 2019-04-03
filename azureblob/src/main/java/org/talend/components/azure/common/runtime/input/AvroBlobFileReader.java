@@ -11,20 +11,14 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.csv;
+package org.talend.components.azure.common.runtime.input;
 
-import lombok.Getter;
+import org.talend.sdk.component.api.record.Record;
 
-public enum RecordDelimiter {
-    LF("\n"),
-    CR("\r"),
-    CRLF("\r\n"),
-    OTHER("");
+public class AvroBlobFileReader extends BlobFileReader {
 
-    @Getter
-    private String delimiterValue;
-
-    RecordDelimiter(String delimiter) {
-        this.delimiterValue = delimiter;
+    @Override
+    public Record readRecord() {
+        return null;
     }
 }

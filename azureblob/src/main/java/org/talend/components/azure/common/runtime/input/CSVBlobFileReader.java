@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.runtime;
+package org.talend.components.azure.common.runtime.input;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,8 +49,6 @@ public class CSVBlobFileReader extends BlobFileReader {
 
     private CloudStorageAccount connection;
 
-    private AzureBlobConnectionServices connectionService;
-
     private FileRecordIterator recordIterator;
 
     private CSVFormatOptions configCSV;
@@ -58,8 +56,7 @@ public class CSVBlobFileReader extends BlobFileReader {
     public CSVBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
             AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
         this.recordBuilderFactory = recordBuilderFactory;
-        this.connectionService = connectionServices;
-        this.connection = connectionService.createStorageAccount(config.getConnection()); // TODO no need of it?
+        this.connection = connectionServices.createStorageAccount(config.getConnection()); // TODO no need of it?
         this.configCSV = config.getCsvOptions();
 
         CloudBlobClient blobClient = connection.createCloudBlobClient();
@@ -115,7 +112,7 @@ public class CSVBlobFileReader extends BlobFileReader {
             for (int i = 0; i < next.size(); i++) {
                 recordBuilder.withString(columns.get(i), next.get(i));
             }
-            return recordBuilder.build(); // TODO stub
+            return recordBuilder.build();
         }
 
         private CSVRecord nextCSV() {

@@ -10,15 +10,18 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
-@GridLayout({
-        // the generated layout put one configuration entry per line,
-        // customize it as much as needed
-        @GridLayout.Row({ "dataset" }) })
+@GridLayout({ @GridLayout.Row({ "dataset" }) })
+
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("blobName") })
 @Documentation("TODO fill the documentation for this configuration")
 @Data
-public class OutputOutputConfiguration implements Serializable {
+public class BlobOutputConfiguration implements Serializable {
 
     @Option
     @Documentation("Azure Blob connection")
     private AzureBlobDataset dataset;
+
+    @Option
+    @Documentation("Generated blob name template")
+    private String blobName = "data";
 }

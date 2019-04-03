@@ -23,7 +23,7 @@ public class BlobOutputTest {
 
         // Output configuration
         // Setup your component configuration for the test here
-        final OutputOutputConfiguration configuration = new OutputOutputConfiguration();
+        final BlobOutputConfiguration configuration = new BlobOutputConfiguration();
 
         // We create the component processor instance using the configuration filled above
         final Processor processor = COMPONENT_FACTORY.createProcessor(BlobOutput.class, configuration);
