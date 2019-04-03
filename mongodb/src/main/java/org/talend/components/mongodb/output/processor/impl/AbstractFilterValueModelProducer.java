@@ -2,7 +2,7 @@ package org.talend.components.mongodb.output.processor.impl;
 
 import com.mongodb.client.model.WriteModel;
 import org.bson.Document;
-import org.talend.components.mongodb.output.DBObjectUtil;
+import org.talend.components.mongodb.output.MongoDocumentWrapper;
 import org.talend.components.mongodb.output.MongoDBOutputConfiguration;
 import org.talend.components.mongodb.output.OutputMapping;
 import org.talend.components.mongodb.output.processor.ModelProducer;
@@ -12,9 +12,9 @@ import java.util.Set;
 
 public abstract class AbstractFilterValueModelProducer<T extends WriteModel<Document>> implements ModelProducer<T> {
 
-    private DBObjectUtil dbObjectUtil;
+    private MongoDocumentWrapper mongoDocumentWrapper;
 
-    private DBObjectUtil queryObjectUtil;
+    private MongoDocumentWrapper queryDocumentWrapper;
 
     private final Set<String> keys;
 
@@ -24,26 +24,24 @@ public abstract class AbstractFilterValueModelProducer<T extends WriteModel<Docu
 
     @Override
     public void addField(OutputMapping mapping, String col, Object value) {
-        if (queryObjectUtil == null) {
-            queryObjectUtil = new DBObjectUtil();
-            queryObjectUtil.setObject(new Document());
+        if (queryDocumentWrapper == null) {
+            queryDocumentWrapper = new MongoDocumentWrapper();
         }
         if (keys.contains(col)) {
-            queryObjectUtil.putkeyNode(mapping, col, value);
+            queryDocumentWrapper.putkeyNode(mapping, col, value);
         }
-        if (dbObjectUtil == null) {
-            dbObjectUtil = new DBObjectUtil();
-            dbObjectUtil.setObject(new Document());
+        if (mongoDocumentWrapper == null) {
+            mongoDocumentWrapper = new MongoDocumentWrapper();
         }
-        dbObjectUtil.put(mapping, col, value);
+        mongoDocumentWrapper.put(mapping, col, value);
     }
 
     @Override
     public T createRecord() {
-        Document filter = queryObjectUtil.getObject();
-        Document object = dbObjectUtil.getObject();
-        queryObjectUtil = null;
-        dbObjectUtil = null;
+        Document filter = queryDocumentWrapper.getObject();
+        Document object = mongoDocumentWrapper.getObject();
+        queryDocumentWrapper = null;
+        mongoDocumentWrapper = null;
         if (filter.keySet().isEmpty()) {
             return null;
         }

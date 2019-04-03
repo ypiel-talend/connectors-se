@@ -25,7 +25,7 @@ import org.talend.components.mongodb.service.MongoDBService;
 @Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
                           // icons/filename_icon32.png in resources
 @PartitionMapper(name = "MongoDBInput")
-@Documentation("TODO fill the documentation for this mapper")
+@Documentation("Input mapper for MongoDB")
 public class MongoDBInputMapper implements Serializable {
 
     private final MongoDBInputMapperConfiguration configuration;

@@ -2,7 +2,7 @@ package org.talend.components.mongodb.output.processor.impl;
 
 import com.mongodb.client.model.DeleteOneModel;
 import org.bson.Document;
-import org.talend.components.mongodb.output.DBObjectUtil;
+import org.talend.components.mongodb.output.MongoDocumentWrapper;
 import org.talend.components.mongodb.output.MongoDBOutputConfiguration;
 import org.talend.components.mongodb.output.OutputMapping;
 import org.talend.components.mongodb.output.processor.ModelProducer;
@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class DeleteModelProducer implements ModelProducer<DeleteOneModel<Document>> {
 
-    private DBObjectUtil queryObjectUtil;
+    private MongoDocumentWrapper queryDocumentWrapper;
 
     private final Set<String> keys;
 
@@ -22,19 +22,18 @@ public class DeleteModelProducer implements ModelProducer<DeleteOneModel<Documen
 
     @Override
     public void addField(OutputMapping mapping, String col, Object value) {
-        if (queryObjectUtil == null) {
-            queryObjectUtil = new DBObjectUtil();
-            queryObjectUtil.setObject(new Document());
+        if (queryDocumentWrapper == null) {
+            queryDocumentWrapper = new MongoDocumentWrapper();
         }
         if (keys.contains(col)) {
-            queryObjectUtil.putkeyNode(mapping, col, value);
+            queryDocumentWrapper.putkeyNode(mapping, col, value);
         }
     }
 
     @Override
     public DeleteOneModel<Document> createRecord() {
-        Document filter = queryObjectUtil.getObject();
-        queryObjectUtil = null;
+        Document filter = queryDocumentWrapper.getObject();
+        queryDocumentWrapper = null;
         if (filter.keySet().isEmpty()) {
             return null;
         }

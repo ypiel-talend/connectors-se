@@ -27,7 +27,7 @@ import org.talend.sdk.component.api.record.Schema;
 @Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
                           // icons/filename_icon32.png in resources
 @Processor(name = "MongoDBOutput")
-@Documentation("TODO fill the documentation for this processor")
+@Documentation("MongoDB output component")
 public class MongoDBOutput implements Serializable {
 
     private final MongoDBOutputConfiguration configuration;

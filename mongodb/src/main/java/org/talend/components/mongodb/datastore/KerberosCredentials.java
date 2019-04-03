@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({ @GridLayout.Row({ "userPrincipal" }), @GridLayout.Row({ "realm" }), @GridLayout.Row({ "kdcServer" }) })
+@Documentation("Credentials for Kerberos authentication type")
 public class KerberosCredentials implements Serializable {
 
     @Option

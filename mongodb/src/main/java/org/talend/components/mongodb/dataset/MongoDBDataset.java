@@ -18,19 +18,19 @@ import org.talend.sdk.component.api.meta.Documentation;
         // the generated layout put one configuration entry per line,
         // customize it as much as needed
         @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "collection" }), @GridLayout.Row({ "schema" }) })
-@Documentation("TODO fill the documentation for this configuration")
+@Documentation("Common dataset for MongoDB components")
 public class MongoDBDataset implements Serializable {
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Connection")
     private MongoDBDatastore datastore;
 
     @Option
-    @Documentation("collection")
+    @Documentation("Collection name to use")
     private String collection;
 
     @Option
     @Structure
-    @Documentation("schema")
+    @Documentation("Schema to use")
     private List<String> schema;
 }

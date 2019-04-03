@@ -29,7 +29,7 @@ import org.talend.components.mongodb.service.MongoDBService;
 import static org.talend.sdk.component.api.record.Schema.Type.RECORD;
 
 @Slf4j
-@Documentation("TODO fill the documentation for this source")
+@Documentation("Input source for MongoDB")
 public class MongoDBInputSource implements Serializable {
 
     private final MongoDBInputMapperConfiguration configuration;

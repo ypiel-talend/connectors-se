@@ -23,7 +23,7 @@ import org.talend.sdk.component.api.meta.Documentation;
         @GridLayout.Row({ "authentication" }), @GridLayout.Row({ "authenticationMechanism" }),
         @GridLayout.Row({ "kerberosCreds" }), @GridLayout.Row({ "username", "password" }),
         @GridLayout.Row({ "setAuthenticationDatabase" }), @GridLayout.Row({ "authenticationDatabase" }) })
-@Documentation("TODO fill the documentation for this configuration")
+@Documentation("Connection for MongoDB components")
 public class MongoDBDatastore implements Serializable {
 
     @Option
@@ -47,7 +47,7 @@ public class MongoDBDatastore implements Serializable {
     private int port;
 
     @Option
-    @Documentation("Database")
+    @Documentation("Database to use")
     private String database;
 
     @Option

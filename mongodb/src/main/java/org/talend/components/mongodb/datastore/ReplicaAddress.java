@@ -8,6 +8,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
 @GridLayout({ @GridLayout.Row({ "address", "port" }) })
+@Documentation("Replica server addresses for MongoDB components")
 public class ReplicaAddress {
 
     @Option

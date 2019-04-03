@@ -22,20 +22,20 @@ import org.talend.sdk.component.api.meta.Documentation;
                 @GridLayout.Row({ "sort" }) }, names = GridLayout.FormType.MAIN),
         @GridLayout(value = { @GridLayout.Row({ "noQueryTimeout" }),
                 @GridLayout.Row({ "externalSort" }) }, names = GridLayout.FormType.ADVANCED), })
-@Documentation("TODO fill the documentation for this configuration")
+@Documentation("Configuration for MongoDB input component")
 public class MongoDBInputMapperConfiguration implements Serializable {
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Dataset to use for MongoDB input component")
     private MongoDBDataset dataset;
 
     @Option
-    @Documentation("setReadPreference")
+    @Documentation("Set read preference")
     private boolean setReadPreference;
 
     @Option
     @ActiveIf(target = "setReadPreference", value = "true")
-    @Documentation("readPreference")
+    @Documentation("Read preference type")
     private ReadPreference readPreference;
 
     public enum ReadPreference {
@@ -52,32 +52,32 @@ public class MongoDBInputMapperConfiguration implements Serializable {
     }
 
     @Option
-    @Documentation("")
+    @Documentation("Query type to use to get the data")
     @DefaultValue("FIND_QUERY")
     private QueryType queryType;
 
     @Option
     @TextArea
-    @Documentation("query")
+    @Documentation("Query to use to get the data")
     @ActiveIf(target = "queryType", value = "FIND_QUERY")
     private String query = "{}";
 
     @Option
-    @Documentation("limit")
+    @Documentation("Limit")
     @ActiveIf(target = "queryType", value = "FIND_QUERY")
     private int limit;
 
     @Option
-    @Documentation("mapping")
+    @Documentation("Columns to documents fields mapping")
     private List<InputMapping> mapping;
 
     @Option
-    @Documentation("sort")
+    @Documentation("Columns to sort data by")
     @ActiveIf(target = "queryType", value = "FIND_QUERY")
     private List<Sort> sort;
 
     @Option
-    @Documentation("No timeout for queries")
+    @Documentation("Set no timeout for queries")
     @ActiveIf(target = "queryType", value = "FIND_QUERY")
     private boolean noQueryTimeout;
 

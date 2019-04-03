@@ -20,11 +20,11 @@ public class InputMapping implements Serializable {
 
     @Option
     @Suggestable(value = UIMongoDBService.GET_SCHEMA_FIELDS, parameters = { "../../dataset" })
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Column for the mapping")
     private String column;
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Parent node path of the field")
     private String parentNodePath;
 
 }

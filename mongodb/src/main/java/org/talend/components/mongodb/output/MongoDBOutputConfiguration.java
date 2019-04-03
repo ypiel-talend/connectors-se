@@ -23,7 +23,7 @@ import org.talend.sdk.component.api.meta.Documentation;
                 @GridLayout.Row({ "keys" }) }, names = GridLayout.FormType.MAIN),
         @GridLayout(value = { @GridLayout.Row({ "bulkWrite" }),
                 @GridLayout.Row({ "bulkWriteType" }) }, names = GridLayout.FormType.ADVANCED) })
-@Documentation("TODO fill the documentation for this configuration")
+@Documentation("Configuration class for output component")
 public class MongoDBOutputConfiguration implements Serializable {
 
     public enum WriteConcern {
@@ -48,7 +48,7 @@ public class MongoDBOutputConfiguration implements Serializable {
     }
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Dataset")
     private MongoDBDataset dataset;
 
     @Option
@@ -87,7 +87,7 @@ public class MongoDBOutputConfiguration implements Serializable {
     private List<OutputMapping> outputMappingList;
 
     @Option
-    @Documentation("Keyset")
+    @Documentation("Keys used for update operations")
     @Suggestable(value = UIMongoDBService.GET_SCHEMA_FIELDS, parameters = { "../dataset" })
     @ActiveIf(target = "actionOnData", value = { "UPDATE", "SET", "UPSERT", "UPSERT_WITH_SET", "DELETE" })
     private List<String> keys;

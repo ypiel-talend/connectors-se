@@ -10,14 +10,14 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @GridLayout({ @GridLayout.Row({ "stage" }) })
-@Documentation("This is the mapping for input schema.")
+@Documentation("Aggregation stage definition")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AggregationStage implements Serializable {
 
     @Option
-    @Documentation("")
+    @Documentation("Aggregation stage to use")
     private String stage;
 
 }
