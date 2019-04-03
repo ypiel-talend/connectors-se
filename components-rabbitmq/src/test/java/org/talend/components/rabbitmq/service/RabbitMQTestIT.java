@@ -106,12 +106,24 @@ public class RabbitMQTestIT {
 
         Thread thread = new Thread(() -> {
             while (true) {
+                System.out.println(getLogDate()  + " trying to send message. receiveFanoutMessage");
+                if (Thread.currentThread().isInterrupted()) {
+                    System.out.println(getLogDate()  + " is interrupted. receiveFanoutMessage");
+                    break;
+                }
                 if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.FANOUT,
                             FANOUT_EXCHANGE_NAME);
                     break;
                 }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    System.out.println(getLogDate()  + " is interrupted. receiveFanoutMessage");
+                    break;
+                }
             }
+            System.out.println(getLogDate()  + " is finished. receiveFanoutMessage");
         });
         thread.start();
 
@@ -124,6 +136,8 @@ public class RabbitMQTestIT {
 
         Job.components().component("rabbitmq-output", "RabbitMQ://Input?" + inputConfig)
                 .component("collector", "test://collector").connections().from("rabbitmq-output").to("collector").build().run();
+
+        thread.interrupt();
 
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
         Optional optional = res.stream().findFirst();
@@ -146,9 +160,20 @@ public class RabbitMQTestIT {
 
         Thread thread = new Thread(() -> {
             while (true) {
+                System.out.println(getLogDate()  + " trying to send message. receiveDirectMessage");
+                if (Thread.currentThread().isInterrupted()) {
+                    System.out.println(getLogDate()  + " is interrupted. receiveDirectMessage");
+                    break;
+                }
                 if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.DIRECT,
                             DIRECT_EXCHANGE_NAME);
+                    break;
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    System.out.println(getLogDate()  + " is interrupted. receiveDirectMessage");
                     break;
                 }
             }
@@ -167,6 +192,8 @@ public class RabbitMQTestIT {
 
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
         Optional optional = res.stream().findFirst();
+
+        thread.interrupt();
 
         assertTrue(optional.isPresent(), "Message was not received");
 
