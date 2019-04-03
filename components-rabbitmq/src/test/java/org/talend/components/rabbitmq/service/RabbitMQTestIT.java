@@ -24,12 +24,13 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -38,12 +39,12 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PASSWORD;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.TEST_MESSAGE;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.FANOUT_EXCHANGE_NAME;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.DIRECT_EXCHANGE_NAME;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.QUEUE_NAME;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.FANOUT_EXCHANGE_NAME;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.MAXIMUM_MESSAGES;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PASSWORD;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.QUEUE_NAME;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.TEST_MESSAGE;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.USER_NAME;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
@@ -73,7 +74,7 @@ public class RabbitMQTestIT {
 
     @Test
     public void sendAndReceiveQueueMessage() {
-        System.out.println("sendAndReceiveQueueMessage start");
+        System.out.println(getLogDate() + " sendAndReceiveQueueMessage start");
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
@@ -91,12 +92,12 @@ public class RabbitMQTestIT {
         assertTrue(optional.isPresent(), "Message was not received");
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println("sendAndReceiveQueueMessage end");
+        System.out.println(getLogDate()  + " sendAndReceiveQueueMessage end");
     }
 
     @Test
     public void receiveFanoutMessage() throws MalformedURLException, URISyntaxException {
-        System.out.println("receiveFanoutMessage start");
+        System.out.println(getLogDate()  + " receiveFanoutMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
         Client client = new Client(
@@ -131,12 +132,12 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println("receiveFanoutMessage end");
+        System.out.println(getLogDate()  + " receiveFanoutMessage end");
     }
 
     @Test
     public void receiveDirectMessage() throws MalformedURLException, URISyntaxException {
-        System.out.println("receiveDirectMessage start");
+        System.out.println(getLogDate()  + " receiveDirectMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
         Client client = new Client(
@@ -171,7 +172,7 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-        System.out.println("receiveDirectMessage end");
+        System.out.println(getLogDate()  + " receiveDirectMessage end");
     }
 
     private void sendMessageToExchange(RabbitMQDataStore store, BuiltinExchangeType exchangeType, String exchangeName) {
@@ -217,6 +218,10 @@ public class RabbitMQTestIT {
     private boolean isInputSubscribed(Client client) {
         return !client.getConnections().isEmpty()
                 && client.getConnection(client.getConnections().get(0).getName()).getChannels() > 0;
+    }
+
+    private String getLogDate(){
+        return new SimpleDateFormat("yyyy-MM-dd").format(new Date());
     }
 
 }
