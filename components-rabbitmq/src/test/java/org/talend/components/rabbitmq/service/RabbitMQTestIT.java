@@ -221,7 +221,7 @@ public class RabbitMQTestIT {
     }
 
     private String getLogDate(){
-        return new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        return new SimpleDateFormat("HH:mm:ss.SSS").format(new Date());
     }
 
 }
