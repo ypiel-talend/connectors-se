@@ -33,15 +33,9 @@
     </licenses>
 
     <modules>
-        <module>jdbc</module>
-        <module>salesforce</module>
-        <module>couchbase</module>
-        <module>azure</module>
-        <!-- disable eventhubs build before all ready
-        <module>azure-eventhubs</module> 
-        -->
-        <module>azure-dls-gen2</module>
-        <module>marketo</module>
+        <!--<module>jdbc</module>-->
+        <!--<module>salesforce</module>-->
+        <module>magentocms</module>
     </modules>
 
     <scm>
