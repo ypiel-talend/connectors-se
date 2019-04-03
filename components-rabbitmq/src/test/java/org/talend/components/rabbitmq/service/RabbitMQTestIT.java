@@ -226,6 +226,10 @@ public class RabbitMQTestIT {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            System.out.println(getLogDate() + " sendMessageToExchange trying to close connection");
+            connection.close();
+            System.out.println(getLogDate() + " sendMessageToExchange connection closed");
+            
         } catch (IOException | TimeoutException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
