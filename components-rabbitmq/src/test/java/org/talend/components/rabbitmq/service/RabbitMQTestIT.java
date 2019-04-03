@@ -210,12 +210,17 @@ public class RabbitMQTestIT {
         factory.setHost(store.getHostname());
         factory.setUsername(store.getUserName());
         factory.setPassword(store.getPassword());
-        try (Connection connection = service.getConnection(store); Channel channel = connection.createChannel()) {
+        try {
+            Connection connection = service.getConnection(store);
+            Channel channel = connection.createChannel();
+
             System.out.println(getLogDate() + " sendMessageToExchange exchangeDeclare start");
             channel.exchangeDeclare(exchangeName, exchangeType);
             System.out.println(getLogDate() + " sendMessageToExchange basicPublish start");
             channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
             System.out.println(getLogDate() + " sendMessageToExchange basicPublish end");
+            channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
+            System.out.println(getLogDate() + " sendMessageToExchange basicPublish2 end");
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
