@@ -12,19 +12,18 @@
 // ============================================================================
 package org.talend.components.rabbitmq.service;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.TimeoutException;
-
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.talend.components.rabbitmq.datastore.RabbitMQDataStore;
 import org.talend.components.rabbitmq.exception.CreateChannelException;
 import org.talend.sdk.component.api.service.Service;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -42,20 +41,28 @@ public class RabbitMQService {
         if (store.getTLS()) {
             factory.useSslProtocol(SSLContext.getDefault());
         }
-        return factory.newConnection();
+        Connection conn = factory.newConnection();
+        System.out.println("Connection to rabbit: " + conn.getId() + ":" + conn);
+        return conn;
     }
 
     public Channel createChannel(Connection connection) {
+        System.out.println("create channel on connection" + (connection == null ? null : connection.getId()) + ":" + connection);
+
         Channel channel;
         try {
             channel = connection.createChannel();
         } catch (IOException e) {
             throw new CreateChannelException(i18n.errorCantCreateChannel(), e);
         }
+
+        System.out.println("finish create channel on connection" + (connection == null ? null : connection.getId()) + ":"
+                + connection + ":" + channel);
         return channel;
     }
 
     public void closeConnection(Connection connection) {
+        System.out.println("closing connection" + (connection == null ? null : connection.getId()) + ":" + connection);
         if (connection != null) {
             try {
                 connection.close();

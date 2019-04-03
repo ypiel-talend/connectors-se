@@ -99,8 +99,9 @@ public class RabbitMQTestIT {
         System.out.println("receiveFanoutMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
-        Client client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
-                USER_NAME, PASSWORD);
+        Client client = new Client(
+                "http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api", USER_NAME,
+                PASSWORD);
 
         Thread thread = new Thread(() -> {
             while (true) {
@@ -138,8 +139,9 @@ public class RabbitMQTestIT {
         System.out.println("receiveDirectMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
-        Client client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
-                USER_NAME, PASSWORD);
+        Client client = new Client(
+                "http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api", USER_NAME,
+                PASSWORD);
 
         Thread thread = new Thread(() -> {
             while (true) {
