@@ -216,6 +216,11 @@ public class RabbitMQTestIT {
             System.out.println(getLogDate() + " sendMessageToExchange basicPublish start");
             channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
             System.out.println(getLogDate() + " sendMessageToExchange basicPublish end");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } catch (IOException | TimeoutException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
