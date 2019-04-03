@@ -65,7 +65,16 @@ public class RabbitMQService {
         System.out.println("closing connection" + (connection == null ? null : connection.getId()) + ":" + connection);
         if (connection != null) {
             try {
+                System.out.println("closing connection wait" + (connection == null ? null : connection.getId()) + ":" + connection);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("closing connection stop waiting" + (connection == null ? null : connection.getId()) + ":" + connection);
                 connection.close();
+                System.out.println("closing connection finish" + (connection == null ? null : connection.getId()) + ":" + connection);
+
             } catch (IOException e) {
                 log.warn(i18n.warnConnectionCantBeClosed(), e);
             }
