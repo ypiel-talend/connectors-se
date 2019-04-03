@@ -66,8 +66,6 @@ public class RabbitMQTestIT {
 
     private RabbitMQTestExtention.TestContext testContext;
 
-    private Client client;
-
     @BeforeAll
     private void init(RabbitMQTestExtention.TestContext testContext) {
         this.testContext = testContext;
@@ -98,12 +96,12 @@ public class RabbitMQTestIT {
     public void receiveFanoutMessage() throws MalformedURLException, URISyntaxException {
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
-        client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
+        Client client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
                 USER_NAME, PASSWORD);
 
         Thread thread = new Thread(() -> {
             while (true) {
-                if (isInputSubscribed()) {
+                if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.FANOUT,
                             FANOUT_EXCHANGE_NAME);
                     break;
@@ -135,12 +133,12 @@ public class RabbitMQTestIT {
     public void receiveDirectMessage() throws MalformedURLException, URISyntaxException {
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
-        client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
+        Client client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
                 USER_NAME, PASSWORD);
 
         Thread thread = new Thread(() -> {
             while (true) {
-                if (isInputSubscribed()) {
+                if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.DIRECT,
                             DIRECT_EXCHANGE_NAME);
                     break;
@@ -213,7 +211,7 @@ public class RabbitMQTestIT {
         return configuration;
     }
 
-    private boolean isInputSubscribed() {
+    private boolean isInputSubscribed(Client client) {
         return !client.getConnections().isEmpty()
                 && client.getConnection(client.getConnections().get(0).getName()).getChannels() > 0;
     }
