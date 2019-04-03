@@ -203,16 +203,23 @@ public class RabbitMQTestIT {
     }
 
     private void sendMessageToExchange(RabbitMQDataStore store, BuiltinExchangeType exchangeType, String exchangeName) {
+        System.out.println(getLogDate()  + " sendMessageToExchange start");
+
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(store.getHostname());
         factory.setUsername(store.getUserName());
         factory.setPassword(store.getPassword());
         try (Connection connection = service.getConnection(store); Channel channel = connection.createChannel()) {
+            System.out.println(getLogDate()  + " sendMessageToExchange exchangeDeclare start");
             channel.exchangeDeclare(exchangeName, exchangeType);
+            System.out.println(getLogDate()  + " sendMessageToExchange basicPublish start");
             channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
+            System.out.println(getLogDate()  + " sendMessageToExchange basicPublish end");
         } catch (IOException | TimeoutException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+        System.out.println(getLogDate()  + " sendMessageToExchange end");
+
     }
 
     private OutputConfiguration getOutputConfiguration() {
