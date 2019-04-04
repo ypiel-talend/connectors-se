@@ -1,7 +1,7 @@
 #FROM registry.datapwn.com/vizotenko/components-integration-test-rabbitmq:1.0.0
 FROM bitnami/rabbitmq:3.7.13
-USER root
-COPY rabbitmq.config /
+#USER root
+#COPY rabbitmq.config /
 
 RUN cd / && ./app-entrypoint.sh nami start rabbitmq
 # && sleep 30.0 && sudo ./app-entrypoint.sh nami stop rabbitmq
