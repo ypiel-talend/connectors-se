@@ -30,6 +30,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -73,6 +75,7 @@ public class RabbitMQTestIT {
 
     @Test
     public void sendAndReceiveQueueMessage() {
+        System.out.println(getLogDate() + " sendAndReceiveQueueMessage start");
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
@@ -90,23 +93,32 @@ public class RabbitMQTestIT {
         assertTrue(optional.isPresent(), "Message was not received");
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
+        System.out.println(getLogDate() + " sendAndReceiveQueueMessage end\n");
     }
 
     @Test
     public void receiveFanoutMessage() throws MalformedURLException, URISyntaxException {
+        System.out.println(getLogDate() + " receiveFanoutMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
-        Client client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
-                USER_NAME, PASSWORD);
+        Client client = new Client(
+                "http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api", USER_NAME,
+                PASSWORD);
 
         Thread thread = new Thread(() -> {
             while (true) {
+                System.out.println(getLogDate() + " trying to send message. receiveFanoutMessage");
                 if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.FANOUT,
                             FANOUT_EXCHANGE_NAME);
                     break;
                 }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                }
             }
+            System.out.println(getLogDate() + " is finished. receiveFanoutMessage");
         });
         thread.start();
 
@@ -127,22 +139,31 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
+        System.out.println(getLogDate() + " receiveFanoutMessage end\n");
     }
 
     @Test
     public void receiveDirectMessage() throws MalformedURLException, URISyntaxException {
+        System.out.println(getLogDate() + " receiveDirectMessage start");
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
-        Client client = new Client("http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api",
-                USER_NAME, PASSWORD);
+        Client client = new Client(
+                "http://" + testContext.getDataStore().getHostname() + ":" + testContext.getHttpPort() + "/api", USER_NAME,
+                PASSWORD);
 
         Thread thread = new Thread(() -> {
             while (true) {
+                System.out.println(getLogDate() + " trying to send message. receiveDirectMessage");
                 if (isInputSubscribed(client)) {
                     sendMessageToExchange(outputConfiguration.getBasicConfig().getConnection(), BuiltinExchangeType.DIRECT,
                             DIRECT_EXCHANGE_NAME);
                     break;
                 }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                }
+                System.out.println(getLogDate() + " is finished. receiveDirectMessage");
             }
         });
         thread.start();
@@ -164,24 +185,25 @@ public class RabbitMQTestIT {
 
         assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
+        System.out.println(getLogDate() + " receiveDirectMessage end\n");
     }
 
     private void sendMessageToExchange(RabbitMQDataStore store, BuiltinExchangeType exchangeType, String exchangeName) {
+        System.out.println(getLogDate() + " sendMessageToExchange start");
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(store.getHostname());
         factory.setUsername(store.getUserName());
         factory.setPassword(store.getPassword());
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
         try (Connection connection = service.getConnection(store); Channel channel = connection.createChannel()) {
             channel.exchangeDeclare(exchangeName, exchangeType);
             channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
+            System.out.println(getLogDate() + " sendMessageToExchange basicPublish end");
+            System.out.println(getLogDate() + " sendMessageToExchange trying to close connection");
         } catch (IOException | TimeoutException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+        System.out.println(getLogDate() + " sendMessageToExchange end");
     }
 
     private OutputConfiguration getOutputConfiguration() {
@@ -214,6 +236,10 @@ public class RabbitMQTestIT {
     private boolean isInputSubscribed(Client client) {
         return !client.getConnections().isEmpty()
                 && client.getConnection(client.getConnections().get(0).getName()).getChannels() > 0;
+    }
+
+    private String getLogDate() {
+        return new SimpleDateFormat("HH:mm:ss.SSS").format(new Date());
     }
 
 }
