@@ -28,10 +28,8 @@ class ActionServiceTestIT {
 
     @Test
     public void testSuccessfulConnection() {
-        System.out.println("testSuccessfulConnection start");
         HealthCheckStatus status = actionService.validateBasicDatastore(testContext.getDataStore());
 
         assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
-        System.out.println("testSuccessfulConnection end");
     }
 }
