@@ -12,6 +12,7 @@
 // ============================================================================
 package org.talend.components.rabbitmq.service;
 
+import com.rabbitmq.client.BlockedListener;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -42,6 +43,17 @@ public class RabbitMQService {
             factory.useSslProtocol(SSLContext.getDefault());
         }
         Connection conn = factory.newConnection();
+        conn.addBlockedListener(new BlockedListener() {
+            @Override
+            public void handleBlocked(String s) throws IOException {
+                System.out.println("The connection is Blocked");
+            }
+
+            @Override
+            public void handleUnblocked() throws IOException {
+                System.out.println("The connection is UnBlocked");
+            }
+        });
         System.out.println("Connection to rabbit: " + conn.getId() + ":" + conn);
         return conn;
     }
