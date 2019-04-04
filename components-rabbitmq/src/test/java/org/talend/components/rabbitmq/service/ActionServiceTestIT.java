@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.talend.components.rabbitmq.RabbitMQTestExtention;
-import org.talend.components.rabbitmq.datastore.RabbitMQDataStore;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -29,8 +28,10 @@ class ActionServiceTestIT {
 
     @Test
     public void testSuccessfulConnection() {
+        System.out.println("testSuccessfulConnection start");
         HealthCheckStatus status = actionService.validateBasicDatastore(testContext.getDataStore());
 
         assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
+        System.out.println("testSuccessfulConnection end");
     }
 }

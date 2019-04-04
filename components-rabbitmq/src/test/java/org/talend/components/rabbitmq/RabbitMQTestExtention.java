@@ -26,9 +26,12 @@ public class RabbitMQTestExtention implements ExtensionContext.Store.CloseableRe
     private TestContext testContext = new TestContext();
 
     private static final GenericContainer RABBITMQ_CONTAINER = new GenericContainer(
-            new ImageFromDockerfile().withDockerfileFromBuilder(
-                    builder -> builder.from("registry.datapwn.com/vizotenko/components-integration-test-rabbitmq:1.0.0").build()))
-                            .withExposedPorts(PORT).waitingFor(Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(200)));
+            new ImageFromDockerfile().withFileFromClasspath("Dockerfile", "docker/Dockerfile")
+                    .withFileFromClasspath("rabbitmq.config", "docker/rabbitmq.config")
+                    .withFileFromClasspath("server_certificate.pem", "docker/server_certificate.pem")
+                    .withFileFromClasspath("server_key.pem", "docker/server_key.pem")
+                    .withFileFromClasspath("ca_certificate.pem", "docker/ca_certificate.pem")).withExposedPorts(PORT)
+                            .waitingFor(Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(200)));
 
     private static boolean started = false;
 
@@ -49,7 +52,7 @@ public class RabbitMQTestExtention implements ExtensionContext.Store.CloseableRe
 
         dataStore.setHostname(dockerHostAddress);
         dataStore.setPort(amqpPort);
-        dataStore.setTLS(false);
+        dataStore.setTLS(true);
         dataStore.setUserName(USER_NAME);
         dataStore.setPassword(PASSWORD);
         testContext.dataStore = dataStore;
