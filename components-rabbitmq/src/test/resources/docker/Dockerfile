@@ -1,4 +1,4 @@
-FROM registry.datapwn.com/vizotenko/components-integration-test-rabbitmq:1.0.1
+FROM registry.datapwn.com/vizotenko/components-integration-test-rabbitmq:1.0.0
 
 COPY rabbitmq.config /bitnami/rabbitmq/conf/
 COPY ca_certificate.pem /bitnami/rabbitmq/certificates/
