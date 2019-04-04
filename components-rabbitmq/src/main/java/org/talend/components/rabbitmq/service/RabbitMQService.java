@@ -44,6 +44,7 @@ public class RabbitMQService {
         }
         Connection conn = factory.newConnection();
         conn.addBlockedListener(new BlockedListener() {
+
             @Override
             public void handleBlocked(String s) throws IOException {
                 System.out.println("The connection is Blocked");
@@ -77,15 +78,18 @@ public class RabbitMQService {
         System.out.println("closing connection" + (connection == null ? null : connection.getId()) + ":" + connection);
         if (connection != null) {
             try {
-                System.out.println("closing connection wait" + (connection == null ? null : connection.getId()) + ":" + connection);
+                System.out
+                        .println("closing connection wait" + (connection == null ? null : connection.getId()) + ":" + connection);
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.out.println("closing connection stop waiting" + (connection == null ? null : connection.getId()) + ":" + connection);
+                System.out.println(
+                        "closing connection stop waiting" + (connection == null ? null : connection.getId()) + ":" + connection);
                 connection.close();
-                System.out.println("closing connection finish" + (connection == null ? null : connection.getId()) + ":" + connection);
+                System.out.println(
+                        "closing connection finish" + (connection == null ? null : connection.getId()) + ":" + connection);
 
             } catch (IOException e) {
                 log.warn(i18n.warnConnectionCantBeClosed(), e);
