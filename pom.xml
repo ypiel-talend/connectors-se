@@ -14,17 +14,17 @@
   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.talend.components</groupId>
-  <artifactId>connectors-se</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
-  <packaging>pom</packaging>
+   <groupId>org.talend.components</groupId>
+   <artifactId>connectors-se</artifactId>
+   <version>1.0.2-SNAPSHOT</version>
+   <packaging>pom</packaging>
 
-    <name>Components</name>
-    <description>SE connectors using Talend Component Kit.</description>
-    <url>https://talend.github.com/connectors-se</url>
-    <licenses>
+   <name>Components</name>
+   <description>SE connectors using Talend Component Kit.</description>
+   <url>https://talend.github.com/connectors-se</url>
+   <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
             <url>https://github.com/talend/connectors-se/blob/master/LICENSE</url>
@@ -32,18 +32,18 @@
         </license>
     </licenses>
 
-    <modules>
+   <modules>
         <module>jdbc</module>
         <module>salesforce</module>
     </modules>
 
-  <scm>
+   <scm>
     <connection>scm:git:https://github.com/talend/connectors-se.git</connection>
     <developerConnection>scm:git:https://github.com/talend/connectors-se.git</developerConnection>
     <url>https://github.com/talend/connectors-se</url>
     <tag>maintenance/1.0</tag>
   </scm>
-  <distributionManagement>
+   <distributionManagement>
     <snapshotRepository>
       <id>talend_nexus_deployment</id>
       <url>${talend_oss_snapshots}</url>
@@ -58,7 +58,7 @@
     </site>
   </distributionManagement>
 
-    <properties>
+   <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <component-api.version>1.1.4</component-api.version>
@@ -85,7 +85,7 @@
         </talend_oss_snapshots>
     </properties>
 
-    <dependencyManagement>
+   <dependencyManagement>
         <dependencies> <!-- mainly to make beam* provided -->
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -192,7 +192,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <dependencies>
+   <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -238,7 +238,7 @@
         </dependency>
     </dependencies>
 
-    <repositories>
+   <repositories>
         <repository>
             <id>talend.oss.snapshots</id>
             <url>${talend_oss_snapshots}</url>
@@ -270,7 +270,7 @@
             </snapshots>
         </repository>
     </repositories>
-    <pluginRepositories>
+   <pluginRepositories>
         <pluginRepository>
             <id>talend.oss.snapshots</id>
             <url>${talend_oss_snapshots}</url>
@@ -303,7 +303,7 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <build>
+   <build>
         <plugins>
             <plugin>
                 <groupId>pl.project13.maven</groupId>
@@ -596,7 +596,7 @@
         </plugins>
     </build>
 
-    <reporting>
+   <reporting>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -629,7 +629,7 @@
         </plugins>
     </reporting>
 
-    <profiles>
+   <profiles>
         <profile>
             <id>documentation-html</id>
             <build>
