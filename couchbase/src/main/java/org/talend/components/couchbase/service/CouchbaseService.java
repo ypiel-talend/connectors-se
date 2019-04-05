@@ -4,7 +4,10 @@ import com.couchbase.client.core.message.internal.DiagnosticsReport;
 import com.couchbase.client.core.message.internal.EndpointHealth;
 import com.couchbase.client.core.state.LifecycleState;
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
+import com.couchbase.client.java.auth.Authenticator;
+import com.couchbase.client.java.auth.PasswordAuthenticator;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import lombok.extern.slf4j.Slf4j;
@@ -35,27 +38,43 @@ public class CouchbaseService {
     // you can put logic here you can reuse in components
     @HealthCheck("healthCheck")
     public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final CouchbaseDataStore datastore) {
+        Cluster cluster = null;
+        Bucket bucket = null;
         try {
-            String[] urls = resolveAddresses(datastore.getBootstrapNodes());
-
             String bootstrapNodes = datastore.getBootstrapNodes();
             String bucketName = datastore.getBucket();
             String password = datastore.getPassword();
 
-            CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
-            CouchbaseCluster cluster = CouchbaseCluster.create(environment, bootstrapNodes);
-            Bucket bucket = cluster.openBucket(bucketName, password);
+            String[] urls = resolveAddresses(datastore.getBootstrapNodes());
 
-            DiagnosticsReport report = cluster.diagnostics();
-            List<EndpointHealth> endpointHealths = report.endpoints();
-            for (EndpointHealth health : endpointHealths) {
-                if (!health.state().equals(LifecycleState.CONNECTED)) {
-                    return new HealthCheckStatus(HealthCheckStatus.Status.KO,
-                            "Endpoint with id: " + health.id() + " Not connected");
-                }
-            }
+            CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder()
+                    //.bootstrapHttpDirectPort(port)
+                    .connectTimeout(20000L)
+                    .build();
+            Authenticator authenticator = new PasswordAuthenticator(bucketName, password);
+            cluster = CouchbaseCluster.create(environment, bootstrapNodes);
+            cluster.authenticate(authenticator);
+            bucket = cluster.openBucket(bucketName);
+
+
+//            DiagnosticsReport report = cluster.diagnostics();
+//            List<EndpointHealth> endpointHealths = report.endpoints();
+//
+//            for (EndpointHealth health : endpointHealths) {
+//                if (!health.state().equals(LifecycleState.CONNECTED)) {
+//                    return new HealthCheckStatus(HealthCheckStatus.Status.KO,
+//                            "Endpoint with id: " + health.id() + " Not connected");
+//                }
+//            }
         } catch (Throwable exception) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, exception.getMessage());
+        } finally {
+            if (bucket != null) {
+                bucket.close();
+            }
+            if (cluster != null) {
+                cluster.disconnect();
+            }
         }
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK");
         // todo: add i18n
