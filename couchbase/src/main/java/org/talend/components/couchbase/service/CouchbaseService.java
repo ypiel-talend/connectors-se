@@ -48,24 +48,22 @@ public class CouchbaseService {
             String[] urls = resolveAddresses(datastore.getBootstrapNodes());
 
             CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder()
-                    //.bootstrapHttpDirectPort(port)
-                    .connectTimeout(20000L)
-                    .build();
+                    // .bootstrapHttpDirectPort(port)
+                    .connectTimeout(20000L).build();
             Authenticator authenticator = new PasswordAuthenticator(bucketName, password);
             cluster = CouchbaseCluster.create(environment, bootstrapNodes);
             cluster.authenticate(authenticator);
             bucket = cluster.openBucket(bucketName);
 
-
-//            DiagnosticsReport report = cluster.diagnostics();
-//            List<EndpointHealth> endpointHealths = report.endpoints();
-//
-//            for (EndpointHealth health : endpointHealths) {
-//                if (!health.state().equals(LifecycleState.CONNECTED)) {
-//                    return new HealthCheckStatus(HealthCheckStatus.Status.KO,
-//                            "Endpoint with id: " + health.id() + " Not connected");
-//                }
-//            }
+            // DiagnosticsReport report = cluster.diagnostics();
+            // List<EndpointHealth> endpointHealths = report.endpoints();
+            //
+            // for (EndpointHealth health : endpointHealths) {
+            // if (!health.state().equals(LifecycleState.CONNECTED)) {
+            // return new HealthCheckStatus(HealthCheckStatus.Status.KO,
+            // "Endpoint with id: " + health.id() + " Not connected");
+            // }
+            // }
         } catch (Throwable exception) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, exception.getMessage());
         } finally {
@@ -80,8 +78,8 @@ public class CouchbaseService {
         // todo: add i18n
     }
 
-    static String[] resolveAddresses(String nodes) {
-        String[] addresses = nodes.split(",");
+    public static String[] resolveAddresses(String nodes) {
+        String[] addresses = nodes.replaceAll(" ", "").split(",");
         for (int i = 0; i < addresses.length; i++) {
             log.info("Bootstrap node[" + i + "]: " + addresses[i]);
         }

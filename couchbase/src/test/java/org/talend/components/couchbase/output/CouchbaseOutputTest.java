@@ -12,7 +12,7 @@ import org.talend.sdk.component.junit.JoinInputFactory;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.runtime.output.Processor;
 
-public class CouchbaseOutputOutputTest {
+public class CouchbaseOutputTest {
 
     @ClassRule
     public static final SimpleComponentRule COMPONENT_FACTORY = new SimpleComponentRule("org/talend/components/couchbase");

@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 @Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
                           // icons/filename_icon32.png in resources
-@Processor(name = "CouchbaseOutput")
+@Processor(name = "Output")
 @Documentation("This component writes data to Couchbase")
 public class CouchbaseOutput implements Serializable {
 
@@ -43,8 +43,6 @@ public class CouchbaseOutput implements Serializable {
     private Bucket bucket;
 
     private String idFieldName;
-
-    private boolean dieOnError;
 
     public CouchbaseOutput(@Option("configuration") final CouchbaseOutputConfiguration configuration,
             final CouchbaseService service) {

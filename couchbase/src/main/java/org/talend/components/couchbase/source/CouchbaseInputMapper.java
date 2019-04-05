@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
 @Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
                           // icons/filename_icon32.png in resources
-@PartitionMapper(name = "CouchbaseInput")
+@PartitionMapper(name = "Input")
 @Documentation("Couchbase input Mapper")
 public class CouchbaseInputMapper implements Serializable {
 
