@@ -17,16 +17,26 @@ import org.talend.components.azure.common.csv.Encoding;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
+import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
-@GridLayout({ @GridLayout.Row("excelFormat"), @GridLayout.Row("encoding"), @GridLayout.Row("customEncoding"),
-        @GridLayout.Row("useHeader"), @GridLayout.Row("header"), @GridLayout.Row("useFooter"), @GridLayout.Row("footer") })
+import lombok.Data;
+
+@GridLayout({ @GridLayout.Row("excelFormat"), @GridLayout.Row("sheetName"), @GridLayout.Row("encoding"),
+        @GridLayout.Row("customEncoding"), @GridLayout.Row("useHeader"), @GridLayout.Row("header"), @GridLayout.Row("useFooter"),
+        @GridLayout.Row("footer") })
+@Data
 public class ExcelFormatOptions {
 
     @Option
     @Documentation("Excel format")
     private ExcelFormat excelFormat = ExcelFormat.EXCEL2007;
+
+    @Option
+    @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" })
+    @Documentation("Sheet name")
+    private String sheetName;
 
     @Option
     @ActiveIf(target = "excelFormat", value = "HTML")
@@ -45,6 +55,7 @@ public class ExcelFormatOptions {
     @Option
     @ActiveIf(target = "useHeader", value = "true")
     @Documentation("Header size")
+    @Min(0)
     private int header;
 
     @Option
@@ -54,5 +65,6 @@ public class ExcelFormatOptions {
     @Option
     @ActiveIf(target = "useFooter", value = "true")
     @Documentation("Footer size")
+    @Min(0)
     private int footer;
 }

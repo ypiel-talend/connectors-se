@@ -31,6 +31,8 @@
     TIP: it is recommended to set this property into your settings.xml in an active by default profile.
     -->
     <talend.component.studioHome />
+
+    <apache.poi.version>4.0.1</apache.poi.version>
   </properties>
 
   <dependencies>
@@ -54,6 +56,19 @@
       <artifactId>commons-csv</artifactId>
       <version>${commons-csv.version}</version>
     </dependency>
+
+    <!-- Excel format -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>${apache.poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${apache.poi.version}</version>
+    </dependency>
+
 
   </dependencies>
 

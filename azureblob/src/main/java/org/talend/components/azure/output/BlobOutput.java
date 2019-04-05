@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.common.runtime.output.BlobFileWriter;
 import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.component.Icon;
@@ -19,10 +20,8 @@ import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 
 import org.talend.components.azure.service.AzureBlobComponentServices;
-import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-@Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
+@Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "AzureOutput")
 @Processor(name = "Output")
 @Documentation("TODO fill the documentation for this processor")
@@ -32,12 +31,15 @@ public class BlobOutput implements Serializable {
 
     private final AzureBlobComponentServices service;
 
+    private final MessageService messageService;
+
     private BlobFileWriter fileWriter;
 
     public BlobOutput(@Option("configuration") final BlobOutputConfiguration configuration,
             final AzureBlobComponentServices service, final MessageService i18n) {
         this.configuration = configuration;
         this.service = service;
+        this.messageService = i18n;
     }
 
     @PostConstruct
@@ -46,7 +48,7 @@ public class BlobOutput implements Serializable {
             this.fileWriter = BlobFileWriter.BlobFileWriterFactory.getWriter(configuration, service.getConnectionService());
             fileWriter.generateFile();
         } catch (Exception e) {
-            throw new RuntimeException(e); // TODO custom exception
+            throw new BlobRuntimeException(messageService.errorCreateBlobItem(), e);
         }
     }
 
@@ -65,7 +67,7 @@ public class BlobOutput implements Serializable {
         try {
             fileWriter.flush();
         } catch (Exception e) {
-            throw new RuntimeException(e); // TODO custom exception
+            throw new BlobRuntimeException(messageService.errorSubmitRows(), e);
         }
     }
 

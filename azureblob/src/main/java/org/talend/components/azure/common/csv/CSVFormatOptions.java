@@ -15,6 +15,7 @@ package org.talend.components.azure.common.csv;
 
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -69,5 +70,6 @@ public class CSVFormatOptions {
     @Option
     @ActiveIf(target = "useHeader", value = "true")
     @Documentation("Header size")
+    @Min(0)
     private int header;
 }

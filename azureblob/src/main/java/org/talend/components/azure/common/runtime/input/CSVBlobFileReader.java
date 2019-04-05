@@ -29,6 +29,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.csv.FieldDelimiter;
+import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
@@ -43,27 +44,21 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class CSVBlobFileReader extends BlobFileReader {
 
-    // TODO move fields in abstract class
-
-    private RecordBuilderFactory recordBuilderFactory;
-
-    private CloudStorageAccount connection;
-
     private FileRecordIterator recordIterator;
 
     private CSVFormatOptions configCSV;
 
-    public CSVBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
+    CSVBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
             AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
-        this.recordBuilderFactory = recordBuilderFactory;
-        this.connection = connectionServices.createStorageAccount(config.getConnection()); // TODO no need of it?
+        super(recordBuilderFactory);
         this.configCSV = config.getCsvOptions();
 
-        CloudBlobClient blobClient = connection.createCloudBlobClient();
+        CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
+        CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
+                AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
         CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
 
         Iterable<ListBlobItem> blobItems = container.listBlobs(config.getDirectory(), true);
-        // config.getCsvOptions()
         recordIterator = new FileRecordIterator(blobItems);
     }
 
@@ -108,7 +103,7 @@ public class CSVBlobFileReader extends BlobFileReader {
                 columns = inferSchemaInfo(next, true);
             }
 
-            Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
+            Record.Builder recordBuilder = getRecordBuilderFactory().newRecordBuilder();
             for (int i = 0; i < next.size(); i++) {
                 recordBuilder.withString(columns.get(i), next.get(i));
             }
@@ -154,7 +149,7 @@ public class CSVBlobFileReader extends BlobFileReader {
 
                 this.recordIterator = parser.getRecords().iterator();
             } catch (Exception e) {
-                throw new RuntimeException(e); // TODO custom exception
+                throw new BlobRuntimeException(e);
             }
         }
     }
@@ -190,7 +185,6 @@ public class CSVBlobFileReader extends BlobFileReader {
 
     // TODO move it
     private static List<String> inferSchemaInfo(CSVRecord singleHeaderRow, boolean useDefaultFieldName) {
-        // ArrayList can Serializable, so can pass to the ExtractCsvRecord
         List<String> result = new ArrayList<>();
         Set<String> existNames = new HashSet<>();
         int index = 0;

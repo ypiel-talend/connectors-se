@@ -14,8 +14,13 @@
 package org.talend.components.azure.common.runtime.input;
 
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class AvroBlobFileReader extends BlobFileReader {
+
+    public AvroBlobFileReader(RecordBuilderFactory recordBuilderFactory) {
+        super(recordBuilderFactory);
+    }
 
     @Override
     public Record readRecord() {

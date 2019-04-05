@@ -22,7 +22,17 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public abstract class BlobFileReader {
 
+    private RecordBuilderFactory recordBuilderFactory;
+
+    public BlobFileReader(RecordBuilderFactory recordBuilderFactory) {
+        this.recordBuilderFactory = recordBuilderFactory;
+    }
+
     public abstract Record readRecord();
+
+    protected RecordBuilderFactory getRecordBuilderFactory() {
+        return recordBuilderFactory;
+    }
 
     public static class BlobFileReaderFactory {
 
@@ -32,11 +42,11 @@ public abstract class BlobFileReader {
             case CSV:
                 return new CSVBlobFileReader(config, recordBuilderFactory, connectionServices);
             case AVRO:
-                return new AvroBlobFileReader();
+                return new AvroBlobFileReader(recordBuilderFactory);
             case EXCEL:
-                return new ExcelBlobFileReader();
+                return new ExcelBlobFileReader(config, recordBuilderFactory, connectionServices);
             case PARQUET:
-                return new ParquetBlobFileReader();
+                return new ParquetBlobFileReader(recordBuilderFactory);
             default:
                 throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
             }
