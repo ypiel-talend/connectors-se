@@ -21,7 +21,8 @@ public abstract class MongoClientFactory {
         this.clientOptions = clientOptions;
     }
 
-    public static MongoClientFactory getInstance(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+    public static MongoClientFactory getInstance(MongoDBDatastore datastore, MongoClientOptions clientOptions,
+            I18nMessage i18nMessage) {
         if (datastore.isAuthentication()) {
             switch (datastore.getAuthenticationMechanism()) {
             case NEGOTIATE_MEC:
@@ -33,7 +34,8 @@ public abstract class MongoClientFactory {
             case KERBEROS_MEC:
                 return new KerberosAuthMongoClientFactory(datastore, clientOptions);
             default:
-                throw new IllegalArgumentException("Authentication mechanism is not supported");
+                throw new IllegalArgumentException(
+                        i18nMessage.authMechanismNotSupported(datastore.getAuthenticationMechanism().name()));
             }
         }
         return new DefaultMongoClientFactory(datastore, clientOptions);

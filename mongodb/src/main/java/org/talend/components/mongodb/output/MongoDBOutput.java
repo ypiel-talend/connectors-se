@@ -13,6 +13,7 @@ import com.mongodb.client.model.WriteModel;
 import org.bson.Document;
 import org.talend.components.mongodb.output.processor.ValuesProcessor;
 import org.talend.components.mongodb.output.processor.ValuesProcessorsFactory;
+import org.talend.components.mongodb.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -30,6 +31,8 @@ import org.talend.sdk.component.api.record.Schema;
 @Documentation("MongoDB output component")
 public class MongoDBOutput implements Serializable {
 
+    private final I18nMessage i18n;
+
     private final MongoDBOutputConfiguration configuration;
 
     private MongoCollection<Document> collection;
@@ -44,9 +47,11 @@ public class MongoDBOutput implements Serializable {
 
     private ValuesProcessor<? extends WriteModel<Document>> valuesProcessor;
 
-    public MongoDBOutput(@Option("configuration") final MongoDBOutputConfiguration configuration, final MongoDBService service) {
+    public MongoDBOutput(@Option("configuration") final MongoDBOutputConfiguration configuration, final MongoDBService service,
+            final I18nMessage i18n) {
         this.configuration = configuration;
         this.service = service;
+        this.i18n = i18n;
     }
 
     @PostConstruct
@@ -66,7 +71,7 @@ public class MongoDBOutput implements Serializable {
         if (configuration.getDataset().getSchema() != null) {
             columnsList.addAll(configuration.getDataset().getSchema());
         }
-        valuesProcessor = ValuesProcessorsFactory.createProcessor(configuration, collection);
+        valuesProcessor = ValuesProcessorsFactory.createProcessor(configuration, collection, i18n);
     }
 
     @BeforeGroup

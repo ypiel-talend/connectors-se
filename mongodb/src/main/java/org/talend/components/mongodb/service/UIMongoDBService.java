@@ -26,6 +26,9 @@ public class UIMongoDBService {
     @Service
     private MongoDBService mongoDbService;
 
+    @Service
+    private I18nMessage i18nMessage;
+
     @HealthCheck(HEALTH_CHECK)
     public HealthCheckStatus testConnection(MongoDBDatastore datastore) {
         MongoClient mongo = mongoDbService.getMongoClient(datastore, new MongoDBService.DefaultClientOptionsFactory(datastore));
@@ -39,9 +42,9 @@ public class UIMongoDBService {
             }
             mongo.close();
         } catch (Exception e) {
-            return new HealthCheckStatus(HealthCheckStatus.Status.KO, "Exception");
+            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18nMessage.connectionFailed(e.getMessage()));
         }
-        return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Everything's ok");
+        return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18nMessage.connectionSuccessful());
     }
 
     @Suggestions(GET_SCHEMA_FIELDS)

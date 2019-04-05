@@ -1,15 +1,18 @@
 package org.talend.components.mongodb.output.processor.impl;
 
 import com.mongodb.client.model.WriteModel;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.talend.components.mongodb.output.MongoDocumentWrapper;
 import org.talend.components.mongodb.output.MongoDBOutputConfiguration;
 import org.talend.components.mongodb.output.OutputMapping;
 import org.talend.components.mongodb.output.processor.ModelProducer;
+import org.talend.components.mongodb.service.I18nMessage;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
 public abstract class AbstractFilterValueModelProducer<T extends WriteModel<Document>> implements ModelProducer<T> {
 
     private MongoDocumentWrapper mongoDocumentWrapper;
@@ -37,12 +40,13 @@ public abstract class AbstractFilterValueModelProducer<T extends WriteModel<Docu
     }
 
     @Override
-    public T createRecord() {
+    public T createRecord(I18nMessage i18nMessage) {
         Document filter = queryDocumentWrapper.getObject();
         Document object = mongoDocumentWrapper.getObject();
         queryDocumentWrapper = null;
         mongoDocumentWrapper = null;
         if (filter.keySet().isEmpty()) {
+            log.warn(i18nMessage.noKeysFound(String.valueOf(object)));
             return null;
         }
         return doCreateModel(filter, object);

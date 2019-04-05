@@ -5,11 +5,12 @@ import com.mongodb.client.model.*;
 import org.bson.Document;
 import org.talend.components.mongodb.output.MongoDBOutputConfiguration;
 import org.talend.components.mongodb.output.processor.impl.*;
+import org.talend.components.mongodb.service.I18nMessage;
 
 public class ValuesProcessorsFactory {
 
     public static <T extends WriteModel<Document>> ValuesProcessor<T> createProcessor(MongoDBOutputConfiguration config,
-            MongoCollection<Document> collection) {
+            MongoCollection<Document> collection, I18nMessage i18nMessage) {
         AbstractValuesProcessorFactory<T> factory;
         switch (config.getActionOnData()) {
         case INSERT:
@@ -47,7 +48,7 @@ public class ValuesProcessorsFactory {
         } else {
             writer = factory.createWriter(collection);
         }
-        ValuesProcessor<T> processor = new ValuesProcessor<>(factory.createProducer(config), writer);
+        ValuesProcessor<T> processor = new ValuesProcessor<>(factory.createProducer(config), writer, i18nMessage);
         return processor;
     }
 

@@ -15,6 +15,9 @@ import org.talend.sdk.component.api.service.Service;
 @Slf4j
 public class MongoDBService {
 
+    @Service
+    private I18nMessage i18nMessage;
+
     public static class DefaultClientOptionsFactory extends ClientOptionsFactory {
 
         public DefaultClientOptionsFactory(final MongoDBDatastore datastore) {
@@ -96,12 +99,14 @@ public class MongoDBService {
     }
 
     public MongoClient getMongoClient(final MongoDBDatastore datastore, final ClientOptionsFactory optionsFactory) {
-        MongoClientFactory factory = MongoClientFactory.getInstance(datastore, optionsFactory.createOptions());
+        MongoClientFactory factory = MongoClientFactory.getInstance(datastore, optionsFactory.createOptions(), i18nMessage);
+        log.debug(i18nMessage.factoryClass(factory.getClass().getName()));
         MongoClient mongo = factory.createClient();
         return mongo;
     }
 
     public MongoCollection<Document> getCollection(final MongoDBDataset dataset, final MongoClient client) {
+        log.debug(i18nMessage.retrievingCollection(dataset.getCollection()));
         MongoDatabase db = client.getDatabase(dataset.getDatastore().getDatabase());
         return db.getCollection(dataset.getCollection());
     }
