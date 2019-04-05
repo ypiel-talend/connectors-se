@@ -1,17 +1,16 @@
 package org.talend.components.netsuite.source;
 
-import java.io.Serializable;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-
 import org.talend.components.netsuite.dataset.NetsuiteInputDataSet;
 import org.talend.components.netsuite.service.NetsuiteService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
+import java.io.Serializable;
 
 @Documentation("TODO fill the documentation for this source")
 public class NetsuiteInputSource implements Serializable {
