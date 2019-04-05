@@ -1,8 +1,6 @@
 package org.talend.components.netsuite.source;
 
 import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.talend.components.netsuite.dataset.NetsuiteInputDataSet;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.runtime.input.Mapper;
@@ -18,8 +16,8 @@ public class NetsuiteInputMapperTest {
     @ClassRule
     public static final SimpleComponentRule COMPONENT_FACTORY = new SimpleComponentRule("org.talend.components.netsuite");
 
-    @Test
-    @Ignore("You need to complete this test")
+    // @Test
+    // @Ignore("You need to complete this test")
     public void produce() throws IOException {
 
         // Source configuration
