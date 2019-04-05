@@ -31,7 +31,7 @@ public class UIMongoDBService {
 
     @HealthCheck(HEALTH_CHECK)
     public HealthCheckStatus testConnection(MongoDBDatastore datastore) {
-        MongoClient mongo = mongoDbService.getMongoClient(datastore, new MongoDBService.DefaultClientOptionsFactory(datastore));
+        MongoClient mongo = mongoDbService.getMongoClient(datastore, new DefaultClientOptionsFactory(datastore, i18nMessage));
         try {
             MongoDatabase db = mongo.getDatabase(datastore.getDatabase());
             MongoIterable<String> collectionsIterable = db.listCollectionNames();

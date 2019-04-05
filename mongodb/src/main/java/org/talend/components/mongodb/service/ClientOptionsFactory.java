@@ -7,8 +7,11 @@ public abstract class ClientOptionsFactory {
 
     private final MongoDBDatastore datastore;
 
-    public ClientOptionsFactory(final MongoDBDatastore properties) {
+    protected final I18nMessage i18nMessage;
+
+    public ClientOptionsFactory(final MongoDBDatastore properties, final I18nMessage i18nMessage) {
         this.datastore = properties;
+        this.i18nMessage = i18nMessage;
     }
 
     public MongoClientOptions createOptions() {

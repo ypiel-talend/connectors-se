@@ -7,16 +7,15 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
+import org.talend.components.mongodb.service.I18nMessage;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -50,8 +49,11 @@ public class MongoDBInputSource implements Serializable {
 
     private final QueryDataFinder<Document> dataFinder;
 
+    private final I18nMessage i18nMessage;
+
     public MongoDBInputSource(@Option("configuration") final MongoDBInputMapperConfiguration configuration,
-            final MongoDBService service, final RecordBuilderFactory builderFactory) {
+            final MongoDBService service, final RecordBuilderFactory builderFactory, final I18nMessage i18nMessage) {
+        this.i18nMessage = i18nMessage;
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;
@@ -63,7 +65,7 @@ public class MongoDBInputSource implements Serializable {
     @PostConstruct
     public void init() {
         mongoClient = service.getMongoClient(configuration.getDataset().getDatastore(),
-                new MongoDBService.InputClientOptionsFactory(configuration));
+                new InputClientOptionsFactory(configuration, i18nMessage));
         MongoCollection<Document> collection = service.getCollection(configuration.getDataset(), mongoClient);
 
         checkIndexList(collection);

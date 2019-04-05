@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import java.io.Serializable;
 import java.util.List;
 
+import org.talend.components.mongodb.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -34,11 +35,14 @@ public class MongoDBInputMapper implements Serializable {
 
     private final RecordBuilderFactory recordBuilderFactory;
 
+    private final I18nMessage i18nMessage;
+
     public MongoDBInputMapper(@Option("configuration") final MongoDBInputMapperConfiguration configuration,
-            final MongoDBService service, final RecordBuilderFactory recordBuilderFactory) {
+            final MongoDBService service, final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
+        this.i18nMessage = i18nMessage;
     }
 
     @Assessor
@@ -53,6 +57,6 @@ public class MongoDBInputMapper implements Serializable {
 
     @Emitter
     public MongoDBInputSource createWorker() {
-        return new MongoDBInputSource(configuration, service, recordBuilderFactory);
+        return new MongoDBInputSource(configuration, service, recordBuilderFactory, i18nMessage);
     }
 }

@@ -26,4 +26,8 @@ public interface I18nMessage {
     String factoryClass(String className);
 
     String retrievingCollection(String collection);
+
+    String unknownWriteConcern(String writeConcern);
+
+    String unknownReadPreference(String valueOf);
 }

@@ -57,7 +57,7 @@ public class MongoDBOutput implements Serializable {
     @PostConstruct
     public void init() {
         this.client = service.getMongoClient(configuration.getDataset().getDatastore(),
-                new MongoDBService.OutputClientOptionsFactory(configuration));
+                new OutputClientOptionsFactory(configuration, i18n));
         collection = service.getCollection(configuration.getDataset(), client);
         // if (configuration.isDropCollectionIfExists()) {
         // collection.drop();
