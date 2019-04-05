@@ -1,13 +1,5 @@
 package org.talend.components.netsuite.source;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.IndexedRecord;
@@ -23,6 +15,14 @@ import org.talend.components.netsuite.processor.NetsuiteOutputProcessor;
 import org.talend.components.netsuite.runtime.NetSuiteEndpoint;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.input.Mapper;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @WithComponents("org.talend.components.netsuite")
 public class NetsuiteSourceTest extends NetsuiteBaseTest {
