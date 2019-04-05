@@ -1,5 +1,6 @@
 package org.talend.components.netsuite.datastore;
 
+import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.type.DataStore;
@@ -8,8 +9,6 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
-
-import lombok.Data;
 
 @Data
 @DataStore("NetsuiteConnection")
