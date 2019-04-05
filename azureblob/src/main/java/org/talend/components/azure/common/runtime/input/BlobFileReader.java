@@ -13,12 +13,15 @@
 
 package org.talend.components.azure.common.runtime.input;
 
-import java.util.Set;
+import java.util.Iterator;
 
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
+import com.microsoft.azure.storage.blob.CloudBlob;
+import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public abstract class BlobFileReader {
 
@@ -53,64 +56,65 @@ public abstract class BlobFileReader {
         }
     }
 
-    // TODO move it
-    /**
-     * correct the field name and make it valid for AVRO schema
-     * for example :
-     * input : "CA HT", output "CA_HT"
-     * input : "column?!^Name", output "column___Name"
-     * input : "P1_Vente_Qté", output "P1_Vente_Qt_"
-     *
-     * @param name : the name will be correct
-     * @param nameIndex : a index which is used to generate the column name when too much underline in the name
-     * @param previousNames : the previous valid names, this is used to make sure that every name is different
-     * @return the valid name, if the input name is null or empty, or the previousNames is null, return the input name directly
-     */
-    public static String correct(String name, int nameIndex, Set<String> previousNames) {
-        if (name == null || name.isEmpty() || previousNames == null) {
-            return name;
+    protected abstract class ItemRecordIterator<T> implements Iterator<Record> {
+
+        private Iterator<ListBlobItem> blobItems;
+
+        private CloudBlob currentItem;
+
+        ItemRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+            this.blobItems = blobItemsList.iterator();
+            initRecordContainer();
+            takeFirstItem();
         }
 
-        StringBuilder str = new StringBuilder();
-        int underLineCount = 0;
-        for (int i = 0; i < name.length(); i++) {
-            char c = name.charAt(i);
-            if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')) || ((c >= '0') && (c <= '9') && (i != 0))) {
-                str.append(c);
-            } else if (c == '_') {
-                str.append(c);
-                underLineCount++;
+        @Override
+        public boolean hasNext() {
+            throw new UnsupportedOperationException("Use next() method until return null");
+        }
+
+        @Override
+        public Record next() {
+            T next = readNextItemRecord();
+
+            return next != null ? convertToRecord(next) : null;
+        }
+
+        CloudBlob getCurrentItem() {
+            return currentItem;
+        }
+
+        T readNextItemRecord() {
+            if (currentItem == null) {
+                return null; // No items exists
+            }
+
+            if (hasNextRecordTaken()) {
+                return takeNextRecord();
+            } else if (blobItems.hasNext()) {
+                currentItem = (CloudBlob) blobItems.next();
+                readItem();
+                return readNextItemRecord(); // read record from next item
             } else {
-                str.append('_');
-                underLineCount++;
+                return null;
             }
         }
 
-        String result = null;
-        if (underLineCount > (name.length() / 2)) {
-            result = "Column" + nameIndex;
-        } else {
-            result = str.toString();
-        }
+        protected abstract void initRecordContainer();
 
-        return getUniqueName(result, previousNames);
-    }
+        protected abstract T takeNextRecord();
 
-    private static String getUniqueName(String name, Set<String> previousNames) {
-        boolean allIsDifferent = false;
-        int index = 0;
-        String currentName = name;
-        while (!allIsDifferent) {
-            allIsDifferent = true;
+        protected abstract boolean hasNextRecordTaken();
 
-            if (previousNames.contains(currentName)) {
-                allIsDifferent = false;
-            }
+        protected abstract Record convertToRecord(T next);
 
-            if (!allIsDifferent) {
-                currentName = currentName + (++index);
+        protected abstract void readItem();
+
+        private void takeFirstItem() {
+            if (blobItems.hasNext()) {
+                currentItem = (CloudBlob) blobItems.next();
+                readItem();
             }
         }
-        return currentName;
     }
 }

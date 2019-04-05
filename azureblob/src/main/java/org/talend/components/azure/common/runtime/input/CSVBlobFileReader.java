@@ -37,7 +37,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
@@ -67,37 +66,20 @@ public class CSVBlobFileReader extends BlobFileReader {
         return recordIterator.next();
     }
 
-    private class FileRecordIterator implements Iterator<Record> {
-
-        private Iterator<ListBlobItem> blobItems;
+    private class FileRecordIterator extends ItemRecordIterator<CSVRecord> {
 
         private Iterator<CSVRecord> recordIterator;
-
-        private CloudBlob currentItem;
 
         private CSVFormat format;
 
         private List<String> columns;
 
         public FileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
-            this.blobItems = blobItemsList.iterator();
-
-            takeFirstItem();
+            super(blobItemsList);
         }
 
         @Override
-        public boolean hasNext() {
-            throw new UnsupportedOperationException("Use next() method until return null");
-        }
-
-        @Override
-        public Record next() {
-            CSVRecord next = nextCSV();
-
-            return next != null ? convertToRecord(next) : null;
-        }
-
-        private Record convertToRecord(CSVRecord next) {
+        protected Record convertToRecord(CSVRecord next) {
             if (columns == null) {
                 // TODO header
                 columns = inferSchemaInfo(next, true);
@@ -110,30 +92,8 @@ public class CSVBlobFileReader extends BlobFileReader {
             return recordBuilder.build();
         }
 
-        private CSVRecord nextCSV() {
-            if (currentItem == null) {
-                return null; // No items exists
-            }
-
-            if (recordIterator.hasNext()) {
-                return recordIterator.next();
-            } else if (blobItems.hasNext()) {
-                currentItem = (CloudBlob) blobItems.next();
-                readItem();
-                return nextCSV(); // read record from next item
-            } else {
-                return null;
-            }
-        }
-
-        private void takeFirstItem() {
-            if (blobItems.hasNext()) {
-                currentItem = (CloudBlob) blobItems.next();
-                readItem();
-            }
-        }
-
-        private void readItem() {
+        @Override
+        protected void readItem() {
             if (format == null) {
                 // TODO char
                 String delimiterValue = configCSV.getFieldDelimiter() == FieldDelimiter.OTHER
@@ -143,7 +103,7 @@ public class CSVBlobFileReader extends BlobFileReader {
                         configCSV.getEscapeCharacter());
             }
 
-            try (InputStream input = currentItem.openInputStream();
+            try (InputStream input = getCurrentItem().openInputStream();
                     InputStreamReader inr = new InputStreamReader(input, StandardCharsets.UTF_8); // TODO encoding
                     org.apache.commons.csv.CSVParser parser = new CSVParser(inr, format)) {
 
@@ -151,6 +111,21 @@ public class CSVBlobFileReader extends BlobFileReader {
             } catch (Exception e) {
                 throw new BlobRuntimeException(e);
             }
+        }
+
+        @Override
+        protected boolean hasNextRecordTaken() {
+            return recordIterator.hasNext();
+        }
+
+        @Override
+        protected CSVRecord takeNextRecord() {
+            return recordIterator.next();
+        }
+
+        @Override
+        protected void initRecordContainer() {
+            // NOOP
         }
     }
 
@@ -194,7 +169,7 @@ public class CSVBlobFileReader extends BlobFileReader {
                 fieldName = "field" + i;
             }
 
-            String finalName = correct(fieldName, index++, existNames);
+            String finalName = SchemaUtils.correct(fieldName, index++, existNames);
             existNames.add(finalName);
 
             result.add(finalName);

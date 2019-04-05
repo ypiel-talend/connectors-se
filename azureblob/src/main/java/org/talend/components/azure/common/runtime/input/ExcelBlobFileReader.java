@@ -13,13 +13,12 @@
 
 package org.talend.components.azure.common.runtime.input;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -36,7 +35,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
@@ -66,35 +64,18 @@ public class ExcelBlobFileReader extends BlobFileReader {
         return recordIterator.next();
     }
 
-    private class FileRecordIterator implements Iterator<Record> {
+    private class FileRecordIterator extends BlobFileReader.ItemRecordIterator<Row> {
 
-        private Iterator<ListBlobItem> blobItems;
-
-        private Queue<Row> rows;
-
-        private CloudBlob currentItem;
+        private LinkedList<Row> rows;
 
         private List<String> columns;
 
         public FileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
-            this.blobItems = blobItemsList.iterator();
-            this.rows = new LinkedBlockingQueue<>();
-            takeFirstItem();
+            super(blobItemsList);
         }
 
         @Override
-        public boolean hasNext() {
-            throw new UnsupportedOperationException("Use next() method until return null");
-        }
-
-        @Override
-        public Record next() {
-            Row next = nextRow();
-
-            return next != null ? convertToRecord(next) : null;
-        }
-
-        private Record convertToRecord(Row next) {
+        protected Record convertToRecord(Row next) {
             if (columns == null) {
                 // TODO header
                 columns = inferSchemaInfo(next, false);
@@ -132,31 +113,9 @@ public class ExcelBlobFileReader extends BlobFileReader {
             return columns;
         }
 
-        private Row nextRow() {
-            if (currentItem == null) {
-                return null; // No items exists
-            }
-
-            if (rows.size() > 0) {
-                return rows.poll();
-            } else if (blobItems.hasNext()) {
-                currentItem = (CloudBlob) blobItems.next();
-                readItem();
-                return nextRow(); // read record from next item
-            } else {
-                return null;
-            }
-        }
-
-        private void takeFirstItem() {
-            if (blobItems.hasNext()) {
-                currentItem = (CloudBlob) blobItems.next();
-                readItem();
-            }
-        }
-
-        private void readItem() {
-            try (InputStream input = currentItem.openInputStream()) {
+        @Override
+        protected void readItem() {
+            try (InputStream input = getCurrentItem().openInputStream()) {
 
                 Workbook wb = new HSSFWorkbook(input); // TODO excel format
                 Sheet sheet = wb.getSheet(excelConfig.getSheetName());
@@ -168,9 +127,24 @@ public class ExcelBlobFileReader extends BlobFileReader {
                     rows.add(row);
                 }
 
-            } catch (Exception e) {
+            } catch (StorageException | IOException e) {
                 throw new BlobRuntimeException(e);
             }
+        }
+
+        @Override
+        protected boolean hasNextRecordTaken() {
+            return rows.size() > 0;
+        }
+
+        @Override
+        protected Row takeNextRecord() {
+            return rows.poll();
+        }
+
+        @Override
+        protected void initRecordContainer() {
+            rows = new LinkedList<>();
         }
     }
 }
