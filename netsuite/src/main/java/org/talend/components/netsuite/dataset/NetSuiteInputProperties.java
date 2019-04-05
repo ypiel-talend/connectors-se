@@ -13,38 +13,29 @@
 package org.talend.components.netsuite.dataset;
 
 import lombok.Data;
-import org.talend.components.netsuite.datastore.NetsuiteDataStore;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
-import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.meta.Documentation;
 
+import java.io.Serializable;
+import java.util.List;
+
 @Data
-@DataSet("input")
-@GridLayouts({
-        @GridLayout({ @GridLayout.Row({ "dataStore" }), @GridLayout.Row({ "recordType" }),
-                @GridLayout.Row({ "searchCondition" }) }),
-        @GridLayout(names = { GridLayout.FormType.ADVANCED }, value = @GridLayout.Row({ "bodyFieldsOnly" })) })
-public class NetsuiteInputDataSet {
+@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "searchCondition" }) }), @GridLayout(names = {
+        GridLayout.FormType.ADVANCED }, value = { @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "bodyFieldsOnly" }) }) })
+@Documentation("Properties for Input component")
+public class NetSuiteInputProperties implements Serializable {
 
     @Option
-    @Documentation("")
-    private NetsuiteDataStore dataStore;
+    @Documentation("Common dataset properties - datastore + module")
+    private NetSuiteDataSet dataSet;
 
     @Option
-    @Suggestable(value = "loadRecordTypes", parameters = { "../configuration.dataStore.endpoint",
-            "../configuration.dataStore.email", "../configuration.dataStore.password", "../configuration.dataStore.role",
-            "../configuration.dataStore.account", "../configuration.dataStore.applicationId" })
-    @Documentation("TODO fill the documentation for this parameter")
-    private String recordType;
+    @Documentation("Properties that are required for search")
+    private List<SearchConditionConfiguration> searchCondition;
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
-    private SearchConditionConfiguration searchCondition;
-
-    @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Shows or hides Item List result. Default true - hides, uncheck it to show")
     private boolean bodyFieldsOnly = true;
 }

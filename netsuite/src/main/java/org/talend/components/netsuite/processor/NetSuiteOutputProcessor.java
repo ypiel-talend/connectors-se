@@ -12,8 +12,15 @@
  */
 package org.talend.components.netsuite.processor;
 
-import org.talend.components.netsuite.dataset.NetsuiteOutputDataSet;
-import org.talend.components.netsuite.service.NetsuiteService;
+import org.apache.commons.lang3.StringUtils;
+import org.talend.components.netsuite.dataset.NetSuiteOutputProperties;
+import org.talend.components.netsuite.dataset.NetSuiteOutputProperties.DataAction;
+import org.talend.components.netsuite.runtime.NsObjectTransducer;
+import org.talend.components.netsuite.runtime.client.NetSuiteClientService;
+import org.talend.components.netsuite.runtime.client.NsWriteResponse;
+import org.talend.components.netsuite.runtime.model.beans.Beans;
+import org.talend.components.netsuite.service.Messages;
+import org.talend.components.netsuite.service.NetSuiteService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -22,63 +29,173 @@ import org.talend.sdk.component.api.processor.AfterGroup;
 import org.talend.sdk.component.api.processor.BeforeGroup;
 import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Input;
-import org.talend.sdk.component.api.processor.Output;
-import org.talend.sdk.component.api.processor.OutputEmitter;
 import org.talend.sdk.component.api.processor.Processor;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.json.JsonObject;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @Version(1)
-@Icon(value = Icon.IconType.CUSTOM, custom = "NetsuiteOutput")
+@Icon(value = Icon.IconType.CUSTOM, custom = "NetSuiteOutput")
 @Processor(name = "Output")
 @Documentation("Output component processor")
-public class NetsuiteOutputProcessor implements Serializable {
+public class NetSuiteOutputProcessor implements Serializable {
 
-    private final NetsuiteOutputDataSet configuration;
+    private final NetSuiteOutputProperties configuration;
 
-    private final NetsuiteService service;
+    private final NetSuiteService service;
 
-    public NetsuiteOutputProcessor(@Option("configuration") final NetsuiteOutputDataSet configuration,
-            final NetsuiteService service) {
+    private NetSuiteClientService<?> clientService;
+
+    private Messages i18n;
+
+    protected NsObjectOutputTransducer transducer;
+
+    private Function<List<?>, List<NsWriteResponse<?>>> dataActionFunction;
+
+    private List<Record> inputRecordList;
+
+    private Schema schema;
+
+    public NetSuiteOutputProcessor(@Option("configuration") final NetSuiteOutputProperties configuration,
+            final NetSuiteService service, Messages i18n) {
         this.configuration = configuration;
         this.service = service;
+        this.i18n = i18n;
     }
 
     @PostConstruct
     public void init() {
-        // this method will be executed once for the whole component execution,
-        // this is where you can establish a connection for instance
-        // Note: if you don't need it you can delete it
+        clientService = service.getClientService(configuration.getDataSet().getDataStore());
+        schema = service.getSchema(configuration.getDataSet(), null);
+        referenceDataActionFunction();
+        instantiateTransducer();
+        inputRecordList = new ArrayList<>();
+    }
+
+    private void referenceDataActionFunction() {
+        DataAction data = configuration.getAction();
+        switch (data) {
+        case ADD:
+            dataActionFunction = clientService::addList;
+            break;
+        case UPDATE:
+            dataActionFunction = clientService::updateList;
+            break;
+        case DELETE:
+            dataActionFunction = clientService::deleteList;
+            break;
+        case UPSERT:
+            dataActionFunction = configuration.isUseNativeUpsert() ? clientService::upsertList : this::customUpsert;
+            break;
+        }
+    }
+
+    private void instantiateTransducer() {
+        transducer = new NsObjectOutputTransducer(clientService, i18n, configuration.getDataSet().getRecordType(), schema,
+                configuration.getDataSet().getDataStore().getApiVersion().getVersion());
+        transducer.setMetaDataSource(clientService.getMetaDataSource());
+        transducer.setReference(configuration.getAction() == DataAction.DELETE);
     }
 
     @BeforeGroup
     public void beforeGroup() {
-        // if the environment supports chunking this method is called at the beginning if a chunk
-        // it can be used to start a local transaction specific to the backend you use
-        // Note: if you don't need it you can delete it
+        inputRecordList.clear();
     }
 
     @ElementListener
-    public void onNext(@Input final JsonObject defaultInput, @Output final OutputEmitter<JsonObject> defaultOutput,
-            @Output("REJECT") final OutputEmitter<JsonObject> reject) {
-        // this is the method allowing you to handle the input(s) and emit the output(s)
-        // after some custom logic you put here, to send a value to next element you can use an
-        // output parameter and call emit(value).
+    public void onNext(@Input final Record record) {
+        inputRecordList.add(record);
+    }
+
+    /**
+     * Process and write given list of <code>Record</code>s.
+     *
+     * @param RecordList list of records to be processed
+     */
+    private void write(List<Record> recordList) {
+        if (recordList.isEmpty()) {
+            return;
+        }
+        List<Object> nsObjectList = recordList.stream().map(transducer::write).collect(toList());
+        dataActionFunction.apply(nsObjectList).stream().forEach(this::processWriteResponse);
+        cleanWrites();
+    }
+
+    private void cleanWrites() {
+        inputRecordList.clear();
+    }
+
+    /**
+     * Process NetSuite write response and produce result record for outgoing flow.
+     *
+     * @param record which was submitted
+     */
+    private void processWriteResponse(NsWriteResponse<?> response) {
+        if (!response.getStatus().isSuccess()) {
+            NetSuiteClientService.checkError(response.getStatus());
+        }
     }
 
     @AfterGroup
     public void afterGroup() {
-        // symmetric method of the beforeGroup() executed after the chunk processing
-        // Note: if you don't need it you can delete it
+        write(inputRecordList);
     }
 
     @PreDestroy
     public void release() {
-        // this is the symmetric method of the init() one,
-        // release potential connections you created or data you cached
-        // Note: if you don't need it you can delete it
+        if (!inputRecordList.isEmpty()) {
+            write(inputRecordList);
+        }
     }
+
+    private <T> List<NsWriteResponse<?>> customUpsert(List<T> records) {
+        List<T> addList = null;
+        List<T> updateList = null;
+        for (T nsObject : records) {
+            String internalId = (String) Beans.getSimpleProperty(nsObject, NsObjectTransducer.INTERNAL_ID);
+            String externalId = (String) Beans.getSimpleProperty(nsObject, NsObjectTransducer.EXTERNAL_ID);
+            if (StringUtils.isNotEmpty(internalId) || StringUtils.isNotEmpty(externalId)) {
+                if (updateList == null) {
+                    updateList = new ArrayList<>();
+                }
+                updateList.add(nsObject);
+            } else {
+                if (addList == null) {
+                    addList = new ArrayList<>();
+                }
+                addList.add(nsObject);
+            }
+        }
+        Map<T, NsWriteResponse<?>> responseMap = new HashMap<>(records.size());
+        if (addList != null) {
+            processOperationResponse(clientService::addList, addList, () -> responseMap);
+        }
+        if (updateList != null) {
+            processOperationResponse(clientService::updateList, updateList, () -> responseMap);
+        }
+
+        // Create combined list of write responses with an order as input records list
+        return records.stream().map(responseMap::get).collect(toList());
+    }
+
+    private <T> void processOperationResponse(Function<List<T>, List<NsWriteResponse<?>>> operation, List<T> recordsToBeProcessed,
+            Supplier<Map<T, NsWriteResponse<?>>> supplier) {
+        List<NsWriteResponse<?>> responseList = operation.apply(recordsToBeProcessed);
+        IntStream.range(0, recordsToBeProcessed.size()).boxed()
+                .collect(toMap(recordsToBeProcessed::get, responseList::get, (k1, k2) -> k2, supplier));
+    }
+
 }

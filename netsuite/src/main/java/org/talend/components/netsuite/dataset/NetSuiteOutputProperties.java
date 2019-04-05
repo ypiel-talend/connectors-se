@@ -13,42 +13,47 @@
 package org.talend.components.netsuite.dataset;
 
 import lombok.Data;
-import org.talend.components.netsuite.datastore.NetsuiteDataStore;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
-import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.meta.Documentation;
 
-@Data
-@DataSet("output")
-@GridLayouts({
-        @GridLayout({ @GridLayout.Row({ "dataStore" }), @GridLayout.Row({ "recordType" }), @GridLayout.Row({ "action" }) }),
-        @GridLayout(names = { GridLayout.FormType.ADVANCED }, value = { @GridLayout.Row({ "batchSize" }) }) })
-public class NetsuiteOutputDataSet {
+import java.io.Serializable;
+import java.util.List;
 
-    enum DataAction {
+@Data
+@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "action" }) }), @GridLayout(names = {
+        GridLayout.FormType.ADVANCED }, value = { @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "useNativeUpsert" }) }) })
+@Documentation("Properties for Output component")
+public class NetSuiteOutputProperties implements Serializable {
+
+    private List<String> schemaIn;
+
+    @Option
+    @Documentation("Common dataset properties - datastore + module")
+    private NetSuiteDataSet dataSet;
+
+    @Option
+    @DefaultValue("ADD")
+    @Documentation("Operation to be performed with records. Default - ADD")
+    private DataAction action;
+
+    @Option
+    @ActiveIf(target = "action", value = "UPSERT")
+    @DefaultValue("true")
+    @Documentation("Changes UPSERT strategy. Default - true, uses NetSuite upsert; otherwise - custom")
+    private boolean useNativeUpsert;
+
+    /**
+     * Basic operation with NetSuite records.
+     *
+     */
+    public enum DataAction {
         ADD,
         UPDATE,
         UPSERT,
         DELETE
     }
-
-    @Option
-    @Documentation("")
-    private NetsuiteDataStore dataStore;
-
-    @Option
-    @Suggestable(value = "loadRecordTypes")
-    @Documentation("TODO fill the documentation for this parameter")
-    private String recordType;
-
-    @Option
-    @Documentation("TODO fill the documentation for this parameter")
-    private DataAction action;
-
-    @Option
-    @Documentation("TODO fill the documentation for this parameter")
-    private int batchSize;
 }

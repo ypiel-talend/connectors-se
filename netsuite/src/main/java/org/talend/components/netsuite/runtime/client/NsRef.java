@@ -12,14 +12,15 @@
  */
 package org.talend.components.netsuite.runtime.client;
 
+import org.talend.components.netsuite.runtime.NsObjectTransducer;
+import org.talend.components.netsuite.runtime.model.RefType;
+import org.talend.components.netsuite.runtime.model.beans.BeanInfo;
+import org.talend.components.netsuite.runtime.model.beans.Beans;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.talend.components.netsuite.runtime.model.BasicMetaData;
-import org.talend.components.netsuite.runtime.model.RefType;
-import org.talend.components.netsuite.runtime.model.beans.BeanInfo;
-import org.talend.components.netsuite.runtime.model.beans.Beans;
 
 /**
  * Holds information about NetSuite's reference.
@@ -70,30 +71,6 @@ public class NsRef {
     }
 
     /**
-     * Create NetSuite's native ref data object from this ref object.
-     *
-     * @param basicMetaData basic meta data to be used
-     * @return ref data object
-     */
-    @SuppressWarnings("unchecked")
-    public Object toNativeRef(BasicMetaData basicMetaData) {
-        Object ref = basicMetaData.createInstance(refType.getTypeName());
-        BeanInfo beanInfo = Beans.getBeanInfo(ref.getClass());
-        Beans.setSimpleProperty(ref, "internalId", internalId);
-        Beans.setSimpleProperty(ref, "externalId", externalId);
-        if (refType == RefType.CUSTOMIZATION_REF || refType == RefType.CUSTOM_RECORD_REF) {
-            Beans.setSimpleProperty(ref, "scriptId", scriptId);
-        }
-        if (refType == RefType.CUSTOM_RECORD_REF) {
-            Beans.setSimpleProperty(ref, "typeId", typeId);
-        } else {
-            Beans.setSimpleProperty(ref, "type",
-                    Beans.getEnumAccessor((Class<Enum<?>>) beanInfo.getProperty("type").getWriteType()).getEnumValue(type));
-        }
-        return ref;
-    }
-
-    /**
      * Create ref object from NetSuite's native ref data object.
      *
      * @param ref native ref data object
@@ -106,8 +83,8 @@ public class NsRef {
         NsRef nsRef = new NsRef();
         nsRef.setRefType(refType);
         BeanInfo beanInfo = Beans.getBeanInfo(ref.getClass());
-        nsRef.setInternalId((String) Beans.getSimpleProperty(ref, "internalId"));
-        nsRef.setExternalId((String) Beans.getSimpleProperty(ref, "externalId"));
+        nsRef.setInternalId((String) Beans.getSimpleProperty(ref, NsObjectTransducer.INTERNAL_ID));
+        nsRef.setExternalId((String) Beans.getSimpleProperty(ref, NsObjectTransducer.EXTERNAL_ID));
         if (refType == RefType.RECORD_REF) {
             nsRef.setType(Beans.getEnumAccessor((Class<Enum<?>>) beanInfo.getProperty("type").getReadType())
                     .getStringValue((Enum<?>) Beans.getSimpleProperty(ref, "type")));

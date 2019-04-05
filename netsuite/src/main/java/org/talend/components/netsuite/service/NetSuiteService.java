@@ -12,48 +12,81 @@
  */
 package org.talend.components.netsuite.service;
 
+import org.apache.commons.lang3.StringUtils;
+import org.talend.components.netsuite.dataset.NetSuiteDataSet;
+import org.talend.components.netsuite.datastore.NetSuiteDataStore;
 import org.talend.components.netsuite.runtime.NetSuiteDatasetRuntime;
-import org.talend.components.netsuite.runtime.NetSuiteDatasetRuntimeImpl;
 import org.talend.components.netsuite.runtime.NetSuiteEndpoint;
-import org.talend.components.netsuite.runtime.NetSuiteEndpoint.ConnectionConfig;
-import org.talend.components.netsuite.runtime.v2016_2.client.NetSuiteClientFactoryImpl;
+import org.talend.components.netsuite.runtime.client.NetSuiteClientService;
+import org.talend.components.netsuite.runtime.v2018_2.client.NetSuiteClientFactoryImpl;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
-public class NetsuiteService {
-
-    private NetSuiteEndpoint endpoint;
+public class NetSuiteService {
 
     private NetSuiteDatasetRuntime dataSetRuntime;
 
-    void connect(final ConnectionConfig connConfig) {
-        if (endpoint == null) {
-            endpoint = new NetSuiteEndpoint(NetSuiteClientFactoryImpl.INSTANCE, connConfig);
+    private NetSuiteClientService<?> clientService;
+
+    @Service
+    private RecordBuilderFactory recordBuilderFactory;
+
+    @Service
+    private Messages i18n;
+
+    public synchronized void connect(NetSuiteDataStore dataStore) {
+        NetSuiteEndpoint endpoint = new NetSuiteEndpoint(NetSuiteClientFactoryImpl.getFactory(), i18n, dataStore);
+        clientService = endpoint.getClientService();
+        dataSetRuntime = new NetSuiteDatasetRuntime(clientService.getMetaDataSource(), recordBuilderFactory);
+    }
+
+    List<SuggestionValues.Item> getRecordTypes(NetSuiteDataStore dataStore) {
+        if (dataSetRuntime == null) {
+            connect(dataStore);
         }
-        endpoint.connect();
-        dataSetRuntime = new NetSuiteDatasetRuntimeImpl(endpoint.getMetaDataSource());
+        return dataSetRuntime.getRecordTypes().stream()
+                .map(record -> new SuggestionValues.Item(record.getName(), record.getDisplayName())).collect(toList());
     }
 
-    List<SuggestionValues.Item> getRecordTypes() {
-
-        return dataSetRuntime == null ? new ArrayList<>() : dataSetRuntime.getRecordTypes();
+    List<SuggestionValues.Item> getSearchTypes(NetSuiteDataSet dataSet) {
+        if (StringUtils.isEmpty(dataSet.getRecordType())) {
+            return Collections.emptyList();
+        }
+        if (dataSetRuntime == null) {
+            connect(dataSet.getDataStore());
+        }
+        return dataSetRuntime.getSearchInfo(dataSet.getRecordType()).getFields().stream()
+                .map(searchType -> new SuggestionValues.Item(searchType, searchType)).collect(toList());
     }
 
-    List<SuggestionValues.Item> getSearchTypes(String typeName) {
-        return dataSetRuntime == null ? new ArrayList<>()
-                : dataSetRuntime.getSearchInfo(typeName).getFields().stream()
-                        .map(info -> new SuggestionValues.Item(info.getName(), info.getName())).collect(Collectors.toList());
+    List<SuggestionValues.Item> getSearchFieldOperators(NetSuiteDataSet dataSet, String field) {
+        if (dataSetRuntime == null) {
+            connect(dataSet.getDataStore());
+        }
+        return dataSetRuntime.getSearchFieldOperators(dataSet.getRecordType(), field).stream()
+                .map(searchField -> new SuggestionValues.Item(searchField, searchField)).collect(toList());
     }
 
-    List<SuggestionValues.Item> getSearchFieldOperators() {
-        return dataSetRuntime == null ? new ArrayList<>()
-                : dataSetRuntime.getSearchFieldOperators().stream().map(name -> new SuggestionValues.Item(name, name))
-                        .collect(Collectors.toList());
+    public Schema getSchema(NetSuiteDataSet dataSet, List<String> stringSchema) {
+        if (dataSetRuntime == null) {
+            connect(dataSet.getDataStore());
+        }
+        return dataSetRuntime.getSchema(dataSet.getRecordType(), stringSchema);
+    }
+
+    public NetSuiteClientService<?> getClientService(NetSuiteDataStore dataStore) {
+        if (clientService == null) {
+            connect(dataStore);
+        }
+        return clientService;
     }
 
 }
