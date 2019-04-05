@@ -1,18 +1,17 @@
 package org.talend.components.netsuite.source;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-
-import javax.json.JsonObject;
-
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.talend.components.netsuite.dataset.NetsuiteInputDataSet;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.runtime.input.Mapper;
+
+import javax.json.JsonObject;
+import java.io.IOException;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
 
 public class NetsuiteInputMapperTest {
 
