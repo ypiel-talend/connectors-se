@@ -12,15 +12,14 @@
  */
 package org.talend.components.netsuite.runtime.client;
 
-import org.talend.components.netsuite.runtime.model.BasicMetaData;
-import org.talend.components.netsuite.runtime.model.RefType;
-import org.talend.components.netsuite.runtime.model.beans.BeanInfo;
-import org.talend.components.netsuite.runtime.model.beans.Beans;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.talend.components.netsuite.runtime.model.BasicMetaData;
+import org.talend.components.netsuite.runtime.model.RefType;
+import org.talend.components.netsuite.runtime.model.beans.BeanInfo;
+import org.talend.components.netsuite.runtime.model.beans.Beans;
 
 /**
  * Holds information about NetSuite's reference.

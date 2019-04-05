@@ -1,9 +1,5 @@
 package org.talend.components.netsuite.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.talend.components.netsuite.runtime.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.runtime.NetSuiteDatasetRuntimeImpl;
 import org.talend.components.netsuite.runtime.NetSuiteEndpoint;
@@ -11,6 +7,10 @@ import org.talend.components.netsuite.runtime.NetSuiteEndpoint.ConnectionConfig;
 import org.talend.components.netsuite.runtime.v2016_2.client.NetSuiteClientFactoryImpl;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NetsuiteService {

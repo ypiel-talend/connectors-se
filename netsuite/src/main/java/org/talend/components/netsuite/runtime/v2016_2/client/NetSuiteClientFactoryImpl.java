@@ -1,11 +1,10 @@
 package org.talend.components.netsuite.runtime.v2016_2.client;
 
+import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 import org.talend.components.netsuite.runtime.client.NetSuiteClientFactory;
 import org.talend.components.netsuite.runtime.client.NetSuiteClientService;
 import org.talend.components.netsuite.runtime.client.NetSuiteException;
 import org.talend.components.netsuite.runtime.client.NetSuiteVersion;
-
-import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 
 /**
  *

@@ -1,11 +1,10 @@
 package org.talend.components.netsuite.runtime;
 
+import lombok.Data;
 import org.talend.components.netsuite.datastore.NetsuiteDataStore;
 import org.talend.components.netsuite.runtime.client.NetSuiteClientFactory;
 import org.talend.components.netsuite.runtime.client.NetSuiteException;
 import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
-
-import lombok.Data;
 
 /**
  * Base class for all implementations of {@link NetSuiteRuntime}.

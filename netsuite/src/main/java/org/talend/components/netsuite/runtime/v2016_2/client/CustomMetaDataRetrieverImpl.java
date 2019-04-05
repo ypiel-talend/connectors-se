@@ -1,10 +1,15 @@
 package org.talend.components.netsuite.runtime.v2016_2.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
+import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
+import com.netsuite.webservices.v2016_2.platform.core.CustomizationRef;
+import com.netsuite.webservices.v2016_2.platform.core.CustomizationType;
+import com.netsuite.webservices.v2016_2.platform.core.GetCustomizationIdResult;
+import com.netsuite.webservices.v2016_2.platform.core.Record;
+import com.netsuite.webservices.v2016_2.platform.core.types.GetCustomizationType;
+import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
+import com.netsuite.webservices.v2016_2.platform.messages.GetCustomizationIdRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetListRequest;
+import com.netsuite.webservices.v2016_2.setup.customization.CustomRecordType;
 import org.apache.commons.lang3.time.StopWatch;
 import org.talend.components.netsuite.runtime.client.DefaultCustomMetaDataSource;
 import org.talend.components.netsuite.runtime.client.NetSuiteClientService;
@@ -16,16 +21,10 @@ import org.talend.components.netsuite.runtime.model.CustomFieldDesc;
 import org.talend.components.netsuite.runtime.model.RecordTypeDesc;
 import org.talend.components.netsuite.runtime.model.RefType;
 
-import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
-import com.netsuite.webservices.v2016_2.platform.core.CustomizationRef;
-import com.netsuite.webservices.v2016_2.platform.core.CustomizationType;
-import com.netsuite.webservices.v2016_2.platform.core.GetCustomizationIdResult;
-import com.netsuite.webservices.v2016_2.platform.core.Record;
-import com.netsuite.webservices.v2016_2.platform.core.types.GetCustomizationType;
-import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
-import com.netsuite.webservices.v2016_2.platform.messages.GetCustomizationIdRequest;
-import com.netsuite.webservices.v2016_2.platform.messages.GetListRequest;
-import com.netsuite.webservices.v2016_2.setup.customization.CustomRecordType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
