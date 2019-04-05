@@ -57,12 +57,7 @@ public abstract class BlobFileWriter {
 
     public void generateFile() throws URISyntaxException, StorageException {
         blobItem = container
-                .getAppendBlobReference(configuration.getDataset().getDirectory() + "/" + configuration.getBlobName()); // TODO
-                                                                                                                        // check
-                                                                                                                        // separator
-                                                                                                                        // is
-                                                                                                                        // always
-                                                                                                                        // "/"
+                .getAppendBlobReference(configuration.getDataset().getDirectory() + "/" + configuration.getBlobName());
         // TODO not replace if append
         blobItem.createOrReplace();
     }

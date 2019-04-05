@@ -24,11 +24,6 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public void generateFile() {
-
-    }
-
-    @Override
     public void writeRecord(Record record) {
 
     }

@@ -26,6 +26,8 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.talend.components.azure.common.excel.ExcelFormat;
 import org.talend.components.azure.common.excel.ExcelFormatOptions;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
@@ -116,8 +118,12 @@ public class ExcelBlobFileReader extends BlobFileReader {
         @Override
         protected void readItem() {
             try (InputStream input = getCurrentItem().openInputStream()) {
-
-                Workbook wb = new HSSFWorkbook(input); // TODO excel format
+                Workbook wb;
+                if (excelConfig.getExcelFormat() == ExcelFormat.EXCEL97) {
+                    wb = new HSSFWorkbook(input);
+                } else {
+                    wb = new XSSFWorkbook(input);
+                } //TODO HTML excel format??
                 Sheet sheet = wb.getSheet(excelConfig.getSheetName());
 
                 for (int i = 0;; i++) {
