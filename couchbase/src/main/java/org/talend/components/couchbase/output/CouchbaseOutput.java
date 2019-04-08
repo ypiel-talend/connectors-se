@@ -22,6 +22,8 @@ import org.talend.sdk.component.api.record.Schema;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.List;
 
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
@@ -142,7 +144,16 @@ public class CouchbaseOutput implements Serializable {
             if (entryName.equals(idFieldName)) {
                 value = String.valueOf(value);
             }
-            jsonObject.put(entryName, value);
+            if (value instanceof byte[]) {
+                jsonObject.put(entryName, new String((byte[]) value));
+            } else if (value instanceof Float) {
+                jsonObject.put(entryName, (Number) value);
+            } else if (value instanceof ZonedDateTime) {
+                jsonObject.put(entryName, value.toString());
+            } else {
+                jsonObject.put(entryName, value);
+            }
+
         }
         return JsonDocument.create(String.valueOf(jsonObject.get(idFieldName)), jsonObject);
     }
