@@ -11,9 +11,9 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.runtime.output;
+package org.talend.components.azure.runtime.output;
 
-import org.talend.components.azure.common.runtime.output.excel.ExcelBlobFileWriter;
+import org.talend.components.azure.runtime.output.excel.ExcelBlobFileWriter;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 

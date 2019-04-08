@@ -11,11 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.runtime.input;
+package org.talend.components.azure.runtime.input;
 
 import java.util.Iterator;
 
-import org.talend.components.azure.common.runtime.input.excel.ExcelBlobFileReader;
+import org.talend.components.azure.runtime.input.excel.ExcelBlobFileReader;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;

@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.runtime.output;
+package org.talend.components.azure.runtime.output;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

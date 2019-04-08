@@ -11,12 +11,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.runtime.input.excel;
+package org.talend.components.azure.runtime.input.excel;
 
 import java.net.URISyntaxException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Row;
-import org.talend.components.azure.common.runtime.input.BlobFileReader;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
@@ -33,7 +38,10 @@ public class ExcelHTMLBlobFileReader extends ExcelBlobFileReader {
     }
 
 
-    private class ExcelRecordIterator extends BlobFileReader.ItemRecordIterator<Row> {
+    private class ExcelRecordIterator extends ItemRecordIterator<Element> {
+        private Iterator<Element> rowIterator;
+
+        private List<String> columns;
 
         public ExcelRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
@@ -41,11 +49,10 @@ public class ExcelHTMLBlobFileReader extends ExcelBlobFileReader {
 
         @Override
         protected void initRecordContainer() {
-
         }
 
         @Override
-        protected Row takeNextRecord() {
+        protected Element takeNextRecord() {
             return null;
         }
 
@@ -55,7 +62,7 @@ public class ExcelHTMLBlobFileReader extends ExcelBlobFileReader {
         }
 
         @Override
-        protected Record convertToRecord(Row next) {
+        protected Record convertToRecord(Element next) {
             return null;
         }
 

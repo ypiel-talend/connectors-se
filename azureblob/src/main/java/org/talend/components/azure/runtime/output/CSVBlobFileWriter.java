@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.runtime.output;
+package org.talend.components.azure.runtime.output;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -26,7 +26,6 @@ import org.talend.sdk.component.api.record.Record;
 
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudAppendBlob;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class CSVBlobFileWriter extends BlobFileWriter {
 

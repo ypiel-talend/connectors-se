@@ -11,36 +11,19 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.runtime.output;
+package org.talend.components.azure.runtime.input;
 
-import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-public class ParquetBlobFileWriter extends BlobFileWriter {
+public class AvroBlobFileReader extends BlobFileReader {
 
-    public ParquetBlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices)
-            throws Exception {
-        super(config, connectionServices);
+    public AvroBlobFileReader(RecordBuilderFactory recordBuilderFactory) {
+        super(recordBuilderFactory);
     }
 
     @Override
-    public void generateFile() {
-
-    }
-
-    @Override
-    public void writeRecord(Record record) {
-
-    }
-
-    @Override
-    public void flush() {
-
-    }
-
-    @Override
-    public void complete() {
-
+    public Record readRecord() {
+        return null;
     }
 }
