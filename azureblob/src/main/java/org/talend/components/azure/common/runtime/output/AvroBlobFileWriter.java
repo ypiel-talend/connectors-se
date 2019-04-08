@@ -13,9 +13,12 @@
 
 package org.talend.components.azure.common.runtime.output;
 
+import java.net.URISyntaxException;
+
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
-import org.talend.sdk.component.api.record.Record;
+
+import com.microsoft.azure.storage.StorageException;
 
 public class AvroBlobFileWriter extends BlobFileWriter {
 
@@ -24,17 +27,17 @@ public class AvroBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public void generateFile() {
-
-    }
-
-    @Override
-    public void writeRecord(Record record) {
-
-    }
-
-    @Override
     public void flush() {
+
+    }
+
+    @Override
+    public void generateFile() throws URISyntaxException, StorageException {
+
+    }
+
+    @Override
+    public void complete() {
 
     }
 }

@@ -7,6 +7,8 @@ import javax.annotation.PreDestroy;
 
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.common.runtime.output.BlobFileWriter;
+import org.talend.components.azure.common.runtime.output.BlobFileWriterFactory;
+import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -18,8 +20,6 @@ import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
-
-import org.talend.components.azure.service.AzureBlobComponentServices;
 
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "AzureOutput")
@@ -45,8 +45,7 @@ public class BlobOutput implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            this.fileWriter = BlobFileWriter.BlobFileWriterFactory.getWriter(configuration, service.getConnectionService());
-            fileWriter.generateFile();
+            this.fileWriter = BlobFileWriterFactory.getWriter(configuration, service.getConnectionService());
         } catch (Exception e) {
             throw new BlobRuntimeException(messageService.errorCreateBlobItem(), e);
         }
@@ -73,6 +72,10 @@ public class BlobOutput implements Serializable {
 
     @PreDestroy
     public void release() {
-        afterGroup();
+        try {
+            fileWriter.complete();
+        } catch (Exception e) {
+            throw new BlobRuntimeException(messageService.errorUniteFiles(), e);
+        }
     }
 }

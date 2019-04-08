@@ -14,18 +14,23 @@
 package org.talend.components.azure.common.runtime.output;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 
 import org.talend.components.azure.common.csv.CSVFormatOptions;
+import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudAppendBlob;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class CSVBlobFileWriter extends BlobFileWriter {
+
+    private BlobOutputConfiguration config;
 
     private final CSVFormatOptions configCSV;
 
@@ -33,8 +38,32 @@ public class CSVBlobFileWriter extends BlobFileWriter {
 
     public CSVBlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices) throws Exception {
         super(config, connectionServices);
+        this.config = config;
         this.configCSV = config.getDataset().getCsvOptions();
 
+    }
+
+    @Override
+    public void generateFile() throws URISyntaxException, StorageException {
+        CloudAppendBlob currentItem = getContainer()
+                .getAppendBlobReference(config.getDataset().getDirectory() + "/" + config.getBlobNameTemplate() + ".csv");
+        // TODO not replace if append
+        currentItem.createOrReplace();
+
+        setCurrentItem(currentItem);
+    }
+
+    @Override
+    public void newBatch() {
+        super.newBatch();
+
+        if (getCurrentItem() == null) {
+            try {
+                generateFile();
+            } catch (Exception e) {
+                throw new BlobRuntimeException(e);
+            }
+        }
     }
 
     // TODO move common implementation to abstract class
@@ -49,7 +78,8 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         } else if (configCSV.isUseHeader() && configCSV.getHeader() > 0) {
             appendHeader();
         }
-        getBlobItem().appendText(content, "UTF-8", null, null, AzureBlobConnectionServices.getTalendOperationContext());
+        ((CloudAppendBlob) getCurrentItem()).appendText(content, "UTF-8", null, null,
+                AzureBlobConnectionServices.getTalendOperationContext());
         fileIsEmpty = false;
         // TODO charset name
 
@@ -70,7 +100,8 @@ public class CSVBlobFileWriter extends BlobFileWriter {
             headerBuilder.append(configCSV.getFieldDelimiter().getDelimiterValue())
                     .append(getSchema().getEntries().get(i).getName());
         }
-        getBlobItem().appendText(headerBuilder.toString() + configCSV.getRecordDelimiter().getDelimiterValue());
+        ((CloudAppendBlob) getCurrentItem())
+                .appendText(headerBuilder.toString() + configCSV.getRecordDelimiter().getDelimiterValue());
         fileIsEmpty = false;
     }
 
@@ -104,5 +135,10 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         }
 
         return stringBuilder.toString();
+    }
+
+    @Override
+    public void complete() {
+        // NOOP
     }
 }

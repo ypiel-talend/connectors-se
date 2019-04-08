@@ -13,34 +13,26 @@
 
 package org.talend.components.azure.common.runtime.output;
 
+import org.talend.components.azure.common.runtime.output.excel.ExcelBlobFileWriter;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
-import org.talend.sdk.component.api.record.Record;
 
-public class ParquetBlobFileWriter extends BlobFileWriter {
+public class BlobFileWriterFactory {
 
-    public ParquetBlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices)
+    public static BlobFileWriter getWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices)
             throws Exception {
-        super(config, connectionServices);
+        switch (config.getDataset().getFileFormat()) {
+        case CSV:
+            return new CSVBlobFileWriter(config, connectionServices);
+        case AVRO:
+            return new AvroBlobFileWriter(config, connectionServices);
+        case EXCEL:
+            return new ExcelBlobFileWriter(config, connectionServices);
+        case PARQUET:
+            return new ParquetBlobFileWriter(config, connectionServices);
+        default:
+            throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
+        }
     }
 
-    @Override
-    public void generateFile() {
-
-    }
-
-    @Override
-    public void writeRecord(Record record) {
-
-    }
-
-    @Override
-    public void flush() {
-
-    }
-
-    @Override
-    public void complete() {
-
-    }
 }

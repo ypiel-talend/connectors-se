@@ -25,7 +25,7 @@ import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudAppendBlob;
+import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 
@@ -37,7 +37,7 @@ public abstract class BlobFileWriter {
 
     private Schema schema;
 
-    private CloudAppendBlob blobItem;
+    private CloudBlob currentItem = null;
 
     private final CloudBlobContainer container;
 
@@ -55,12 +55,7 @@ public abstract class BlobFileWriter {
         batch = new LinkedList<>();
     }
 
-    public void generateFile() throws URISyntaxException, StorageException {
-        blobItem = container
-                .getAppendBlobReference(configuration.getDataset().getDirectory() + "/" + configuration.getBlobName());
-        // TODO not replace if append
-        blobItem.createOrReplace();
-    }
+    public abstract void generateFile() throws URISyntaxException, StorageException;
 
     public void writeRecord(Record record) {
         if (schema == null) {
@@ -74,33 +69,33 @@ public abstract class BlobFileWriter {
         return batch;
     }
 
-    protected CloudAppendBlob getBlobItem() {
-        return blobItem;
+    protected CloudBlob getCurrentItem() {
+        return currentItem;
+    }
+
+    protected void setCurrentItem(CloudBlob currentItem) {
+        this.currentItem = currentItem;
+    }
+
+    protected CloudBlobContainer getContainer() {
+        return container;
     }
 
     protected Schema getSchema() {
         return schema;
     }
 
+    /**
+     * Upload prepared batch
+     * 
+     * @throws IOException
+     * @throws StorageException
+     */
     public abstract void flush() throws IOException, StorageException;
 
-    // TODO move it
-    public static class BlobFileWriterFactory {
+    /**
+     * Delete temp items, unite all temporarily data to the final item blob file
+     */
+    public abstract void complete() throws Exception;
 
-        public static BlobFileWriter getWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices)
-                throws Exception {
-            switch (config.getDataset().getFileFormat()) {
-            case CSV:
-                return new CSVBlobFileWriter(config, connectionServices);
-            case AVRO:
-                return new AvroBlobFileWriter(config, connectionServices);
-            case EXCEL:
-                return new ExcelBlobFileWriter(config, connectionServices);
-            case PARQUET:
-                return new ParquetBlobFileWriter(config, connectionServices);
-            default:
-                throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
-            }
-        }
-    }
 }
