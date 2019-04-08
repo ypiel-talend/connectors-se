@@ -27,6 +27,7 @@ public class UIMongoDBServiceTest {
         SuggestionValues values = uiMongoDBService.getFields(dataset);
 
         assertEquals(2, values.getItems().size());
-        assertThat(values.getItems().stream().map(SuggestionValues.Item::getId).collect(Collectors.toList()), containsInAnyOrder(dataset.getSchema().toArray()));
+        assertThat(values.getItems().stream().map(SuggestionValues.Item::getId).collect(Collectors.toList()),
+                containsInAnyOrder(dataset.getSchema().toArray()));
     }
 }

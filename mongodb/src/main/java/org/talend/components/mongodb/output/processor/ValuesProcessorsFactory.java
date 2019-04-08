@@ -11,6 +11,19 @@ public class ValuesProcessorsFactory {
 
     public static <T extends WriteModel<Document>> ValuesProcessor<T> createProcessor(MongoDBOutputConfiguration config,
             MongoCollection<Document> collection, I18nMessage i18nMessage) {
+        AbstractValuesProcessorFactory<T> factory = createAbstractValuesProcessorFactory(config);
+        ModelWriter<T> writer;
+        if (config.isBulkWrite()) {
+            writer = new BulkModelWriter<>(collection, config.getBulkWriteType());
+        } else {
+            writer = factory.createWriter(collection);
+        }
+        ValuesProcessor<T> processor = new ValuesProcessor<>(factory.createProducer(config), writer, i18nMessage);
+        return processor;
+    }
+
+    public static <T extends WriteModel<Document>> AbstractValuesProcessorFactory<T> createAbstractValuesProcessorFactory(
+            MongoDBOutputConfiguration config) {
         AbstractValuesProcessorFactory<T> factory;
         switch (config.getActionOnData()) {
         case INSERT:
@@ -42,14 +55,7 @@ public class ValuesProcessorsFactory {
         default:
             throw new IllegalArgumentException();
         }
-        ModelWriter<T> writer;
-        if (config.isBulkWrite()) {
-            writer = new BulkModelWriter<>(collection, config.getBulkWriteType());
-        } else {
-            writer = factory.createWriter(collection);
-        }
-        ValuesProcessor<T> processor = new ValuesProcessor<>(factory.createProducer(config), writer, i18nMessage);
-        return processor;
+        return factory;
     }
 
     public static class InsertModelProcessorFactory implements AbstractValuesProcessorFactory<InsertOneModel<Document>> {

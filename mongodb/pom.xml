@@ -106,6 +106,51 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>org/talend/**/*</include>
+          </includes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-agent-ut</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <append>true</append>
+            </configuration>
+          </execution>
+          <execution>
+            <id>prepare-agent-it</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+            <configuration>
+              <propertyName>jacoco.agent.it.argLine</propertyName>
+              <append>true</append>
+            </configuration>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-it</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>report-integration</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
@@ -122,21 +167,52 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
+        <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
-          <runOrder>alphabetical</runOrder>
+          <includes>
+            <include>**/*IT.java</include>
+          </includes>
           <systemPropertyVariables>
             <javax.net.ssl.trustStore>src/test/resources/truststore.ks</javax.net.ssl.trustStore>
             <javax.net.ssl.trustStorePassword>changeit</javax.net.ssl.trustStorePassword>
             <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
-            <!--
-               You can activate the targetParallelism to control the parallelism of the test pipeline.
-               You can also set it to 1 to debug more easily
-            -->
-            <!--<talend.beam.job.targetParallelism>1</talend.beam.job.targetParallelism>-->
           </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <classpathDependencyExcludes>
+                <classpathDependencyExcludes>org.talend.sdk.component:component-runtime-beam
+                </classpathDependencyExcludes>
+                <classpathDependencyExcludes>org.apache.beam:beam-runners-direct-java
+                </classpathDependencyExcludes>
+              </classpathDependencyExcludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>filesafe-beam-test</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <configuration>
+          <classpathDependencyExcludes>
+            <classpathDependencyExcludes>org.talend.sdk.component:component-runtime-beam
+            </classpathDependencyExcludes>
+            <classpathDependencyExcludes>org.apache.beam:beam-runners-direct-java
+            </classpathDependencyExcludes>
+          </classpathDependencyExcludes>
         </configuration>
       </plugin>
     </plugins>

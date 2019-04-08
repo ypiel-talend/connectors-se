@@ -8,10 +8,17 @@ import java.io.IOException;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.talend.components.mongodb.utils.MongoDBTestExtension;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.SimpleComponentRule;
+import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.input.Mapper;
 
+@WithComponents("org.talend.components.mongodb")
+@ExtendWith(MongoDBTestExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class MongoDBInputMapperTest {
 
     @ClassRule

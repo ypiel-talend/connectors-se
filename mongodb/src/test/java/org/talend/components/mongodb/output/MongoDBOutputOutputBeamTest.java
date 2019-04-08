@@ -30,24 +30,24 @@ public class MongoDBOutputOutputBeamTest {
     public void processor() {
         // Output configuration
         // Setup your component configuration for the test here
-        final MongoDBOutputOutputConfiguration configuration = new MongoDBOutputOutputConfiguration();
-
-        // We create the component processor instance using the configuration filled above
-        final Processor processor = COMPONENT_FACTORY.createProcessor(MongoDBOutputOutput.class, configuration);
-
-        // The join input factory construct inputs test data for every input branch you have defined for this component
-        // Make sure to fil in some test data for the branches you want to test
-        // You can also remove the branches that you don't need from the factory below
-        final JoinInputFactory joinInputFactory = new JoinInputFactory().withInput("__default__",
-                asList(/* TODO - list of your input data for this branch. Instances of Record.class */));
-
-        // Convert it to a beam "source"
-        final PCollection<Record> inputs = pipeline.apply(Data.of(processor.plugin(), joinInputFactory.asInputRecords()));
-
-        // add our processor right after to see each data as configured previously
-        inputs.apply(TalendFn.asFn(processor)).apply(Data.map(processor.plugin(), Record.class));
-
-        // run the pipeline and ensure the execution was successful
-        assertEquals(PipelineResult.State.DONE, pipeline.run().waitUntilFinish());
+        // final MongoDBOutputConfiguration configuration = new MongoDBOutputConfiguration();
+        //
+        // // We create the component processor instance using the configuration filled above
+        // final Processor processor = COMPONENT_FACTORY.createProcessor(MongoDBOutput.class, configuration);
+        //
+        // // The join input factory construct inputs test data for every input branch you have defined for this component
+        // // Make sure to fil in some test data for the branches you want to test
+        // // You can also remove the branches that you don't need from the factory below
+        // final JoinInputFactory joinInputFactory = new JoinInputFactory().withInput("__default__",
+        // asList(/* TODO - list of your input data for this branch. Instances of Record.class */));
+        //
+        // // Convert it to a beam "source"
+        // final PCollection<Record> inputs = pipeline.apply(Data.of(processor.plugin(), joinInputFactory.asInputRecords()));
+        //
+        // // add our processor right after to see each data as configured previously
+        // inputs.apply(TalendFn.asFn(processor)).apply(Data.map(processor.plugin(), Record.class));
+        //
+        // // run the pipeline and ensure the execution was successful
+        // assertEquals(PipelineResult.State.DONE, pipeline.run().waitUntilFinish());
     }
 }

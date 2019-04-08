@@ -1,6 +1,7 @@
 package org.talend.components.mongodb.output;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -135,7 +136,7 @@ public class MongoDBOutput implements Serializable {
                 value = defaultInput.getBoolean(col);
                 break;
             case DATETIME:
-                value = defaultInput.getDateTime(col);
+                value = new Date((defaultInput.getDateTime(col)).toInstant().toEpochMilli());
                 break;
             }
         }

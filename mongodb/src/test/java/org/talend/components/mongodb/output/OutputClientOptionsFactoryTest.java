@@ -82,7 +82,8 @@ public class OutputClientOptionsFactoryTest {
         OutputClientOptionsFactory factory = new OutputClientOptionsFactory(configuration, i18nMessage);
 
         assertSame(WriteConcern.ACKNOWLEDGED, factory.convertWriteConcern(MongoDBOutputConfiguration.WriteConcern.ACKNOWLEDGED));
-        assertSame(WriteConcern.UNACKNOWLEDGED, factory.convertWriteConcern(MongoDBOutputConfiguration.WriteConcern.UNACKNOWLEDGED));
+        assertSame(WriteConcern.UNACKNOWLEDGED,
+                factory.convertWriteConcern(MongoDBOutputConfiguration.WriteConcern.UNACKNOWLEDGED));
         assertSame(WriteConcern.JOURNALED, factory.convertWriteConcern(MongoDBOutputConfiguration.WriteConcern.JOURNALED));
         assertSame(WriteConcern.W2, factory.convertWriteConcern(MongoDBOutputConfiguration.WriteConcern.REPLICA_ACKNOWLEDGED));
     }

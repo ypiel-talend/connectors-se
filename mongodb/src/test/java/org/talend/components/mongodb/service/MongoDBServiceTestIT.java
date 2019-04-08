@@ -52,7 +52,8 @@ public class MongoDBServiceTestIT {
 
     @Test
     public void testGetClient() {
-        MongoClient client = service.getMongoClient(testContext.getDataStore(), new DefaultClientOptionsFactory(testContext.getDataStore(), i18nMessage));
+        MongoClient client = service.getMongoClient(testContext.getDataStore(),
+                new DefaultClientOptionsFactory(testContext.getDataStore(), i18nMessage));
         ListDatabasesIterable<Document> databases = client.listDatabases();
         Iterator<Document> iterator = databases.iterator();
         assertTrue(iterator.hasNext());
@@ -64,7 +65,8 @@ public class MongoDBServiceTestIT {
         dataset.setCollection(COLLECTION_NAME);
         dataset.setDatastore(testContext.getDataStore());
 
-        MongoClient client = service.getMongoClient(testContext.getDataStore(), new DefaultClientOptionsFactory(testContext.getDataStore(), i18nMessage));
+        MongoClient client = service.getMongoClient(testContext.getDataStore(),
+                new DefaultClientOptionsFactory(testContext.getDataStore(), i18nMessage));
         MongoCollection<Document> collection = service.getCollection(dataset, client);
 
         collection.insertOne(Document.parse("{\"a\":1}"));
