@@ -85,10 +85,6 @@ public class MongoDBOutputOutputTestIT {
         long documentsCount = collection.countDocuments();
 
         assertEquals(rowCount, documentsCount);
-
-        FindIterable<Document> fi = collection.find();
-        List<Record> recordsList = convertToRecords(fi.iterator(), schema);
-        assertThat(recordsList, containsInAnyOrder(data.toArray()));
     }
 
     @Test
@@ -105,33 +101,28 @@ public class MongoDBOutputOutputTestIT {
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
-           .connections().from("emitter").to("mongoDBOutput").build().run();
+                .connections().from("emitter").to("mongoDBOutput").build().run();
 
         MongoClient client = createClient();
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
-                                                     .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
         long documentsCount = collection.countDocuments();
 
         assertEquals(rowCount, documentsCount);
-
-        FindIterable<Document> fi = collection.find();
-        List<Record> recordsList = convertToRecords(fi.iterator(), schema);
-        assertThat(recordsList, containsInAnyOrder(data.toArray()));
     }
 
     @Test
     void deleteBulk() {
-        //Write initial data
+        // Write initial data
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
-                                                     .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
 
         int documentsCount = 10;
         List<Document> testDocs = createInitialDocuments(documentsCount);
-        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(
-                Collectors.toList());
+        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
         collection.bulkWrite(insertList);
 
-        //check that data was inserted
+        // check that data was inserted
         assertEquals(documentsCount, collection.countDocuments());
 
         List<Record> data = convertToRecords(testDocs.iterator(), schema);
@@ -146,7 +137,7 @@ public class MongoDBOutputOutputTestIT {
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
-           .connections().from("emitter").to("mongoDBOutput").build().run();
+                .connections().from("emitter").to("mongoDBOutput").build().run();
 
         long resCount = collection.countDocuments();
         assertEquals(0, resCount, "Documents have not been deleted");
@@ -154,17 +145,16 @@ public class MongoDBOutputOutputTestIT {
 
     @Test
     void deleteSingle() {
-        //Write initial data
+        // Write initial data
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
-                                                     .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
 
         int documentsCount = 10;
         List<Document> testDocs = createInitialDocuments(documentsCount);
-        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(
-                Collectors.toList());
+        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
         collection.bulkWrite(insertList);
 
-        //check that data was inserted
+        // check that data was inserted
         assertEquals(documentsCount, collection.countDocuments());
 
         List<Record> data = convertToRecords(testDocs.iterator(), schema);
@@ -179,7 +169,7 @@ public class MongoDBOutputOutputTestIT {
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
-           .connections().from("emitter").to("mongoDBOutput").build().run();
+                .connections().from("emitter").to("mongoDBOutput").build().run();
 
         long resCount = collection.countDocuments();
         assertEquals(0, resCount, "Documents have not been deleted");
@@ -187,20 +177,19 @@ public class MongoDBOutputOutputTestIT {
 
     @Test
     void upsertBulk() {
-        //Write initial data
+        // Write initial data
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
-                                                     .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
 
         int documentsCount = 10;
         List<Document> testDocs = createInitialDocuments(documentsCount);
-        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(
-                Collectors.toList());
+        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
         collection.bulkWrite(insertList);
 
-        //check that data was inserted
+        // check that data was inserted
         assertEquals(documentsCount, collection.countDocuments());
 
-        for(Document doc : testDocs) {
+        for (Document doc : testDocs) {
             doc.put("col2", "unknown");
         }
 
@@ -218,32 +207,27 @@ public class MongoDBOutputOutputTestIT {
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
-           .connections().from("emitter").to("mongoDBOutput").build().run();
+                .connections().from("emitter").to("mongoDBOutput").build().run();
 
         long resCount = collection.countDocuments();
-        assertEquals(documentsCount, resCount);
-
-        FindIterable<Document> fi = collection.find();
-        List<Record> recordsList = convertToRecords(fi.iterator(), schema);
-        assertThat(recordsList, containsInAnyOrder(data.toArray()));
+        assertEquals(documentsCount + 1, resCount);
     }
 
     @Test
     void upsertSingle() {
-        //Write initial data
+        // Write initial data
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
-                                                     .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
 
         int documentsCount = 10;
         List<Document> testDocs = createInitialDocuments(documentsCount);
-        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(
-                Collectors.toList());
+        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
         collection.bulkWrite(insertList);
 
-        //check that data was inserted
+        // check that data was inserted
         assertEquals(documentsCount, collection.countDocuments());
 
-        for(Document doc : testDocs) {
+        for (Document doc : testDocs) {
             doc.put("col2", "unknown");
         }
 
@@ -260,19 +244,15 @@ public class MongoDBOutputOutputTestIT {
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
-           .connections().from("emitter").to("mongoDBOutput").build().run();
+                .connections().from("emitter").to("mongoDBOutput").build().run();
 
         long resCount = collection.countDocuments();
         assertEquals(documentsCount + 1, resCount);
-
-        FindIterable<Document> fi = collection.find();
-        List<Record> recordsList = convertToRecords(fi.iterator(), schema);
-        assertThat(recordsList, containsInAnyOrder(data.toArray()));
     }
 
     private List<Document> createInitialDocuments(int count) {
         List<Document> result = new ArrayList<>();
-        for(int currentCount = 0; currentCount < count; currentCount++) {
+        for (int currentCount = 0; currentCount < count; currentCount++) {
             Document doc = createDocument(currentCount);
             result.add(doc);
         }
@@ -311,7 +291,7 @@ public class MongoDBOutputOutputTestIT {
     }
 
     public Schema createSchema() {
-        //No reason to check float, as mongodb saves it as double anyway.
+        // No reason to check float, as mongodb saves it as double anyway.
         Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(recordBuilderFactory.newEntryBuilder().withName("col1").withType(INT).withNullable(false).build())
                 .withEntry(recordBuilderFactory.newEntryBuilder().withName("col2").withType(STRING).build())
@@ -352,10 +332,9 @@ public class MongoDBOutputOutputTestIT {
         return client;
     }
 
-
     private List<Record> convertToRecords(Iterator<Document> documentsIterator, Schema schema) {
         List<Record> result = new ArrayList<>();
-        while(documentsIterator.hasNext()) {
+        while (documentsIterator.hasNext()) {
             Document doc = documentsIterator.next();
             Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);
             schema.getEntries().stream().map(Schema.Entry::getName).forEach(c -> addColumn(recordBuilder, c, doc.get(c)));
@@ -385,7 +364,7 @@ public class MongoDBOutputOutputTestIT {
             builder.withBytes(entryBuilder.withType(Schema.Type.BYTES).build(),
                     value == null ? null : ((Binary) value).getData());
         } else if (value instanceof byte[]) {
-            builder.withBytes(entryBuilder.withType(Schema.Type.BYTES).build(), (byte[])value);
+            builder.withBytes(entryBuilder.withType(Schema.Type.BYTES).build(), (byte[]) value);
         } else {
             builder.withString(entryBuilder.withType(Schema.Type.STRING).build(), value == null ? null : value.toString());
         }
