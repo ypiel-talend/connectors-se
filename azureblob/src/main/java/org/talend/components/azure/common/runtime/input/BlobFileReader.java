@@ -15,6 +15,7 @@ package org.talend.components.azure.common.runtime.input;
 
 import java.util.Iterator;
 
+import org.talend.components.azure.common.runtime.input.excel.ExcelBlobFileReader;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
@@ -62,7 +63,7 @@ public abstract class BlobFileReader {
 
         private CloudBlob currentItem;
 
-        ItemRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+        protected ItemRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             this.blobItems = blobItemsList.iterator();
             initRecordContainer();
             takeFirstItem();
@@ -80,7 +81,7 @@ public abstract class BlobFileReader {
             return next != null ? convertToRecord(next) : null;
         }
 
-        CloudBlob getCurrentItem() {
+        protected CloudBlob getCurrentItem() {
             return currentItem;
         }
 

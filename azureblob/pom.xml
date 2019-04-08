@@ -33,6 +33,7 @@
     <talend.component.studioHome />
 
     <apache.poi.version>4.0.1</apache.poi.version>
+    <jsoup.version>1.11.3</jsoup.version>
   </properties>
 
   <dependencies>
@@ -68,7 +69,12 @@
       <artifactId>poi-ooxml</artifactId>
       <version>${apache.poi.version}</version>
     </dependency>
-
+    <!-- Excel HTML format -->
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>${jsoup.version}</version>
+    </dependency>
 
   </dependencies>
 

@@ -13,7 +13,7 @@
 
 package org.talend.components.azure.common.excel;
 
-import org.talend.components.azure.common.csv.Encoding;
+import org.talend.components.azure.common.Encoding;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
@@ -49,6 +49,7 @@ public class ExcelFormatOptions {
     private String customEncoding;
 
     @Option
+    @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" })
     @Documentation("Set header size")
     private boolean useHeader;
 
@@ -59,6 +60,7 @@ public class ExcelFormatOptions {
     private int header;
 
     @Option
+    @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" })
     @Documentation("Set footer size")
     private boolean useFooter;
 

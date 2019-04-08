@@ -106,9 +106,9 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         bos = new ByteArrayOutputStream();
 
         switch (config.getDataset().getExcelOptions().getExcelFormat()) {
-            case EXCEL97:
-            case EXCEL2007:
-                flushBatchToByteArray();
+        case EXCEL97:
+        case EXCEL2007:
+            flushBatchToByteArray();
         }
 
         getCurrentItem().upload(new ByteArrayInputStream(bos.toByteArray()), -1);
@@ -142,7 +142,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
             Sheet sheet = tempWorkBook.getSheet(config.getDataset().getExcelOptions().getSheetName());
             for (int j = 0; j < sheet.getPhysicalNumberOfRows(); j++) {
                 Row nextRow = sheet.getRow(j);
-                //TODO check max row size
+                // TODO check max row size
                 Row finalNextRow = finalMainSheet.createRow(rowCounter++);
                 for (int k = 0; k < nextRow.getPhysicalNumberOfCells(); k++) {
                     Cell c = nextRow.getCell(k);

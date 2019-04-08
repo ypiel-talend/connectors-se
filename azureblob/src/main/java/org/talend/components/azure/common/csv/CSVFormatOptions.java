@@ -13,6 +13,7 @@
 
 package org.talend.components.azure.common.csv;
 
+import org.talend.components.azure.common.Encoding;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Min;

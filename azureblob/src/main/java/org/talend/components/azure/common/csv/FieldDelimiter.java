@@ -19,8 +19,9 @@ public enum FieldDelimiter {
     SEMICOLON(":"),
     COMMA(","),
     TAB("\t"),
-    SPACE(" "),
-    OTHER("");
+    SPACE(" ");
+    //TODO support custom field delimiter
+    //OTHER("");
 
     @Getter
     private String delimiterValue;

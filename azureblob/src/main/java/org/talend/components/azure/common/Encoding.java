@@ -11,10 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.csv;
+package org.talend.components.azure.common;
 
 public enum Encoding {
     UFT8,
     ISO_8859_15,
-    OTHER
+    //TODO support custom encoding
+    //OTHER
 }
