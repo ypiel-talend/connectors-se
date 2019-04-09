@@ -43,7 +43,7 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class CSVBlobFileReader extends BlobFileReader {
 
-    private FileRecordIterator recordIterator;
+    private CSVFileRecordIterator recordIterator;
 
     private CSVFormatOptions configCSV;
 
@@ -58,7 +58,7 @@ public class CSVBlobFileReader extends BlobFileReader {
         CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
 
         Iterable<ListBlobItem> blobItems = container.listBlobs(config.getDirectory(), true);
-        recordIterator = new FileRecordIterator(blobItems);
+        recordIterator = new CSVFileRecordIterator(blobItems);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class CSVBlobFileReader extends BlobFileReader {
         return recordIterator.next();
     }
 
-    private class FileRecordIterator extends ItemRecordIterator<CSVRecord> {
+    private class CSVFileRecordIterator extends ItemRecordIterator<CSVRecord> {
 
         private Iterator<CSVRecord> recordIterator;
 
@@ -74,7 +74,7 @@ public class CSVBlobFileReader extends BlobFileReader {
 
         private List<String> columns;
 
-        public FileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+        public CSVFileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
         }
 

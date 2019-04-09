@@ -15,8 +15,10 @@ package org.talend.components.azure.runtime.input;
 
 import java.util.Iterator;
 
+import org.talend.components.azure.common.excel.ExcelFormat;
 import org.talend.components.azure.runtime.input.excel.ExcelBlobFileReader;
 import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.runtime.input.excel.ExcelHTMLBlobFileReader;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -47,8 +49,13 @@ public abstract class BlobFileReader {
                 return new CSVBlobFileReader(config, recordBuilderFactory, connectionServices);
             case AVRO:
                 return new AvroBlobFileReader(recordBuilderFactory);
-            case EXCEL:
-                return new ExcelBlobFileReader(config, recordBuilderFactory, connectionServices);
+            case EXCEL: {
+                if (config.getExcelOptions().getExcelFormat() == ExcelFormat.HTML) {
+                    return new ExcelHTMLBlobFileReader(config, recordBuilderFactory, connectionServices);
+                } else {
+                    return new ExcelBlobFileReader(config, recordBuilderFactory, connectionServices);
+                }
+            }
             case PARQUET:
                 return new ParquetBlobFileReader(recordBuilderFactory);
             default:

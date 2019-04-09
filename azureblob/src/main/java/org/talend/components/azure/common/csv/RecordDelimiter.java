@@ -19,8 +19,8 @@ public enum RecordDelimiter {
     LF("\n"),
     CR("\r"),
     CRLF("\r\n");
-    //TODO support custom record delimiter
-//    OTHER("");
+    // TODO support custom record delimiter
+    // OTHER("");
 
     @Getter
     private String delimiterValue;
