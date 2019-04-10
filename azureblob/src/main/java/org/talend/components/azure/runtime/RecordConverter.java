@@ -11,19 +11,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.runtime.input;
+package org.talend.components.azure.runtime;
 
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.api.record.Schema;
 
-public class AvroBlobFileReader extends BlobFileReader {
+public interface RecordConverter<T> {
 
-    public AvroBlobFileReader(RecordBuilderFactory recordBuilderFactory) {
-        super(recordBuilderFactory);
-    }
+    Schema inferSchema(T record);
 
-    @Override
-    public Record readRecord() {
-       return null;
-    }
+    Record toRecord(T record);
+
+    T fromRecord(Record record);
 }

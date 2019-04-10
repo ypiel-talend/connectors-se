@@ -16,7 +16,7 @@ package org.talend.components.azure.common.csv;
 import lombok.Getter;
 
 public enum FieldDelimiter {
-    SEMICOLON(":"),
+    SEMICOLON(";"),
     COMMA(","),
     TAB("\t"),
     SPACE(" "),

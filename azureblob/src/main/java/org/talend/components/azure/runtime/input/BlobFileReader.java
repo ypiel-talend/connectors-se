@@ -16,6 +16,7 @@ package org.talend.components.azure.runtime.input;
 import java.util.Iterator;
 
 import org.talend.components.azure.common.excel.ExcelFormat;
+import org.talend.components.azure.runtime.input.avro.AvroBlobFileReader;
 import org.talend.components.azure.runtime.input.excel.ExcelBlobFileReader;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.runtime.input.excel.ExcelHTMLBlobFileReader;
@@ -48,7 +49,7 @@ public abstract class BlobFileReader {
             case CSV:
                 return new CSVBlobFileReader(config, recordBuilderFactory, connectionServices);
             case AVRO:
-                return new AvroBlobFileReader(recordBuilderFactory);
+                return new AvroBlobFileReader(config, recordBuilderFactory, connectionServices);
             case EXCEL: {
                 if (config.getExcelOptions().getExcelFormat() == ExcelFormat.HTML) {
                     return new ExcelHTMLBlobFileReader(config, recordBuilderFactory, connectionServices);

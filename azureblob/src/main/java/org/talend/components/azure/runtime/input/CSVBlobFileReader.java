@@ -92,6 +92,7 @@ public class CSVBlobFileReader extends BlobFileReader {
             return recordBuilder.build();
         }
 
+        // TODO fix memory leak
         @Override
         protected void readItem() {
             if (format == null) {
@@ -105,7 +106,7 @@ public class CSVBlobFileReader extends BlobFileReader {
 
             try (InputStream input = getCurrentItem().openInputStream();
                     InputStreamReader inr = new InputStreamReader(input, StandardCharsets.UTF_8); // TODO encoding
-                    org.apache.commons.csv.CSVParser parser = new CSVParser(inr, format)) {
+                    CSVParser parser = new CSVParser(inr, format)) {
 
                 this.recordIterator = parser.getRecords().iterator();
             } catch (Exception e) {
