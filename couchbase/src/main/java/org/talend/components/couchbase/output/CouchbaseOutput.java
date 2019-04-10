@@ -4,6 +4,7 @@ import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
@@ -26,10 +27,9 @@ import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.List;
 
-@Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
+@Version(1)
 @Slf4j
-@Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
-                          // icons/filename_icon32.png in resources
+@Icon(Icon.IconType.STAR)
 @Processor(name = "Output")
 @Documentation("This component writes data to Couchbase")
 public class CouchbaseOutput implements Serializable {
@@ -54,9 +54,6 @@ public class CouchbaseOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        // this method will be executed once for the whole component execution,
-        // this is where you can establish a connection for instance
-        // Note: if you don't need it you can delete it
         String bootstrapNodes = configuration.getDataSet().getDatastore().getBootstrapNodes();
         String bucketName = configuration.getDataSet().getDatastore().getBucket();
         String password = configuration.getDataSet().getDatastore().getPassword();
@@ -67,32 +64,13 @@ public class CouchbaseOutput implements Serializable {
         bucket = cluster.openBucket(bucketName, password);
     }
 
-    @BeforeGroup
-    public void beforeGroup() {
-        // if the environment supports chunking this method is called at the beginning if a chunk
-        // it can be used to start a local transaction specific to the backend you use
-        // Note: if you don't need it you can delete it
-    }
-
     @ElementListener
     public void onNext(@Input final Record defaultInput) {
-        // this is the method allowing you to handle the input(s) and emit the output(s)
-        // after some custom logic you put here, to send a value to next element you can use an
-        // output parameter and call emit(value).
         bucket.upsert(toJsonDocument(idFieldName, defaultInput));
-    }
-
-    @AfterGroup
-    public void afterGroup() {
-        // symmetric method of the beforeGroup() executed after the chunk processing
-        // Note: if you don't need it you can delete it
     }
 
     @PreDestroy
     public void release() {
-        // this is the symmetric method of the init() one,
-        // release potential connections you created or data you cached
-        // Note: if you don't need it you can delete it
         bucket.close();
         cluster.disconnect();
     }
@@ -146,14 +124,17 @@ public class CouchbaseOutput implements Serializable {
             }
             if (value instanceof byte[]) {
                 jsonObject.put(entryName, new String((byte[]) value));
+                // TODO: decide what to do with byte array
             } else if (value instanceof Float) {
-                jsonObject.put(entryName, (Number) value);
+                jsonObject.put(entryName, Double.parseDouble(value.toString()));
             } else if (value instanceof ZonedDateTime) {
                 jsonObject.put(entryName, value.toString());
+            } else if (value instanceof List) {
+                JsonArray jsonArray = JsonArray.from((List<?>) value);
+                jsonObject.put(entryName, jsonArray);
             } else {
                 jsonObject.put(entryName, value);
             }
-
         }
         return JsonDocument.create(String.valueOf(jsonObject.get(idFieldName)), jsonObject);
     }

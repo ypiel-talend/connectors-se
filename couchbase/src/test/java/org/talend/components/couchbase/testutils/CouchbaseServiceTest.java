@@ -1,5 +1,6 @@
 package org.talend.components.couchbase.testutils;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.talend.components.couchbase.CouchbaseContainerTest;
@@ -12,10 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @WithComponents("org.talend.components.couchbase")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class CouchbaseServiceTest extends CouchbaseContainerTest {// implements ExtensionContext.Store.CloseableResource,
-                                                                  // BeforeAllCallback, ParameterResolver {
+@DisplayName("Testing of CouchbaseService class")
+public class CouchbaseServiceTest extends CouchbaseContainerTest {
 
     @Test
+    @DisplayName("Test successful connection")
     void couchbaseSuccessfulConnectionTest() {
         CouchbaseDataStore couchbaseDataStore = new CouchbaseDataStore();
         couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
@@ -28,6 +30,7 @@ public class CouchbaseServiceTest extends CouchbaseContainerTest {// implements 
     }
 
     @Test
+    @DisplayName("Test unsuccessful connection")
     void couchbaseNotSuccessfulConnectionTest() {
         String wrongPassword = "wrongpass";
         String expectedComment = "Passwords for bucket \"student\" do not match.";
@@ -43,6 +46,7 @@ public class CouchbaseServiceTest extends CouchbaseContainerTest {// implements 
     }
 
     @Test
+    @DisplayName("Two bootstrap nodes without spaces")
     void resolveAddressesTest() {
         String inputUrl = "192.168.0.1,192.168.0.2";
         String[] resultArrayWithUrls = CouchbaseService.resolveAddresses(inputUrl);
@@ -51,6 +55,7 @@ public class CouchbaseServiceTest extends CouchbaseContainerTest {// implements 
     }
 
     @Test
+    @DisplayName("Two bootstrap nodes with extra spaces")
     void resolveAddressesWithSpacesTest() {
         String inputUrl = " 192.168.0.1,  192.168.0.2";
         String[] resultArrayWithUrls = CouchbaseService.resolveAddresses(inputUrl);

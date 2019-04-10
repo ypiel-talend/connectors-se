@@ -16,7 +16,7 @@ import java.io.Serializable;
         // customize it as much as needed
         @GridLayout.Row({ "dataSet" }) })
 @Documentation("Couchbase input Mapper Configuration")
-public class CouchbaseInputMapperConfiguration implements Serializable {
+public class CouchbaseInputConfiguration implements Serializable {
 
     @Option
     @Documentation("dataset")
@@ -26,7 +26,7 @@ public class CouchbaseInputMapperConfiguration implements Serializable {
         return dataSet;
     }
 
-    public CouchbaseInputMapperConfiguration setDataSet(CouchbaseDataSet dataSet) {
+    public CouchbaseInputConfiguration setDataSet(CouchbaseDataSet dataSet) {
         this.dataSet = dataSet;
         return this;
     }

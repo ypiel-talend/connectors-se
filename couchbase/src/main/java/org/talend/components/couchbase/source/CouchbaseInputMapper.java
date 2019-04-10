@@ -23,13 +23,13 @@ import static java.util.Collections.singletonList;
 @Documentation("Couchbase input Mapper")
 public class CouchbaseInputMapper implements Serializable {
 
-    private final CouchbaseInputMapperConfiguration configuration;
+    private final CouchbaseInputConfiguration configuration;
 
     private final CouchbaseService service;
 
     private final RecordBuilderFactory recordBuilderFactory;
 
-    public CouchbaseInputMapper(@Option("configuration") final CouchbaseInputMapperConfiguration configuration,
+    public CouchbaseInputMapper(@Option("configuration") final CouchbaseInputConfiguration configuration,
             final CouchbaseService service, final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
@@ -57,10 +57,10 @@ public class CouchbaseInputMapper implements Serializable {
     }
 
     @Emitter
-    public CouchbaseInputSource createWorker() {
+    public CouchbaseInput createWorker() {
         // here we create an actual worker,
         // you are free to rework the configuration etc but our default generated implementation
         // propagates the partition mapper entries.
-        return new CouchbaseInputSource(configuration, service, recordBuilderFactory);
+        return new CouchbaseInput(configuration, service, recordBuilderFactory);
     }
 }

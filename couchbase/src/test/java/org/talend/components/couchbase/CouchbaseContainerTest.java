@@ -2,6 +2,9 @@ package org.talend.components.couchbase;
 
 import com.couchbase.client.java.bucket.BucketType;
 import com.couchbase.client.java.cluster.DefaultBucketSettings;
+import org.junit.jupiter.api.extension.Extension;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.couchbase.CouchbaseContainer;
 
 import java.time.Duration;
@@ -9,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class CouchbaseContainerTest {
+public abstract class CouchbaseContainerTest implements Extension {
 
     public static final String BUCKET_NAME = "student";
 
@@ -21,7 +24,8 @@ public abstract class CouchbaseContainerTest {
 
     public static final String CLUSTER_PASSWORD = "secret";
 
-    private static final List ports = new ArrayList(Arrays.asList(new String[] { "8091:8091", "18091:18091" }));
+    private static final List ports = new ArrayList(
+            Arrays.asList(new String[] { "8091:8091", "8092:8092", "8093:8093", "8094:8094", "11210:11210" }));
 
     public static final CouchbaseContainer COUCHBASE_CONTAINER;
 
@@ -32,5 +36,6 @@ public abstract class CouchbaseContainerTest {
                 .withStartupTimeout(Duration.ofSeconds(120));
         COUCHBASE_CONTAINER.setPortBindings(ports);
         COUCHBASE_CONTAINER.start(); //
+        COUCHBASE_CONTAINER.waitingFor(new WaitAllStrategy());
     }
 }

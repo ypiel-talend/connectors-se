@@ -14,23 +14,11 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <!--
-    Set it to true if you want the documentation to be rendered as HTML and PDF
-
-    You can also use it on the command line: -Dtalend.documentation.htmlAndPdf=true
-    -->
     <talend.documentation.htmlAndPdf>false</talend.documentation.htmlAndPdf>
-
-    <!--
-    if you want to deploy into the studio you can use the related goal:
-
-    mvn package talend-component:deploy-in-studio -Dtalend.component.studioHome=/path/to/studio
-
-    TIP: it is recommended to set this property into your settings.xml in an active by default profile.
-    -->
     <component-runtime.version>1.1.6</component-runtime.version>
     <testcontainers.version>1.10.3</testcontainers.version>
+    <couchbase.client.version>2.7.4</couchbase.client.version>
+    <testcontainers.version>1.10.2</testcontainers.version>
     <talend.component.studioHome />
   </properties>
 
@@ -38,26 +26,19 @@
     <dependency>
       <groupId>com.couchbase.client</groupId>
       <artifactId>java-client</artifactId>
-      <version>2.7.4</version>
+      <version>${couchbase.client.version}</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>1.10.2</version>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
-      <!--TODO:link to dependency to parent-->
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>couchbase</artifactId>
-      <version>1.10.2</version>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
-      <!--TODO:link to dependency to parent-->
-    </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.9</version>
     </dependency>
   </dependencies>
 

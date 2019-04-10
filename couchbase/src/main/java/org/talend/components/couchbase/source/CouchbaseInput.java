@@ -37,11 +37,11 @@ import static org.talend.sdk.component.api.record.Schema.Type.*;
 @Version(1)
 @Slf4j
 @Documentation("This component reads data from Couchbase.")
-public class CouchbaseInputSource implements Serializable {
+public class CouchbaseInput implements Serializable {
 
-    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseInputSource.class);
+    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseInput.class);
 
-    private final CouchbaseInputMapperConfiguration configuration;
+    private final CouchbaseInputConfiguration configuration;
 
     private final CouchbaseService service;
 
@@ -55,7 +55,7 @@ public class CouchbaseInputSource implements Serializable {
 
     private List<Record> recordList;
 
-    public CouchbaseInputSource(@Option("configuration") final CouchbaseInputMapperConfiguration configuration,
+    public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
             final CouchbaseService service, final RecordBuilderFactory builderFactory) {
         this.configuration = configuration;
         this.service = service;
@@ -72,6 +72,7 @@ public class CouchbaseInputSource implements Serializable {
         CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
         this.cluster = CouchbaseCluster.create(environment, bootStrapNodes);
         bucket = cluster.openBucket(bucketName, password);
+        bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
         N1qlQueryResult n1qlQueryResult = bucket.query(N1qlQuery
                 .simple("SELECT META(" + bucketName + ").id FROM " + bucketName + " ORDER BY META(" + bucketName + ").id"));
@@ -106,7 +107,6 @@ public class CouchbaseInputSource implements Serializable {
             schema = schemaBuilder.build();
         }
 
-        // todo: uncomment this line after lib version update
         // final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
         final Record.Builder recordBuilder = builderFactory.newRecordBuilder();
 
@@ -116,18 +116,17 @@ public class CouchbaseInputSource implements Serializable {
 
     private void addField(Schema.Builder schemaBuilder, Object value, String name) {
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
+        entryBuilder.withName(name).withNullable(true);
 
         // todo: decide how define type if value is null
         if (value == null) {
-            schemaBuilder.withEntry(entryBuilder.withType(STRING).build());
+            LOG.warn("Can't guess data type if value null. Column with null value will be excluded");
         } else if (value instanceof Integer) {
             schemaBuilder.withEntry(entryBuilder.withType(INT).build());
         } else if (value instanceof Long || value instanceof BigInteger) {
             schemaBuilder.withEntry(entryBuilder.withType(LONG).build());
         } else if (value instanceof Byte[]) {
             schemaBuilder.withEntry(entryBuilder.withType(BYTES).build());
-        } else if (value instanceof Float) {
-            schemaBuilder.withEntry(entryBuilder.withType(FLOAT).build());
         } else if (value instanceof Double) {
             schemaBuilder.withEntry(entryBuilder.withType(DOUBLE).build());
         } else if (value instanceof String || value instanceof JsonObject) {
@@ -147,18 +146,15 @@ public class CouchbaseInputSource implements Serializable {
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
         entryBuilder.withName(name);
 
-        // todo: decide how define type if value is null
         try {
             if (value == null) {
-                recordBuilder.withString(entryBuilder.withType(STRING).build(), null);
+                LOG.warn("Can't guess data type if value null. Column with null value will be excluded");
             } else if (value instanceof Integer) {
                 recordBuilder.withInt(entryBuilder.withType(INT).build(), (Integer) value);
             } else if (value instanceof Long || value instanceof BigInteger) {
                 recordBuilder.withLong(entryBuilder.withType(LONG).build(), (Long) value);
             } else if (value instanceof Byte[]) {
                 recordBuilder.withBytes(entryBuilder.withType(BYTES).build(), (byte[]) value);
-            } else if (value instanceof Float) {
-                recordBuilder.withFloat(entryBuilder.withType(FLOAT).build(), (Float) value);
             } else if (value instanceof Double) {
                 recordBuilder.withDouble(entryBuilder.withType(DOUBLE).build(), (Double) value);
             } else if (value instanceof String || value instanceof JsonObject) {
