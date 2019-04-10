@@ -34,6 +34,7 @@
 
     <apache.poi.version>4.0.1</apache.poi.version>
     <jsoup.version>1.11.3</jsoup.version>
+    <avro.version>1.8.2</avro.version>
   </properties>
 
   <dependencies>
@@ -75,7 +76,12 @@
       <artifactId>jsoup</artifactId>
       <version>${jsoup.version}</version>
     </dependency>
-
+    <!-- Avro format -->
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>${avro.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
