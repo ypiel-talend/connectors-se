@@ -55,31 +55,20 @@ public class CouchbaseOutputTest extends CouchbaseContainerTest {
     @Service
     private RecordBuilderFactory recordBuilderFactory;
 
-    private List<Record> records;
-
     private static final ZonedDateTime ZONED_DATE_TIME = ZonedDateTime.of(2018, 10, 30, 10, 30, 59, 0, ZoneId.of("UTC"));
 
     private List<JsonDocument> retrieveDataFromDatabase() {
         CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
-        Cluster cluster = null;
-        Bucket bucket = null;
+        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
+        Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
         List<JsonDocument> resultList = new ArrayList<>();
 
-        try {
-            cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
-            bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
+        resultList.add(bucket.get("RRRR1"));
+        resultList.add(bucket.get("RRRR2"));
 
-            resultList.add(bucket.get("RRRR1"));
-            resultList.add(bucket.get("RRRR2"));
-
-        } finally {
-            if (bucket != null) {
-                bucket.close();
-            }
-            if (cluster != null) {
-                cluster.disconnect();
-            }
-        }
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
         return resultList;
     }
 
@@ -90,7 +79,7 @@ public class CouchbaseOutputTest extends CouchbaseContainerTest {
         listTestData.add("two");
         listTestData.add("three");
 
-        records = new ArrayList<>();
+        List<Record> records = new ArrayList<>();
 
         SchemaImpl schema = new SchemaImpl();
         schema.setType(Schema.Type.STRING);
@@ -131,7 +120,7 @@ public class CouchbaseOutputTest extends CouchbaseContainerTest {
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
 
         Job.components().component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
-                .component("emitter", "test://emitter").connections().from("emitter").to("Couchbase_Output").build().run(); //
+                .component("emitter", "test://emitter").connections().from("emitter").to("Couchbase_Output").build().run();
         assertEquals(2, retrieveDataFromDatabase().size());
     }
 

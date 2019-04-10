@@ -13,7 +13,6 @@
 
 package org.talend.components.couchbase.dataset;
 
-import lombok.Data;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -24,6 +23,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 import java.util.List;
+
+import lombok.Data;
 
 @Version(1)
 @Data

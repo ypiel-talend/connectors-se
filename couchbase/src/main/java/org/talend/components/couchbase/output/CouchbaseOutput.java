@@ -21,7 +21,6 @@ import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
@@ -29,7 +28,9 @@ import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.processor.*;
+import org.talend.sdk.component.api.processor.ElementListener;
+import org.talend.sdk.component.api.processor.Input;
+import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
@@ -37,8 +38,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Version(1)
 @Slf4j
@@ -54,6 +56,8 @@ public class CouchbaseOutput implements Serializable {
     private final CouchbaseService service;
 
     private Cluster cluster;
+
+    private CouchbaseEnvironment environment;
 
     private Bucket bucket;
 
@@ -72,7 +76,7 @@ public class CouchbaseOutput implements Serializable {
         String password = configuration.getDataSet().getDatastore().getPassword();
         idFieldName = configuration.getIdFieldName();
 
-        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
+        environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
         this.cluster = CouchbaseCluster.create(environment, bootstrapNodes);
         bucket = cluster.openBucket(bucketName, password);
     }
@@ -86,6 +90,7 @@ public class CouchbaseOutput implements Serializable {
     public void release() {
         bucket.close();
         cluster.disconnect();
+        environment.shutdown();
     }
 
     private JsonDocument toJsonDocument(String idFieldName, Record record) {

@@ -61,36 +61,44 @@ public class CouchbaseInputTest extends CouchbaseContainerTest {
 
     private void insertTestDataToDB() {
         CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
-        Cluster cluster = null;
-        Bucket bucket = null;
+        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
+        Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
 
-        try {
-            cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
-            bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
+        bucket.bucketManager().flush();
 
-            bucket.bucketManager().flush();
+        JsonObject json = JsonObject.create().put("t_string", "RRRR1").put("t_int", 11111).put("t_long", 1_000_000_000_000L)
+                // .put("t_bytes", "test1".getBytes())
+                .put("t_float", 1000.0f).put("t_double", 1.5).put("t_boolean", false)
+                .put("t_datetime", ZONED_DATE_TIME.toString()).put("t_array", JsonArray.from("one", "two", "three"));
 
-            JsonObject json = JsonObject.create().put("t_string", "RRRR1").put("t_int", 11111).put("t_long", 1_000_000_000_000L)
-                    // .put("t_bytes", "test1".getBytes())
-                    .put("t_float", 1000.0f).put("t_double", 1.5).put("t_boolean", false)
-                    .put("t_datetime", ZONED_DATE_TIME.toString()).put("t_array", JsonArray.from("one", "two", "three"));
+        bucket.insert(JsonDocument.create("RRRR1", json));
 
-            bucket.insert(JsonDocument.create("RRRR1", json));
+        JsonObject json2 = JsonObject.create().put("t_string", "RRRR2").put("t_int", 22222).put("t_long", 2_000_000_000_000L)
+                // .put("t_bytes", "test2".getBytes())
+                .put("t_float", 2000.0f).put("t_double", 2.5).put("t_boolean", true).put("t_datetime", ZONED_DATE_TIME.toString())
+                .put("t_array", JsonArray.from("one", "two", "three"));
 
-            JsonObject json2 = JsonObject.create().put("t_string", "RRRR2").put("t_int", 22222).put("t_long", 2_000_000_000_000L)
-                    // .put("t_bytes", "test2".getBytes())
-                    .put("t_float", 2000.0f).put("t_double", 2.5).put("t_boolean", true)
-                    .put("t_datetime", ZONED_DATE_TIME.toString()).put("t_array", JsonArray.from("one", "two", "three"));
+        bucket.insert(JsonDocument.create("RRRR2", json2));
 
-            bucket.insert(JsonDocument.create("RRRR2", json2));
-        } finally {
-            if (bucket != null) {
-                bucket.close();
-            }
-            if (cluster != null) {
-                cluster.disconnect();
-            }
-        }
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
+    }
+
+    private void insertTestDataWithNullValueToDB() {
+        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
+        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
+        Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
+
+        bucket.bucketManager().flush();
+
+        JsonObject json = JsonObject.create().put("t_string1", "RRRR1").put("t_string2", "RRRR2").putNull("t_string3");
+
+        bucket.insert(JsonDocument.create("RRRR1", json));
+
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
     }
 
     @Test
@@ -116,7 +124,7 @@ public class CouchbaseInputTest extends CouchbaseContainerTest {
                 .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();
 
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
-        // check first record
+
         assertEquals("RRRR1", res.get(0).getString("t_string"));
         assertEquals(11111, res.get(0).getInt("t_int"));
         assertEquals(1_000_000_000_000L, res.get(0).getLong("t_long"));
@@ -135,6 +143,17 @@ public class CouchbaseInputTest extends CouchbaseContainerTest {
         assertEquals(2.5, res.get(1).getDouble("t_double"));
         assertEquals(true, res.get(1).getBoolean("t_boolean"));
         assertEquals(listTestData, res.get(1).getArray(List.class, "t_array"));
+    }
+
+    @Test
+    void firstValueIsNullInInputDBTest() {
+        insertTestDataWithNullValueToDB();
+        final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
+        Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
+                .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();
+
+        final List<Record> res = componentsHandler.getCollectedData(Record.class);
+        assertEquals(2, res.get(0).getSchema().getEntries().size());
     }
 
     private CouchbaseInputConfiguration getInputConfiguration() {

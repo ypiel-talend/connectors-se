@@ -13,7 +13,6 @@
 
 package org.talend.components.couchbase.datastore;
 
-import lombok.Data;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
@@ -24,6 +23,8 @@ import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
+
+import lombok.Data;
 
 @Version(1)
 @Data

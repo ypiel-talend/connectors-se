@@ -23,7 +23,6 @@ import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
@@ -46,6 +45,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
 import static org.talend.sdk.component.api.record.Schema.Type.*;
 
 @Version(1)
@@ -60,11 +61,13 @@ public class CouchbaseInput implements Serializable {
 
     private final CouchbaseService service;
 
+    private final RecordBuilderFactory builderFactory;
+
+    private CouchbaseEnvironment environment;
+
     private Cluster cluster;
 
     private Bucket bucket;
-
-    private final RecordBuilderFactory builderFactory;
 
     private transient Schema schema;
 
@@ -84,10 +87,13 @@ public class CouchbaseInput implements Serializable {
         String bucketName = configuration.getDataSet().getDatastore().getBucket();
         String password = configuration.getDataSet().getDatastore().getPassword();
 
-        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
+        environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
         this.cluster = CouchbaseCluster.create(environment, bootStrapNodes);
         bucket = cluster.openBucket(bucketName, password);
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+
+        // N1qlQueryResult result = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucketName));
+        // result.rows().
 
         N1qlQueryResult n1qlQueryResult = bucket.query(N1qlQuery
                 .simple("SELECT META(" + bucketName + ").id FROM " + bucketName + " ORDER BY META(" + bucketName + ").id"));
@@ -109,23 +115,24 @@ public class CouchbaseInput implements Serializable {
     public void release() {
         bucket.close();
         cluster.disconnect();
+        environment.shutdown();
 
     }
 
     private Record createRecord(final JsonDocument jsonDocument) {
         JsonObject jsonObject = jsonDocument.content();
-        Set<String> labelNames = jsonObject.getNames();
 
         if (schema == null) {
+            Set<String> labelNames = jsonObject.getNames();
             final Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
             labelNames.stream().forEach(name -> addField(schemaBuilder, jsonObject.get(name), name));
             schema = schemaBuilder.build();
         }
 
-        // final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-        final Record.Builder recordBuilder = builderFactory.newRecordBuilder();
+        final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
 
-        labelNames.stream().forEach(name -> addColumn(recordBuilder, jsonObject.get(name), name));
+        schema.getEntries().stream().map(Schema.Entry::getName)
+                .forEach(name -> addColumn(recordBuilder, jsonObject.get(name), name));
         return recordBuilder.build();
     }
 
@@ -133,7 +140,6 @@ public class CouchbaseInput implements Serializable {
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
         entryBuilder.withName(name).withNullable(true);
 
-        // todo: decide how define type if value is null
         if (value == null) {
             LOG.warn("Can't guess data type if value null. Column with null value will be excluded");
         } else if (value instanceof Integer) {

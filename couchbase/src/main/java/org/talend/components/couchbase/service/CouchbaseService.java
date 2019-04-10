@@ -13,9 +13,6 @@
 
 package org.talend.components.couchbase.service;
 
-import com.couchbase.client.core.message.internal.DiagnosticsReport;
-import com.couchbase.client.core.message.internal.EndpointHealth;
-import com.couchbase.client.core.state.LifecycleState;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
@@ -23,7 +20,6 @@ import com.couchbase.client.java.auth.Authenticator;
 import com.couchbase.client.java.auth.PasswordAuthenticator;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
@@ -33,24 +29,32 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Version(1)
 @Slf4j
 @Service
 public class CouchbaseService {
 
+    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
+
     @Service
     private CouchbaseDataStore couchBaseConnection;
-
-    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
 
     // @Service
     // private I18nMessage i18n;
 
-    // you can put logic here you can reuse in components
+    public static String[] resolveAddresses(String nodes) {
+        String[] addresses = nodes.replaceAll(" ", "").split(",");
+        for (int i = 0; i < addresses.length; i++) {
+            log.info("Bootstrap node[" + i + "]: " + addresses[i]);
+        }
+        return addresses;
+    }
+
     @HealthCheck("healthCheck")
     public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final CouchbaseDataStore datastore) {
+        CouchbaseEnvironment environment = null;
         Cluster cluster = null;
         Bucket bucket = null;
         try {
@@ -60,7 +64,7 @@ public class CouchbaseService {
 
             String[] urls = resolveAddresses(datastore.getBootstrapNodes());
 
-            CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder()
+            environment = new DefaultCouchbaseEnvironment.Builder()
                     // .bootstrapHttpDirectPort(port)
                     .connectTimeout(20000L).build();
             Authenticator authenticator = new PasswordAuthenticator(bucketName, password);
@@ -80,22 +84,21 @@ public class CouchbaseService {
         } catch (Throwable exception) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, exception.getMessage());
         } finally {
-            if (bucket != null) {
-                bucket.close();
-            }
-            if (cluster != null) {
-                cluster.disconnect();
-            }
+            closeConnection(environment, cluster, bucket);
         }
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK");
         // todo: add i18n
     }
 
-    public static String[] resolveAddresses(String nodes) {
-        String[] addresses = nodes.replaceAll(" ", "").split(",");
-        for (int i = 0; i < addresses.length; i++) {
-            log.info("Bootstrap node[" + i + "]: " + addresses[i]);
+    public static void closeConnection(CouchbaseEnvironment environment, Cluster cluster, Bucket bucket) {
+        if (bucket != null) {
+            bucket.close();
         }
-        return addresses;
+        if (cluster != null) {
+            cluster.disconnect();
+        }
+        if (environment != null) {
+            environment.shutdown();
+        }
     }
 }

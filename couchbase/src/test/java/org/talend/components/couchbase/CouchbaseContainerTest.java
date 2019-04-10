@@ -36,7 +36,7 @@ public abstract class CouchbaseContainerTest implements Extension {
 
     public static final String CLUSTER_PASSWORD = "secret";
 
-    private static final List ports = new ArrayList(
+    private static final List<String> ports = new ArrayList(
             Arrays.asList(new String[] { "8091:8091", "8092:8092", "8093:8093", "8094:8094", "11210:11210" }));
 
     public static final CouchbaseContainer COUCHBASE_CONTAINER;
@@ -44,10 +44,8 @@ public abstract class CouchbaseContainerTest implements Extension {
     static {
         COUCHBASE_CONTAINER = new CouchbaseContainer().withClusterAdmin(CLUSTER_USERNAME, CLUSTER_PASSWORD)
                 .withNewBucket(DefaultBucketSettings.builder().enableFlush(true).name(BUCKET_NAME).password(BUCKET_PASSWORD)
-                        .quota(BUCKET_QUOTA).type(BucketType.COUCHBASE).build())
-                .withStartupTimeout(Duration.ofSeconds(120));
+                        .quota(BUCKET_QUOTA).type(BucketType.COUCHBASE).build());
         COUCHBASE_CONTAINER.setPortBindings(ports);
         COUCHBASE_CONTAINER.start();
-        COUCHBASE_CONTAINER.waitingFor(new WaitAllStrategy());
     }
 }
