@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.runtime.input.excel;
+package org.talend.components.azure.runtime.input;
 
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -29,42 +29,26 @@ import org.jsoup.select.Elements;
 import org.talend.components.azure.common.excel.ExcelFormatOptions;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.runtime.input.BlobFileReader;
-import org.talend.components.azure.runtime.input.SchemaUtils;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
     private ExcelFormatOptions excelConfig;
 
-    private HTMLRecordIterator iterator;
-
     public ExcelHTMLBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
             AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
-        super(recordBuilderFactory);
+        super(config, recordBuilderFactory, connectionServices);
         this.excelConfig = config.getExcelOptions();
-
-        CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
-        CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
-                AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
-        CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
-
-        Iterable<ListBlobItem> blobItems = container.listBlobs(config.getDirectory(), true);
-        iterator = new HTMLRecordIterator(blobItems);
     }
 
-    // TODO move to parent
     @Override
-    public Record readRecord() {
-        return iterator.next();
+    protected ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems) {
+        return new HTMLRecordIterator(blobItems);
     }
 
     private class HTMLRecordIterator extends ItemRecordIterator<Element> {
@@ -75,6 +59,7 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
         public HTMLRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
+            takeFirstItem();
         }
 
         @Override
@@ -88,11 +73,6 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
             } catch (Exception e) {
                 throw new BlobRuntimeException(e);
             }
-        }
-
-        @Override
-        protected void initRecordContainer() {
-            // NOOP
         }
 
         @Override

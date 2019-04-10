@@ -11,16 +11,22 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.runtime;
+package org.talend.components.azure.runtime.converters;
 
-import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-public interface RecordConverter<T> {
+public class ParquetConverter extends AvroConverter implements RecordConverter<GenericRecord> {
 
-    Schema inferSchema(T record);
+    @Service
+    public static RecordBuilderFactory recordBuilderFactory;
 
-    Record toRecord(T record);
+    public static ParquetConverter of() {
+        return new ParquetConverter();
+    }
 
-    T fromRecord(Record record);
+    private ParquetConverter() {
+        super();
+    }
 }

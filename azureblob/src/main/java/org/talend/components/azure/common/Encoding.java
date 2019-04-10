@@ -15,9 +15,8 @@ package org.talend.components.azure.common;
 
 public enum Encoding {
     UFT8("UTF-8"),
-    ISO_8859_15("ISO-8859-15");
-    // TODO support custom encoding
-    // OTHER
+    ISO_8859_15("ISO-8859-15"),
+    OTHER("");
 
     Encoding(String encodingCharsetValue) {
         this.encodingCharsetValue = encodingCharsetValue;

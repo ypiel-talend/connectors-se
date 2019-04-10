@@ -13,17 +13,53 @@
 
 package org.talend.components.azure.runtime.input;
 
+import java.net.URISyntaxException;
+
+import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.ListBlobItem;
+
 public class ParquetBlobFileReader extends BlobFileReader {
 
-    public ParquetBlobFileReader(RecordBuilderFactory recordBuilderFactory) {
-        super(recordBuilderFactory);
+    public ParquetBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
+            AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
+        super(config, recordBuilderFactory, connectionServices);
     }
 
     @Override
-    public Record readRecord() {
-        return null;
+    protected ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems) {
+        return new ParquetRecordIterator(blobItems);
+    }
+
+    private class ParquetRecordIterator extends ItemRecordIterator {
+
+        protected ParquetRecordIterator(Iterable<ListBlobItem> blobItems) {
+            super(blobItems);
+            takeFirstItem();
+        }
+
+        @Override
+        protected Object takeNextRecord() {
+            return null;
+        }
+
+        @Override
+        protected boolean hasNextRecordTaken() {
+            return false;
+        }
+
+        @Override
+        protected Record convertToRecord(Object next) {
+            return null;
+        }
+
+        @Override
+        protected void readItem() {
+
+        }
     }
 }

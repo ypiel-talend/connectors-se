@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.runtime.input.excel;
+package org.talend.components.azure.runtime.input;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,41 +30,24 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.talend.components.azure.common.excel.ExcelFormat;
 import org.talend.components.azure.common.excel.ExcelFormatOptions;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
-import org.talend.components.azure.runtime.input.BlobFileReader;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class ExcelBlobFileReader extends BlobFileReader {
 
-    private ExcelFormatOptions excelConfig;
-
-    private ExcelRecordIterator recordIterator;
-
     public ExcelBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
             AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
-        super(recordBuilderFactory);
-        this.excelConfig = config.getExcelOptions();
-
-        CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
-        CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
-                AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
-        CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
-
-        Iterable<ListBlobItem> blobItems = container.listBlobs(config.getDirectory(), true);
-        recordIterator = new ExcelRecordIterator(blobItems);
+        super(config, recordBuilderFactory, connectionServices);
     }
 
     @Override
-    public Record readRecord() {
-        return recordIterator.next();
+    protected ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems) {
+        return new ExcelRecordIterator(blobItems);
     }
 
     private class ExcelRecordIterator extends BlobFileReader.ItemRecordIterator<Row> {
@@ -75,6 +58,8 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
         public ExcelRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
+            this.rows = new LinkedList<>();
+            takeFirstItem();
         }
 
         @Override
@@ -120,12 +105,12 @@ public class ExcelBlobFileReader extends BlobFileReader {
         protected void readItem() {
             try (InputStream input = getCurrentItem().openInputStream()) {
                 Workbook wb;
-                if (excelConfig.getExcelFormat() == ExcelFormat.EXCEL97) {
+                if (getConfig().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL97) {
                     wb = new HSSFWorkbook(input);
                 } else {
                     wb = new XSSFWorkbook(input);
                 } // TODO HTML excel format??
-                Sheet sheet = wb.getSheet(excelConfig.getSheetName());
+                Sheet sheet = wb.getSheet(getConfig().getExcelOptions().getSheetName());
 
                 for (int i = 0;; i++) {
                     Row row = sheet.getRow(i);
@@ -147,11 +132,6 @@ public class ExcelBlobFileReader extends BlobFileReader {
         @Override
         protected Row takeNextRecord() {
             return rows.poll();
-        }
-
-        @Override
-        protected void initRecordContainer() {
-            rows = new LinkedList<>();
         }
     }
 }

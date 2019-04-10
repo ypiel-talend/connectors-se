@@ -11,21 +11,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.csv;
+package org.talend.components.azure.runtime.converters;
 
-import lombok.Getter;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 
-public enum FieldDelimiter {
-    SEMICOLON(';'),
-    COMMA(','),
-    TAB('\t'),
-    SPACE(' '),
-    OTHER((char) 0);
+public interface RecordConverter<T> {
 
-    @Getter
-    private char delimiterValue;
+    Schema inferSchema(T record);
 
-    FieldDelimiter(char delimiter) {
-        this.delimiterValue = delimiter;
-    }
+    Record toRecord(T record);
+
+    T fromRecord(Record record);
 }

@@ -11,21 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.csv;
+package org.talend.components.azure.runtime.converters;
 
-import lombok.Getter;
-
-public enum FieldDelimiter {
-    SEMICOLON(';'),
-    COMMA(','),
-    TAB('\t'),
-    SPACE(' '),
-    OTHER((char) 0);
-
-    @Getter
-    private char delimiterValue;
-
-    FieldDelimiter(char delimiter) {
-        this.delimiterValue = delimiter;
-    }
+public class ExcelConverter {
 }

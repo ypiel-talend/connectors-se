@@ -13,32 +13,60 @@
 
 package org.talend.components.azure.runtime.input;
 
+import java.net.URISyntaxException;
 import java.util.Iterator;
 
 import org.talend.components.azure.common.excel.ExcelFormat;
-import org.talend.components.azure.runtime.input.avro.AvroBlobFileReader;
-import org.talend.components.azure.runtime.input.excel.ExcelBlobFileReader;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.runtime.input.excel.ExcelHTMLBlobFileReader;
+import org.talend.components.azure.runtime.converters.RecordConverter;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
+import com.microsoft.azure.storage.blob.CloudBlobClient;
+import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 public abstract class BlobFileReader {
 
     private RecordBuilderFactory recordBuilderFactory;
 
-    public BlobFileReader(RecordBuilderFactory recordBuilderFactory) {
+    private ItemRecordIterator iterator;
+
+    private final AzureBlobDataset config;
+
+    public BlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
+            AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
         this.recordBuilderFactory = recordBuilderFactory;
+        this.config = config;
+        CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
+        CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
+                AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
+        CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
+
+        Iterable<ListBlobItem> blobItems = container.listBlobs(config.getDirectory(), true);
+
+        this.iterator = initItemRecordIterator(blobItems);
     }
 
-    public abstract Record readRecord();
+    protected abstract ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems);
 
+    public Record readRecord() {
+        return iterator.next();
+    }
+
+    // TODO no need of it in dss?
     protected RecordBuilderFactory getRecordBuilderFactory() {
         return recordBuilderFactory;
+    }
+
+    protected AzureBlobDataset getConfig() {
+        return config;
     }
 
     public static class BlobFileReaderFactory {
@@ -58,7 +86,7 @@ public abstract class BlobFileReader {
                 }
             }
             case PARQUET:
-                return new ParquetBlobFileReader(recordBuilderFactory);
+                return new ParquetBlobFileReader(config, recordBuilderFactory, connectionServices);
             default:
                 throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
             }
@@ -69,12 +97,11 @@ public abstract class BlobFileReader {
 
         private Iterator<ListBlobItem> blobItems;
 
+        @Getter(AccessLevel.PROTECTED)
         private CloudBlob currentItem;
 
         protected ItemRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             this.blobItems = blobItemsList.iterator();
-            initRecordContainer();
-            takeFirstItem();
         }
 
         @Override
@@ -87,10 +114,6 @@ public abstract class BlobFileReader {
             T next = readNextItemRecord();
 
             return next != null ? convertToRecord(next) : null;
-        }
-
-        protected CloudBlob getCurrentItem() {
-            return currentItem;
         }
 
         T readNextItemRecord() {
@@ -109,8 +132,6 @@ public abstract class BlobFileReader {
             }
         }
 
-        protected abstract void initRecordContainer();
-
         protected abstract T takeNextRecord();
 
         protected abstract boolean hasNextRecordTaken();
@@ -119,7 +140,7 @@ public abstract class BlobFileReader {
 
         protected abstract void readItem();
 
-        private void takeFirstItem() {
+        protected void takeFirstItem() {
             if (blobItems.hasNext()) {
                 currentItem = (CloudBlob) blobItems.next();
                 readItem();

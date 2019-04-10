@@ -11,16 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.runtime.input.avro;
+package org.talend.components.azure.runtime.input;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
@@ -29,37 +24,23 @@ import org.apache.avro.io.DatumReader;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.runtime.converters.AvroConverter;
-import org.talend.components.azure.runtime.input.BlobFileReader;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class AvroBlobFileReader extends BlobFileReader {
 
-    private AvroFileRecordIterator iterator;
-
     public AvroBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
             AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
-        super(recordBuilderFactory);
-        CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
-        CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
-                AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
-        CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
-
-        Iterable<ListBlobItem> blobItems = container.listBlobs(config.getDirectory(), true);
-        iterator = new AvroFileRecordIterator(blobItems);
+        super(config, recordBuilderFactory, connectionServices);
     }
 
     @Override
-    public Record readRecord() {
-        return iterator.next();
+    protected ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems) {
+        return new AvroFileRecordIterator(blobItems);
     }
 
     private class AvroFileRecordIterator extends ItemRecordIterator<GenericRecord> {
@@ -70,6 +51,8 @@ public class AvroBlobFileReader extends BlobFileReader {
 
         public AvroFileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
+            this.recordList = new LinkedList<>();
+            takeFirstItem();
         }
 
         @Override
@@ -104,11 +87,6 @@ public class AvroBlobFileReader extends BlobFileReader {
         @Override
         protected GenericRecord takeNextRecord() {
             return recordList.poll();
-        }
-
-        @Override
-        protected void initRecordContainer() {
-            recordList = new LinkedList<>();
         }
     }
 }

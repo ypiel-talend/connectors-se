@@ -16,54 +16,38 @@ package org.talend.components.azure.runtime.input;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.StringUtils;
-import org.talend.components.azure.common.csv.CSVFormatOptions;
+import org.talend.components.azure.common.Encoding;
 import org.talend.components.azure.common.csv.FieldDelimiter;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.runtime.converters.CSVConverter;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class CSVBlobFileReader extends BlobFileReader {
 
-    private CSVFileRecordIterator recordIterator;
-
-    private CSVFormatOptions configCSV;
-
     CSVBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
             AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
-        super(recordBuilderFactory);
-        this.configCSV = config.getCsvOptions();
+        super(config, recordBuilderFactory, connectionServices);
+    }
 
-        CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
-        CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
-                AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
-        CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
-
-        Iterable<ListBlobItem> blobItems = container.listBlobs(config.getDirectory(), true);
-        recordIterator = new CSVFileRecordIterator(blobItems);
+    @Override
+    protected ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems) {
+        return new CSVFileRecordIterator(blobItems);
     }
 
     @Override
     public Record readRecord() {
-        return recordIterator.next();
+        return super.readRecord();
     }
 
     private class CSVFileRecordIterator extends ItemRecordIterator<CSVRecord> {
@@ -72,43 +56,57 @@ public class CSVBlobFileReader extends BlobFileReader {
 
         private CSVFormat format;
 
-        private List<String> columns;
+        private CSVConverter converter;
+
+        private String encodingValue;
 
         public CSVFileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
+            this.encodingValue = getConfig().getCsvOptions().getEncoding() == Encoding.OTHER
+                    ? getConfig().getCsvOptions().getCustomEncoding()
+                    : getConfig().getCsvOptions().getEncoding().getEncodingValue();
+
+            takeFirstItem();
         }
 
         @Override
         protected Record convertToRecord(CSVRecord next) {
-            if (columns == null) {
-                // TODO header
-                columns = inferSchemaInfo(next, true);
-            }
-
-            Record.Builder recordBuilder = getRecordBuilderFactory().newRecordBuilder();
-            for (int i = 0; i < next.size(); i++) {
-                recordBuilder.withString(columns.get(i), next.get(i));
-            }
-            return recordBuilder.build();
+            return converter.toRecord(next);
         }
 
         // TODO fix memory leak
         @Override
         protected void readItem() {
+            if (converter == null) {
+                // todo not needed for datastreams
+                CSVConverter.recordBuilderFactory = CSVBlobFileReader.this.getRecordBuilderFactory();
+                converter = CSVConverter.of(getConfig().getCsvOptions().isUseHeader());
+            }
+
             if (format == null) {
-                // TODO char
-                String delimiterValue = configCSV.getFieldDelimiter() == FieldDelimiter.OTHER
-                        ? configCSV.getCustomFieldDelimiter()
-                        : configCSV.getFieldDelimiter().getDelimiterValue();
-                format = createCSVFormat(delimiterValue.charAt(0), configCSV.getTextEnclosureCharacter(),
-                        configCSV.getEscapeCharacter());
+                char delimiterValue = getConfig().getCsvOptions().getFieldDelimiter() == FieldDelimiter.OTHER
+                        ? getConfig().getCsvOptions().getCustomFieldDelimiter().charAt(0)
+                        : getConfig().getCsvOptions().getFieldDelimiter().getDelimiterValue();
+                format = converter.createCSVFormat(delimiterValue, getConfig().getCsvOptions().getTextEnclosureCharacter(),
+                        getConfig().getCsvOptions().getEscapeCharacter());
             }
 
             try (InputStream input = getCurrentItem().openInputStream();
-                    InputStreamReader inr = new InputStreamReader(input, StandardCharsets.UTF_8); // TODO encoding
+                    InputStreamReader inr = new InputStreamReader(input, encodingValue);
                     CSVParser parser = new CSVParser(inr, format)) {
 
                 this.recordIterator = parser.getRecords().iterator();
+                if (getConfig().getCsvOptions().isUseHeader() && getConfig().getCsvOptions().getHeader() > 1) {
+                    //TODO check on 2-nd+ file
+                    for (int i = 0; i < getConfig().getCsvOptions().getHeader() - 1; i++) {
+                        // skip extra header lines
+                        recordIterator.next();
+                    }
+                    //read schema for first file
+                    if (converter.getSchema() == null) {
+                        converter.toRecord(recordIterator.next());
+                    }
+                }
             } catch (Exception e) {
                 throw new BlobRuntimeException(e);
             }
@@ -123,58 +121,5 @@ public class CSVBlobFileReader extends BlobFileReader {
         protected CSVRecord takeNextRecord() {
             return recordIterator.next();
         }
-
-        @Override
-        protected void initRecordContainer() {
-            // NOOP
-        }
-    }
-
-    // TODO move it
-    private static CSVFormat createCSVFormat(char fieldDelimiter, String textEnclosure, String escapeChar) {
-        // CSVFormat.RFC4180 use " as quote and no escape char and "," as field
-        // delimiter and only quote if quote is set and necessary
-        CSVFormat format = CSVFormat.RFC4180.withDelimiter(fieldDelimiter);
-
-        Character textEnclosureCharacter = null;
-        if (StringUtils.isNotEmpty(textEnclosure)) {
-            textEnclosureCharacter = textEnclosure.charAt(0);
-        }
-
-        Character enclosureChar = null;
-        if (escapeChar != null && !escapeChar.isEmpty()) {
-            enclosureChar = escapeChar.charAt(0);
-        }
-
-        // the with method return a new object, so have to assign back
-        if (textEnclosureCharacter != null) {
-            format = format.withQuote(textEnclosureCharacter);
-        } else {
-            format = format.withQuote(null);
-        }
-
-        if (enclosureChar != null) {
-            format = format.withEscape(enclosureChar);
-        }
-        return format;
-    }
-
-    // TODO move it
-    private static List<String> inferSchemaInfo(CSVRecord singleHeaderRow, boolean useDefaultFieldName) {
-        List<String> result = new ArrayList<>();
-        Set<String> existNames = new HashSet<>();
-        int index = 0;
-        for (int i = 0; i < singleHeaderRow.size(); i++) {
-            String fieldName = singleHeaderRow.get(i);
-            if (useDefaultFieldName || fieldName == null || fieldName.isEmpty()) {
-                fieldName = "field" + i;
-            }
-
-            String finalName = SchemaUtils.correct(fieldName, index++, existNames);
-            existNames.add(finalName);
-
-            result.add(finalName);
-        }
-        return result;
     }
 }
