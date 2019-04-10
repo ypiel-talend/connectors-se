@@ -1,23 +1,28 @@
+/*
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 package org.talend.components.mongodb.output;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.talend.sdk.component.api.record.Schema.Type.*;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.InsertOneModel;
 import org.bson.Document;
-import org.bson.types.Binary;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.talend.components.mongodb.MongoTestBase;
 import org.talend.components.mongodb.dataset.MongoDBDataset;
 import org.talend.components.mongodb.datastore.MongoDBDatastore;
 import org.talend.components.mongodb.utils.MongoDBTestConstants;
@@ -37,7 +42,7 @@ import java.util.stream.Collectors;
 @WithComponents("org.talend.components.mongodb")
 @ExtendWith(MongoDBTestExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class MongoDBOutputOutputTestIT {
+public class MongoDBOutputOutputTestIT extends MongoTestBase {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -58,15 +63,15 @@ public class MongoDBOutputOutputTestIT {
 
     @BeforeEach
     private void tearDown() {
-        this.client = createClient();
+        this.client = createClient(testContext);
         client.getDatabase(MongoDBTestConstants.DATABASE_NAME).getCollection(MongoDBTestConstants.COLLECTION_NAME).drop();
-        schema = createSchema();
+        schema = createSchema(recordBuilderFactory);
     }
 
     @Test
     void insertBulk() {
         final int rowCount = 10;
-        List<Record> data = createTestData(rowCount);
+        List<Record> data = createTestData(rowCount, recordBuilderFactory, schema);
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
@@ -79,18 +84,20 @@ public class MongoDBOutputOutputTestIT {
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
                 .connections().from("emitter").to("mongoDBOutput").build().run();
 
-        MongoClient client = createClient();
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
         long documentsCount = collection.countDocuments();
 
         assertEquals(rowCount, documentsCount);
+
+        List<Record> result = convertToRecords(collection.find().iterator(), schema, recordBuilderFactory);
+        assertResult(schema, data, result);
     }
 
     @Test
     void insertSingle() {
         final int rowCount = 10;
-        List<Record> data = createTestData(rowCount);
+        List<Record> data = createTestData(rowCount, recordBuilderFactory, schema);
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
@@ -103,12 +110,14 @@ public class MongoDBOutputOutputTestIT {
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
                 .connections().from("emitter").to("mongoDBOutput").build().run();
 
-        MongoClient client = createClient();
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
         long documentsCount = collection.countDocuments();
 
         assertEquals(rowCount, documentsCount);
+
+        List<Record> result = convertToRecords(collection.find().iterator(), schema, recordBuilderFactory);
+        assertResult(schema, data, result);
     }
 
     @Test
@@ -118,14 +127,14 @@ public class MongoDBOutputOutputTestIT {
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
 
         int documentsCount = 10;
-        List<Document> testDocs = createInitialDocuments(documentsCount);
+        List<Document> testDocs = createDocuments(documentsCount);
         List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
         collection.bulkWrite(insertList);
 
         // check that data was inserted
         assertEquals(documentsCount, collection.countDocuments());
 
-        List<Record> data = convertToRecords(testDocs.iterator(), schema);
+        List<Record> data = convertToRecords(testDocs.iterator(), schema, recordBuilderFactory);
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
@@ -150,14 +159,14 @@ public class MongoDBOutputOutputTestIT {
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
 
         int documentsCount = 10;
-        List<Document> testDocs = createInitialDocuments(documentsCount);
+        List<Document> testDocs = createDocuments(documentsCount);
         List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
         collection.bulkWrite(insertList);
 
         // check that data was inserted
         assertEquals(documentsCount, collection.countDocuments());
 
-        List<Record> data = convertToRecords(testDocs.iterator(), schema);
+        List<Record> data = convertToRecords(testDocs.iterator(), schema, recordBuilderFactory);
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
@@ -182,7 +191,7 @@ public class MongoDBOutputOutputTestIT {
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
 
         int documentsCount = 10;
-        List<Document> testDocs = createInitialDocuments(documentsCount);
+        List<Document> testDocs = createDocuments(documentsCount);
         List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
         collection.bulkWrite(insertList);
 
@@ -195,7 +204,7 @@ public class MongoDBOutputOutputTestIT {
 
         testDocs.add(createDocument(documentsCount + 1));
 
-        List<Record> data = convertToRecords(testDocs.iterator(), schema);
+        List<Record> data = convertToRecords(testDocs.iterator(), schema, recordBuilderFactory);
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
@@ -211,6 +220,9 @@ public class MongoDBOutputOutputTestIT {
 
         long resCount = collection.countDocuments();
         assertEquals(documentsCount + 1, resCount);
+
+        List<Record> result = convertToRecords(collection.find().iterator(), schema, recordBuilderFactory);
+        assertResult(schema, data, result);
     }
 
     @Test
@@ -220,7 +232,7 @@ public class MongoDBOutputOutputTestIT {
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
 
         int documentsCount = 10;
-        List<Document> testDocs = createInitialDocuments(documentsCount);
+        List<Document> testDocs = createDocuments(documentsCount);
         List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
         collection.bulkWrite(insertList);
 
@@ -233,7 +245,7 @@ public class MongoDBOutputOutputTestIT {
 
         testDocs.add(createDocument(documentsCount + 1));
 
-        List<Record> data = convertToRecords(testDocs.iterator(), schema);
+        List<Record> data = convertToRecords(testDocs.iterator(), schema, recordBuilderFactory);
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
@@ -248,27 +260,201 @@ public class MongoDBOutputOutputTestIT {
 
         long resCount = collection.countDocuments();
         assertEquals(documentsCount + 1, resCount);
+
+        List<Record> result = convertToRecords(collection.find().iterator(), schema, recordBuilderFactory);
+        assertResult(schema, data, result);
     }
 
-    private List<Document> createInitialDocuments(int count) {
-        List<Document> result = new ArrayList<>();
-        for (int currentCount = 0; currentCount < count; currentCount++) {
-            Document doc = createDocument(currentCount);
-            result.add(doc);
+    @Test
+    void updateSingle() {
+        // Write initial data
+        MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+
+        int documentsCount = 10;
+        List<Document> testDocs = createDocuments(documentsCount);
+        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
+        collection.bulkWrite(insertList);
+
+        // check that data was inserted
+        assertEquals(documentsCount, collection.countDocuments());
+
+        for (Document doc : testDocs) {
+            doc.put("col2", "unknown");
         }
-        return result;
+
+        testDocs.add(createDocument(documentsCount + 1));
+
+        List<Record> data = convertToRecords(testDocs.iterator(), schema, recordBuilderFactory);
+        componentsHandler.setInputData(data);
+
+        MongoDBOutputConfiguration outputConfiguration = createConfiguration();
+        outputConfiguration.setKeys(Arrays.asList("col1"));
+
+        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPDATE);
+        outputConfiguration.setBulkWrite(false);
+        final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
+
+        Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
+                .connections().from("emitter").to("mongoDBOutput").build().run();
+
+        long resCount = collection.countDocuments();
+        assertEquals(documentsCount, resCount);
+
+        List<Record> result = convertToRecords(collection.find().iterator(), schema, recordBuilderFactory);
+        assertResult(schema, data, result);
     }
 
-    private Document createDocument(int currentCount) {
-        Document doc = new Document();
-        doc.put("col1", currentCount);
-        doc.put("col2", String.valueOf("artist" + currentCount));
-        doc.put("col3", currentCount * 100L);
-        doc.put("col4", currentCount / 3.0);
-        doc.put("col5", currentCount % 2 == 0);
-        doc.put("col6", new Date());
-        doc.put("col7", ("String" + currentCount).getBytes());
-        return doc;
+    @Test
+    void upsertWithSetMany() {
+        // Write initial data
+        MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+
+        int documentsCount = 10;
+        List<Document> testDocs = createDocuments(documentsCount);
+
+        // Set col2 values to unknown, to test if all the rows will be updated with new values.
+        for (Document doc : testDocs) {
+            doc.put("col2", "unknown");
+        }
+        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
+        collection.bulkWrite(insertList);
+
+        // check that data was inserted
+        assertEquals(documentsCount, collection.countDocuments());
+
+        // We will update data in mongo using this document.
+        Document updateWithCol2Unknown = createDocument(documentsCount - 1);
+        updateWithCol2Unknown.put("col2", "unknown");
+        updateWithCol2Unknown.put("col3", 128L);
+
+        List<Record> data = Collections.singletonList(convertToRecord(updateWithCol2Unknown, schema, recordBuilderFactory));
+        componentsHandler.setInputData(data);
+
+        MongoDBOutputConfiguration outputConfiguration = createConfiguration();
+        outputConfiguration.setKeys(Arrays.asList("col2"));
+        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT_WITH_SET);
+        outputConfiguration.setBulkWrite(false);
+        outputConfiguration.setUpdateAllDocuments(true);
+
+        final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
+
+        Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
+                .connections().from("emitter").to("mongoDBOutput").build().run();
+
+        long resCount = collection.countDocuments();
+        assertEquals(documentsCount, resCount);
+
+        for (Document doc : testDocs) {
+            doc.put("col3", 128L);
+            // Date column. Needs to be updated to be the same as in updated document.
+            doc.put("col6", updateWithCol2Unknown.get("col6"));
+        }
+
+        data = convertToRecords(testDocs.iterator(), schema, recordBuilderFactory);
+        List<Record> result = convertToRecords(collection.find().iterator(), schema, recordBuilderFactory);
+        assertResult(schema, data, result);
+    }
+
+    @Test
+    void upsertWithSetSingle() {
+        // Write initial data
+        MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+
+        int documentsCount = 10;
+        List<Document> testDocs = createDocuments(documentsCount);
+        for (Document doc : testDocs) {
+            doc.put("col2", "unknown");
+        }
+        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
+        collection.bulkWrite(insertList);
+
+        // check that data was inserted
+        assertEquals(documentsCount, collection.countDocuments());
+
+        Document updateWithCol2Unknown = createDocument(0);
+        updateWithCol2Unknown.put("col2", "unknown");
+        updateWithCol2Unknown.put("col3", 128L);
+
+        List<Record> data = Collections.singletonList(convertToRecord(updateWithCol2Unknown, schema, recordBuilderFactory));
+        componentsHandler.setInputData(data);
+
+        MongoDBOutputConfiguration outputConfiguration = createConfiguration();
+        outputConfiguration.setKeys(Arrays.asList("col2"));
+        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT_WITH_SET);
+        outputConfiguration.setBulkWrite(false);
+        outputConfiguration.setUpdateAllDocuments(false);
+
+        final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
+
+        Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
+                .connections().from("emitter").to("mongoDBOutput").build().run();
+
+        long resCount = collection.countDocuments();
+        assertEquals(documentsCount, resCount);
+
+        testDocs.stream().filter(c -> c.get("col1").equals(0)).forEach(c -> {
+            c.put("col3", 128L);
+            c.put("col6", updateWithCol2Unknown.get("col6"));
+        });
+
+        data = convertToRecords(testDocs.iterator(), schema, recordBuilderFactory);
+        List<Record> result = convertToRecords(collection.find().iterator(), schema, recordBuilderFactory);
+        assertResult(schema, data, result);
+    }
+
+    @Test
+    public void testSet() {
+        // Write initial data
+        MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
+                .getCollection(MongoDBTestConstants.COLLECTION_NAME);
+
+        int documentsCount = 10;
+        List<Document> testDocs = createDocuments(documentsCount);
+
+        List<InsertOneModel<Document>> insertList = testDocs.stream().map(InsertOneModel::new).collect(Collectors.toList());
+        collection.bulkWrite(insertList);
+
+        // check that data was inserted
+        assertEquals(documentsCount, collection.countDocuments());
+
+        // We will update data in mongo using this document.
+        Document updateWithCol2Unknown = createDocument(0);
+        updateWithCol2Unknown.put("col2", "unknown");
+        updateWithCol2Unknown.put("col3", 128L);
+
+        List<Record> data = Collections.singletonList(convertToRecord(updateWithCol2Unknown, schema, recordBuilderFactory));
+        componentsHandler.setInputData(data);
+
+        MongoDBOutputConfiguration outputConfiguration = createConfiguration();
+        outputConfiguration.setKeys(Arrays.asList("col1"));
+        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.SET);
+        outputConfiguration.setBulkWrite(false);
+        outputConfiguration.setUpdateAllDocuments(true);
+
+        final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
+
+        Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
+                .connections().from("emitter").to("mongoDBOutput").build().run();
+
+        long resCount = collection.countDocuments();
+        assertEquals(documentsCount, resCount);
+
+        for (Document doc : testDocs) {
+            if (doc.get("col1").equals(0)) {
+                doc.put("col2", "unknown");
+                doc.put("col3", 128L);
+                // Date column. Needs to be updated to be the same as in updated document.
+                doc.put("col6", updateWithCol2Unknown.get("col6"));
+                break;
+            }
+        }
+
+        data = convertToRecords(testDocs.iterator(), schema, recordBuilderFactory);
+        List<Record> result = convertToRecords(collection.find().iterator(), schema, recordBuilderFactory);
+        assertResult(schema, data, result);
     }
 
     private MongoDBOutputConfiguration createConfiguration() {
@@ -282,91 +468,4 @@ public class MongoDBOutputOutputTestIT {
         return outputConfiguration;
     }
 
-    private List<Record> createTestData(int count) {
-        List<Record> result = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            result.add(next(i));
-        }
-        return result;
-    }
-
-    public Schema createSchema() {
-        // No reason to check float, as mongodb saves it as double anyway.
-        Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("col1").withType(INT).withNullable(false).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("col2").withType(STRING).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("col3").withType(LONG).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("col4").withType(DOUBLE).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("col5").withType(BOOLEAN).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("col6").withType(DATETIME).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("col7").withType(BYTES).build());
-
-        return schemaBuilder.build();
-    }
-
-    public Record next(int currentCount) {
-        final Record.Builder builder = recordBuilderFactory.newRecordBuilder(schema);
-        builder.withInt("col1", currentCount);
-        builder.withString("col2", String.valueOf("artist" + currentCount));
-        builder.withLong("col3", currentCount * 100);
-        builder.withDouble("col4", currentCount / 3.0);
-        builder.withBoolean("col5", currentCount % 2 == 0);
-        builder.withDateTime("col6", new Date());
-        builder.withBytes("col7", "String".getBytes());
-
-        return builder.build();
-    }
-
-    private MongoClient createClient() {
-        MongoClientOptions.Builder builder = MongoClientOptions.builder();
-        if (testContext.getDataStore().isUseSSL()) {
-            builder.sslEnabled(true);
-        }
-        MongoClientOptions opts = builder.build();
-        MongoClient client = new MongoClient(
-                new ServerAddress(testContext.getDataStore().getServer(), testContext.getDataStore().getPort()),
-                MongoCredential.createCredential(testContext.getDataStore().getUsername(),
-                        testContext.getDataStore().getAuthenticationDatabase(),
-                        testContext.getDataStore().getPassword().toCharArray()),
-                opts);
-        return client;
-    }
-
-    private List<Record> convertToRecords(Iterator<Document> documentsIterator, Schema schema) {
-        List<Record> result = new ArrayList<>();
-        while (documentsIterator.hasNext()) {
-            Document doc = documentsIterator.next();
-            Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);
-            schema.getEntries().stream().map(Schema.Entry::getName).forEach(c -> addColumn(recordBuilder, c, doc.get(c)));
-            result.add(recordBuilder.build());
-        }
-        return result;
-    }
-
-    private void addColumn(final Record.Builder builder, final String name, Object value) {
-        final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
-        entryBuilder.withName(name).withNullable(true);
-        if (value instanceof ObjectId) {
-            builder.withString(entryBuilder.withType(Schema.Type.STRING).build(), value == null ? null : value.toString());
-        } else if (value instanceof String) {
-            builder.withString(entryBuilder.withType(Schema.Type.STRING).build(), value == null ? null : (String) value);
-        } else if (value instanceof Boolean) {
-            builder.withBoolean(entryBuilder.withType(Schema.Type.BOOLEAN).build(), value == null ? null : (Boolean) value);
-        } else if (value instanceof Date) {
-            builder.withDateTime(entryBuilder.withType(Schema.Type.DATETIME).build(), value == null ? null : (Date) value);
-        } else if (value instanceof Double) {
-            builder.withDouble(entryBuilder.withType(Schema.Type.DOUBLE).build(), value == null ? null : (Double) value);
-        } else if (value instanceof Integer) {
-            builder.withInt(entryBuilder.withType(Schema.Type.INT).build(), value == null ? null : (Integer) value);
-        } else if (value instanceof Long) {
-            builder.withLong(entryBuilder.withType(Schema.Type.LONG).build(), value == null ? null : (Long) value);
-        } else if (value instanceof Binary) {
-            builder.withBytes(entryBuilder.withType(Schema.Type.BYTES).build(),
-                    value == null ? null : ((Binary) value).getData());
-        } else if (value instanceof byte[]) {
-            builder.withBytes(entryBuilder.withType(Schema.Type.BYTES).build(), (byte[]) value);
-        } else {
-            builder.withString(entryBuilder.withType(Schema.Type.STRING).build(), value == null ? null : value.toString());
-        }
-    }
 }
