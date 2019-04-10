@@ -31,11 +31,11 @@ import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-@Version
-@Icon(Icon.IconType.STAR)
-@PartitionMapper(name = "AzureEventHubsInput")
+@Version(1)
+@Icon(Icon.IconType.DEFAULT)
+@PartitionMapper(name = "AzureEventHubsInputMapper", infinite = true)
 @Documentation("TODO fill the documentation for this mapper")
-public class AzureEventHubsInput implements Serializable {
+public class AzureEventHubsInputMapper implements Serializable {
 
     private final AzureEventHubsInputConfiguration configuration;
 
@@ -43,7 +43,7 @@ public class AzureEventHubsInput implements Serializable {
 
     private final RecordBuilderFactory recordBuilderFactory;
 
-    public AzureEventHubsInput(@Option("configuration") final AzureEventHubsInputConfiguration configuration,
+    public AzureEventHubsInputMapper(@Option("configuration") final AzureEventHubsInputConfiguration configuration,
             final UiActionService service, final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
@@ -52,29 +52,16 @@ public class AzureEventHubsInput implements Serializable {
 
     @Assessor
     public long estimateSize() {
-        // this method should return the estimation of the dataset size
-        // it is recommended to return a byte value
-        // if you don't have the exact size you can use a rough estimation
         return 1L;
     }
 
     @Split
-    public List<AzureEventHubsInput> split(@PartitionSize final long bundles) {
-        // overall idea here is to split the work related to configuration in bundles of size "bundles"
-        //
-        // for instance if your estimateSize() returned 1000 and you can run on 10 nodes
-        // then the environment can decide to run it concurrently (10 * 100).
-        // In this case bundles = 100 and we must try to return 10 AzureEventHubsInput with 1/10 of the overall work each.
-        //
-        // default implementation returns this which means it doesn't support the work to be split
+    public List<AzureEventHubsInputMapper> split(@PartitionSize final long bundles) {
         return singletonList(this);
     }
 
     @Emitter
     public AzureEventHubsSource createWorker() {
-        // here we create an actual worker,
-        // you are free to rework the configuration etc but our default generated implementation
-        // propagates the partition mapper entries.
         return new AzureEventHubsSource(configuration, service, recordBuilderFactory);
     }
 }

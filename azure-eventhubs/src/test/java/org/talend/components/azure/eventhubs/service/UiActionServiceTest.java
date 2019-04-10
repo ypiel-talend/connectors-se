@@ -33,8 +33,6 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     private static final String INVALID_ENDPOINT = "sb://not-exit-ns.servicebus.windows.net";
 
-    private static final String EVENTHUB_NAME = "test-event-hub";
-
     // Bad config
     private static final String BAD_EVENTHUB_NAME = "not-exist-event-hub";
 

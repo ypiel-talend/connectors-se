@@ -21,6 +21,27 @@
     <artifactId>azure-eventhubs</artifactId>
     <version>2.2.0</version>
   </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-runners-direct-java</artifactId>
+      <version>${beam.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-runtime-beam-junit</artifactId>
+      <version>${component-runtime.version}</version>
+      <scope>test</scope>
+    </dependency>
 </dependencies>
 
   <build>
@@ -45,6 +66,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.0.0-M3</version>
         <configuration>
+          <systemPropertyVariables>
+            <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
+          </systemPropertyVariables>
           <trimStackTrace>false</trimStackTrace>
           <runOrder>alphabetical</runOrder>
         </configuration>

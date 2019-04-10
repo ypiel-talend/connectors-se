@@ -15,6 +15,12 @@
 package org.talend.components.azure.eventhubs.source;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.time.Instant;
+import java.util.Iterator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -26,6 +32,16 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
+import com.microsoft.azure.eventhubs.EventData;
+import com.microsoft.azure.eventhubs.EventHubClient;
+import com.microsoft.azure.eventhubs.EventHubException;
+import com.microsoft.azure.eventhubs.EventHubRuntimeInformation;
+import com.microsoft.azure.eventhubs.EventPosition;
+import com.microsoft.azure.eventhubs.PartitionReceiver;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Documentation("TODO fill the documentation for this source")
 public class AzureEventHubsSource implements Serializable {
 
@@ -34,6 +50,18 @@ public class AzureEventHubsSource implements Serializable {
     private final UiActionService service;
 
     private final RecordBuilderFactory builderFactory;
+
+    private PartitionReceiver receiver;
+
+    private ScheduledExecutorService executorService;
+
+    private Iterator<EventData> receivedEvents;
+
+    private EventHubClient ehClient;
+
+    private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
+    private static final String PAYLOAD_COLUMN = "payload";
 
     public AzureEventHubsSource(@Option("configuration") final AzureEventHubsInputConfiguration configuration,
             final UiActionService service, final RecordBuilderFactory builderFactory) {
@@ -44,23 +72,81 @@ public class AzureEventHubsSource implements Serializable {
 
     @PostConstruct
     public void init() {
-        // this method will be executed once for the whole component execution,
-        // this is where you can establish a connection for instance
+        try {
+            executorService = Executors.newScheduledThreadPool(4);
+            final ConnectionStringBuilder connStr;//
+            connStr = new ConnectionStringBuilder()//
+                    .setEndpoint(new URI(configuration.getDataset().getDatastore().getEndpoint()));
+            connStr.setSasKeyName(configuration.getDataset().getDatastore().getSasKeyName());
+            connStr.setSasKey(configuration.getDataset().getDatastore().getSasKey());
+            connStr.setEventHubName(configuration.getDataset().getEventHubName());
+            ehClient = EventHubClient.createSync(connStr.toString(), executorService);
+
+            receiver = ehClient.createReceiverSync(configuration.getGroupId(), configuration.getPartitionId(), getPosition());
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+
     }
 
     @Producer
     public Record next() {
-        // this is the method allowing you to go through the dataset associated
-        // to the component configuration
-        //
-        // return null means the dataset has no more data to go through
-        // you can use the builderFactory to create a new Record.
+        try {
+            if (receivedEvents == null || !receivedEvents.hasNext()) {
+                Iterable iterable = receiver.receiveSync(100);
+                if (iterable == null) {
+                    return null;
+                } else {
+                    receivedEvents = iterable.iterator();
+                }
+            }
+            EventData eventData = receivedEvents.next();
+            if (eventData != null) {
+                Record.Builder recordBuilder = builderFactory.newRecordBuilder();
+                log.info(new String(eventData.getBytes(), DEFAULT_CHARSET));
+                recordBuilder.withString(PAYLOAD_COLUMN, new String(eventData.getBytes(), DEFAULT_CHARSET));
+                return recordBuilder.build();
+            }
+        } catch (EventHubException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @PreDestroy
     public void release() {
-        // this is the symmetric method of the init() one,
-        // release potential connections you created or data you cached
+        // cleaning up receivers is paramount;
+        // Quota limitation on maximum number of concurrent receivers per consumergroup per partition is 5
+        try {
+            receiver.close().thenComposeAsync(aVoid -> ehClient.close(), executorService).whenCompleteAsync((t, u) -> {
+                if (u != null) {
+                    log.warn("closing failed with error:", u.toString());
+                }
+            }, executorService).get();
+
+            executorService.shutdown();
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    private EventPosition getPosition() {
+        if (AzureEventHubsInputConfiguration.ReceiverOptions.OFFSET.equals(configuration.getReceiverOptions())) {
+            return EventPosition.fromOffset(configuration.getOffset());
+        }
+        if (AzureEventHubsInputConfiguration.ReceiverOptions.SEQUENCE.equals(configuration.getReceiverOptions())) {
+            return EventPosition.fromSequenceNumber(configuration.getSequenceNum(), configuration.isInclusiveFlag());
+        }
+        if (AzureEventHubsInputConfiguration.ReceiverOptions.DATETIME.equals(configuration.getReceiverOptions())) {
+            Instant enqueuedDateTime = null;
+            if (configuration.getEnqueuedDateTime() == null) {
+                // default query from now
+                enqueuedDateTime = Instant.now();
+            } else {
+                enqueuedDateTime = Instant.parse(configuration.getEnqueuedDateTime());
+            }
+            return EventPosition.fromEnqueuedTime(enqueuedDateTime);
+        }
+        return EventPosition.fromStartOfStream();
     }
 }
