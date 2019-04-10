@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
+import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
@@ -50,6 +51,7 @@ import static org.talend.sdk.component.api.record.Schema.Type.*;
 @Version(1)
 @Slf4j
 @Documentation("This component reads data from Couchbase.")
+@Icon(value = Icon.IconType.CUSTOM, custom = "CouchbaseInput")
 public class CouchbaseInput implements Serializable {
 
     private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseInput.class);

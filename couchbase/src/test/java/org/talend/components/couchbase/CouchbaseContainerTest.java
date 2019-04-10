@@ -47,7 +47,7 @@ public abstract class CouchbaseContainerTest implements Extension {
                         .quota(BUCKET_QUOTA).type(BucketType.COUCHBASE).build())
                 .withStartupTimeout(Duration.ofSeconds(120));
         COUCHBASE_CONTAINER.setPortBindings(ports);
-        COUCHBASE_CONTAINER.start(); //
+        COUCHBASE_CONTAINER.start();
         COUCHBASE_CONTAINER.waitingFor(new WaitAllStrategy());
     }
 }
