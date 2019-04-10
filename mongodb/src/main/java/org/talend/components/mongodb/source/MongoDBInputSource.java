@@ -1,6 +1,20 @@
+/*
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 package org.talend.components.mongodb.source;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +39,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import org.talend.components.mongodb.service.MongoDBService;
 
+import static org.talend.sdk.component.api.record.Schema.Type.ARRAY;
 import static org.talend.sdk.component.api.record.Schema.Type.RECORD;
 
 @Slf4j
@@ -120,7 +135,8 @@ public class MongoDBInputSource implements Serializable {
                 schema = parseSchema(document);
             }
             final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-            columnsList.stream().forEach(name -> addColumn(recordBuilder, name, getValue(pathMap.get(name), name, document)));
+            schema.getEntries().stream().forEach(
+                    entry -> addColumn(recordBuilder, entry, getValue(pathMap.get(entry.getName()), entry.getName(), document)));
             return recordBuilder.build();
         }
         return null;
@@ -133,51 +149,79 @@ public class MongoDBInputSource implements Serializable {
     }
 
     private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
+        if (value == null) {
+            log.warn(i18nMessage.schemaFieldParseError(name));
+            return;
+        }
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        entryBuilder.withName(name).withNullable(true);
-        if (value instanceof ObjectId) {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.STRING).build());
-        } else if (value instanceof String) {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.STRING).build());
-        } else if (value instanceof Boolean) {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.BOOLEAN).build());
-        } else if (value instanceof Date) {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.DATETIME).build());
-        } else if (value instanceof Double) {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.DOUBLE).build());
-        } else if (value instanceof Integer) {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.INT).build());
-        } else if (value instanceof Long) {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.LONG).build());
-        } else if (value instanceof Binary) {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.BYTES).build());
-        } else {
-            schemaBuilder.withEntry(entryBuilder.withType(Schema.Type.STRING).build());
+        Schema.Type type = getSchemaType(value);
+        entryBuilder.withName(name).withNullable(true).withType(type);
+        if (type == ARRAY) {
+            List<?> listValue = (List<?>) value;
+            Object listObject = (listValue == null || listValue.isEmpty()) ? null : listValue.get(0);
+            entryBuilder.withElementSchema(builderFactory.newSchemaBuilder(getSchemaType(listObject)).build());
+        }
+        schemaBuilder.withEntry(entryBuilder.build());
+    }
+
+    private void addColumn(final Record.Builder builder, final Schema.Entry entry, Object value) {
+        final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
+        Schema.Type type = entry.getType();
+        entryBuilder.withName(entry.getName()).withNullable(true).withType(type);
+        switch (type) {
+        case ARRAY:
+            List<?> listValue = (List<?>) value;
+            entryBuilder.withElementSchema(entry.getElementSchema());
+            builder.withArray(entryBuilder.build(), listValue);
+            break;
+        case FLOAT:
+            builder.withFloat(entryBuilder.build(), value == null ? null : (Float) value);
+            break;
+        case DOUBLE:
+            builder.withDouble(entryBuilder.build(), value == null ? null : (Double) value);
+            break;
+        case BYTES:
+            builder.withBytes(entryBuilder.build(), value == null ? null : ((Binary) value).getData());
+            break;
+        case STRING:
+            builder.withString(entryBuilder.build(), value == null ? null : String.valueOf(value));
+            break;
+        case LONG:
+            builder.withLong(entryBuilder.build(), value == null ? null : (Long) value);
+            break;
+        case INT:
+            builder.withInt(entryBuilder.build(), value == null ? null : (Integer) value);
+            break;
+        case DATETIME:
+            builder.withDateTime(entryBuilder.build(), value == null ? null : (Date) value);
+            break;
+        case BOOLEAN:
+            builder.withBoolean(entryBuilder.build(), value == null ? null : (Boolean) value);
+            break;
         }
     }
 
-    private void addColumn(final Record.Builder builder, final String name, Object value) {
-        final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        entryBuilder.withName(name).withNullable(true);
+    private Schema.Type getSchemaType(Object value) {
         if (value instanceof ObjectId) {
-            builder.withString(entryBuilder.withType(Schema.Type.STRING).build(), value == null ? null : value.toString());
+            return Schema.Type.STRING;
         } else if (value instanceof String) {
-            builder.withString(entryBuilder.withType(Schema.Type.STRING).build(), value == null ? null : (String) value);
+            return Schema.Type.STRING;
         } else if (value instanceof Boolean) {
-            builder.withBoolean(entryBuilder.withType(Schema.Type.BOOLEAN).build(), value == null ? null : (Boolean) value);
+            return Schema.Type.BOOLEAN;
         } else if (value instanceof Date) {
-            builder.withDateTime(entryBuilder.withType(Schema.Type.DATETIME).build(), value == null ? null : (Date) value);
+            return Schema.Type.DATETIME;
         } else if (value instanceof Double) {
-            builder.withDouble(entryBuilder.withType(Schema.Type.DOUBLE).build(), value == null ? null : (Double) value);
+            return Schema.Type.DOUBLE;
         } else if (value instanceof Integer) {
-            builder.withInt(entryBuilder.withType(Schema.Type.INT).build(), value == null ? null : (Integer) value);
+            return Schema.Type.INT;
         } else if (value instanceof Long) {
-            builder.withLong(entryBuilder.withType(Schema.Type.LONG).build(), value == null ? null : (Long) value);
+            return Schema.Type.LONG;
         } else if (value instanceof Binary) {
-            builder.withBytes(entryBuilder.withType(Schema.Type.BYTES).build(),
-                    value == null ? null : ((Binary) value).getData());
+            return Schema.Type.BYTES;
+        } else if (value instanceof List<?>) {
+            return Schema.Type.ARRAY;
         } else {
-            builder.withString(entryBuilder.withType(Schema.Type.STRING).build(), value == null ? null : value.toString());
+            return Schema.Type.STRING;
         }
     }
 
