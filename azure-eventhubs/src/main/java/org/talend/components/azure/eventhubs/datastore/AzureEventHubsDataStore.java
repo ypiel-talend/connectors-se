@@ -29,23 +29,23 @@ import lombok.Data;
 @DataStore("AzureEventHubsConnection")
 @Checkable("checkEndpoint")
 @GridLayout({ @GridLayout.Row({ "endpoint" }), @GridLayout.Row({ "sasKeyName" }), @GridLayout.Row({ "sasKey" }) })
-@Documentation("TODO fill the documentation for this configuration")
+@Documentation("The connection to the azure eventhubs")
 public class AzureEventHubsDataStore implements Serializable {
 
     @Option
     @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("A combination of the namespace name and domain name")
     private String endpoint;
 
     @Option
     @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Shared Access Signature key name")
     private String sasKeyName;
 
     @Option
     @Credential
     @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Shared Access Signature key")
     private String sasKey;
 
 }

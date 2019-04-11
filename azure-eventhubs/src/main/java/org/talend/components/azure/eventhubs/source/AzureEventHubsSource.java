@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.talend.components.azure.eventhubs.dataset.AzureEventHubsDataSet;
 import org.talend.components.azure.eventhubs.service.UiActionService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
@@ -36,13 +37,12 @@ import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
 import com.microsoft.azure.eventhubs.EventData;
 import com.microsoft.azure.eventhubs.EventHubClient;
 import com.microsoft.azure.eventhubs.EventHubException;
-import com.microsoft.azure.eventhubs.EventHubRuntimeInformation;
 import com.microsoft.azure.eventhubs.EventPosition;
 import com.microsoft.azure.eventhubs.PartitionReceiver;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Documentation("TODO fill the documentation for this source")
+@Documentation("Source to consume eventhubs messages")
 public class AzureEventHubsSource implements Serializable {
 
     private final AzureEventHubsInputConfiguration configuration;
@@ -73,7 +73,7 @@ public class AzureEventHubsSource implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            executorService = Executors.newScheduledThreadPool(4);
+            executorService = Executors.newScheduledThreadPool(1);
             final ConnectionStringBuilder connStr;//
             connStr = new ConnectionStringBuilder()//
                     .setEndpoint(new URI(configuration.getDataset().getDatastore().getEndpoint()));
@@ -82,7 +82,8 @@ public class AzureEventHubsSource implements Serializable {
             connStr.setEventHubName(configuration.getDataset().getEventHubName());
             ehClient = EventHubClient.createSync(connStr.toString(), executorService);
 
-            receiver = ehClient.createReceiverSync(configuration.getGroupId(), configuration.getPartitionId(), getPosition());
+            receiver = ehClient.createReceiverSync(configuration.getDataset().getConsumerGroupName(),
+                    configuration.getDataset().getPartitionId(), getPosition());
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -93,6 +94,7 @@ public class AzureEventHubsSource implements Serializable {
     public Record next() {
         try {
             if (receivedEvents == null || !receivedEvents.hasNext()) {
+                // TODO let it configurable?
                 Iterable iterable = receiver.receiveSync(100);
                 if (iterable == null) {
                     return null;
@@ -103,7 +105,6 @@ public class AzureEventHubsSource implements Serializable {
             EventData eventData = receivedEvents.next();
             if (eventData != null) {
                 Record.Builder recordBuilder = builderFactory.newRecordBuilder();
-                log.info(new String(eventData.getBytes(), DEFAULT_CHARSET));
                 recordBuilder.withString(PAYLOAD_COLUMN, new String(eventData.getBytes(), DEFAULT_CHARSET));
                 return recordBuilder.build();
             }
@@ -131,19 +132,20 @@ public class AzureEventHubsSource implements Serializable {
     }
 
     private EventPosition getPosition() {
-        if (AzureEventHubsInputConfiguration.ReceiverOptions.OFFSET.equals(configuration.getReceiverOptions())) {
-            return EventPosition.fromOffset(configuration.getOffset());
+        if (AzureEventHubsDataSet.ReceiverOptions.OFFSET.equals(configuration.getDataset().getReceiverOptions())) {
+            return EventPosition.fromOffset(configuration.getDataset().getOffset(), configuration.getDataset().isInclusiveFlag());
         }
-        if (AzureEventHubsInputConfiguration.ReceiverOptions.SEQUENCE.equals(configuration.getReceiverOptions())) {
-            return EventPosition.fromSequenceNumber(configuration.getSequenceNum(), configuration.isInclusiveFlag());
+        if (AzureEventHubsDataSet.ReceiverOptions.SEQUENCE.equals(configuration.getDataset().getReceiverOptions())) {
+            return EventPosition.fromSequenceNumber(configuration.getDataset().getSequenceNum(),
+                    configuration.getDataset().isInclusiveFlag());
         }
-        if (AzureEventHubsInputConfiguration.ReceiverOptions.DATETIME.equals(configuration.getReceiverOptions())) {
+        if (AzureEventHubsDataSet.ReceiverOptions.DATETIME.equals(configuration.getDataset().getReceiverOptions())) {
             Instant enqueuedDateTime = null;
-            if (configuration.getEnqueuedDateTime() == null) {
+            if (configuration.getDataset().getEnqueuedDateTime() == null) {
                 // default query from now
                 enqueuedDateTime = Instant.now();
             } else {
-                enqueuedDateTime = Instant.parse(configuration.getEnqueuedDateTime());
+                enqueuedDateTime = Instant.parse(configuration.getDataset().getEnqueuedDateTime());
             }
             return EventPosition.fromEnqueuedTime(enqueuedDateTime);
         }

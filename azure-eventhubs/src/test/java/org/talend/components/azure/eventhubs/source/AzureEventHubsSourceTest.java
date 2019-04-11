@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.talend.components.azure.eventhubs.AzureEventHubsTestBase;
 import org.talend.components.azure.eventhubs.dataset.AzureEventHubsDataSet;
 import org.talend.sdk.component.api.record.Record;
@@ -34,13 +33,13 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
     @Test
     void testReadByOffset() {
         AzureEventHubsInputConfiguration inputConfiguration = new AzureEventHubsInputConfiguration();
-        inputConfiguration.setGroupId("consumer-group-1");
-        inputConfiguration.setPartitionId("3");
-        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.OFFSET);
-        inputConfiguration.setOffset("-1");
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setDatastore(getDataStore());
         dataSet.setEventHubName(EVENTHUB_NAME);
+        dataSet.setConsumerGroupName("consumer-group-1");
+        dataSet.setPartitionId("1");
+        dataSet.setReceiverOptions(AzureEventHubsDataSet.ReceiverOptions.OFFSET);
+        dataSet.setOffset("-1");
         inputConfiguration.setDataset(dataSet);
 
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
@@ -53,13 +52,13 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
     @Test
     void testReadBySeq() {
         AzureEventHubsInputConfiguration inputConfiguration = new AzureEventHubsInputConfiguration();
-        inputConfiguration.setGroupId("consumer-group-1");
-        inputConfiguration.setPartitionId("3");
-        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.SEQUENCE);
-        inputConfiguration.setSequenceNum(0L);
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setDatastore(getDataStore());
         dataSet.setEventHubName(EVENTHUB_NAME);
+        dataSet.setConsumerGroupName("consumer-group-1");
+        dataSet.setPartitionId("3");
+        dataSet.setReceiverOptions(AzureEventHubsDataSet.ReceiverOptions.SEQUENCE);
+        dataSet.setSequenceNum(0L);
         inputConfiguration.setDataset(dataSet);
 
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
@@ -72,13 +71,13 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
     @Test
     void testReadByDateTime() {
         AzureEventHubsInputConfiguration inputConfiguration = new AzureEventHubsInputConfiguration();
-        inputConfiguration.setGroupId("consumer-group-1");
-        inputConfiguration.setPartitionId("3");
-        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.DATETIME);
-        inputConfiguration.setEnqueuedDateTime("2019-04-04T00:00:00.000Z");
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setDatastore(getDataStore());
         dataSet.setEventHubName(EVENTHUB_NAME);
+        dataSet.setConsumerGroupName("consumer-group-1");
+        dataSet.setPartitionId("3");
+        dataSet.setReceiverOptions(AzureEventHubsDataSet.ReceiverOptions.DATETIME);
+        dataSet.setEnqueuedDateTime("2019-04-04T00:00:00.000Z");
         inputConfiguration.setDataset(dataSet);
 
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();

@@ -102,15 +102,16 @@ public class UiActionService {
     }
 
     @Suggestions("listPartitionIds")
-    public SuggestionValues listPartitionIds(@Option("dataset") final AzureEventHubsDataSet dataset) {
+    public SuggestionValues listPartitionIds(@Option("datastore") final AzureEventHubsDataStore datastore,
+            @Option("eventHubName") final String eventHubname) {
         EventHubClient ehClient = null;
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
         try {
             final ConnectionStringBuilder connStr = new ConnectionStringBuilder()//
-                    .setEndpoint(new URI(dataset.getDatastore().getEndpoint()))//
-                    .setEventHubName(dataset.getEventHubName())//
-                    .setSasKeyName(dataset.getDatastore().getSasKeyName())//
-                    .setSasKey(dataset.getDatastore().getSasKey());//
+                    .setEndpoint(new URI(datastore.getEndpoint()))//
+                    .setEventHubName(eventHubname)//
+                    .setSasKeyName(datastore.getSasKeyName())//
+                    .setSasKey(datastore.getSasKey());//
             ehClient = EventHubClient.createSync(connStr.toString(), executorService);
             EventHubRuntimeInformation ehInfo = ehClient.getRuntimeInformation().get();
             List<SuggestionValues.Item> items = new ArrayList<>();
