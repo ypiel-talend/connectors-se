@@ -62,10 +62,11 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
     }
 
     @BeforeEach
-    private void tearDown() {
+    private void setup() {
         this.client = createClient(testContext);
         client.getDatabase(MongoDBTestConstants.DATABASE_NAME).getCollection(MongoDBTestConstants.COLLECTION_NAME).drop();
         schema = createSchema(recordBuilderFactory);
+        client.getDatabase(MongoDBTestConstants.DATABASE_NAME).getCollection(MongoDBTestConstants.COLLECTION_NAME).drop();
     }
 
     @Test
@@ -466,6 +467,16 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         MongoDBOutputConfiguration outputConfiguration = new MongoDBOutputConfiguration();
         outputConfiguration.setDataset(dataset);
         return outputConfiguration;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        client.getDatabase(MongoDBTestConstants.DATABASE_NAME).getCollection(MongoDBTestConstants.COLLECTION_NAME).drop();
+    }
+
+    @AfterAll
+    public void closeConnection() {
+        client.close();
     }
 
 }

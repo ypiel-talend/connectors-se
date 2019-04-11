@@ -81,11 +81,13 @@ public class MongoDBServiceTestIT {
         MongoClient client = service.getMongoClient(testContext.getDataStore(),
                 new DefaultClientOptionsFactory(testContext.getDataStore(), i18nMessage));
         MongoCollection<Document> collection = service.getCollection(dataset, client);
+        collection.drop();
 
         collection.insertOne(Document.parse("{\"a\":1}"));
         assertEquals(1, collection.countDocuments());
 
         collection.drop();
+        client.close();
     }
 
 }

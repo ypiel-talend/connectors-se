@@ -78,7 +78,6 @@ public class MongoDBInputMapperTestIT extends MongoTestBase {
     public void testReadFindMapper() throws IOException {
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
-        collection.drop();
         List<Document> documents = createDocuments(10);
 
         List<InsertOneModel<Document>> insertModels = documents.stream().map(InsertOneModel::new).collect(Collectors.toList());
@@ -113,7 +112,6 @@ public class MongoDBInputMapperTestIT extends MongoTestBase {
     public void testReadAggregationStages() throws IOException {
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
-        collection.drop();
         List<Document> documents = createDocuments(10);
 
         List<InsertOneModel<Document>> insertModels = documents.stream().map(InsertOneModel::new).collect(Collectors.toList());
@@ -143,7 +141,6 @@ public class MongoDBInputMapperTestIT extends MongoTestBase {
     public void testReadWithMapping() {
         MongoCollection<Document> collection = client.getDatabase(MongoDBTestConstants.DATABASE_NAME)
                 .getCollection(MongoDBTestConstants.COLLECTION_NAME);
-        collection.drop();
         Document testDocument = Document.parse("{a: 1, b: {c: {f: \"string\", e: 2}}}");
         Document testDocumentWithMappingFlat = Document.parse("{a: 1, f: \"string\", e: 2}");
 
@@ -191,6 +188,16 @@ public class MongoDBInputMapperTestIT extends MongoTestBase {
             Record expected = testData.get(i);
             schema.getEntries().stream().forEach(col -> assertObject(actual, expected, col.getName()));
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        client.getDatabase(MongoDBTestConstants.DATABASE_NAME).getCollection(MongoDBTestConstants.COLLECTION_NAME).drop();
+    }
+
+    @AfterAll
+    public void closeConnection() {
+        client.close();
     }
 
 }
