@@ -97,14 +97,14 @@ public class CSVBlobFileReader extends BlobFileReader {
 
                 this.recordIterator = parser.getRecords().iterator();
                 if (getConfig().getCsvOptions().isUseHeader() && getConfig().getCsvOptions().getHeader() > 1) {
-                    //TODO check on 2-nd+ file
                     for (int i = 0; i < getConfig().getCsvOptions().getHeader() - 1; i++) {
                         // skip extra header lines
                         recordIterator.next();
                     }
-                    //read schema for first file
+                    CSVRecord headerRecord = recordIterator.next();
+                    // save schema from first file
                     if (converter.getSchema() == null) {
-                        converter.toRecord(recordIterator.next());
+                        converter.toRecord(headerRecord);
                     }
                 }
             } catch (Exception e) {
