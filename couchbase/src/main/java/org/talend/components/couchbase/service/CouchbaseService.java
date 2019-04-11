@@ -36,20 +36,36 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CouchbaseService {
 
-    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
+    private CouchbaseEnvironment environment;
+
+    private Cluster cluster;
+
+    private Bucket bucket;
+
+    private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
 
     @Service
     private CouchbaseDataStore couchBaseConnection;
 
-    // @Service
-    // private I18nMessage i18n;
+    @Service
+    private I18nMessage i18n;
 
-    public static String[] resolveAddresses(String nodes) {
+    public String[] resolveAddresses(String nodes) {
         String[] addresses = nodes.replaceAll(" ", "").split(",");
         for (int i = 0; i < addresses.length; i++) {
-            log.info("Bootstrap node[" + i + "]: " + addresses[i]);
+            LOG.info(i18n.bootstrapNodes(i, addresses[i]));
         }
         return addresses;
+    }
+
+    public Bucket openConnection(CouchbaseDataStore dataStore) {
+        String bootStrapNodes = dataStore.getBootstrapNodes();
+        String bucketName = dataStore.getBucket();
+        String password = dataStore.getPassword();
+
+        this.environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
+        this.cluster = CouchbaseCluster.create(environment, bootStrapNodes);
+        return this.cluster.openBucket(bucketName, password);
     }
 
     @HealthCheck("healthCheck")
@@ -62,43 +78,46 @@ public class CouchbaseService {
             String bucketName = datastore.getBucket();
             String password = datastore.getPassword();
 
-            String[] urls = resolveAddresses(datastore.getBootstrapNodes());
+            String[] urls = resolveAddresses(bootstrapNodes);
 
             environment = new DefaultCouchbaseEnvironment.Builder()
                     // .bootstrapHttpDirectPort(port)
                     .connectTimeout(20000L).build();
             Authenticator authenticator = new PasswordAuthenticator(bucketName, password);
-            cluster = CouchbaseCluster.create(environment, bootstrapNodes);
+            cluster = CouchbaseCluster.create(environment, urls);
             cluster.authenticate(authenticator);
             bucket = cluster.openBucket(bucketName);
-
-            // DiagnosticsReport report = cluster.diagnostics();
-            // List<EndpointHealth> endpointHealths = report.endpoints();
-            //
-            // for (EndpointHealth health : endpointHealths) {
-            // if (!health.state().equals(LifecycleState.CONNECTED)) {
-            // return new HealthCheckStatus(HealthCheckStatus.Status.KO,
-            // "Endpoint with id: " + health.id() + " Not connected");
-            // }
-            // }
-        } catch (Throwable exception) {
+        } catch (Exception exception) {
+            LOG.warn(i18n.connectionKO());
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, exception.getMessage());
         } finally {
-            closeConnection(environment, cluster, bucket);
+            closeConnection();
         }
+        LOG.info(i18n.connectionOK());
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK");
-        // todo: add i18n
     }
 
-    public static void closeConnection(CouchbaseEnvironment environment, Cluster cluster, Bucket bucket) {
+    public void closeConnection() {
         if (bucket != null) {
-            bucket.close();
+            if (bucket.close()) {
+                LOG.debug(i18n.bucketWasClosed(bucket.name()));
+            } else {
+                LOG.debug(i18n.cannotCloseBucket(bucket.name()));
+            }
         }
         if (cluster != null) {
-            cluster.disconnect();
+            if (cluster.disconnect()) {
+                LOG.debug(i18n.clusterWasClosed());
+            } else {
+                LOG.debug(i18n.cannotCloseCluster());
+            }
         }
         if (environment != null) {
-            environment.shutdown();
+            if (environment.shutdown()) {
+                LOG.debug(i18n.couchbaseEnvWasClosed());
+            } else {
+                LOG.debug(i18n.cannotCloseCouchbaseEnv());
+            }
         }
     }
 }

@@ -14,15 +14,11 @@
 package org.talend.components.couchbase.source;
 
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.CouchbaseCluster;
-import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.env.CouchbaseEnvironment;
-import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
+import com.couchbase.client.java.query.N1qlQueryRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
@@ -38,12 +34,8 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,23 +47,21 @@ import static org.talend.sdk.component.api.record.Schema.Type.*;
 @Icon(value = Icon.IconType.CUSTOM, custom = "CouchbaseInput")
 public class CouchbaseInput implements Serializable {
 
-    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseInput.class);
+    private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseInput.class);
 
     private final CouchbaseInputConfiguration configuration;
 
-    private final CouchbaseService service;
-
     private final RecordBuilderFactory builderFactory;
 
-    private CouchbaseEnvironment environment;
-
-    private Cluster cluster;
-
-    private Bucket bucket;
+    private CouchbaseService service;
 
     private transient Schema schema;
 
-    private List<Record> recordList;
+    private Set<String> columnsSet;
+
+    private N1qlQueryResult n1qlQueryRows;
+
+    private Iterator<N1qlQueryRow> index;
 
     public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
             final CouchbaseService service, final RecordBuilderFactory builderFactory) {
@@ -82,116 +72,124 @@ public class CouchbaseInput implements Serializable {
 
     @PostConstruct
     public void init() {
+        Bucket bucket = service.openConnection(configuration.getDataSet().getDatastore());
 
-        String bootStrapNodes = configuration.getDataSet().getDatastore().getBootstrapNodes();
-        String bucketName = configuration.getDataSet().getDatastore().getBucket();
-        String password = configuration.getDataSet().getDatastore().getPassword();
-
-        environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
-        this.cluster = CouchbaseCluster.create(environment, bootStrapNodes);
-        bucket = cluster.openBucket(bucketName, password);
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
-        // N1qlQueryResult result = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucketName));
-        // result.rows().
+        columnsSet = new HashSet<>();
 
-        N1qlQueryResult n1qlQueryResult = bucket.query(N1qlQuery
-                .simple("SELECT META(" + bucketName + ").id FROM " + bucketName + " ORDER BY META(" + bucketName + ").id"));
-        recordList = n1qlQueryResult.allRows().stream().map(index -> index.value().get("id")).map(Object::toString)
-                .map(index -> bucket.get(index)).map(this::createRecord).collect(Collectors.toList());
+        n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucket.name()));
+        index = n1qlQueryRows.rows();
     }
 
     @Producer
     public Record next() {
-        // this is the method allowing you to go through the dataset associated
-        // to the component configuration
-        //
-        // return null means the dataset has no more data to go through
-        // you can use the builderFactory to create a new Record.
-        return recordList.isEmpty() ? null : recordList.remove(0);
+        if (index.hasNext()) {
+            // unwrap JsonObject
+            JsonObject jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
+
+            if (columnsSet.isEmpty()) {
+                columnsSet.addAll(jsonObject.getNames());
+            }
+            if (schema == null) {
+                schema = parseSchema(jsonObject);
+            }
+            final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
+            schema.getEntries().stream().forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), jsonObject)));
+
+            return recordBuilder.build();
+        }
+        return null;
     }
 
     @PreDestroy
     public void release() {
-        bucket.close();
-        cluster.disconnect();
-        environment.shutdown();
-
+        service.closeConnection();
     }
 
-    private Record createRecord(final JsonDocument jsonDocument) {
-        JsonObject jsonObject = jsonDocument.content();
-
-        if (schema == null) {
-            Set<String> labelNames = jsonObject.getNames();
-            final Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
-            labelNames.stream().forEach(name -> addField(schemaBuilder, jsonObject.get(name), name));
-            schema = schemaBuilder.build();
-        }
-
-        final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-
-        schema.getEntries().stream().map(Schema.Entry::getName)
-                .forEach(name -> addColumn(recordBuilder, jsonObject.get(name), name));
-        return recordBuilder.build();
+    private Schema parseSchema(JsonObject document) {
+        final Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
+        columnsSet.stream().forEach(name -> addField(schemaBuilder, name, getValue(name, document)));
+        return schemaBuilder.build();
     }
 
-    private void addField(Schema.Builder schemaBuilder, Object value, String name) {
-        final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        entryBuilder.withName(name).withNullable(true);
-
+    private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
         if (value == null) {
-            LOG.warn("Can't guess data type if value null. Column with null value will be excluded");
-        } else if (value instanceof Integer) {
-            schemaBuilder.withEntry(entryBuilder.withType(INT).build());
-        } else if (value instanceof Long || value instanceof BigInteger) {
-            schemaBuilder.withEntry(entryBuilder.withType(LONG).build());
-        } else if (value instanceof Byte[]) {
-            schemaBuilder.withEntry(entryBuilder.withType(BYTES).build());
-        } else if (value instanceof Double) {
-            schemaBuilder.withEntry(entryBuilder.withType(DOUBLE).build());
-        } else if (value instanceof String || value instanceof JsonObject) {
-            schemaBuilder.withEntry(entryBuilder.withType(STRING).build());
+            // LOG.warn(i18nMessage.schemaFieldParseError(name));
+            return;
+        }
+        final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
+        Schema.Type type = getSchemaType(value);
+        entryBuilder.withName(name).withNullable(true).withType(type);
+        if (type == ARRAY) {
+            List<?> listValue = ((JsonArray) value).toList();
+            Object listObject = listValue.isEmpty() ? null : listValue.get(0);
+            entryBuilder.withElementSchema(builderFactory.newSchemaBuilder(getSchemaType(listObject)).build());
+        }
+        schemaBuilder.withEntry(entryBuilder.build());
+    }
+
+    public Object getValue(String currentName, JsonObject jsonObject) {
+        return jsonObject.get(currentName);
+    }
+
+    private Schema.Type getSchemaType(Object value) {
+        if (value instanceof String) {
+            return Schema.Type.STRING;
         } else if (value instanceof Boolean) {
-            schemaBuilder.withEntry(entryBuilder.withType(BOOLEAN).build());
-        } else if (value instanceof JsonArray) {
-            schemaBuilder.withEntry(entryBuilder.withType(ARRAY).build());
+            return Schema.Type.BOOLEAN;
         } else if (value instanceof Date) {
-            schemaBuilder.withEntry(entryBuilder.withType(DATETIME).build());
+            return Schema.Type.DATETIME;
+        } else if (value instanceof Double) {
+            return Schema.Type.DOUBLE;
+        } else if (value instanceof Integer) {
+            return INT;
+        } else if (value instanceof Long) {
+            return Schema.Type.LONG;
+        } else if (value instanceof Byte[]) {
+            return Schema.Type.BYTES;
+        } else if (value instanceof JsonArray) {
+            return ARRAY;
         } else {
-            throw new IllegalArgumentException("Unknown Class type " + value.getClass().getSimpleName());
+            return Schema.Type.STRING;
         }
     }
 
-    private void addColumn(Record.Builder recordBuilder, Object value, String name) {
+    private void addColumn(Record.Builder recordBuilder, final Schema.Entry entry, Object value) {
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        entryBuilder.withName(name);
+        Schema.Type type = entry.getType();
+        entryBuilder.withName(entry.getName()).withNullable(true).withType(type);
 
-        try {
-            if (value == null) {
-                LOG.warn("Can't guess data type if value null. Column with null value will be excluded");
-            } else if (value instanceof Integer) {
-                recordBuilder.withInt(entryBuilder.withType(INT).build(), (Integer) value);
-            } else if (value instanceof Long || value instanceof BigInteger) {
-                recordBuilder.withLong(entryBuilder.withType(LONG).build(), (Long) value);
-            } else if (value instanceof Byte[]) {
-                recordBuilder.withBytes(entryBuilder.withType(BYTES).build(), (byte[]) value);
-            } else if (value instanceof Double) {
-                recordBuilder.withDouble(entryBuilder.withType(DOUBLE).build(), (Double) value);
-            } else if (value instanceof String || value instanceof JsonObject) {
-                recordBuilder.withString(entryBuilder.withType(STRING).build(), (String) value);
-            } else if (value instanceof Boolean) {
-                recordBuilder.withBoolean(entryBuilder.withType(BOOLEAN).build(), (Boolean) value);
-            } else if (value instanceof JsonArray) {
-                recordBuilder.withArray(entryBuilder.withType(ARRAY).build(), (List) value);
-            } else if (value instanceof Date) {
-                recordBuilder.withDateTime(entryBuilder.withType(DATETIME).build(), (ZonedDateTime) value);
-            } else {
-                LOG.error("Unknown Class type " + value.getClass().getSimpleName());
-                throw new IllegalArgumentException("Unknown Class type " + value.getClass().getSimpleName());
-            }
-        } catch (ClassCastException e) {
-            LOG.error("Field " + name + " with value " + value + " can't be converted", e);
+        switch (type) {
+        case ARRAY:
+            List<?> listValue = ((JsonArray) value).toList();
+            entryBuilder.withElementSchema(entry.getElementSchema());
+            recordBuilder.withArray(entryBuilder.build(), listValue);
+            break;
+        case FLOAT:
+            recordBuilder.withFloat(entryBuilder.build(), value == null ? null : (Float) value);
+            break;
+        case DOUBLE:
+            recordBuilder.withDouble(entryBuilder.build(), value == null ? null : (Double) value);
+            break;
+        case BYTES:
+            recordBuilder.withBytes(entryBuilder.build(), value == null ? null : (byte[]) value);
+            break;
+        case STRING:
+            recordBuilder.withString(entryBuilder.build(), value == null ? null : value.toString());
+            break;
+        case LONG:
+            recordBuilder.withLong(entryBuilder.build(), value == null ? null : (Long) value);
+            break;
+        case INT:
+            recordBuilder.withInt(entryBuilder.build(), value == null ? null : (Integer) value);
+            break;
+        case DATETIME:
+            recordBuilder.withDateTime(entryBuilder.build(), value == null ? null : (ZonedDateTime) value);
+            break;
+        case BOOLEAN:
+            recordBuilder.withBoolean(entryBuilder.build(), value == null ? null : (Boolean) value);
+            break;
         }
     }
 }

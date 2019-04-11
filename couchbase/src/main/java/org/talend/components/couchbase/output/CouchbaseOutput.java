@@ -15,12 +15,10 @@ package org.talend.components.couchbase.output;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
-import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
@@ -49,12 +47,6 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("This component writes data to Couchbase")
 public class CouchbaseOutput implements Serializable {
 
-    private transient static final Logger LOG = LoggerFactory.getLogger(CouchbaseOutput.class);
-
-    private final CouchbaseOutputConfiguration configuration;
-
-    private final CouchbaseService service;
-
     private Cluster cluster;
 
     private CouchbaseEnvironment environment;
@@ -62,6 +54,12 @@ public class CouchbaseOutput implements Serializable {
     private Bucket bucket;
 
     private String idFieldName;
+
+    private final CouchbaseOutputConfiguration configuration;
+
+    private final CouchbaseService service;
+
+    private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseOutput.class);
 
     public CouchbaseOutput(@Option("configuration") final CouchbaseOutputConfiguration configuration,
             final CouchbaseService service) {
@@ -71,14 +69,8 @@ public class CouchbaseOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        String bootstrapNodes = configuration.getDataSet().getDatastore().getBootstrapNodes();
-        String bucketName = configuration.getDataSet().getDatastore().getBucket();
-        String password = configuration.getDataSet().getDatastore().getPassword();
+        bucket = service.openConnection(configuration.getDataSet().getDatastore());
         idFieldName = configuration.getIdFieldName();
-
-        environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
-        this.cluster = CouchbaseCluster.create(environment, bootstrapNodes);
-        bucket = cluster.openBucket(bucketName, password);
     }
 
     @ElementListener
@@ -88,9 +80,7 @@ public class CouchbaseOutput implements Serializable {
 
     @PreDestroy
     public void release() {
-        bucket.close();
-        cluster.disconnect();
-        environment.shutdown();
+        service.closeConnection();
     }
 
     private JsonDocument toJsonDocument(String idFieldName, Record record) {
@@ -133,7 +123,6 @@ public class CouchbaseOutput implements Serializable {
                 value = record.getRecord(entryName);
                 break;
             default:
-                value = record.get(Object.class, entryName);
                 throw new IllegalArgumentException("Unknown Type " + entry.getType());
             }
 

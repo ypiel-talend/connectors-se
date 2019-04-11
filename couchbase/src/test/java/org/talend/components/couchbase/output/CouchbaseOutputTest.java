@@ -19,26 +19,22 @@ import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
+import com.couchbase.client.java.query.N1qlQuery;
+import com.couchbase.client.java.query.N1qlQueryResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.talend.components.couchbase.CouchbaseContainerTest;
+import org.talend.components.couchbase.CouchbaseUtilTest;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
-import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
-import org.talend.sdk.component.runtime.record.SchemaImpl;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,15 +43,10 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 @WithComponents("org.talend.components.couchbase")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of CouchbaseOutput component")
-public class CouchbaseOutputTest extends CouchbaseContainerTest {
+public class CouchbaseOutputTest extends CouchbaseUtilTest {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
-
-    @Service
-    private RecordBuilderFactory recordBuilderFactory;
-
-    private static final ZonedDateTime ZONED_DATE_TIME = ZonedDateTime.of(2018, 10, 30, 10, 30, 59, 0, ZoneId.of("UTC"));
 
     private List<JsonDocument> retrieveDataFromDatabase() {
         CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
@@ -63,8 +54,12 @@ public class CouchbaseOutputTest extends CouchbaseContainerTest {
         Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
         List<JsonDocument> resultList = new ArrayList<>();
 
-        resultList.add(bucket.get("RRRR1"));
-        resultList.add(bucket.get("RRRR2"));
+        bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+
+        N1qlQueryResult n1qlQueryResult = bucket.query(N1qlQuery
+                .simple("SELECT META(" + BUCKET_NAME + ").id FROM " + BUCKET_NAME + " ORDER BY META(" + BUCKET_NAME + ").id"));
+        resultList = n1qlQueryResult.allRows().stream().map(index -> index.value().get("id")).map(Object::toString)
+                .map(index -> bucket.get(index)).collect(Collectors.toList());
 
         bucket.close();
         cluster.disconnect();
@@ -72,51 +67,10 @@ public class CouchbaseOutputTest extends CouchbaseContainerTest {
         return resultList;
     }
 
-    private void prepareRecords() {
-        final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
-        List<String> listTestData = new ArrayList<>();
-        listTestData.add("one");
-        listTestData.add("two");
-        listTestData.add("three");
-
-        List<Record> records = new ArrayList<>();
-
-        SchemaImpl schema = new SchemaImpl();
-        schema.setType(Schema.Type.STRING);
-
-        Record record1 = recordBuilderFactory.newRecordBuilder()
-                .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(), "RRRR1")
-                .withInt(entryBuilder.withName("t_int").withType(Schema.Type.INT).build(), 11111)
-                .withLong(entryBuilder.withName("t_long").withType(Schema.Type.LONG).build(), 1_000_000_000_000L)
-                // .withBytes(entryBuilder.withName("t_bytes").withType(Schema.Type.BYTES).build(), "test1".getBytes())
-                .withFloat(entryBuilder.withName("t_float").withType(Schema.Type.FLOAT).build(), 1000.0f)
-                .withDouble(entryBuilder.withName("t_double").withType(Schema.Type.DOUBLE).build(), 1.5)
-                .withBoolean(entryBuilder.withName("t_boolean").withType(Schema.Type.BOOLEAN).build(), false)
-                .withDateTime(entryBuilder.withName("t_datetime").withType(Schema.Type.DATETIME).build(), ZONED_DATE_TIME)
-                .withArray(entryBuilder.withName("t_array").withType(Schema.Type.ARRAY).withElementSchema(schema).build(),
-                        listTestData)
-                .build();
-        Record record2 = recordBuilderFactory.newRecordBuilder()
-                .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(), "RRRR2")
-                .withInt(entryBuilder.withName("t_int").withType(Schema.Type.INT).build(), 22222)
-                .withLong(entryBuilder.withName("t_long").withType(Schema.Type.LONG).build(), 2_000_000_000_000L)
-                // .withBytes(entryBuilder.withName("t_bytes").withType(Schema.Type.BYTES).build(), "test2".getBytes())
-                .withFloat(entryBuilder.withName("t_float").withType(Schema.Type.FLOAT).build(), 2000.0f)
-                .withDouble(entryBuilder.withName("t_double").withType(Schema.Type.DOUBLE).build(), 2.5)
-                .withBoolean(entryBuilder.withName("t_boolean").withType(Schema.Type.BOOLEAN).build(), true)
-                .withDateTime(entryBuilder.withName("t_datetime").withType(Schema.Type.DATETIME).build(), ZONED_DATE_TIME)
-                .withArray(entryBuilder.withName("t_array").withType(Schema.Type.ARRAY).withElementSchema(schema).build(),
-                        listTestData)
-                .build();
-        records.add(record1);
-        records.add(record2);
-        componentsHandler.setInputData(records);
-    }
-
     @Test
     @DisplayName("Check amount of total records from retrieved data")
     void sizeOfRetrievedCouchbaseInsertTest() {
-        prepareRecords();
+        componentsHandler.setInputData(super.createRecords());
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
 
         Job.components().component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
@@ -127,7 +81,7 @@ public class CouchbaseOutputTest extends CouchbaseContainerTest {
     @Test
     @DisplayName("Check fields from retrieved data")
     void checkDataCouchbaseInsertTest() {
-        prepareRecords();
+        componentsHandler.setInputData(super.createRecords());
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
 
         Job.components().component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
@@ -135,30 +89,23 @@ public class CouchbaseOutputTest extends CouchbaseContainerTest {
 
         List<JsonDocument> resultList = retrieveDataFromDatabase();
 
-        List<String> listTestData = new ArrayList<>();
-        listTestData.add("one");
-        listTestData.add("two");
-        listTestData.add("three");
+        TestData testData = new TestData();
 
-        assertEquals("RRRR1", resultList.get(0).content().getString("t_string"));
-        assertEquals(new Integer(11111), resultList.get(0).content().getInt("t_int"));
-        assertEquals(new Long(1_000_000_000_000L), resultList.get(0).content().getLong("t_long"));
+        assertEquals(testData.getCol1() + "1", resultList.get(0).content().getString("t_string"));
+        assertEquals(new Integer(testData.getCol2()), resultList.get(0).content().getInt("t_int_min"));
+        assertEquals(new Integer(testData.getCol3()), resultList.get(0).content().getInt("t_int_max"));
+        assertEquals(new Long(testData.getCol4()), resultList.get(0).content().getLong("t_long_min"));
+        assertEquals(new Long(testData.getCol5()), resultList.get(0).content().getLong("t_long_max"));
         // assertEquals(new Byte[], resultList.get(0).content().getString("t_bytes"));
-        assertEquals(new Double(1000.0f), resultList.get(0).content().getDouble("t_float"));
-        assertEquals(new Double(1.5), resultList.get(0).content().getDouble("t_double"));
-        assertEquals(new Boolean(false), resultList.get(0).content().getBoolean("t_boolean"));
-        assertEquals(ZONED_DATE_TIME.toString(), resultList.get(0).content().getString("t_datetime"));
-        assertArrayEquals(listTestData.toArray(), resultList.get(0).content().getArray("t_array").toList().toArray());
+        assertEquals(testData.getCol6(), resultList.get(0).content().getDouble("t_float_min"), 1E35);
+        assertEquals(testData.getCol7(), resultList.get(0).content().getDouble("t_float_max"), 1E35);
+        assertEquals(testData.getCol8(), resultList.get(0).content().getDouble("t_double_min"), 1);
+        assertEquals(testData.getCol9(), resultList.get(0).content().getDouble("t_double_max"), 1);
+        assertEquals(testData.isCol10(), resultList.get(0).content().getBoolean("t_boolean"));
+        assertEquals(testData.getCol11().toString(), resultList.get(0).content().getString("t_datetime"));
+        assertArrayEquals(testData.getCol12().toArray(), resultList.get(0).content().getArray("t_array").toList().toArray());
 
-        assertEquals("RRRR2", resultList.get(1).content().getString("t_string"));
-        assertEquals(new Integer(22222), resultList.get(1).content().getInt("t_int"));
-        assertEquals(new Long(2_000_000_000_000L), resultList.get(1).content().getLong("t_long"));
-        // assertEquals(new Byte[], resultList.get(0).content().getString("t_bytes"));
-        assertEquals(new Double(2000.0f), resultList.get(1).content().getDouble("t_float"));
-        assertEquals(new Double(2.5), resultList.get(1).content().getDouble("t_double"));
-        assertEquals(new Boolean(true), resultList.get(1).content().getBoolean("t_boolean"));
-        assertEquals(ZONED_DATE_TIME.toString(), resultList.get(1).content().getString("t_datetime"));
-        assertArrayEquals(listTestData.toArray(), resultList.get(1).content().getArray("t_array").toList().toArray());
+        assertEquals(testData.getCol1() + "2", resultList.get(1).content().getString("t_string"));
     }
 
     private CouchbaseOutputConfiguration getOutputConfiguration() {
