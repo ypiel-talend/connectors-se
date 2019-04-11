@@ -31,7 +31,6 @@ public class MongoDBTestExtension implements ExtensionContext.Store.CloseableRes
 
     private static final GenericContainer MONGO_CONTAINER = new GenericContainer(
             new ImageFromDockerfile().withFileFromClasspath("Dockerfile", "docker/Dockerfile")
-                    .withFileFromPath("docker-entrypoint.sh", Paths.get("src/test/resources/docker/docker-entrypoint.sh"))
                     .withFileFromPath("server.pem", Paths.get("src/test/resources/docker/server.pem"))
                     .withFileFromPath("ca.pem", Paths.get("src/test/resources/docker/ca.pem")))
                             .withEnv("MONGO_INITDB_ROOT_USERNAME", MongoDBTestConstants.USERNAME)
