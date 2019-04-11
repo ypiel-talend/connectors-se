@@ -32,7 +32,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 @Version(1)
-@Icon(Icon.IconType.DEFAULT)
+@Icon(value = Icon.IconType.DEFAULT)
 @PartitionMapper(name = "AzureEventHubsInputMapper", infinite = true)
 @Documentation("TODO fill the documentation for this mapper")
 public class AzureEventHubsInputMapper implements Serializable {

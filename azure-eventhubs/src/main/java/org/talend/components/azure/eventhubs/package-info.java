@@ -13,7 +13,7 @@
  */
 
 @Components(family = "AzureEventHubs")
-@Icon(Icon.IconType.DEFAULT)
+@Icon(value = Icon.IconType.DEFAULT)
 package org.talend.components.azure.eventhubs;
 
 import org.talend.sdk.component.api.component.Components;
