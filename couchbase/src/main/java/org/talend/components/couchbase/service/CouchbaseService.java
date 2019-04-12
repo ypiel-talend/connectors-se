@@ -84,6 +84,7 @@ public class CouchbaseService {
             } else {
                 log.debug(i18n.cannotCloseBucket(bucket.name()));
             }
+            bucket = null;
         }
         if (cluster != null) {
             if (cluster.disconnect()) {
@@ -91,6 +92,7 @@ public class CouchbaseService {
             } else {
                 log.debug(i18n.cannotCloseCluster());
             }
+            cluster = null;
         }
         if (environment != null) {
             if (environment.shutdown()) {
@@ -98,6 +100,7 @@ public class CouchbaseService {
             } else {
                 log.debug(i18n.cannotCloseCouchbaseEnv());
             }
+            environment = null;
         }
     }
 }
