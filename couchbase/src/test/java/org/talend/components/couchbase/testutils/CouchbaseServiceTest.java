@@ -41,23 +41,20 @@ public class CouchbaseServiceTest extends CouchbaseUtilTest {
         couchbaseDataStore.setBucket(BUCKET_NAME);
         couchbaseDataStore.setPassword(BUCKET_PASSWORD);
 
-        assertEquals(new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK"),
-                couchbaseService.healthCheck(couchbaseDataStore));
+        assertEquals(HealthCheckStatus.Status.OK, couchbaseService.healthCheck(couchbaseDataStore).getStatus());
     }
 
     @Test
     @DisplayName("Test unsuccessful connection")
     void couchbaseNotSuccessfulConnectionTest() {
         String wrongPassword = "wrongpass";
-        String expectedComment = "Passwords for bucket \"student\" do not match.";
 
         CouchbaseDataStore couchbaseDataStore = new CouchbaseDataStore();
         couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
         couchbaseDataStore.setBucket(BUCKET_NAME);
         couchbaseDataStore.setPassword(wrongPassword);
 
-        assertEquals(new HealthCheckStatus(HealthCheckStatus.Status.KO, expectedComment),
-                couchbaseService.healthCheck(couchbaseDataStore));
+        assertEquals(HealthCheckStatus.Status.KO, couchbaseService.healthCheck(couchbaseDataStore).getStatus());
     }
 
     @Test

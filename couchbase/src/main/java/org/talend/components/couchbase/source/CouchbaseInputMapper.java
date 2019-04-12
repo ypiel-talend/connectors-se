@@ -14,6 +14,7 @@
 package org.talend.components.couchbase.source;
 
 import org.talend.components.couchbase.service.CouchbaseService;
+import org.talend.components.couchbase.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -38,11 +39,14 @@ public class CouchbaseInputMapper implements Serializable {
 
     private final RecordBuilderFactory recordBuilderFactory;
 
+    private final I18nMessage i18nMessage;
+
     public CouchbaseInputMapper(@Option("configuration") final CouchbaseInputConfiguration configuration,
-            final CouchbaseService service, final RecordBuilderFactory recordBuilderFactory) {
+            final CouchbaseService service, final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
+        this.i18nMessage = i18nMessage;
     }
 
     @Assessor
@@ -70,6 +74,6 @@ public class CouchbaseInputMapper implements Serializable {
         // here we create an actual worker,
         // you are free to rework the configuration etc but our default generated implementation
         // propagates the partition mapper entries.
-        return new CouchbaseInput(configuration, service, recordBuilderFactory);
+        return new CouchbaseInput(configuration, service, recordBuilderFactory, i18nMessage);
     }
 }

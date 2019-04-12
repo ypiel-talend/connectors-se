@@ -129,8 +129,10 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     }
 
     @Test
+    @DisplayName("When input data is null, record will be skipped")
     void firstValueIsNullInInputDBTest() {
         insertTestDataWithNullValueToDB();
+
         final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
         Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
                 .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();

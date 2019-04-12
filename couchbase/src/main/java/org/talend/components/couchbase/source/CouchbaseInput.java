@@ -22,6 +22,7 @@ import com.couchbase.client.java.query.N1qlQueryRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
+import org.talend.components.couchbase.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -29,6 +30,7 @@ import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PostConstruct;
@@ -47,6 +49,8 @@ import static org.talend.sdk.component.api.record.Schema.Type.*;
 @Icon(value = Icon.IconType.CUSTOM, custom = "CouchbaseInput")
 public class CouchbaseInput implements Serializable {
 
+    private I18nMessage i18n;
+
     private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseInput.class);
 
     private final CouchbaseInputConfiguration configuration;
@@ -59,26 +63,30 @@ public class CouchbaseInput implements Serializable {
 
     private Set<String> columnsSet;
 
-    private N1qlQueryResult n1qlQueryRows;
-
     private Iterator<N1qlQueryRow> index;
 
     public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
-            final CouchbaseService service, final RecordBuilderFactory builderFactory) {
+            final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n) {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;
+        this.i18n = i18n;
     }
 
     @PostConstruct
     public void init() {
-        Bucket bucket = service.openConnection(configuration.getDataSet().getDatastore());
+        Bucket bucket = null;
+        try {
+            bucket = service.openConnection(configuration.getDataSet().getDatastore());
+        } catch (Exception e) {
+            LOG.error(i18n.connectionKO());
+        }
 
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
         columnsSet = new HashSet<>();
 
-        n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucket.name()));
+        N1qlQueryResult n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucket.name()));
         index = n1qlQueryRows.rows();
     }
 
@@ -115,7 +123,7 @@ public class CouchbaseInput implements Serializable {
 
     private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
         if (value == null) {
-            // LOG.warn(i18nMessage.schemaFieldParseError(name));
+            LOG.warn(i18n.cannotGuessWhenDataIsNull());
             return;
         }
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
@@ -190,6 +198,8 @@ public class CouchbaseInput implements Serializable {
         case BOOLEAN:
             recordBuilder.withBoolean(entryBuilder.build(), value == null ? null : (Boolean) value);
             break;
+        case RECORD:
+            throw new IllegalArgumentException("Record is unsupported");
         }
     }
 }

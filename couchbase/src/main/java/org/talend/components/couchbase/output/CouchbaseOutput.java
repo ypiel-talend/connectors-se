@@ -14,14 +14,13 @@
 package org.talend.components.couchbase.output;
 
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.env.CouchbaseEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
+import org.talend.components.couchbase.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -31,6 +30,7 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -47,9 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("This component writes data to Couchbase")
 public class CouchbaseOutput implements Serializable {
 
-    private Cluster cluster;
-
-    private CouchbaseEnvironment environment;
+    private I18nMessage i18n;
 
     private Bucket bucket;
 
@@ -62,14 +60,19 @@ public class CouchbaseOutput implements Serializable {
     private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseOutput.class);
 
     public CouchbaseOutput(@Option("configuration") final CouchbaseOutputConfiguration configuration,
-            final CouchbaseService service) {
+            final CouchbaseService service, final I18nMessage i18n) {
         this.configuration = configuration;
         this.service = service;
+        this.i18n = i18n;
     }
 
     @PostConstruct
     public void init() {
-        bucket = service.openConnection(configuration.getDataSet().getDatastore());
+        try {
+            bucket = service.openConnection(configuration.getDataSet().getDatastore());
+        } catch (Exception e) {
+            LOG.error(i18n.connectionKO());
+        }
         idFieldName = configuration.getIdFieldName();
     }
 

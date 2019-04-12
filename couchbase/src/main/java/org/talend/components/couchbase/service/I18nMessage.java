@@ -22,4 +22,6 @@ public interface I18nMessage {
     String couchbaseEnvWasClosed();
 
     String cannotCloseCouchbaseEnv();
+
+    String cannotGuessWhenDataIsNull();
 }

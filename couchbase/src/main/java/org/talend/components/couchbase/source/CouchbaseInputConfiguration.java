@@ -26,8 +26,6 @@ import lombok.Data;
 @Version(1)
 @Data
 @GridLayout({
-        // the generated layout put one configuration entry per line,
-        // customize it as much as needed
         @GridLayout.Row({ "dataSet" }) })
 @Documentation("Couchbase input Mapper Configuration")
 public class CouchbaseInputConfiguration implements Serializable {
