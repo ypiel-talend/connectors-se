@@ -57,7 +57,7 @@ public class ExcelFormatOptions {
     @ActiveIf(target = "useHeader", value = "true")
     @Documentation("Header size")
     @Min(0)
-    private int header;
+    private int header = 0;
 
     @Option
     @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" })
@@ -68,5 +68,5 @@ public class ExcelFormatOptions {
     @ActiveIf(target = "useFooter", value = "true")
     @Documentation("Footer size")
     @Min(0)
-    private int footer;
+    private int footer = 0;
 }

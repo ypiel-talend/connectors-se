@@ -72,5 +72,5 @@ public class CSVFormatOptions {
     @ActiveIf(target = "useHeader", value = "true")
     @Documentation("Header size")
     @Min(0)
-    private int header;
+    private int header = 0;
 }
