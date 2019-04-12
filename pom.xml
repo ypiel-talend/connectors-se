@@ -32,11 +32,11 @@
         </license>
     </licenses>
 
-  <modules>
-    <module>jdbc</module>
-    <module>salesforce</module>
-    <module>couchbase</module>
-  </modules>git
+    <modules>
+        <module>jdbc</module>
+        <module>salesforce</module>
+        <module>couchbase</module>
+    </modules>
 
     <scm>
         <connection>scm:git:https://github.com/talend/connectors-se.git</connection>
