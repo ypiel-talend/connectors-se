@@ -33,4 +33,8 @@ public class AggregationStage implements Serializable {
     @Documentation("Aggregation stage to use")
     private String stage;
 
+    @Option
+    @Documentation("stub")
+    private boolean stub;
+
 }
