@@ -13,6 +13,8 @@
 
 package org.talend.components.azure.common.csv;
 
+import java.io.Serializable;
+
 import org.talend.components.azure.common.Encoding;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -27,7 +29,7 @@ import lombok.Data;
         @GridLayout.Row("escapeCharacter"), @GridLayout.Row("encoding"), @GridLayout.Row("customEncoding"),
         @GridLayout.Row("useHeader"), @GridLayout.Row("header") })
 @Data
-public class CSVFormatOptions {
+public class CSVFormatOptions implements Serializable {
 
     @Option
     @Documentation("Record delimiter")

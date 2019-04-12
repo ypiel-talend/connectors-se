@@ -13,7 +13,9 @@
 
 package org.talend.components.azure.common.excel;
 
-public enum ExcelFormat {
+import java.io.Serializable;
+
+public enum ExcelFormat implements Serializable {
     EXCEL2007,
     EXCEL97,
     HTML

@@ -36,8 +36,6 @@ public class BlobSource implements Serializable {
 
     private final RecordBuilderFactory builderFactory;
 
-    private final MessageService i18n;
-
     private BlobFileReader reader;
 
     public BlobSource(@Option("configuration") final InputMapperConfiguration configuration,
@@ -45,7 +43,6 @@ public class BlobSource implements Serializable {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;
-        this.i18n = i18n;
     }
 
     @PostConstruct
