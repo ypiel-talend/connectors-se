@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.service;
+package org.talend.components.azure.common.service;
 
 import org.talend.sdk.component.api.internationalization.Internationalized;
 
