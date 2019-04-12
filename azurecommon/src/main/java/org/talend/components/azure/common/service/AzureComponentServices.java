@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.service;
+package org.talend.components.azure.common.service;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-import org.talend.components.azure.connection.AzureCloudConnection;
+import org.talend.components.azure.common.connection.AzureCloudConnection;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
@@ -115,9 +115,9 @@ public class AzureComponentServices {
     }
 
     public CloudBlobClient createCloudBlobClient(CloudStorageAccount connection, RetryPolicy retryPolicy) {
-        CloudBlobClient tableClient = connection.createCloudBlobClient();
-        tableClient.getDefaultRequestOptions().setRetryPolicyFactory(retryPolicy);
+        CloudBlobClient blobClient = connection.createCloudBlobClient();
+        blobClient.getDefaultRequestOptions().setRetryPolicyFactory(retryPolicy);
 
-        return tableClient;
+        return blobClient;
     }
 }
