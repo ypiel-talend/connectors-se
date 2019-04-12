@@ -24,12 +24,11 @@ import org.apache.avro.io.DatumWriter;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.runtime.converters.AvroConverter;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
+import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudAppendBlob;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class AvroBlobFileWriter extends BlobFileWriter {
@@ -40,7 +39,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
 
     private AvroConverter converter;
 
-    public AvroBlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices) throws Exception {
+    public AvroBlobFileWriter(BlobOutputConfiguration config, AzureComponentServices connectionServices) throws Exception {
         super(config, connectionServices);
         this.config = config;
         converter = AvroConverter.of();
@@ -52,7 +51,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
                 + ".avro";
 
         CloudBlockBlob blob = getContainer().getBlockBlobReference(fileName);
-        if (blob.exists(null, null, AzureBlobConnectionServices.getTalendOperationContext())) {
+        if (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
             generateFile();
             return;
         }

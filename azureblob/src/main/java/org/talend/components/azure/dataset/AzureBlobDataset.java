@@ -17,7 +17,7 @@ import java.io.Serializable;
 import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.excel.ExcelFormatOptions;
-import org.talend.components.azure.datastore.AzureConnection;
+import org.talend.components.azure.connection.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
@@ -36,7 +36,7 @@ public class AzureBlobDataset implements Serializable {
 
     @Option
     @Documentation("Azure Connection")
-    private AzureConnection connection;
+    private AzureCloudConnection connection;
 
     @Option
     @Documentation("The name of the container to access")

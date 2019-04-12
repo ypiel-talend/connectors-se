@@ -18,8 +18,7 @@ import java.util.Iterator;
 
 import org.talend.components.azure.common.excel.ExcelFormat;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.runtime.converters.RecordConverter;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
+import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
@@ -41,12 +40,12 @@ public abstract class BlobFileReader {
     private final AzureBlobDataset config;
 
     public BlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-            AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
+            AzureComponentServices connectionServices) throws URISyntaxException, StorageException {
         this.recordBuilderFactory = recordBuilderFactory;
         this.config = config;
         CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
         CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
-                AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
+                AzureComponentServices.DEFAULT_RETRY_POLICY);
         CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
 
         Iterable<ListBlobItem> blobItems = container.listBlobs(config.getDirectory(), true);
@@ -72,7 +71,7 @@ public abstract class BlobFileReader {
     public static class BlobFileReaderFactory {
 
         public static BlobFileReader getReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-                AzureBlobConnectionServices connectionServices) throws Exception {
+                AzureComponentServices connectionServices) throws Exception {
             switch (config.getFileFormat()) {
             case CSV:
                 return new CSVBlobFileReader(config, recordBuilderFactory, connectionServices);

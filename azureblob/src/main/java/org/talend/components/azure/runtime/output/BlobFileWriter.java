@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
+import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
@@ -41,10 +41,10 @@ public abstract class BlobFileWriter {
 
     private final CloudBlobContainer container;
 
-    public BlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices) throws Exception {
+    public BlobFileWriter(BlobOutputConfiguration config, AzureComponentServices connectionServices) throws Exception {
         this.connection = connectionServices.createStorageAccount(config.getDataset().getConnection());
         CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
-                AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
+                AzureComponentServices.DEFAULT_RETRY_POLICY);
         container = blobClient.getContainerReference(config.getDataset().getContainerName());
     }
 

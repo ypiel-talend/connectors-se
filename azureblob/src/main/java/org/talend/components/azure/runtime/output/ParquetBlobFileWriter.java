@@ -14,13 +14,12 @@
 package org.talend.components.azure.runtime.output;
 
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
+import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 
 public class ParquetBlobFileWriter extends BlobFileWriter {
 
-    public ParquetBlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices)
-            throws Exception {
+    public ParquetBlobFileWriter(BlobOutputConfiguration config, AzureComponentServices connectionServices) throws Exception {
         super(config, connectionServices);
     }
 

@@ -16,7 +16,7 @@ package org.talend.components.azure.runtime.input;
 import java.net.URISyntaxException;
 
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
+import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
@@ -26,7 +26,7 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 public class ParquetBlobFileReader extends BlobFileReader {
 
     public ParquetBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-            AzureBlobConnectionServices connectionServices) throws URISyntaxException, StorageException {
+            AzureComponentServices connectionServices) throws URISyntaxException, StorageException {
         super(config, recordBuilderFactory, connectionServices);
     }
 

@@ -31,7 +31,7 @@ import org.talend.components.azure.common.excel.ExcelFormat;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.runtime.output.BlobFileWriter;
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
+import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 
 import com.microsoft.azure.storage.StorageException;
@@ -54,7 +54,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
 
     private final String fileExtention;
 
-    public ExcelBlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices) throws Exception {
+    public ExcelBlobFileWriter(BlobOutputConfiguration config, AzureComponentServices connectionServices) throws Exception {
         super(config, connectionServices);
         this.config = config;
         ExcelFormat format = config.getDataset().getExcelOptions().getExcelFormat();
@@ -77,7 +77,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
                 + System.currentTimeMillis() + fileExtention;
 
         CloudBlockBlob tempFile = getContainer().getBlockBlobReference(tempName);
-        if (tempFile.exists(null, null, AzureBlobConnectionServices.getTalendOperationContext())) {
+        if (tempFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
             generateFile();
             return;
         }
@@ -150,7 +150,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
             }
 
             tempBlobItem.deleteIfExists(DeleteSnapshotsOption.NONE, null, null,
-                    AzureBlobConnectionServices.getTalendOperationContext());
+                    AzureComponentServices.getTalendOperationContext());
         }
 
         finalWorkBook.write(finalByteStream);

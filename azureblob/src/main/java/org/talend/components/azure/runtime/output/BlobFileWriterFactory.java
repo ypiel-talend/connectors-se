@@ -15,11 +15,12 @@ package org.talend.components.azure.runtime.output;
 
 import org.talend.components.azure.runtime.output.excel.ExcelBlobFileWriter;
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.azure.service.AzureBlobConnectionServices;
+import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.azure.service.AzureComponentServices;
 
 public class BlobFileWriterFactory {
 
-    public static BlobFileWriter getWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices)
+    public static BlobFileWriter getWriter(BlobOutputConfiguration config, AzureComponentServices connectionServices)
             throws Exception {
         switch (config.getDataset().getFileFormat()) {
         case CSV:
