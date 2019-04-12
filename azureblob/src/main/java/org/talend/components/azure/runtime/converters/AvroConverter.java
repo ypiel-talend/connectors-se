@@ -161,7 +161,7 @@ public class AvroConverter implements RecordConverter<GenericRecord> {
         throw new IllegalStateException(type.toString());
     }
 
-    protected org.apache.avro.Schema inferAvroSchema(Schema schema) {
+    public org.apache.avro.Schema inferAvroSchema(Schema schema) {
         List<org.apache.avro.Schema.Field> fields = new ArrayList<>();
         for (Schema.Entry e : schema.getEntries()) {
             String name = e.getName();

@@ -13,31 +13,100 @@
 
 package org.talend.components.azure.runtime.output;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.DatumWriter;
+import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.output.BlobOutputConfiguration;
+import org.talend.components.azure.runtime.converters.AvroConverter;
 import org.talend.components.azure.service.AzureBlobConnectionServices;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudAppendBlob;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class AvroBlobFileWriter extends BlobFileWriter {
 
+    private BlobOutputConfiguration config;
+
+    private Schema recordSchema;
+
+    private AvroConverter converter;
+
     public AvroBlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices) throws Exception {
         super(config, connectionServices);
-    }
-
-    @Override
-    public void flush() {
-
+        this.config = config;
+        converter = AvroConverter.of();
     }
 
     @Override
     public void generateFile() throws URISyntaxException, StorageException {
+        String fileName = config.getDataset().getDirectory() + "/" + config.getBlobNameTemplate() + System.currentTimeMillis()
+                + ".avro";
+
+        CloudBlockBlob blob = getContainer().getBlockBlobReference(fileName);
+        if (blob.exists(null, null, AzureBlobConnectionServices.getTalendOperationContext())) {
+            generateFile();
+            return;
+        }
+
+        setCurrentItem(blob);
+    }
+
+    @Override
+    public void writeRecord(Record record) {
+        super.writeRecord(record);
+
+        if (recordSchema == null) {
+            recordSchema = record.getSchema();
+        }
+    }
+
+    @Override
+    public void newBatch() {
+        super.newBatch();
+
+        try {
+            generateFile();
+        } catch (Exception e) {
+            throw new BlobRuntimeException(e);
+        }
 
     }
 
     @Override
-    public void complete() {
+    public void flush() throws StorageException, IOException {
+        if (getBatch().isEmpty()) {
+            return;
+        }
 
+        byte[] batchBytes = appendFirstBatch();
+        getCurrentItem().uploadFromByteArray(batchBytes, 0, batchBytes.length);
     }
+
+    private byte[] appendFirstBatch() throws IOException {
+
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>();
+        DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
+        dataFileWriter.create(converter.inferAvroSchema(recordSchema), byteBuffer);
+        for (Record record : getBatch()) {
+            dataFileWriter.append(converter.fromRecord(record));
+        }
+        dataFileWriter.flush();
+        return byteBuffer.toByteArray();
+    }
+
+    @Override
+    public void complete() {
+        // NOOP
+    }
+
 }

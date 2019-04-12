@@ -72,7 +72,6 @@ public class AvroBlobFileReader extends BlobFileReader {
 
                 DatumReader reader = new GenericDatumReader();
                 DataFileStream<GenericRecord> dataFileStream = new DataFileStream<GenericRecord>(input, reader);
-                System.out.println(dataFileStream.getBlockSize());
                 dataFileStream.forEach(record -> recordList.add(record));
             } catch (Exception e) {
                 throw new BlobRuntimeException(e);

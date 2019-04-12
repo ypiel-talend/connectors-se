@@ -68,8 +68,9 @@ public class CSVBlobFileWriter extends BlobFileWriter {
     // TODO move common implementation to abstract class
     @Override
     public void flush() throws IOException, StorageException {
-        if (getBatch().isEmpty())
+        if (getBatch().isEmpty()) {
             return;
+        }
 
         String content = convertBatchToString();
         if (!fileIsEmpty) {
@@ -120,8 +121,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         return contentBuilder.toString();
     }
 
-    // TODO generic?? and move it to some converter-library
-    private /* T */String convertRecordToString(Record record) {
+    private String convertRecordToString(Record record) {
         StringBuilder stringBuilder = new StringBuilder();
 
         if (!getSchema().getEntries().isEmpty()) {

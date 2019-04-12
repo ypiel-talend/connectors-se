@@ -41,11 +41,8 @@ public abstract class BlobFileWriter {
 
     private final CloudBlobContainer container;
 
-    private final BlobOutputConfiguration configuration;
-
     public BlobFileWriter(BlobOutputConfiguration config, AzureBlobConnectionServices connectionServices) throws Exception {
         this.connection = connectionServices.createStorageAccount(config.getDataset().getConnection());
-        this.configuration = config;
         CloudBlobClient blobClient = connectionServices.createCloudBlobClient(connection,
                 AzureBlobConnectionServices.DEFAULT_RETRY_POLICY);
         container = blobClient.getContainerReference(config.getDataset().getContainerName());
