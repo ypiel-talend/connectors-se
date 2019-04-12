@@ -73,6 +73,6 @@ public class CSVFormatOptions implements Serializable {
     @Option
     @ActiveIf(target = "useHeader", value = "true")
     @Documentation("Header size")
-    @Min(0)
+    @Min(-0.0)
     private int header = 0;
 }

@@ -67,6 +67,6 @@ public class ExcelFormatOptions {
     @Option
     @ActiveIf(target = "useFooter", value = "true")
     @Documentation("Footer size")
-    @Min(0)
+    @Min(-0.0)
     private int footer = 0;
 }
