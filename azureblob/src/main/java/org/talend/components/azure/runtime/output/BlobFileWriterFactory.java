@@ -13,10 +13,9 @@
 
 package org.talend.components.azure.runtime.output;
 
-import org.talend.components.azure.runtime.output.excel.ExcelBlobFileWriter;
+import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.azure.service.AzureBlobComponentServices;
-import org.talend.components.azure.service.AzureComponentServices;
+import org.talend.components.azure.runtime.output.excel.ExcelBlobFileWriter;
 
 public class BlobFileWriterFactory {
 

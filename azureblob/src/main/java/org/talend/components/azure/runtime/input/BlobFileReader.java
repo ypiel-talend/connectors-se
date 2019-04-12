@@ -17,8 +17,8 @@ import java.net.URISyntaxException;
 import java.util.Iterator;
 
 import org.talend.components.azure.common.excel.ExcelFormat;
+import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.service.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
