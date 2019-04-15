@@ -36,6 +36,7 @@
 <!--    <module>jdbc</module>
     <module>salesforce</module>-->
     <module>components-jms</module>
+    <module>components-activemq</module>
   </modules>
 
   <scm>
@@ -85,6 +86,11 @@
     <jms-api.version>2.0.1</jms-api.version>
     <validation.model>true</validation.model>
     <talend_oss_snapshots>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</talend_oss_snapshots>
+    <jms-api.version>2.0.1</jms-api.version>
+    <activemq-client.version>5.15.6</activemq-client.version>
+    <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
+
+      <validation.model>true</validation.model>
   </properties>
 
   <dependencyManagement>
@@ -196,6 +202,11 @@
         <groupId>javax.jms</groupId>
         <artifactId>javax.jms-api</artifactId>
         <version>${jms-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>activemq-client</artifactId>
+        <version>${activemq-client.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
