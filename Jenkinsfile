@@ -56,6 +56,20 @@ spec:
     }
 
     stages {
+        stage('Prepare Build') {
+            steps {
+                container('main') {
+                    withCredentials([
+                        usernamePassword(credentialsId: 'docker-registry-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_LOGIN')
+                    ]) {
+                       sh """#! /bin/bash
+                        set +x
+                        echo $DOCKER_PASSWORD | docker login $TALEND_REGISTRY -u $DOCKER_LOGIN --password-stdin
+                       """
+                    }
+                }
+            }
+        }
         stage('Run maven') {
             steps {
                 container('main') {
@@ -117,7 +131,11 @@ spec:
                 stage('Site') {
                     steps {
                         container('main') {
+<<<<<<< HEAD
                             sh 'cd ci_site && mvn -U -B clean -DskipTests site site:stage -Dmaven.test.failure.ignore=true'
+=======
+                            sh 'cd ci_site && mvn -U -B clean site site:stage -DskipTests -Dmaven.test.failure.ignore=true'
+>>>>>>> vizotenko/TDI-41172_rabbitmq
                         }
                     }
                     post {
