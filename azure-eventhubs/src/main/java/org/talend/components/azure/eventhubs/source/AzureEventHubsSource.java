@@ -39,11 +39,16 @@ import com.microsoft.azure.eventhubs.EventHubClient;
 import com.microsoft.azure.eventhubs.EventHubException;
 import com.microsoft.azure.eventhubs.EventPosition;
 import com.microsoft.azure.eventhubs.PartitionReceiver;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Documentation("Source to consume eventhubs messages")
 public class AzureEventHubsSource implements Serializable {
+
+    private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
+    private static final String PAYLOAD_COLUMN = "payload";
 
     private final AzureEventHubsInputConfiguration configuration;
 
@@ -59,10 +64,6 @@ public class AzureEventHubsSource implements Serializable {
 
     private EventHubClient ehClient;
 
-    private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-
-    private static final String PAYLOAD_COLUMN = "payload";
-
     public AzureEventHubsSource(@Option("configuration") final AzureEventHubsInputConfiguration configuration,
             final UiActionService service, final RecordBuilderFactory builderFactory) {
         this.configuration = configuration;
@@ -74,12 +75,12 @@ public class AzureEventHubsSource implements Serializable {
     public void init() {
         try {
             executorService = Executors.newScheduledThreadPool(1);
-            final ConnectionStringBuilder connStr;//
-            connStr = new ConnectionStringBuilder()//
+            final ConnectionStringBuilder connStr = new ConnectionStringBuilder()//
                     .setEndpoint(new URI(configuration.getDataset().getDatastore().getEndpoint()));
             connStr.setSasKeyName(configuration.getDataset().getDatastore().getSasKeyName());
             connStr.setSasKey(configuration.getDataset().getDatastore().getSasKey());
             connStr.setEventHubName(configuration.getDataset().getEventHubName());
+            // log.info("init client...");
             ehClient = EventHubClient.createSync(connStr.toString(), executorService);
 
             receiver = ehClient.createReceiverSync(configuration.getDataset().getConsumerGroupName(),
@@ -94,31 +95,35 @@ public class AzureEventHubsSource implements Serializable {
     public Record next() {
         try {
             if (receivedEvents == null || !receivedEvents.hasNext()) {
+                log.info("fetch messages...");
                 // TODO let it configurable?
-                Iterable iterable = receiver.receiveSync(100);
+                Iterable<EventData> iterable = receiver.receiveSync(100);
                 if (iterable == null) {
                     return null;
-                } else {
-                    receivedEvents = iterable.iterator();
+                }
+                receivedEvents = iterable.iterator();
+            }
+            if (receivedEvents.hasNext()) {
+                EventData eventData = receivedEvents.next();
+                if (eventData != null) {
+                    Record.Builder recordBuilder = builderFactory.newRecordBuilder();
+                    recordBuilder.withString(PAYLOAD_COLUMN, new String(eventData.getBytes(), DEFAULT_CHARSET));
+                    // TODO remove this later
+                    // log.info(eventData.getSystemProperties().getSequenceNumber() + " --> "
+                    // + new String(eventData.getBytes(), DEFAULT_CHARSET));
+                    return recordBuilder.build();
                 }
             }
-            EventData eventData = receivedEvents.next();
-            if (eventData != null) {
-                Record.Builder recordBuilder = builderFactory.newRecordBuilder();
-                recordBuilder.withString(PAYLOAD_COLUMN, new String(eventData.getBytes(), DEFAULT_CHARSET));
-                return recordBuilder.build();
-            }
         } catch (EventHubException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e.getMessage(), e);
         }
         return null;
     }
 
     @PreDestroy
     public void release() {
-        // cleaning up receivers is paramount;
-        // Quota limitation on maximum number of concurrent receivers per consumergroup per partition is 5
         try {
+            // log.info("release client...");
             receiver.close().thenComposeAsync(aVoid -> ehClient.close(), executorService).whenCompleteAsync((t, u) -> {
                 if (u != null) {
                     log.warn("closing failed with error:", u.toString());
