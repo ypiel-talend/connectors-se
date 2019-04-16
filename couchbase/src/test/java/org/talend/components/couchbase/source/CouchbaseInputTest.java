@@ -86,26 +86,16 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         environment.shutdown();
     }
 
-    void executeJob(){
+    void executeJob() {
         final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
         Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
                 .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();
     }
 
     @Test
-    @DisplayName("Check size of input data")
-    void totalNumbersOfRecordsTest() {
-        insertTestDataToDB();
-
-        executeJob();
-
-        final List<Record> res = componentsHandler.getCollectedData(Record.class);
-        assertEquals(2, res.size());
-    }
-
-    @Test
     @DisplayName("Check input data")
     void couchbaseInputDataTest() {
+        componentsHandler.resetState();
         insertTestDataToDB();
 
         executeJob();

@@ -73,13 +73,13 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     }
 
     @BeforeEach
-    void createTestRecords(){
+    void createTestRecords() {
         records = super.createRecords();
         componentsHandler.setInputData(records);
         executeJob();
     }
 
-    void executeJob(){
+    void executeJob() {
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
 
         Job.components().component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
