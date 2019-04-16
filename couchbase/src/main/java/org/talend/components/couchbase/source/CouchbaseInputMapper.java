@@ -28,7 +28,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 @Version(1)
-@Icon(Icon.IconType.STAR)
+@Icon(value = Icon.IconType.CUSTOM, custom = "CouchbaseInput")
 @PartitionMapper(name = "Input")
 @Documentation("Couchbase input Mapper")
 public class CouchbaseInputMapper implements Serializable {

@@ -43,10 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import static org.talend.sdk.component.api.record.Schema.Type.*;
 
-@Version(1)
 @Slf4j
 @Documentation("This component reads data from Couchbase.")
-@Icon(value = Icon.IconType.CUSTOM, custom = "CouchbaseInput")
 public class CouchbaseInput implements Serializable {
 
     private I18nMessage i18n;
