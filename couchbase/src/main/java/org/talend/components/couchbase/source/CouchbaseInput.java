@@ -92,7 +92,9 @@ public class CouchbaseInput implements Serializable {
 
     @Producer
     public Record next() {
-        if (index.hasNext()) {
+        if (!index.hasNext()) {
+            return null;
+        } else {
             // unwrap JsonObject
             JsonObject jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
 
@@ -107,7 +109,6 @@ public class CouchbaseInput implements Serializable {
 
             return recordBuilder.build();
         }
-        return null;
     }
 
     @PreDestroy
@@ -155,7 +156,7 @@ public class CouchbaseInput implements Serializable {
         } else if (value instanceof Long) {
             return Schema.Type.LONG;
         } else if (value instanceof Byte[]) {
-            return Schema.Type.BYTES;
+            throw new IllegalArgumentException("BYTES is unsupported");
         } else if (value instanceof JsonArray) {
             return ARRAY;
         } else {
@@ -181,8 +182,7 @@ public class CouchbaseInput implements Serializable {
             recordBuilder.withDouble(entryBuilder.build(), value == null ? null : (Double) value);
             break;
         case BYTES:
-            recordBuilder.withBytes(entryBuilder.build(), value == null ? null : (byte[]) value);
-            break;
+            throw new IllegalArgumentException("BYTES is unsupported");
         case STRING:
             recordBuilder.withString(entryBuilder.build(), value == null ? null : value.toString());
             break;

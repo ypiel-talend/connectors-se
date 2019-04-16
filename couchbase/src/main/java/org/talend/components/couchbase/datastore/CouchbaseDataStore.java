@@ -16,9 +16,12 @@ package org.talend.components.couchbase.datastore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
+import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
+import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -30,7 +33,10 @@ import lombok.Data;
 @Data
 @DataStore("CouchbaseDataStore")
 @Checkable("healthCheck")
-@GridLayout({ @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "password" }), @GridLayout.Row({ "bootstrapNodes" }) })
+@GridLayouts({
+        @GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "password" }),
+                @GridLayout.Row({ "bootstrapNodes" }) }),
+        @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectTimeout" }) }) })
 @Documentation("Couchbase connection")
 public class CouchbaseDataStore implements Serializable {
 
@@ -39,8 +45,8 @@ public class CouchbaseDataStore implements Serializable {
     @Documentation("Bucket name")
     private String bucket;
 
-    @Required
     @Option
+    @Required
     @Credential
     @Documentation("Password")
     private String password;
@@ -49,4 +55,11 @@ public class CouchbaseDataStore implements Serializable {
     @Required
     @Documentation("Bootstrap nodes")
     private String bootstrapNodes;
+
+    @Option
+    @Required
+    @DefaultValue("5")
+    @Min(5)
+    @Documentation("Set the maximum number of seconds that a client will wait for opened a Bucket. Min value is 5 seconds.")
+    private int connectTimeout;
 }

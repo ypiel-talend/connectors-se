@@ -56,10 +56,11 @@ public class CouchbaseService {
         String bootStrapNodes = dataStore.getBootstrapNodes();
         String bucketName = dataStore.getBucket();
         String password = dataStore.getPassword();
+        int connectTimeout = dataStore.getConnectTimeout() * 1000; // convert to sec
 
         String[] urls = resolveAddresses(bootStrapNodes);
 
-        this.environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
+        this.environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(connectTimeout).build();
         this.cluster = CouchbaseCluster.create(environment, urls);
         this.bucket = this.cluster.openBucket(bucketName, password);
         return bucket;

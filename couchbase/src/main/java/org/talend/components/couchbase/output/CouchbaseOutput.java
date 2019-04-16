@@ -102,8 +102,7 @@ public class CouchbaseOutput implements Serializable {
                 value = record.getLong(entryName);
                 break;
             case BYTES:
-                value = record.getBytes(entryName);
-                break;
+                throw new IllegalArgumentException("BYTES is unsupported");
             case FLOAT:
                 value = record.getFloat(entryName);
                 break;
@@ -132,10 +131,7 @@ public class CouchbaseOutput implements Serializable {
             if (entryName.equals(idFieldName)) {
                 value = String.valueOf(value);
             }
-            if (value instanceof byte[]) {
-                jsonObject.put(entryName, new String((byte[]) value));
-                // TODO: decide what to do with byte array
-            } else if (value instanceof Float) {
+            if (value instanceof Float) {
                 jsonObject.put(entryName, Double.parseDouble(value.toString()));
             } else if (value instanceof ZonedDateTime) {
                 jsonObject.put(entryName, value.toString());

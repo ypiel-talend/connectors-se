@@ -21,12 +21,14 @@ import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.talend.components.couchbase.CouchbaseUtilTest;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -48,8 +50,11 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     @Injected
     private BaseComponentsHandler componentsHandler;
 
+    private List<Record> records;
+
     private List<JsonDocument> retrieveDataFromDatabase() {
-        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
+        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
+                .build();
         Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
         Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
         List<JsonDocument> resultList = new ArrayList<>();
@@ -67,28 +72,30 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
         return resultList;
     }
 
-    @Test
-    @DisplayName("Check amount of total records from retrieved data")
-    void sizeOfRetrievedCouchbaseInsertTest() {
-        componentsHandler.setInputData(super.createRecords());
+    @BeforeEach
+    void createTestRecords(){
+        records = super.createRecords();
+        componentsHandler.setInputData(records);
+        executeJob();
+    }
+
+    void executeJob(){
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
 
         Job.components().component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
                 .component("emitter", "test://emitter").connections().from("emitter").to("Couchbase_Output").build().run();
+    }
+
+    @Test
+    @DisplayName("Check amount of total records from retrieved data")
+    void sizeOfRetrievedCouchbaseInsertTest() {
         assertEquals(2, retrieveDataFromDatabase().size());
     }
 
     @Test
     @DisplayName("Check fields from retrieved data")
     void checkDataCouchbaseInsertTest() {
-        componentsHandler.setInputData(super.createRecords());
-        final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
-
-        Job.components().component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
-                .component("emitter", "test://emitter").connections().from("emitter").to("Couchbase_Output").build().run();
-
         List<JsonDocument> resultList = retrieveDataFromDatabase();
-
         TestData testData = new TestData();
 
         assertEquals(testData.getCol1() + "1", resultList.get(0).content().getString("t_string"));
@@ -96,7 +103,6 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
         assertEquals(new Integer(testData.getCol3()), resultList.get(0).content().getInt("t_int_max"));
         assertEquals(new Long(testData.getCol4()), resultList.get(0).content().getLong("t_long_min"));
         assertEquals(new Long(testData.getCol5()), resultList.get(0).content().getLong("t_long_max"));
-        // assertEquals(new Byte[], resultList.get(0).content().getString("t_bytes"));
         assertEquals(testData.getCol6(), resultList.get(0).content().getDouble("t_float_min"), 1E35);
         assertEquals(testData.getCol7(), resultList.get(0).content().getDouble("t_float_max"), 1E35);
         assertEquals(testData.getCol8(), resultList.get(0).content().getDouble("t_double_min"), 1);
@@ -113,6 +119,7 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
         couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
         couchbaseDataStore.setBucket(BUCKET_NAME);
         couchbaseDataStore.setPassword(BUCKET_PASSWORD);
+        couchbaseDataStore.setConnectTimeout(DEFAULT_TIMEOUT_IN_SEC);
 
         CouchbaseDataSet couchbaseDataSet = new CouchbaseDataSet();
         couchbaseDataSet.setDatastore(couchbaseDataStore);

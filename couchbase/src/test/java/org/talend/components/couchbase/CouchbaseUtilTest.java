@@ -44,6 +44,8 @@ public abstract class CouchbaseUtilTest implements Extension {
 
     public static final String CLUSTER_PASSWORD = "secret";
 
+    public static final int DEFAULT_TIMEOUT_IN_SEC = 20;
+
     private static final List<String> ports = new ArrayList(
             Arrays.asList(new String[] { "8091:8091", "8092:8092", "8093:8093", "8094:8094", "11210:11210" }));
 
@@ -108,7 +110,6 @@ public abstract class CouchbaseUtilTest implements Extension {
                 .withInt(entryBuilder.withName("t_int_max").withType(Schema.Type.INT).build(), testData.col3)
                 .withLong(entryBuilder.withName("t_long_min").withType(Schema.Type.LONG).build(), testData.col4)
                 .withLong(entryBuilder.withName("t_long_max").withType(Schema.Type.LONG).build(), testData.col5)
-                // .withBytes(entryBuilder.withName("t_bytes").withType(Schema.Type.BYTES).build(), "test1".getBytes())
                 .withFloat(entryBuilder.withName("t_float_min").withType(Schema.Type.FLOAT).build(), testData.col6)
                 .withFloat(entryBuilder.withName("t_float_max").withType(Schema.Type.FLOAT).build(), testData.col7)
                 .withDouble(entryBuilder.withName("t_double_min").withType(Schema.Type.DOUBLE).build(), testData.col8)
@@ -125,7 +126,6 @@ public abstract class CouchbaseUtilTest implements Extension {
                 .withInt(entryBuilder.withName("t_int_max").withType(Schema.Type.INT).build(), testData.col3)
                 .withLong(entryBuilder.withName("t_long_min").withType(Schema.Type.LONG).build(), testData.col4)
                 .withLong(entryBuilder.withName("t_long_max").withType(Schema.Type.LONG).build(), testData.col5)
-                // .withBytes(entryBuilder.withName("t_bytes").withType(Schema.Type.BYTES).build(), "test1".getBytes())
                 .withFloat(entryBuilder.withName("t_float_min").withType(Schema.Type.FLOAT).build(), testData.col6)
                 .withFloat(entryBuilder.withName("t_float_max").withType(Schema.Type.FLOAT).build(), testData.col7)
                 .withDouble(entryBuilder.withName("t_double_min").withType(Schema.Type.DOUBLE).build(), testData.col8)
@@ -146,14 +146,12 @@ public abstract class CouchbaseUtilTest implements Extension {
         TestData testData = new TestData();
         JsonObject json1 = JsonObject.create().put("t_string", testData.col1 + "1").put("t_int_min", testData.col2)
                 .put("t_int_max", testData.col3).put("t_long_min", testData.col4).put("t_long_max", testData.col5)
-                // .put("t_bytes", "test1".getBytes())
                 .put("t_float_min", testData.col6).put("t_float_max", testData.col7).put("t_double_min", testData.col8)
                 .put("t_double_max", testData.col9).put("t_boolean", testData.col10).put("t_datetime", testData.col11.toString())
                 .put("t_array", testData.col12);
 
         JsonObject json2 = JsonObject.create().put("t_string", testData.col1 + "2").put("t_int_min", testData.col2)
                 .put("t_int_max", testData.col3).put("t_long_min", testData.col4).put("t_long_max", testData.col5)
-                // .put("t_bytes", "test1".getBytes())
                 .put("t_float_min", testData.col6).put("t_float_max", testData.col7).put("t_double_min", testData.col8)
                 .put("t_double_max", testData.col9).put("t_boolean", testData.col10).put("t_datetime", testData.col11.toString())
                 .put("t_array", testData.col12);

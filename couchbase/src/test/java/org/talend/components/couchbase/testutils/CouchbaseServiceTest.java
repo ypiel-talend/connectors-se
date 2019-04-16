@@ -40,6 +40,7 @@ public class CouchbaseServiceTest extends CouchbaseUtilTest {
         couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
         couchbaseDataStore.setBucket(BUCKET_NAME);
         couchbaseDataStore.setPassword(BUCKET_PASSWORD);
+        couchbaseDataStore.setConnectTimeout(DEFAULT_TIMEOUT_IN_SEC);
 
         assertEquals(HealthCheckStatus.Status.OK, couchbaseService.healthCheck(couchbaseDataStore).getStatus());
     }
@@ -53,6 +54,7 @@ public class CouchbaseServiceTest extends CouchbaseUtilTest {
         couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
         couchbaseDataStore.setBucket(BUCKET_NAME);
         couchbaseDataStore.setPassword(wrongPassword);
+        couchbaseDataStore.setConnectTimeout(DEFAULT_TIMEOUT_IN_SEC);
 
         assertEquals(HealthCheckStatus.Status.KO, couchbaseService.healthCheck(couchbaseDataStore).getStatus());
     }

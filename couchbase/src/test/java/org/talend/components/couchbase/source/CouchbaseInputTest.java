@@ -20,6 +20,7 @@ import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -34,8 +35,6 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +52,8 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     private RecordBuilderFactory recordBuilderFactory;
 
     private void insertTestDataToDB() {
-        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
+        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
+                .build();
         Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
         Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
 
@@ -70,7 +70,8 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     }
 
     private void insertTestDataWithNullValueToDB() {
-        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(20000L).build();
+        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
+                .build();
         Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
         Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
 
@@ -85,14 +86,18 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         environment.shutdown();
     }
 
+    void executeJob(){
+        final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
+        Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
+                .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();
+    }
+
     @Test
     @DisplayName("Check size of input data")
     void totalNumbersOfRecordsTest() {
         insertTestDataToDB();
 
-        final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
-        Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
-                .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();
+        executeJob();
 
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
         assertEquals(2, res.size());
@@ -103,9 +108,7 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     void couchbaseInputDataTest() {
         insertTestDataToDB();
 
-        final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
-        Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
-                .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();
+        executeJob();
 
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
 
@@ -116,7 +119,6 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         assertEquals(testData.getCol3(), res.get(0).getInt("t_int_max"));
         assertEquals(testData.getCol4(), res.get(0).getLong("t_long_min"));
         assertEquals(testData.getCol5(), res.get(0).getLong("t_long_max"));
-        // assertEquals("test1".getBytes(), res.get(0).getString("t_bytes"));
         assertEquals(testData.getCol6(), res.get(0).getFloat("t_float_min"));
         assertEquals(testData.getCol7(), res.get(0).getFloat("t_float_max"));
         assertEquals(testData.getCol8(), res.get(0).getDouble("t_double_min"));
@@ -133,9 +135,7 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     void firstValueIsNullInInputDBTest() {
         insertTestDataWithNullValueToDB();
 
-        final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
-        Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
-                .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();
+        executeJob();
 
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
         assertEquals(2, res.get(0).getSchema().getEntries().size());
@@ -146,6 +146,7 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
         couchbaseDataStore.setBucket(BUCKET_NAME);
         couchbaseDataStore.setPassword(BUCKET_PASSWORD);
+        couchbaseDataStore.setConnectTimeout(DEFAULT_TIMEOUT_IN_SEC);
 
         CouchbaseDataSet couchbaseDataSet = new CouchbaseDataSet();
         couchbaseDataSet.setDatastore(couchbaseDataStore);
