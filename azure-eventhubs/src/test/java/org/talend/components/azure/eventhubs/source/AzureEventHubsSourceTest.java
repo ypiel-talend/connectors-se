@@ -36,10 +36,10 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setDatastore(getDataStore());
         dataSet.setEventHubName(EVENTHUB_NAME);
-        dataSet.setConsumerGroupName("consumer-group-1");
         dataSet.setPartitionId("1");
-        dataSet.setReceiverOptions(AzureEventHubsDataSet.ReceiverOptions.OFFSET);
-        dataSet.setOffset("-1");
+        inputConfiguration.setConsumerGroupName("consumer-group-1");
+        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.OFFSET);
+        inputConfiguration.setOffset("-1");
         inputConfiguration.setDataset(dataSet);
 
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
@@ -55,10 +55,11 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setDatastore(getDataStore());
         dataSet.setEventHubName(EVENTHUB_NAME);
-        dataSet.setConsumerGroupName("consumer-group-1");
-        dataSet.setPartitionId("3");
-        dataSet.setReceiverOptions(AzureEventHubsDataSet.ReceiverOptions.SEQUENCE);
-        dataSet.setSequenceNum(0L);
+        dataSet.setPartitionId("1");
+
+        inputConfiguration.setConsumerGroupName("consumer-group-1");
+        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.SEQUENCE);
+        inputConfiguration.setSequenceNum(0L);
         inputConfiguration.setDataset(dataSet);
 
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
@@ -74,10 +75,11 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setDatastore(getDataStore());
         dataSet.setEventHubName(EVENTHUB_NAME);
-        dataSet.setConsumerGroupName("consumer-group-1");
         dataSet.setPartitionId("3");
-        dataSet.setReceiverOptions(AzureEventHubsDataSet.ReceiverOptions.DATETIME);
-        dataSet.setEnqueuedDateTime("2019-04-04T00:00:00.000Z");
+
+        inputConfiguration.setConsumerGroupName("consumer-group-1");
+        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.DATETIME);
+        inputConfiguration.setEnqueuedDateTime("2019-04-04T00:00:00.000Z");
         inputConfiguration.setDataset(dataSet);
 
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();

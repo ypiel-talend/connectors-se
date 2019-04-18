@@ -83,7 +83,7 @@ public class AzureEventHubsSource implements Serializable {
             // log.info("init client...");
             ehClient = EventHubClient.createSync(connStr.toString(), executorService);
 
-            receiver = ehClient.createReceiverSync(configuration.getDataset().getConsumerGroupName(),
+            receiver = ehClient.createReceiverSync(configuration.getConsumerGroupName(),
                     configuration.getDataset().getPartitionId(), getPosition());
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -137,20 +137,19 @@ public class AzureEventHubsSource implements Serializable {
     }
 
     private EventPosition getPosition() {
-        if (AzureEventHubsDataSet.ReceiverOptions.OFFSET.equals(configuration.getDataset().getReceiverOptions())) {
-            return EventPosition.fromOffset(configuration.getDataset().getOffset(), configuration.getDataset().isInclusiveFlag());
+        if (AzureEventHubsInputConfiguration.ReceiverOptions.OFFSET.equals(configuration.getReceiverOptions())) {
+            return EventPosition.fromOffset(configuration.getOffset(), configuration.isInclusiveFlag());
         }
-        if (AzureEventHubsDataSet.ReceiverOptions.SEQUENCE.equals(configuration.getDataset().getReceiverOptions())) {
-            return EventPosition.fromSequenceNumber(configuration.getDataset().getSequenceNum(),
-                    configuration.getDataset().isInclusiveFlag());
+        if (AzureEventHubsInputConfiguration.ReceiverOptions.SEQUENCE.equals(configuration.getReceiverOptions())) {
+            return EventPosition.fromSequenceNumber(configuration.getSequenceNum(), configuration.isInclusiveFlag());
         }
-        if (AzureEventHubsDataSet.ReceiverOptions.DATETIME.equals(configuration.getDataset().getReceiverOptions())) {
+        if (AzureEventHubsInputConfiguration.ReceiverOptions.DATETIME.equals(configuration.getReceiverOptions())) {
             Instant enqueuedDateTime = null;
-            if (configuration.getDataset().getEnqueuedDateTime() == null) {
+            if (configuration.getEnqueuedDateTime() == null) {
                 // default query from now
                 enqueuedDateTime = Instant.now();
             } else {
-                enqueuedDateTime = Instant.parse(configuration.getDataset().getEnqueuedDateTime());
+                enqueuedDateTime = Instant.parse(configuration.getEnqueuedDateTime());
             }
             return EventPosition.fromEnqueuedTime(enqueuedDateTime);
         }
