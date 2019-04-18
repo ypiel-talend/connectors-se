@@ -17,6 +17,7 @@ package org.talend.components.azure.eventhubs.source;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.concurrent.Executors;
@@ -25,7 +26,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.talend.components.azure.eventhubs.dataset.AzureEventHubsDataSet;
 import org.talend.components.azure.eventhubs.service.UiActionService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
@@ -64,6 +64,8 @@ public class AzureEventHubsSource implements Serializable {
 
     private EventHubClient ehClient;
 
+    private long count;
+
     public AzureEventHubsSource(@Option("configuration") final AzureEventHubsInputConfiguration configuration,
             final UiActionService service, final RecordBuilderFactory builderFactory) {
         this.configuration = configuration;
@@ -74,7 +76,7 @@ public class AzureEventHubsSource implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            executorService = Executors.newScheduledThreadPool(1);
+            executorService = Executors.newScheduledThreadPool(8);
             final ConnectionStringBuilder connStr = new ConnectionStringBuilder()//
                     .setEndpoint(new URI(configuration.getDataset().getDatastore().getEndpoint()));
             connStr.setSasKeyName(configuration.getDataset().getDatastore().getSasKeyName());
@@ -83,8 +85,9 @@ public class AzureEventHubsSource implements Serializable {
             // log.info("init client...");
             ehClient = EventHubClient.createSync(connStr.toString(), executorService);
 
-            receiver = ehClient.createReceiverSync(configuration.getConsumerGroupName(),
-                    configuration.getDataset().getPartitionId(), getPosition());
+            receiver = ehClient.createEpochReceiverSync(configuration.getConsumerGroupName(),
+                    configuration.getDataset().getPartitionId(), getPosition(), Integer.MAX_VALUE);
+            receiver.setReceiveTimeout(Duration.ofSeconds(configuration.getReceiveTimeout()));
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -93,31 +96,42 @@ public class AzureEventHubsSource implements Serializable {
 
     @Producer
     public Record next() {
-        try {
-            if (receivedEvents == null || !receivedEvents.hasNext()) {
-                log.info("fetch messages...");
-                // TODO let it configurable?
-                Iterable<EventData> iterable = receiver.receiveSync(100);
-                if (iterable == null) {
-                    return null;
-                }
-                receivedEvents = iterable.iterator();
-            }
-            if (receivedEvents.hasNext()) {
-                EventData eventData = receivedEvents.next();
-                if (eventData != null) {
-                    Record.Builder recordBuilder = builderFactory.newRecordBuilder();
-                    recordBuilder.withString(PAYLOAD_COLUMN, new String(eventData.getBytes(), DEFAULT_CHARSET));
-                    // TODO remove this later
-                    // log.info(eventData.getSystemProperties().getSequenceNumber() + " --> "
-                    // + new String(eventData.getBytes(), DEFAULT_CHARSET));
-                    return recordBuilder.build();
-                }
-            }
-        } catch (EventHubException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+        if (configuration.isUseMaxNum() && count >= configuration.getMaxNumReceived()) {
+            return null;
         }
-        return null;
+        while (true) {
+            try {
+                if (receivedEvents == null || !receivedEvents.hasNext()) {
+                    log.info("fetch messages...");
+                    // TODO let it configurable?
+                    Iterable<EventData> iterable = receiver.receiveSync(100);
+                    if (iterable == null) {
+                        if (!configuration.isUseMaxNum()) {
+                            return null;
+                        } else {
+
+                        }
+                    }
+                    receivedEvents = iterable.iterator();
+                }
+                if (receivedEvents.hasNext()) {
+                    EventData eventData = receivedEvents.next();
+                    if (eventData != null) {
+                        Record.Builder recordBuilder = builderFactory.newRecordBuilder();
+                        recordBuilder.withString(PAYLOAD_COLUMN, new String(eventData.getBytes(), DEFAULT_CHARSET));
+                        // TODO remove this later
+                        // log.info(eventData.getSystemProperties().getSequenceNumber() + " --> "
+                        // + new String(eventData.getBytes(), DEFAULT_CHARSET));
+                        count++;
+                        return recordBuilder.build();
+                    }
+                } else {
+                    continue;
+                }
+            } catch (EventHubException e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        }
     }
 
     @PreDestroy

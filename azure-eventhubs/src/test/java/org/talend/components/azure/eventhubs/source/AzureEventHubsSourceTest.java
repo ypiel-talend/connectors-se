@@ -18,6 +18,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.eventhubs.AzureEventHubsTestBase;
@@ -88,4 +89,48 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
                 .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
     }
+
+    @Test
+    void testReadTimeOut() {
+        AzureEventHubsInputConfiguration inputConfiguration = new AzureEventHubsInputConfiguration();
+        final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
+        dataSet.setDatastore(getDataStore());
+        dataSet.setEventHubName(EVENTHUB_NAME);
+        dataSet.setPartitionId("1");
+        inputConfiguration.setConsumerGroupName("$Default");
+        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.OFFSET);
+        inputConfiguration.setOffset("-1");
+        inputConfiguration.setReceiveTimeout(60L);
+        inputConfiguration.setDataset(dataSet);
+
+        final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
+        Job.components().component("azureeventhubs-input", "AzureEventHubs://AzureEventHubsInputMapper?" + config)
+                .component("collector", "test://collector").connections().from("azureeventhubs-input").to("collector").build()
+                .run();
+        final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
+    }
+
+    @Test
+    void testReadMaxNumReceived() {
+        AzureEventHubsInputConfiguration inputConfiguration = new AzureEventHubsInputConfiguration();
+        final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
+        dataSet.setDatastore(getDataStore());
+        dataSet.setEventHubName(EVENTHUB_NAME);
+        dataSet.setPartitionId("1");
+        inputConfiguration.setConsumerGroupName("$Default");
+        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.OFFSET);
+        inputConfiguration.setOffset("-1");
+        inputConfiguration.setUseMaxNum(true);
+        inputConfiguration.setMaxNumReceived(10L);
+        inputConfiguration.setDataset(dataSet);
+
+        final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
+        Job.components().component("azureeventhubs-input", "AzureEventHubs://AzureEventHubsInputMapper?" + config)
+                .component("collector", "test://collector").connections().from("azureeventhubs-input").to("collector").build()
+                .run();
+        final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
+        Assert.assertNotNull(records);
+        Assert.assertEquals(10, records.size());
+    }
+
 }
