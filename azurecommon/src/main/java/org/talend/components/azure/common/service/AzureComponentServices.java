@@ -65,25 +65,13 @@ public class AzureComponentServices {
 
     @HealthCheck(TEST_CONNECTION)
     public HealthCheckStatus testConnection(@Option AzureCloudConnection azureConnection) {
-        return azureConnection.isUseAzureSharedSignature() ? testConnection(azureConnection.getSignatureConnection(), true)
-                : testConnection(azureConnection.getAccountConnection(), false);
+        return azureConnection.isUseAzureSharedSignature() ? testConnection(azureConnection.getSignatureConnection())
+                : testConnection(azureConnection.getAccountConnection());
     }
 
-    private HealthCheckStatus testConnection(Object azureConnection, boolean useSharedSignature) {
-        final int maxContainers = 1;
-        try {
-            CloudStorageAccount cloudStorageAccount = useSharedSignature
-                    ? createStorageAccount((AzureStorageConnectionSignature) azureConnection)
-                    : createStorageAccount((AzureStorageConnectionAccount) azureConnection);
-            CloudBlobClient blobClient = createCloudBlobClient(cloudStorageAccount, DEFAULT_RETRY_POLICY);
-            // will throw an exception if not authorized or account not exist
-            blobClient.listContainersSegmented(null, null, maxContainers, null, null, getTalendOperationContext());
-        } catch (Exception e) {
-            String errorMessage = (StringUtils.isNotEmpty(e.getMessage()) || (e.getCause() == null)) ? e.getMessage()
-                    : e.getCause().toString();
-            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18nService.connectionError() + ": " + errorMessage);
-        }
-        return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18nService.connected());
+    public CloudStorageAccount createStorageAccount(AzureCloudConnection azureConnection) throws URISyntaxException {
+        return azureConnection.isUseAzureSharedSignature() ? createStorageAccount(azureConnection.getSignatureConnection())
+                : createStorageAccount(azureConnection.getAccountConnection());
     }
 
     public CloudStorageAccount createStorageAccount(AzureStorageConnectionAccount azureConnection) throws URISyntaxException {
@@ -98,6 +86,13 @@ public class AzureComponentServices {
                 azureConnection.getAzureSharedAccessSignature());
 
         return new CloudStorageAccount(credentials);
+    }
+
+    public CloudBlobClient createCloudBlobClient(CloudStorageAccount connection, RetryPolicy retryPolicy) {
+        CloudBlobClient blobClient = connection.createCloudBlobClient();
+        blobClient.getDefaultRequestOptions().setRetryPolicyFactory(retryPolicy);
+
+        return blobClient;
     }
 
     public static OperationContext getTalendOperationContext() {
@@ -127,10 +122,20 @@ public class AzureComponentServices {
         return String.format(USER_AGENT_FORMAT, applicationVersion, componentVersion);
     }
 
-    public CloudBlobClient createCloudBlobClient(CloudStorageAccount connection, RetryPolicy retryPolicy) {
-        CloudBlobClient blobClient = connection.createCloudBlobClient();
-        blobClient.getDefaultRequestOptions().setRetryPolicyFactory(retryPolicy);
-
-        return blobClient;
+    private HealthCheckStatus testConnection(Object azureConnection) {
+        final int maxContainers = 1;
+        try {
+            CloudStorageAccount cloudStorageAccount = azureConnection instanceof AzureStorageConnectionSignature
+                    ? createStorageAccount((AzureStorageConnectionSignature) azureConnection)
+                    : createStorageAccount((AzureStorageConnectionAccount) azureConnection);
+            CloudBlobClient blobClient = createCloudBlobClient(cloudStorageAccount, DEFAULT_RETRY_POLICY);
+            // will throw an exception if not authorized or account not exist
+            blobClient.listContainersSegmented(null, null, maxContainers, null, null, getTalendOperationContext());
+        } catch (Exception e) {
+            String errorMessage = (StringUtils.isNotEmpty(e.getMessage()) || (e.getCause() == null)) ? e.getMessage()
+                    : e.getCause().toString();
+            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18nService.connectionError() + ": " + errorMessage);
+        }
+        return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18nService.connected());
     }
 }
