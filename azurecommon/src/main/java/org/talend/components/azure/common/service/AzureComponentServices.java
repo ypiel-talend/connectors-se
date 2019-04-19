@@ -18,11 +18,13 @@ import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.common.Protocol;
+import org.talend.components.azure.common.connection.AzureCloudConnection;
+import org.talend.components.azure.common.connection.AzureStorageConnectionAccount;
+import org.talend.components.azure.common.connection.AzureStorageConnectionSignature;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-import org.talend.components.azure.common.connection.AzureCloudConnection;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
@@ -63,9 +65,16 @@ public class AzureComponentServices {
 
     @HealthCheck(TEST_CONNECTION)
     public HealthCheckStatus testConnection(@Option AzureCloudConnection azureConnection) {
+        return azureConnection.isUseAzureSharedSignature() ? testConnection(azureConnection.getSignatureConnection(), true)
+                : testConnection(azureConnection.getAccountConnection(), false);
+    }
+
+    private HealthCheckStatus testConnection(Object azureConnection, boolean useSharedSignature) {
         final int maxContainers = 1;
         try {
-            CloudStorageAccount cloudStorageAccount = createStorageAccount(azureConnection);
+            CloudStorageAccount cloudStorageAccount = useSharedSignature
+                    ? createStorageAccount((AzureStorageConnectionSignature) azureConnection)
+                    : createStorageAccount((AzureStorageConnectionAccount) azureConnection);
             CloudBlobClient blobClient = createCloudBlobClient(cloudStorageAccount, DEFAULT_RETRY_POLICY);
             // will throw an exception if not authorized or account not exist
             blobClient.listContainersSegmented(null, null, maxContainers, null, null, getTalendOperationContext());
@@ -77,14 +86,18 @@ public class AzureComponentServices {
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18nService.connected());
     }
 
-    public CloudStorageAccount createStorageAccount(AzureCloudConnection azureConnection) throws URISyntaxException {
-        StorageCredentials credentials = null;
-        if (!azureConnection.isUseAzureSharedSignature()) {
-            credentials = new StorageCredentialsAccountAndKey(azureConnection.getAccountName(), azureConnection.getAccountKey());
-        } else {
-            credentials = new StorageCredentialsSharedAccessSignature(azureConnection.getAzureSharedAccessSignature());
-        }
+    public CloudStorageAccount createStorageAccount(AzureStorageConnectionAccount azureConnection) throws URISyntaxException {
+        StorageCredentials credentials = new StorageCredentialsAccountAndKey(azureConnection.getAccountName(),
+                azureConnection.getAccountKey());
+
         return new CloudStorageAccount(credentials, azureConnection.getProtocol() == Protocol.HTTPS);
+    }
+
+    public CloudStorageAccount createStorageAccount(AzureStorageConnectionSignature azureConnection) throws URISyntaxException {
+        StorageCredentials credentials = new StorageCredentialsSharedAccessSignature(
+                azureConnection.getAzureSharedAccessSignature());
+
+        return new CloudStorageAccount(credentials);
     }
 
     public static OperationContext getTalendOperationContext() {
