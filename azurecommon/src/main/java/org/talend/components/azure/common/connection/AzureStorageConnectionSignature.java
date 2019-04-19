@@ -10,39 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+
 package org.talend.components.azure.common.connection;
 
-import java.io.Serializable;
-
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
-import static org.talend.components.azure.common.service.AzureComponentServices.TEST_CONNECTION;
 
-@GridLayout({ @GridLayout.Row("accountConnection"), @GridLayout.Row("useAzureSharedSignature"),
-        @GridLayout.Row("signatureConnection") })
+@GridLayout({ @GridLayout.Row("useAzureSharedSignature"), @GridLayout.Row("azureSharedAccessSignature") })
 @Data
-@DataStore
-@Checkable(TEST_CONNECTION)
-public class AzureCloudConnection implements Serializable {
-
-    @Option
-    @Documentation("Name of the storage account you need to access. "
-            + "A storage account name can be found in the Storage accounts dashboard of the Microsoft Azure Storage system to be used. "
-            + "Ensure that the administrator of the system has granted you the appropriate access permissions to this storage account.")
-    @ActiveIf(target = "useAzureSharedSignature", value = "false")
-    private AzureStorageConnectionAccount accountConnection;
-
-    @Option
-    @Documentation("Use a shared access signature (SAS) to access the storage resources without need for the account key. "
-            + "For more information, see Using Shared Access Signatures (SAS): "
-            + "https://docs.microsoft.com/en-us/azure/storage/storage-dotnet-shared-access-signature-part-1")
-    private boolean useAzureSharedSignature;
+public class AzureStorageConnectionSignature {
 
     @Option
     @Documentation("Enter your account SAS URL between double quotation marks.\n"
@@ -54,5 +34,5 @@ public class AzureCloudConnection implements Serializable {
             + "you can set the start time at which the SAS becomes valid and the expiry time after which the SAS is no longer valid when generating it, "
             + "and you need to make sure your SAS is still valid when running your Job.")
     @ActiveIf(target = "useAzureSharedSignature", value = "true")
-    private AzureStorageConnectionSignature signatureConnection;
+    private String azureSharedAccessSignature;
 }
