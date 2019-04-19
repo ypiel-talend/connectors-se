@@ -133,4 +133,24 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         Assert.assertEquals(10, records.size());
     }
 
+    @Test
+    void testStreamIssue() {
+        AzureEventHubsInputConfiguration inputConfiguration = new AzureEventHubsInputConfiguration();
+        final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
+        dataSet.setDatastore(getDataStore());
+        dataSet.setEventHubName(EVENTHUB_NAME);
+        dataSet.setPartitionId("1");
+        inputConfiguration.setConsumerGroupName("consumer-group-1");
+        inputConfiguration.setReceiverOptions(AzureEventHubsInputConfiguration.ReceiverOptions.SEQUENCE);
+        // latest seq is 26835
+        inputConfiguration.setSequenceNum(26700L);
+        inputConfiguration.setDataset(dataSet);
+
+        final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
+        Job.components().component("azureeventhubs-input", "AzureEventHubs://AzureEventHubsInputMapper?" + config)
+                .component("collector", "test://collector").connections().from("azureeventhubs-input").to("collector").build()
+                .run();
+        final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
+    }
+
 }

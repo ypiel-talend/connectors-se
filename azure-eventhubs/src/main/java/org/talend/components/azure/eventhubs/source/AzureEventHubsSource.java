@@ -96,41 +96,30 @@ public class AzureEventHubsSource implements Serializable {
 
     @Producer
     public Record next() {
-        if (configuration.isUseMaxNum() && count >= configuration.getMaxNumReceived()) {
-            return null;
-        }
-        while (true) {
-            try {
-                if (receivedEvents == null || !receivedEvents.hasNext()) {
-                    log.info("fetch messages...");
-                    // TODO let it configurable?
-                    Iterable<EventData> iterable = receiver.receiveSync(100);
-                    if (iterable == null) {
-                        if (!configuration.isUseMaxNum()) {
-                            return null;
-                        } else {
-
-                        }
-                    }
-                    receivedEvents = iterable.iterator();
+        try {
+            if (receivedEvents == null || !receivedEvents.hasNext()) {
+                log.info("fetch messages...");
+                // TODO let it configurable?
+                Iterable<EventData> iterable = receiver.receiveSync(100);
+                if (iterable == null) {
+                    return null;
                 }
-                if (receivedEvents.hasNext()) {
-                    EventData eventData = receivedEvents.next();
-                    if (eventData != null) {
-                        Record.Builder recordBuilder = builderFactory.newRecordBuilder();
-                        recordBuilder.withString(PAYLOAD_COLUMN, new String(eventData.getBytes(), DEFAULT_CHARSET));
-                        // TODO remove this later
-                        // log.info(eventData.getSystemProperties().getSequenceNumber() + " --> "
-                        // + new String(eventData.getBytes(), DEFAULT_CHARSET));
-                        count++;
-                        return recordBuilder.build();
-                    }
-                } else {
-                    continue;
-                }
-            } catch (EventHubException e) {
-                throw new IllegalStateException(e.getMessage(), e);
+                receivedEvents = iterable.iterator();
             }
+            if (receivedEvents.hasNext()) {
+                EventData eventData = receivedEvents.next();
+                if (eventData != null) {
+                    Record.Builder recordBuilder = builderFactory.newRecordBuilder();
+                    recordBuilder.withString(PAYLOAD_COLUMN, new String(eventData.getBytes(), DEFAULT_CHARSET));
+                    // TODO remove this later
+                    log.info(eventData.getSystemProperties().getSequenceNumber() + " --> "
+                            + new String(eventData.getBytes(), DEFAULT_CHARSET));
+                    return recordBuilder.build();
+                }
+            }
+            return null;
+        } catch (EventHubException e) {
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
