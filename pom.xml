@@ -35,8 +35,8 @@
    <modules>
         <module>jdbc</module>
         <module>salesforce</module>
-        <module>azurecommon</module>
         <module>azure-eventhubs</module>
+        <module>azure</module>
     </modules>
 
    <scm>
