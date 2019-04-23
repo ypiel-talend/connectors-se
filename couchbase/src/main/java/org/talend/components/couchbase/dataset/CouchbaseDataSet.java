@@ -18,6 +18,7 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -29,7 +30,9 @@ import lombok.Data;
 @Version(1)
 @Data
 @DataSet("CouchbaseDataSet")
-@GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "schema" }) })
+@GridLayouts({ @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "schema" }) }),
+        @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "datastore" }) }) })
+
 @Documentation("Couchbase DataSet")
 public class CouchbaseDataSet implements Serializable {
 

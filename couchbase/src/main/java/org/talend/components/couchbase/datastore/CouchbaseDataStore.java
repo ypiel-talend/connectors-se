@@ -33,10 +33,15 @@ import lombok.Data;
 @Data
 @DataStore("CouchbaseDataStore")
 @Checkable("healthCheck")
-@GridLayouts({
-        @GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "password" }),
-                @GridLayout.Row({ "bootstrapNodes" }) }),
-        @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectTimeout" }) }) })
+// @GridLayouts({
+// @GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "password" }),
+// @GridLayout.Row({ "bootstrapNodes" }) }),
+// @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectTimeout" }) }) })
+
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "password" }),
+        @GridLayout.Row({ "bootstrapNodes" }) })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectTimeout" }) })
+
 @Documentation("Couchbase connection")
 public class CouchbaseDataStore implements Serializable {
 
@@ -58,8 +63,7 @@ public class CouchbaseDataStore implements Serializable {
 
     @Option
     @Required
-    @DefaultValue("5")
     @Min(5)
     @Documentation("Set the maximum number of seconds that a client will wait for opened a Bucket. Min value is 5 seconds.")
-    private int connectTimeout;
+    private int connectTimeout = 20; // seconds
 }

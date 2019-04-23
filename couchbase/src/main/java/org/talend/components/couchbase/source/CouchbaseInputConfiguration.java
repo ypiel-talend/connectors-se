@@ -17,6 +17,7 @@ import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
@@ -25,7 +26,9 @@ import lombok.Data;
 
 @Version(1)
 @Data
-@GridLayout({ @GridLayout.Row({ "dataSet" }) })
+ @GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }) }),
+ @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
+
 @Documentation("Couchbase input Mapper Configuration")
 public class CouchbaseInputConfiguration implements Serializable {
 

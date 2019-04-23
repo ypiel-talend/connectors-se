@@ -21,6 +21,7 @@ import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
