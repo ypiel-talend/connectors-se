@@ -58,8 +58,8 @@ public class ExcelFormatOptions implements Serializable {
     @Option
     @ActiveIf(target = "useHeader", value = "true")
     @Documentation("Header size")
-//    @Min(-0.0)
-    //TODO min doesn't work correctly yet
+    // @Min(-0.0)
+    // TODO min doesn't work correctly yet
     private int header = 0;
 
     @Option
@@ -70,7 +70,7 @@ public class ExcelFormatOptions implements Serializable {
     @Option
     @ActiveIf(target = "useFooter", value = "true")
     @Documentation("Footer size")
-//    @Min(-0.0)
-    //TODO min doesn't work correctly yet
+    // @Min(-0.0)
+    // TODO min doesn't work correctly yet
     private int footer = 0;
 }

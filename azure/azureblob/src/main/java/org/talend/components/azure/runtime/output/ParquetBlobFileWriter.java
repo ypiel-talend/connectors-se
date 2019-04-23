@@ -62,9 +62,10 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
         File tempFilePath = null;
         try {
             tempFilePath = File.createTempFile("tempFile", ".parquet");
-            OutputFile tempFile = HadoopOutputFile.fromPath(new org.apache.hadoop.fs.Path(tempFilePath.getPath()), new Configuration());
-            ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord>builder(tempFile).build();
-            for (Record r: getBatch()) {
+            OutputFile tempFile = HadoopOutputFile.fromPath(new org.apache.hadoop.fs.Path(tempFilePath.getPath()),
+                    new Configuration());
+            ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord> builder(tempFile).build();
+            for (Record r : getBatch()) {
                 writer.write(ParquetConverter.of().fromRecord(r));
             }
 
@@ -81,6 +82,6 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
 
     @Override
     public void complete() {
-        //NOOP
+        // NOOP
     }
 }
