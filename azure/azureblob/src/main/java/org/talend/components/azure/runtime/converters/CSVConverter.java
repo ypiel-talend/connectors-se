@@ -19,6 +19,9 @@ import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.talend.components.azure.common.csv.CSVFormatOptions;
+import org.talend.components.azure.common.csv.FieldDelimiter;
+import org.talend.components.azure.common.csv.RecordDelimiter;
 import org.talend.components.azure.runtime.input.SchemaUtils;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
@@ -77,6 +80,16 @@ public class CSVConverter implements RecordConverter<CSVRecord> {
 
     public static CSVConverter of(boolean isHeaderUsed) {
         return new CSVConverter(isHeaderUsed);
+    }
+
+    public static char getFieldDelimiterValue(CSVFormatOptions config) {
+        return config.getFieldDelimiter() == FieldDelimiter.OTHER ? config.getCustomFieldDelimiter().charAt(0)
+                : config.getFieldDelimiter().getDelimiterValue();
+    }
+
+    public static String getRecordDelimiterValue(CSVFormatOptions config) {
+        return config.getRecordDelimiter() == RecordDelimiter.OTHER ? config.getCustomRecordDelimiter()
+                : config.getRecordDelimiter().getDelimiterValue();
     }
 
     @Override
