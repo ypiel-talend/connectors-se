@@ -12,7 +12,7 @@
  *
  */
 
-package org.talend.components.azure.eventhubs.source;
+package org.talend.components.azure.eventhubs.source.batch;
 
 import java.io.Serializable;
 import java.net.URI;

@@ -12,7 +12,7 @@
  *
  */
 
-package org.talend.components.azure.eventhubs.source;
+package org.talend.components.azure.eventhubs.source.batch;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.eventhubs.AzureEventHubsTestBase;
 import org.talend.components.azure.eventhubs.dataset.AzureEventHubsDataSet;
+import org.talend.components.azure.eventhubs.source.batch.AzureEventHubsInputConfiguration;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;

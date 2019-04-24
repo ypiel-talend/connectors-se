@@ -12,7 +12,7 @@
  *
  */
 
-package org.talend.components.azure.eventhubs.source;
+package org.talend.components.azure.eventhubs.source.batch;
 
 import java.io.Serializable;
 
@@ -27,6 +27,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
+import static org.talend.components.azure.eventhubs.common.AzureEventHubsConstant.DEFAULT_CONSUMER_GROUP;
+
 @Data
 @GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "consumerGroupName" }), @GridLayout.Row({ "receiverOptions" }),
         @GridLayout.Row({ "offset" }), @GridLayout.Row({ "sequenceNum", "inclusiveFlag" }),
@@ -34,8 +36,6 @@ import lombok.Data;
         @GridLayout.Row({ "receiveTimeout" }) })
 @Documentation("Consume message from eventhubs configuration")
 public class AzureEventHubsInputConfiguration implements Serializable {
-
-    private static final String DEFAULT_CONSUMER_GROUP = "$Default";
 
     @Option
     @Documentation("The dataset to consume")
