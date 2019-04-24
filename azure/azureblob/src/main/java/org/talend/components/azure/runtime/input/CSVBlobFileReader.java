@@ -23,6 +23,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.talend.components.azure.common.Encoding;
 import org.talend.components.azure.common.csv.FieldDelimiter;
+import org.talend.components.azure.common.csv.RecordDelimiter;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.dataset.AzureBlobDataset;
@@ -85,10 +86,14 @@ public class CSVBlobFileReader extends BlobFileReader {
             }
 
             if (format == null) {
-                char delimiterValue = getConfig().getCsvOptions().getFieldDelimiter() == FieldDelimiter.OTHER
+                char fieldDelimiterChar = getConfig().getCsvOptions().getFieldDelimiter() == FieldDelimiter.OTHER
                         ? getConfig().getCsvOptions().getCustomFieldDelimiter().charAt(0)
                         : getConfig().getCsvOptions().getFieldDelimiter().getDelimiterValue();
-                format = converter.createCSVFormat(delimiterValue, getConfig().getCsvOptions().getTextEnclosureCharacter(),
+                String recordDelimiter = getConfig().getCsvOptions().getRecordDelimiter() == RecordDelimiter.OTHER
+                        ? getConfig().getCsvOptions().getCustomRecordDelimiter()
+                        : getConfig().getCsvOptions().getRecordDelimiter().getDelimiterValue();
+                format = converter.createCSVFormat(fieldDelimiterChar, recordDelimiter,
+                        getConfig().getCsvOptions().getTextEnclosureCharacter(),
                         getConfig().getCsvOptions().getEscapeCharacter());
             }
 
