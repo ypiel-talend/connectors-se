@@ -13,28 +13,36 @@
 
 package org.talend.components.azure.source;
 
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.talend.components.azure.BlobTestUtils;
 import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.common.connection.AzureStorageConnectionAccount;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.csv.RecordDelimiter;
-import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
 import org.talend.sdk.component.runtime.manager.chain.Job;
+import org.talend.sdk.component.runtime.record.SchemaImpl;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
@@ -49,9 +57,11 @@ public class CSVInputIT {
     private static BlobInputProperties blobInputProperties;
 
     private CloudStorageAccount storageAccount;
+    private String containerName;
 
     @BeforeEach
     public void init() throws Exception {
+        containerName = "test-it" + RandomStringUtils.randomAlphabetic(10).toLowerCase();
         Server account;
         final MavenDecrypter decrypter = new MavenDecrypter();
 
@@ -71,23 +81,33 @@ public class CSVInputIT {
         CSVFormatOptions formatOptions = new CSVFormatOptions();
         formatOptions.setRecordDelimiter(RecordDelimiter.LF);
         dataset.setCsvOptions(formatOptions);
-        dataset.setContainerName("limcontainer");
-        dataset.setDirectory("csv0");
+        dataset.setContainerName(containerName);
         blobInputProperties = new BlobInputProperties();
         blobInputProperties.setDataset(dataset);
 
         storageAccount = componentService.createStorageAccount(blobInputProperties.getDataset().getConnection());
+
     }
 
     @Test
-    public void selectAllInputPipelineTest() {
+    public void selectAllInputPipelineTest() throws Exception {
+        final int recordSize = 10;
+        BlobTestUtils.createStorage(blobInputProperties.getDataset().getContainerName(), storageAccount);
+
+        blobInputProperties.getDataset().setDirectory("someDir");
+
+        BlobTestUtils.createAndPopulateFileInStorage(storageAccount, blobInputProperties.getDataset(), Arrays.asList(new String[]{"a", "b", "c"}), recordSize);
+
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig)
                 .component("collector", "test://collector").connections().from("azureInput").to("collector").build().run();
 
         List<Record> records = COMPONENT.getCollectedData(Record.class);
-
-        System.out.println(records.size());
+        Assert.assertEquals(recordSize, records.size());
     }
 
+    @AfterEach
+    public void removeStorage() throws URISyntaxException, StorageException {
+        BlobTestUtils.deleteStorage(containerName, storageAccount);
+    }
 }
