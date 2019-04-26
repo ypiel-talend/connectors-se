@@ -26,8 +26,8 @@ import lombok.Data;
 
 @Version(1)
 @Data
- @GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }) }),
- @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
+@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }) }),
+        @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
 
 @Documentation("Couchbase input Mapper Configuration")
 public class CouchbaseInputConfiguration implements Serializable {
