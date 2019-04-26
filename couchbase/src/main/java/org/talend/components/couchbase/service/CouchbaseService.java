@@ -16,17 +16,26 @@ package org.talend.components.couchbase.service;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
+import com.couchbase.client.java.document.json.JsonArray;
+import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
+import java.util.Date;
+import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static org.talend.sdk.component.api.record.Schema.Type.*;
+import static org.talend.sdk.component.api.record.Schema.Type.STRING;
 
 @Version(1)
 @Slf4j
@@ -44,6 +53,9 @@ public class CouchbaseService {
 
     @Service
     private I18nMessage i18n;
+
+    @Service
+    private RecordBuilderFactory builderFactory;
 
     public String[] resolveAddresses(String nodes) {
         String[] addresses = nodes.replaceAll(" ", "").split(",");
@@ -103,6 +115,77 @@ public class CouchbaseService {
                 log.debug(i18n.cannotCloseCouchbaseEnv());
             }
             environment = null;
+        }
+    }
+
+    public Schema getSchema(JsonObject jsonObject) {
+        Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
+
+        Set<String> jsonKeys = jsonObject.getNames();
+
+        for (String key : jsonKeys) {
+            // receive value from JSON
+            Object value = jsonObject.get(key);
+
+            // With this value we can define type
+            Schema.Type type = defineValueType(value);
+
+            // We can add to schema builder entry
+            Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
+            entryBuilder.withNullable(true).withName(key).withType(type);
+
+            if (type == RECORD) {
+                entryBuilder.withElementSchema(getSchema((JsonObject) value));
+            } else if (type == ARRAY) {
+                entryBuilder.withElementSchema(defineSchemaForArray((JsonArray) value));
+            }
+            Schema.Entry currentEntry = entryBuilder.build();
+            schemaBuilder.withEntry(currentEntry);
+        }
+        return schemaBuilder.build();
+    }
+
+    private Schema defineSchemaForArray(JsonArray jsonArray) {
+        Object firstValueInArray = jsonArray.get(0);
+        Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
+        if (firstValueInArray == null) {
+            throw new IllegalArgumentException("First value of Array is null. Can't define type of values in array");
+        }
+        Schema.Type type = defineValueType(firstValueInArray);
+        schemaBuilder.withType(type);
+        if (type == RECORD) {
+            schemaBuilder.withEntry(
+                    builderFactory.newEntryBuilder().withElementSchema(getSchema((JsonObject) firstValueInArray)).build());
+        } else if (type == ARRAY) {
+            schemaBuilder.withEntry(builderFactory.newEntryBuilder()
+                    .withElementSchema(defineSchemaForArray((JsonArray) firstValueInArray)).build());
+        }
+        return schemaBuilder.withType(type).build();
+    }
+
+    private Schema.Type defineValueType(Object value) {
+        if (value instanceof String) {
+            return STRING;
+        } else if (value instanceof Boolean) {
+            return BOOLEAN;
+        } else if (value instanceof Date) { // TODO: Not sure if Date can come from Couchbase
+            return DATETIME;
+        } else if (value instanceof Double) {
+            return DOUBLE;
+        } else if (value instanceof Integer) {
+            return INT;
+        } else if (value instanceof Long) {
+            return LONG;
+        } else if (value instanceof Byte[]) {
+            throw new IllegalArgumentException("BYTES is unsupported");
+        } else if (value instanceof JsonArray) {
+            return ARRAY;
+        } else if (value instanceof JsonObject) {
+            return RECORD;
+        } else if (value instanceof Float) {
+            return FLOAT;
+        } else {
+            return STRING;
         }
     }
 }

@@ -13,12 +13,15 @@
 
 package org.talend.components.couchbase.testutils;
 
+import com.couchbase.client.java.document.json.JsonArray;
+import com.couchbase.client.java.document.json.JsonObject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.talend.components.couchbase.CouchbaseUtilTest;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.components.couchbase.service.CouchbaseService;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -28,36 +31,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @WithComponents("org.talend.components.couchbase")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of CouchbaseService class")
-public class CouchbaseServiceTest extends CouchbaseUtilTest {
+public class CouchbaseServiceTest {
 
     @Service
     private CouchbaseService couchbaseService;
-
-    @Test
-    @DisplayName("Test successful connection")
-    void couchbaseSuccessfulConnectionTest() {
-        CouchbaseDataStore couchbaseDataStore = new CouchbaseDataStore();
-        couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
-        couchbaseDataStore.setBucket(BUCKET_NAME);
-        couchbaseDataStore.setPassword(BUCKET_PASSWORD);
-        couchbaseDataStore.setConnectTimeout(DEFAULT_TIMEOUT_IN_SEC);
-
-        assertEquals(HealthCheckStatus.Status.OK, couchbaseService.healthCheck(couchbaseDataStore).getStatus());
-    }
-
-    @Test
-    @DisplayName("Test unsuccessful connection")
-    void couchbaseNotSuccessfulConnectionTest() {
-        String wrongPassword = "wrongpass";
-
-        CouchbaseDataStore couchbaseDataStore = new CouchbaseDataStore();
-        couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
-        couchbaseDataStore.setBucket(BUCKET_NAME);
-        couchbaseDataStore.setPassword(wrongPassword);
-        couchbaseDataStore.setConnectTimeout(DEFAULT_TIMEOUT_IN_SEC);
-
-        assertEquals(HealthCheckStatus.Status.KO, couchbaseService.healthCheck(couchbaseDataStore).getStatus());
-    }
 
     @Test
     @DisplayName("Two bootstrap nodes without spaces")
@@ -76,4 +53,58 @@ public class CouchbaseServiceTest extends CouchbaseUtilTest {
         assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
         assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
     }
+
+    @Test
+    void creatingSchemaTest() {
+        Schema schema = couchbaseService.getSchema(createStructuredJsonObject());
+        System.out.println();
+    }
+
+    public JsonObject createStructuredJsonObject() {
+        JsonObject jsonObjectInnerInner = JsonObject.create();
+        jsonObjectInnerInner.put("val1", "000000");
+        jsonObjectInnerInner.put("val2", "111111");
+        jsonObjectInnerInner.put("val3", "222222");
+
+        JsonObject jsonObjectInner = JsonObject.create();
+        jsonObjectInner.put("mobile", "0989901515");
+        jsonObjectInner.put("home", "0342556644");
+        jsonObjectInner.put("inner", jsonObjectInnerInner);
+        jsonObjectInner.put("some", "444444");
+
+        JsonObject jsonObjectOuterOuter = JsonObject.create();
+        jsonObjectOuterOuter.put("id", "0017");
+        jsonObjectOuterOuter.put("name", "Patrik");
+        jsonObjectOuterOuter.put("surname", "Human");
+        jsonObjectOuterOuter.put("tel", jsonObjectInner);
+
+        JsonArray jsonArray = JsonArray.create();
+        jsonArray.add("one");
+        jsonArray.add("two");
+        jsonArray.add("three");
+
+        jsonObjectOuterOuter.put("numbers", jsonArray);
+
+        JsonObject innerArray1 = JsonObject.create();
+        innerArray1.put("arr01", 1);
+        innerArray1.put("arr02", 2);
+        innerArray1.put("arr03", 3);
+
+        JsonObject innerArray2 = JsonObject.create();
+        innerArray2.put("arr11", 1);
+        innerArray2.put("arr22", 2);
+        innerArray2.put("arr33", 3);
+
+        JsonArray jsonArray1 = JsonArray.create();
+        jsonArray1.add(innerArray1);
+        jsonArray1.add(innerArray2);
+
+        jsonObjectOuterOuter.put("arrWithJSON", jsonArray1);
+
+        return jsonObjectOuterOuter;
+    }
+
+    // private Schema createSampleSchema(){
+    //
+    // }
 }

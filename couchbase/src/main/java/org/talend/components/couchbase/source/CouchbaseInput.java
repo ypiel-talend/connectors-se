@@ -23,14 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.components.couchbase.service.I18nMessage;
-import org.talend.sdk.component.api.component.Icon;
-import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PostConstruct;
@@ -82,8 +79,6 @@ public class CouchbaseInput implements Serializable {
 
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
-        columnsSet = new HashSet<>();
-
         N1qlQueryResult n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucket.name()));
         index = n1qlQueryRows.rows();
     }
@@ -95,17 +90,10 @@ public class CouchbaseInput implements Serializable {
         } else {
             // unwrap JsonObject
             JsonObject jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
-
-            if (columnsSet.isEmpty()) {
-                columnsSet.addAll(jsonObject.getNames());
-            }
             if (schema == null) {
-                schema = parseSchema(jsonObject);
+                schema = service.getSchema(jsonObject);
             }
-            final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-            schema.getEntries().stream().forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), jsonObject)));
-
-            return recordBuilder.build();
+            return createRecord(schema, jsonObject);
         }
     }
 
@@ -114,52 +102,18 @@ public class CouchbaseInput implements Serializable {
         service.closeConnection();
     }
 
-    private Schema parseSchema(JsonObject document) {
-        final Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
-        columnsSet.stream().forEach(name -> addField(schemaBuilder, name, getValue(name, document)));
-        return schemaBuilder.build();
-    }
-
-    private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
-        if (value == null) {
-            LOG.warn(i18n.cannotGuessWhenDataIsNull());
-            return;
-        }
-        final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        Schema.Type type = getSchemaType(value);
-        entryBuilder.withName(name).withNullable(true).withType(type);
-        if (type == ARRAY) {
-            List<?> listValue = ((JsonArray) value).toList();
-            Object listObject = listValue.isEmpty() ? null : listValue.get(0);
-            entryBuilder.withElementSchema(builderFactory.newSchemaBuilder(getSchemaType(listObject)).build());
-        }
-        schemaBuilder.withEntry(entryBuilder.build());
+    private Record createRecord(Schema schema, JsonObject jsonObject) {
+        final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
+        schema.getEntries().stream().forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), jsonObject)));
+        Record record = recordBuilder.build();
+        return record;
     }
 
     public Object getValue(String currentName, JsonObject jsonObject) {
-        return jsonObject.get(currentName);
-    }
-
-    private Schema.Type getSchemaType(Object value) {
-        if (value instanceof String) {
-            return Schema.Type.STRING;
-        } else if (value instanceof Boolean) {
-            return Schema.Type.BOOLEAN;
-        } else if (value instanceof Date) {
-            return Schema.Type.DATETIME;
-        } else if (value instanceof Double) {
-            return Schema.Type.DOUBLE;
-        } else if (value instanceof Integer) {
-            return INT;
-        } else if (value instanceof Long) {
-            return Schema.Type.LONG;
-        } else if (value instanceof Byte[]) {
-            throw new IllegalArgumentException("BYTES is unsupported");
-        } else if (value instanceof JsonArray) {
-            return ARRAY;
-        } else {
-            return Schema.Type.STRING;
+        if (jsonObject == null) {
+            return null;
         }
+        return jsonObject.get(currentName);
     }
 
     private void addColumn(Record.Builder recordBuilder, final Schema.Entry entry, Object value) {
@@ -169,9 +123,19 @@ public class CouchbaseInput implements Serializable {
 
         switch (type) {
         case ARRAY:
-            List<?> listValue = ((JsonArray) value).toList();
-            entryBuilder.withElementSchema(entry.getElementSchema());
-            recordBuilder.withArray(entryBuilder.build(), listValue);
+            Schema elementSchema = entry.getElementSchema();
+            entryBuilder.withElementSchema(elementSchema);
+            if (elementSchema.getType() == RECORD) {
+                List<Record> recordList = new ArrayList<>();
+                for (int i = 0; i < elementSchema.getEntries().size(); i++) {
+                    Schema currentSchema = elementSchema.getEntries().get(i).getElementSchema();
+                    JsonObject currentJsonObject = (JsonObject) ((JsonArray) value).get(i);
+                    recordList.add(createRecord(currentSchema, currentJsonObject));
+                }
+                recordBuilder.withArray(entryBuilder.build(), recordList);
+            } else {
+                recordBuilder.withArray(entryBuilder.build(), ((JsonArray) value).toList());
+            }
             break;
         case FLOAT:
             recordBuilder.withFloat(entryBuilder.build(), value == null ? null : (Float) value);
@@ -197,7 +161,9 @@ public class CouchbaseInput implements Serializable {
             recordBuilder.withBoolean(entryBuilder.build(), value == null ? null : (Boolean) value);
             break;
         case RECORD:
-            throw new IllegalArgumentException("Record is unsupported");
+            entryBuilder.withElementSchema(entry.getElementSchema());
+            recordBuilder.withRecord(entryBuilder.build(), createRecord(entry.getElementSchema(), (JsonObject) value));
+            break;
         }
     }
 }
