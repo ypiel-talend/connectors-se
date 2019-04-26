@@ -11,16 +11,14 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.source;
+package org.talend.components.azure.output;
 
-import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BlobTestUtils;
@@ -33,29 +31,24 @@ import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.junit.SimpleComponentRule;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
+import static org.talend.components.azure.source.CSVInputIT.COMPONENT;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
-public class CSVInputIT {
+class CSVOutputIT {
+
+    private String containerName;
+    private BlobOutputConfiguration blobOutputProperties;
+    private CloudStorageAccount storageAccount;
     @Service
     private AzureBlobComponentServices componentService;
-
-
-    @ClassRule
-    public static final SimpleComponentRule COMPONENT = new SimpleComponentRule("org.talend.components.azure");
-
-    private static BlobInputProperties blobInputProperties;
-
-    private CloudStorageAccount storageAccount;
-    private String containerName;
 
     @BeforeEach
     public void init() throws Exception {
@@ -80,43 +73,35 @@ public class CSVInputIT {
         formatOptions.setRecordDelimiter(RecordDelimiter.LF);
         dataset.setCsvOptions(formatOptions);
         dataset.setContainerName(containerName);
-        blobInputProperties = new BlobInputProperties();
-        blobInputProperties.setDataset(dataset);
+        blobOutputProperties = new BlobOutputConfiguration();
+        blobOutputProperties.setDataset(dataset);
 
-        storageAccount = componentService.createStorageAccount(blobInputProperties.getDataset().getConnection());
-        BlobTestUtils.createStorage(blobInputProperties.getDataset().getContainerName(), storageAccount);
+        storageAccount = componentService.createStorageAccount(blobOutputProperties.getDataset().getConnection());
+        BlobTestUtils.createStorage(blobOutputProperties.getDataset().getContainerName(), storageAccount);
     }
 
     @Test
-    public void selectAllInputPipelineTest() throws Exception {
-        final int recordSize = 10;
-        List<String> columns = Arrays.asList(new String[]{"a", "b", "c"});
-        blobInputProperties.getDataset().setDirectory("someDir");
-        BlobTestUtils.createAndPopulateFileInStorage(storageAccount, blobInputProperties.getDataset(), columns, recordSize);
+    public void selectAllInputPipelineTest() {
+        blobOutputProperties.getDataset().setDirectory("testDir");
+        blobOutputProperties.setBlobNameTemplate("testFile");
 
-        String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig)
-                .component("collector", "test://collector").connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
-        Record firstRecord = records.get(0);
+        blobOutputProperties.getDataset().getCsvOptions().setUseHeader(true);
+        blobOutputProperties.getDataset().getCsvOptions().setHeader(1);
 
-        Assert.assertEquals("Records amount is different", recordSize, records.size());
-        Assert.assertEquals("Columns number is different", columns.size(), firstRecord.getSchema().getEntries().size());
-    }
+        Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder()
+                .withBoolean("booleanValue", true)
+                .withLong("longValue", 0L).withInt("intValue", 1).withDouble("doubleValue", 2.0)
+                .withDateTime("dateValue", Date.from(Instant.now())).build();
 
-    @Test
-    public void selectFromNotExistingDirectory() {
-        blobInputProperties.getDataset().setDirectory("notExistingDir");
-        String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig)
-                .component("collector", "test://collector").connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> testRecords = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            testRecords.add(testRecord);
+        }
+        COMPONENT.setInputData(testRecords);
 
-        Assert.assertEquals("Records were taken from empty directory", 0, records.size());
-    }
-
-    @AfterEach
-    public void removeStorage() throws URISyntaxException, StorageException {
-        BlobTestUtils.deleteStorage(containerName, storageAccount);
+        String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
+        Job.components().component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig).connections().from("inputFlow")
+                .to("outputComponent").build().run();
     }
 }
