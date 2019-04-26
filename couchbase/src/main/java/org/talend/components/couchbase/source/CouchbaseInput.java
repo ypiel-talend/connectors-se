@@ -127,8 +127,9 @@ public class CouchbaseInput implements Serializable {
             entryBuilder.withElementSchema(elementSchema);
             if (elementSchema.getType() == RECORD) {
                 List<Record> recordList = new ArrayList<>();
-                for (int i = 0; i < elementSchema.getEntries().size(); i++) {
-                    Schema currentSchema = elementSchema.getEntries().get(i).getElementSchema();
+                // schema of the first element
+                Schema currentSchema = elementSchema.getEntries().get(0).getElementSchema();
+                for (int i = 0; i < ((JsonArray) value).size(); i++) {
                     JsonObject currentJsonObject = (JsonObject) ((JsonArray) value).get(i);
                     recordList.add(createRecord(currentSchema, currentJsonObject));
                 }
