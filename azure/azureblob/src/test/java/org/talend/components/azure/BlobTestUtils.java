@@ -17,35 +17,37 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.avro.data.RecordBuilder;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.text.RandomStringGenerator;
+import org.junit.Assert;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.runtime.converters.CSVConverter;
+import org.talend.components.azure.service.FormatUtils;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudAppendBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class BlobTestUtils {
 
     @Service
-    private static RecordBuilderFactory recordBuilderFactory;
+    public static RecordBuilderFactory recordBuilderFactory;
 
     public static void createStorage(String storageName, CloudStorageAccount connectionAccount) throws URISyntaxException, StorageException {
         CloudBlobClient blobConnection = connectionAccount.createCloudBlobClient();
@@ -75,11 +77,7 @@ public class BlobTestUtils {
     private static byte[] createCSVFileContent(int recordsSize, List<String> columns, CSVFormatOptions formatOptions) throws Exception {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(byteArrayOutputStream));
-        CSVFormat format = CSVConverter.of(formatOptions.isUseHeader()).createCSVFormat(
-                CSVConverter.getFieldDelimiterValue(formatOptions),
-                CSVConverter.getRecordDelimiterValue(formatOptions),
-                formatOptions.getTextEnclosureCharacter(),
-                formatOptions.getEscapeCharacter());
+        CSVFormat format = CSVConverter.of(formatOptions).getCsvFormat();
 
         CSVPrinter printer = new CSVPrinter(writer, format);
 
@@ -94,7 +92,24 @@ public class BlobTestUtils {
         return byteArrayOutputStream.toByteArray();
     }
 
-    public static List<Record> readFilesFromDirectory() {
+    public static List<Record> readDataFromCSVFile(String fileName, CloudStorageAccount connectionAccount, AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException, IOException {
+        List<CSVRecord> csvRecords = readCSVRecords(fileName, connectionAccount, config, format);
+        CSVConverter converter = CSVConverter.of(config.getCsvOptions());
+        converter.setRecordBuilderFactory(recordBuilderFactory);
+        return csvRecords.stream().map(converter::toRecord).collect(Collectors.toList());
+    }
+
+    private static List<CSVRecord> readCSVRecords(String fileName, CloudStorageAccount connectionAccount, AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException {
+        CloudAppendBlob file = connectionAccount.createCloudBlobClient().getContainerReference(config.getContainerName())
+                .getAppendBlobReference( fileName);
+
+        try (InputStreamReader reader = new InputStreamReader(file.openInputStream())) {
+            CSVParser parser = new CSVParser(reader, format);
+            return parser.getRecords();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
         return null;
     }
 

@@ -14,6 +14,9 @@
 package org.talend.components.azure.service;
 
 import org.talend.components.azure.common.Encoding;
+import org.talend.components.azure.common.csv.CSVFormatOptions;
+import org.talend.components.azure.common.csv.FieldDelimiter;
+import org.talend.components.azure.common.csv.RecordDelimiter;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 
 public class FormatUtils {
@@ -29,5 +32,15 @@ public class FormatUtils {
                         : dataset.getExcelOptions().getEncoding().getEncodingValue();
             default: throw new IllegalStateException("Avro and parquet data format doesn't support custom encodings");
         }
+    }
+
+    public static char getFieldDelimiterValue(CSVFormatOptions config) {
+        return config.getFieldDelimiter() == FieldDelimiter.OTHER ? config.getCustomFieldDelimiter().charAt(0)
+                : config.getFieldDelimiter().getDelimiterValue();
+    }
+
+    public static String getRecordDelimiterValue(CSVFormatOptions config) {
+        return config.getRecordDelimiter() == RecordDelimiter.OTHER ? config.getCustomRecordDelimiter()
+                : config.getRecordDelimiter().getDelimiterValue();
     }
 }

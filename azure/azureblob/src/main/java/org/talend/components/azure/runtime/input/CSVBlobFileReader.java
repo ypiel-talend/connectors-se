@@ -80,16 +80,11 @@ public class CSVBlobFileReader extends BlobFileReader {
         @Override
         protected void readItem() {
             if (converter == null) {
-                // todo not needed for datastreams
-                CSVConverter.recordBuilderFactory = CSVBlobFileReader.this.getRecordBuilderFactory();
-                converter = CSVConverter.of(getConfig().getCsvOptions().isUseHeader());
+                converter = CSVConverter.of(getConfig().getCsvOptions());
             }
 
             if (format == null) {
-                format = converter.createCSVFormat(CSVConverter.getFieldDelimiterValue(getConfig().getCsvOptions()),
-                        CSVConverter.getRecordDelimiterValue(getConfig().getCsvOptions()),
-                        getConfig().getCsvOptions().getTextEnclosureCharacter(),
-                        getConfig().getCsvOptions().getEscapeCharacter());
+                format = converter.getCsvFormat();
             }
             try (InputStream input = getCurrentItem().openInputStream();
                     InputStreamReader inr = new InputStreamReader(input, encodingValue);

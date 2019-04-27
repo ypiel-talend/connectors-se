@@ -13,16 +13,14 @@
 
 package org.talend.components.azure.runtime.output;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.talend.components.azure.common.Encoding;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.common.service.AzureComponentServices;
@@ -31,6 +29,7 @@ import org.talend.components.azure.runtime.converters.CSVConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.FormatUtils;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudAppendBlob;
@@ -105,30 +104,25 @@ public class CSVBlobFileWriter extends BlobFileWriter {
             return;
         StringBuilder headerBuilder = new StringBuilder();
         for (int i = 0; i < configCSV.getHeader() - 1; i++) {
-            headerBuilder.append("//header line").append(CSVConverter.getRecordDelimiterValue(configCSV));
+            headerBuilder.append("//header line").append(FormatUtils.getRecordDelimiterValue(configCSV));
         }
 
         headerBuilder.append(getSchema().getEntries().get(0).getName());
         for (int i = 1; i < getSchema().getEntries().size(); i++) {
-            headerBuilder.append(CSVConverter.getFieldDelimiterValue(configCSV))
+            headerBuilder.append(FormatUtils.getFieldDelimiterValue(configCSV))
                     .append(getSchema().getEntries().get(i).getName());
         }
         ((CloudAppendBlob) getCurrentItem())
-                .appendText(headerBuilder.toString() + CSVConverter.getRecordDelimiterValue(configCSV));
+                .appendText(headerBuilder.toString() + FormatUtils.getRecordDelimiterValue(configCSV));
         fileIsEmpty = false;
     }
 
     private String convertBatchToString() throws IOException {
         StringWriter stringWriter = new StringWriter();
         Iterator<Record> recordIterator = getBatch().iterator();
-        CSVFormat format = CSVConverter.of(configCSV.isUseHeader()).createCSVFormat(
-                CSVConverter.getFieldDelimiterValue(configCSV),
-                CSVConverter.getRecordDelimiterValue(configCSV),
-                configCSV.getTextEnclosureCharacter(),
-                configCSV.getEscapeCharacter());
+        CSVFormat format = CSVConverter.of(configCSV).getCsvFormat();
 
         CSVPrinter printer = new CSVPrinter(stringWriter, format);
-
 
         while (recordIterator.hasNext()) {
             printer.printRecord(convertRecordToArray(recordIterator.next()));
@@ -143,7 +137,13 @@ public class CSVBlobFileWriter extends BlobFileWriter {
     private Object[] convertRecordToArray(Record record) {
         Object[] array = new Object[record.getSchema().getEntries().size()];
         for (int i = 0; i < getSchema().getEntries().size(); i++) {
-            array[i] = record.get(Object.class, getSchema().getEntries().get(i).getName());
+            if (getSchema().getEntries().get(i).getType() == Schema.Type.DATETIME) {
+                array[i] = record.getDateTime(getSchema().getEntries().get(i).getName());
+            } else if (getSchema().getEntries().get(i).getType() == Schema.Type.BYTES) {
+                array[i] = Arrays.toString(record.getBytes(getSchema().getEntries().get(i).getName()));
+            } else {
+                array[i] = record.get(Object.class, getSchema().getEntries().get(i).getName());
+            }
         }
 
         return array;
