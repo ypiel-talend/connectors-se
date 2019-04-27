@@ -13,15 +13,14 @@
 
 package org.talend.components.azure.output;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Assert;
+import org.apache.commons.math3.stat.inference.TestUtils;
+import org.junit.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,6 @@ import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.csv.RecordDelimiter;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.datastore.AzureCloudConnection;
-import org.talend.components.azure.runtime.converters.CSVConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
@@ -48,14 +46,13 @@ import static org.talend.components.azure.source.CSVInputIT.COMPONENT;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
-class CSVOutputIT {
-
+public class ParquetOutputIT {
     private String containerName;
     private BlobOutputConfiguration blobOutputProperties;
     private CloudStorageAccount storageAccount;
+
     @Service
     private AzureBlobComponentServices componentService;
-
     @BeforeEach
     public void init() throws Exception {
         containerName = "test-it-" + RandomStringUtils.randomAlphabetic(10).toLowerCase();
@@ -73,11 +70,8 @@ class CSVOutputIT {
 
         AzureBlobDataset dataset = new AzureBlobDataset();
         dataset.setConnection(dataStore);
-        dataset.setFileFormat(FileFormat.CSV);
+        dataset.setFileFormat(FileFormat.PARQUET);
 
-        CSVFormatOptions formatOptions = new CSVFormatOptions();
-        formatOptions.setRecordDelimiter(RecordDelimiter.LF);
-        dataset.setCsvOptions(formatOptions);
         dataset.setContainerName(containerName);
         blobOutputProperties = new BlobOutputConfiguration();
         blobOutputProperties.setDataset(dataset);
@@ -87,7 +81,8 @@ class CSVOutputIT {
     }
 
     @Test
-    public void outputTestWithSixSameRecordsAndStandardConfig() throws StorageException, IOException, URISyntaxException {
+    public void testOutput() {
+//        System.setProperty("hadoop.home.dir", "D:\\projects\\winutils-master\\hadoop-3.0.0");
         final int recordSize = 6;
         final boolean testBooleanValue = true;
         final long testLongValue = 0L;
@@ -98,7 +93,6 @@ class CSVOutputIT {
 
         blobOutputProperties.getDataset().setDirectory("testDir");
         blobOutputProperties.setBlobNameTemplate("testFile");
-        blobOutputProperties.getDataset().getCsvOptions().setTextEnclosureCharacter("\"");
 
         Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder()
                 .withBoolean("booleanValue", testBooleanValue)
@@ -115,24 +109,10 @@ class CSVOutputIT {
         Job.components().component("inputFlow", "test://emitter")
                 .component("outputComponent", "Azure://Output?" + outputConfig).connections().from("inputFlow")
                 .to("outputComponent").build().run();
-        BlobTestUtils.recordBuilderFactory = COMPONENT.findService(RecordBuilderFactory.class);
-        List<Record> retrievedRecords = BlobTestUtils.readDataFromCSVFile(
-                blobOutputProperties.getDataset().getDirectory() + "/" + blobOutputProperties.getBlobNameTemplate() + ".csv"
-        , storageAccount, blobOutputProperties.getDataset(), CSVConverter.of(blobOutputProperties.getDataset().getCsvOptions()).getCsvFormat());
-
-        Assert.assertEquals(recordSize, retrievedRecords.size());
-        Assert.assertEquals(testRecord.getSchema().getEntries().size(), retrievedRecords.get(0).getSchema().getEntries().size());
-        Assert.assertEquals(String.valueOf(testRecord.getBoolean("booleanValue")), retrievedRecords.get(0).getString("field0"));
-        Assert.assertEquals(String.valueOf(testRecord.getLong("longValue")), retrievedRecords.get(0).getString("field1"));
-        Assert.assertEquals(String.valueOf(testRecord.getInt("intValue")), retrievedRecords.get(0).getString("field2"));
-        Assert.assertEquals(String.valueOf(testRecord.getDouble("doubleValue")), retrievedRecords.get(0).getString("field3"));
-        Assert.assertEquals(String.valueOf(testRecord.getDateTime("dateValue")), retrievedRecords.get(0).getString("field4"));
-        Assert.assertEquals(Arrays.toString(testRecord.getBytes("byteArray")), retrievedRecords.get(0).getString("field5"));
     }
 
-
     @AfterEach
-    public void removeStorage() throws URISyntaxException, StorageException {
-        BlobTestUtils.deleteStorage(containerName, storageAccount);
+    public void removeContainer() throws URISyntaxException, StorageException {
+        BlobTestUtils.deleteStorage(containerName,storageAccount);
     }
 }
