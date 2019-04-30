@@ -37,8 +37,8 @@ public class BlobSource implements Serializable {
 
     private BlobFileReader reader;
 
-    public BlobSource(@Option("configuration") final BlobInputProperties configuration,
-            final AzureBlobComponentServices service, final RecordBuilderFactory builderFactory) {
+    public BlobSource(@Option("configuration") final BlobInputProperties configuration, final AzureBlobComponentServices service,
+            final RecordBuilderFactory builderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;

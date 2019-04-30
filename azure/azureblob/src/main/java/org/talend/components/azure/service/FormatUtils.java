@@ -20,17 +20,17 @@ import org.talend.components.azure.common.csv.RecordDelimiter;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 
 public class FormatUtils {
+
     public static String getUsedEncodingValue(AzureBlobDataset dataset) {
         switch (dataset.getFileFormat()) {
-            case CSV:
-                return dataset.getCsvOptions().getEncoding() == Encoding.OTHER
-                        ? dataset.getCsvOptions().getCustomEncoding()
-                        : dataset.getCsvOptions().getEncoding().getEncodingValue();
-            case EXCEL:
-                return dataset.getExcelOptions().getEncoding() == Encoding.OTHER
-                        ? dataset.getExcelOptions().getCustomEncoding()
-                        : dataset.getExcelOptions().getEncoding().getEncodingValue();
-            default: throw new IllegalStateException("Avro and parquet data format doesn't support custom encodings");
+        case CSV:
+            return dataset.getCsvOptions().getEncoding() == Encoding.OTHER ? dataset.getCsvOptions().getCustomEncoding()
+                    : dataset.getCsvOptions().getEncoding().getEncodingValue();
+        case EXCEL:
+            return dataset.getExcelOptions().getEncoding() == Encoding.OTHER ? dataset.getExcelOptions().getCustomEncoding()
+                    : dataset.getExcelOptions().getEncoding().getEncodingValue();
+        default:
+            throw new IllegalStateException("Avro and parquet data format doesn't support custom encodings");
         }
     }
 

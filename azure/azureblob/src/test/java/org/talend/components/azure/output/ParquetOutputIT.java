@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.math3.stat.inference.TestUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,17 +43,22 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import static org.talend.components.azure.source.CSVInputIT.COMPONENT;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
 public class ParquetOutputIT {
+
     private String containerName;
+
     private BlobOutputConfiguration blobOutputProperties;
+
     private CloudStorageAccount storageAccount;
 
     @Service
     private AzureBlobComponentServices componentService;
+
     @BeforeEach
     public void init() throws Exception {
         containerName = "test-it-" + RandomStringUtils.randomAlphabetic(10).toLowerCase();
@@ -81,22 +87,23 @@ public class ParquetOutputIT {
     }
 
     @Test
-    public void testOutput() {
-//        System.setProperty("hadoop.home.dir", "D:\\projects\\winutils-master\\hadoop-3.0.0");
+    public void testOutput() throws Exception{
+        //TODO should be removed from here
+        System.setProperty("hadoop.home.dir", "D:\\projects\\winutils-master\\hadoop-3.0.0");
         final int recordSize = 6;
         final boolean testBooleanValue = true;
         final long testLongValue = 0L;
         final int testIntValue = 1;
         final double testDoubleValue = 2.0;
         final ZonedDateTime testDateValue = ZonedDateTime.now();
-        final byte[] bytes = new byte[] {1,2,3};
+        final byte[] bytes = new byte[] { 1, 2, 3 };
 
         blobOutputProperties.getDataset().setDirectory("testDir");
         blobOutputProperties.setBlobNameTemplate("testFile");
 
         Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder()
-                .withBoolean("booleanValue", testBooleanValue)
-                .withLong("longValue", testLongValue).withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
+                .withBoolean("booleanValue", testBooleanValue).withLong("longValue", testLongValue)
+                .withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
                 .withDateTime("dateValue", testDateValue).withBytes("byteArray", bytes).build();
 
         List<Record> testRecords = new ArrayList<>();
@@ -106,13 +113,17 @@ public class ParquetOutputIT {
         COMPONENT.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
-        Job.components().component("inputFlow", "test://emitter")
-                .component("outputComponent", "Azure://Output?" + outputConfig).connections().from("inputFlow")
-                .to("outputComponent").build().run();
+        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections().from("inputFlow").to("outputComponent").build().run();
+
+        CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
+
+        Assert.assertTrue("No files were created in test container",
+                container.listBlobs(blobOutputProperties.getDataset().getDirectory(), true).iterator().hasNext());
     }
 
     @AfterEach
     public void removeContainer() throws URISyntaxException, StorageException {
-        BlobTestUtils.deleteStorage(containerName,storageAccount);
+        BlobTestUtils.deleteStorage(containerName, storageAccount);
     }
 }

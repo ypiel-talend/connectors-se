@@ -46,8 +46,8 @@ public class InputMapper implements Serializable {
 
     private final RecordBuilderFactory recordBuilderFactory;
 
-    public InputMapper(@Option("configuration") final BlobInputProperties configuration,
-            final AzureBlobComponentServices service, final RecordBuilderFactory recordBuilderFactory) {
+    public InputMapper(@Option("configuration") final BlobInputProperties configuration, final AzureBlobComponentServices service,
+            final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;

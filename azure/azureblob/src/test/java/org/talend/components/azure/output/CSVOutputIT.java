@@ -51,8 +51,11 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 class CSVOutputIT {
 
     private String containerName;
+
     private BlobOutputConfiguration blobOutputProperties;
+
     private CloudStorageAccount storageAccount;
+
     @Service
     private AzureBlobComponentServices componentService;
 
@@ -94,15 +97,15 @@ class CSVOutputIT {
         final int testIntValue = 1;
         final double testDoubleValue = 2.0;
         final ZonedDateTime testDateValue = ZonedDateTime.now();
-        final byte[] bytes = new byte[] {1,2,3};
+        final byte[] bytes = new byte[] { 1, 2, 3 };
 
         blobOutputProperties.getDataset().setDirectory("testDir");
         blobOutputProperties.setBlobNameTemplate("testFile");
         blobOutputProperties.getDataset().getCsvOptions().setTextEnclosureCharacter("\"");
 
         Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder()
-                .withBoolean("booleanValue", testBooleanValue)
-                .withLong("longValue", testLongValue).withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
+                .withBoolean("booleanValue", testBooleanValue).withLong("longValue", testLongValue)
+                .withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
                 .withDateTime("dateValue", testDateValue).withBytes("byteArray", bytes).build();
 
         List<Record> testRecords = new ArrayList<>();
@@ -112,13 +115,13 @@ class CSVOutputIT {
         COMPONENT.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
-        Job.components().component("inputFlow", "test://emitter")
-                .component("outputComponent", "Azure://Output?" + outputConfig).connections().from("inputFlow")
-                .to("outputComponent").build().run();
+        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections().from("inputFlow").to("outputComponent").build().run();
         BlobTestUtils.recordBuilderFactory = COMPONENT.findService(RecordBuilderFactory.class);
         List<Record> retrievedRecords = BlobTestUtils.readDataFromCSVFile(
-                blobOutputProperties.getDataset().getDirectory() + "/" + blobOutputProperties.getBlobNameTemplate() + ".csv"
-        , storageAccount, blobOutputProperties.getDataset(), CSVConverter.of(blobOutputProperties.getDataset().getCsvOptions()).getCsvFormat());
+                blobOutputProperties.getDataset().getDirectory() + "/" + blobOutputProperties.getBlobNameTemplate() + ".csv",
+                storageAccount, blobOutputProperties.getDataset(),
+                CSVConverter.of(blobOutputProperties.getDataset().getCsvOptions()).getCsvFormat());
 
         Assert.assertEquals(recordSize, retrievedRecords.size());
         Assert.assertEquals(testRecord.getSchema().getEntries().size(), retrievedRecords.get(0).getSchema().getEntries().size());
@@ -129,7 +132,6 @@ class CSVOutputIT {
         Assert.assertEquals(String.valueOf(testRecord.getDateTime("dateValue")), retrievedRecords.get(0).getString("field4"));
         Assert.assertEquals(Arrays.toString(testRecord.getBytes("byteArray")), retrievedRecords.get(0).getString("field5"));
     }
-
 
     @AfterEach
     public void removeStorage() throws URISyntaxException, StorageException {

@@ -41,6 +41,7 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 public class ParquetBlobFileWriter extends BlobFileWriter {
 
     private BlobOutputConfiguration config;
+
     private Schema recordSchema;
 
     public ParquetBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
@@ -90,7 +91,8 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
             tempFilePath = File.createTempFile("tempFile", ".parquet");
             Path tempFile = new org.apache.hadoop.fs.Path(tempFilePath.getPath());
             ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord> builder(tempFile)
-                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE).withSchema(ParquetConverter.of().inferAvroSchema(recordSchema)).build();
+                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
+                    .withSchema(ParquetConverter.of().inferAvroSchema(recordSchema)).build();
             for (Record r : getBatch()) {
                 writer.write(ParquetConverter.of().fromRecord(r));
             }

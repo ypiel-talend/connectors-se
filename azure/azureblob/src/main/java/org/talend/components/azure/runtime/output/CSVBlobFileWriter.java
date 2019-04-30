@@ -86,7 +86,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
 
         String content = convertBatchToString();
 
-         if (fileIsEmpty && configCSV.isUseHeader() && configCSV.getHeader() > 0) {
+        if (fileIsEmpty && configCSV.isUseHeader() && configCSV.getHeader() > 0) {
             appendHeader();
         }
 
@@ -109,8 +109,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
 
         headerBuilder.append(getSchema().getEntries().get(0).getName());
         for (int i = 1; i < getSchema().getEntries().size(); i++) {
-            headerBuilder.append(FormatUtils.getFieldDelimiterValue(configCSV))
-                    .append(getSchema().getEntries().get(i).getName());
+            headerBuilder.append(FormatUtils.getFieldDelimiterValue(configCSV)).append(getSchema().getEntries().get(i).getName());
         }
         ((CloudAppendBlob) getCurrentItem())
                 .appendText(headerBuilder.toString() + FormatUtils.getRecordDelimiterValue(configCSV));

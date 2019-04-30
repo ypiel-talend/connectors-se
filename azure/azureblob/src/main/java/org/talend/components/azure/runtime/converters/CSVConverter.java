@@ -51,8 +51,7 @@ public class CSVConverter implements RecordConverter<CSVRecord> {
     private CSVConverter(CSVFormatOptions csvFormatOptions) {
         this.isHeaderUsed = csvFormatOptions.isUseHeader();
         this.csvFormat = createCSVFormat(FormatUtils.getFieldDelimiterValue(csvFormatOptions),
-                FormatUtils.getRecordDelimiterValue(csvFormatOptions),
-                csvFormatOptions.getTextEnclosureCharacter(),
+                FormatUtils.getRecordDelimiterValue(csvFormatOptions), csvFormatOptions.getTextEnclosureCharacter(),
                 csvFormatOptions.getEscapeCharacter());
     }
 

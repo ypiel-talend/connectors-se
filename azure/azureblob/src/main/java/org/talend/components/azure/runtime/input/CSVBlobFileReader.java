@@ -73,10 +73,12 @@ public class CSVBlobFileReader extends BlobFileReader {
 
         @Override
         protected Record convertToRecord(CSVRecord next) {
+            if (converter.recordBuilderFactory == null) {
+                converter.recordBuilderFactory = getRecordBuilderFactory();
+            }
             return converter.toRecord(next);
         }
 
-        // TODO fix memory leak
         @Override
         protected void readItem() {
             if (converter == null) {

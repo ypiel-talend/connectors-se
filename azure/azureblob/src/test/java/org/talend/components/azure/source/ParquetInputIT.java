@@ -13,8 +13,15 @@
 
 package org.talend.components.azure.source;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -26,8 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BlobTestUtils;
 import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.common.connection.AzureStorageConnectionAccount;
-import org.talend.components.azure.common.csv.CSVFormatOptions;
-import org.talend.components.azure.common.csv.RecordDelimiter;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -41,10 +46,12 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
-public class CSVInputIT {
+public class ParquetInputIT {
 
     @Service
     private AzureBlobComponentServices componentService;
@@ -75,49 +82,63 @@ public class CSVInputIT {
 
         AzureBlobDataset dataset = new AzureBlobDataset();
         dataset.setConnection(dataStore);
-        dataset.setFileFormat(FileFormat.CSV);
+        dataset.setFileFormat(FileFormat.PARQUET);
 
-        CSVFormatOptions formatOptions = new CSVFormatOptions();
-        formatOptions.setRecordDelimiter(RecordDelimiter.LF);
-        dataset.setCsvOptions(formatOptions);
         dataset.setContainerName(containerName);
         blobInputProperties = new BlobInputProperties();
         blobInputProperties.setDataset(dataset);
 
         storageAccount = componentService.createStorageAccount(blobInputProperties.getDataset().getConnection());
         BlobTestUtils.createStorage(blobInputProperties.getDataset().getContainerName(), storageAccount);
+
+    }
+
+    private void uploadTestFile(String resourceName, String targetName) throws URISyntaxException, StorageException, IOException {
+        CloudBlobContainer container = storageAccount.createCloudBlobClient()
+                .getContainerReference(blobInputProperties.getDataset().getContainerName());
+        CloudBlockBlob blockBlob = container
+                .getBlockBlobReference(blobInputProperties.getDataset().getDirectory() + "/" + targetName);
+
+        File resourceFile = new File(this.getClass().getClassLoader().getResource(resourceName).toURI());
+        try (FileInputStream fileInputStream = new FileInputStream(resourceFile)) {
+            blockBlob.upload(fileInputStream, resourceFile.length());
+        }
     }
 
     @Test
-    public void selectAllInputPipelineTest() throws Exception {
-        final int recordSize = 10;
-        List<String> columns = Arrays.asList(new String[] { "a", "b", "c" });
-        blobInputProperties.getDataset().setDirectory("someDir");
-        BlobTestUtils.createAndPopulateFileInStorage(storageAccount, blobInputProperties.getDataset(), columns, recordSize);
+    public void testInput1File1Record() throws Exception {
+        final int recordSize = 1;
+        final int columnSize = 6;
+        final boolean booleanValue = true;
+        final long longValue = 0L;
+        final int intValue = 1;
+        final double doubleValue = 2.0;
+        final long dateValue = 1556612530082L;
+        final byte[] bytesValue = new byte[] { 1, 2, 3 };
+
+        blobInputProperties.getDataset().setDirectory("parquet");
+        uploadTestFile("parquet/testParquet1Record.parquet", "testParquet1Record.parquet");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
         List<Record> records = COMPONENT.getCollectedData(Record.class);
-        Record firstRecord = records.get(0);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
-        Assert.assertEquals("Columns number is different", columns.size(), firstRecord.getSchema().getEntries().size());
-    }
-
-    @Test
-    public void selectFromNotExistingDirectory() {
-        blobInputProperties.getDataset().setDirectory("notExistingDir");
-        String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
-
-        Assert.assertEquals("Records were taken from empty directory", 0, records.size());
+        Record firstRecord = records.get(0);
+        Assert.assertEquals(columnSize, firstRecord.getSchema().getEntries().size());
+        Assert.assertEquals(booleanValue, firstRecord.getBoolean("booleanValue"));
+        Assert.assertEquals(longValue, firstRecord.getLong("longValue"));
+        Assert.assertEquals(intValue, firstRecord.getInt("intValue"));
+        Assert.assertEquals(doubleValue, firstRecord.getDouble("doubleValue"), 0.01);
+        Assert.assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateValue), ZoneId.of("UTC")),
+                firstRecord.getDateTime("dateValue"));
+        Assert.assertArrayEquals(bytesValue, firstRecord.getBytes("byteArray"));
     }
 
     @AfterEach
-    public void removeStorage() throws URISyntaxException, StorageException {
+    public void removeContainer() throws URISyntaxException, StorageException {
         BlobTestUtils.deleteStorage(containerName, storageAccount);
     }
+
 }
