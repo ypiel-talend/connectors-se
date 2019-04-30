@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BlobTestUtils;
 import org.talend.components.azure.common.FileFormat;
-import org.talend.components.azure.common.connection.AzureStorageConnectionAccount;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -36,8 +35,6 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.junit5.WithComponents;
-import org.talend.sdk.component.maven.MavenDecrypter;
-import org.talend.sdk.component.maven.Server;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -62,17 +59,7 @@ public class ParquetInputIT {
     @BeforeEach
     public void init() throws Exception {
         containerName = "test-it-" + RandomStringUtils.randomAlphabetic(10).toLowerCase();
-        Server account;
-        final MavenDecrypter decrypter = new MavenDecrypter();
-
-        AzureCloudConnection dataStore = new AzureCloudConnection();
-        dataStore.setUseAzureSharedSignature(false);
-        AzureStorageConnectionAccount accountConnection = new AzureStorageConnectionAccount();
-        account = decrypter.find("azure.account");
-        accountConnection.setAccountName(account.getUsername());
-        accountConnection.setAccountKey(account.getPassword());
-
-        dataStore.setAccountConnection(accountConnection);
+        AzureCloudConnection dataStore = BlobTestUtils.createCloudConnection();
 
         AzureBlobDataset dataset = new AzureBlobDataset();
         dataset.setConnection(dataStore);

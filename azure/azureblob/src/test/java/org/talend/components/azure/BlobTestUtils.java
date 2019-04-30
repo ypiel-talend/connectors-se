@@ -32,13 +32,17 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
+import org.talend.components.azure.common.connection.AzureStorageConnectionAccount;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.runtime.converters.CSVConverter;
 import org.talend.components.azure.source.BlobInputProperties;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.maven.MavenDecrypter;
+import org.talend.sdk.component.maven.Server;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -51,6 +55,22 @@ public class BlobTestUtils {
 
     @Service
     public static RecordBuilderFactory recordBuilderFactory;
+
+    public static AzureCloudConnection createCloudConnection() {
+        Server account;
+        final MavenDecrypter decrypter = new MavenDecrypter();
+
+        AzureCloudConnection dataStore = new AzureCloudConnection();
+        dataStore.setUseAzureSharedSignature(false);
+        AzureStorageConnectionAccount accountConnection = new AzureStorageConnectionAccount();
+        account = decrypter.find("azure.account");
+        accountConnection.setAccountName(account.getUsername());
+        accountConnection.setAccountKey(account.getPassword());
+
+        dataStore.setAccountConnection(accountConnection);
+        return dataStore;
+    }
+
 
     public static void createStorage(String storageName, CloudStorageAccount connectionAccount)
             throws URISyntaxException, StorageException {
@@ -72,18 +92,18 @@ public class BlobTestUtils {
     }
 
     public static void createAndPopulateFileInStorage(CloudStorageAccount connectionAccount, AzureBlobDataset fileOptions,
-            List<String> recordSchema, int recordsSize) throws Exception {
+                                                      List<String> recordSchema, int recordsSize) throws Exception {
         String fileName = "file" + RandomStringUtils.randomAlphabetic(5);
         CloudBlockBlob file = connectionAccount.createCloudBlobClient().getContainerReference(fileOptions.getContainerName())
                 .getBlockBlobReference(fileOptions.getDirectory() + "/" + fileName);
         byte[] content = null;
         switch (fileOptions.getFileFormat()) {
-        case CSV:
-            content = createCSVFileContent(recordsSize, recordSchema, fileOptions.getCsvOptions());
-            break;
-        case EXCEL:
-        case AVRO:
-        case PARQUET:
+            case CSV:
+                content = createCSVFileContent(recordsSize, recordSchema, fileOptions.getCsvOptions());
+                break;
+            case EXCEL:
+            case AVRO:
+            case PARQUET:
         }
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content)) {
             file.upload(inputStream, content.length);
@@ -110,7 +130,7 @@ public class BlobTestUtils {
     }
 
     public static List<Record> readDataFromCSVFile(String fileName, CloudStorageAccount connectionAccount,
-            AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException, IOException {
+                                                   AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException, IOException {
         List<CSVRecord> csvRecords = readCSVRecords(fileName, connectionAccount, config, format);
         CSVConverter converter = CSVConverter.of(config.getCsvOptions());
         converter.setRecordBuilderFactory(recordBuilderFactory);
@@ -118,7 +138,7 @@ public class BlobTestUtils {
     }
 
     private static List<CSVRecord> readCSVRecords(String fileName, CloudStorageAccount connectionAccount, AzureBlobDataset config,
-            CSVFormat format) throws URISyntaxException, StorageException {
+                                                  CSVFormat format) throws URISyntaxException, StorageException {
         CloudAppendBlob file = connectionAccount.createCloudBlobClient().getContainerReference(config.getContainerName())
                 .getAppendBlobReference(fileName);
 

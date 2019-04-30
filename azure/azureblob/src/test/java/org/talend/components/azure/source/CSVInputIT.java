@@ -61,17 +61,7 @@ public class CSVInputIT {
     @BeforeEach
     public void init() throws Exception {
         containerName = "test-it-" + RandomStringUtils.randomAlphabetic(10).toLowerCase();
-        Server account;
-        final MavenDecrypter decrypter = new MavenDecrypter();
-
-        AzureCloudConnection dataStore = new AzureCloudConnection();
-        dataStore.setUseAzureSharedSignature(false);
-        AzureStorageConnectionAccount accountConnection = new AzureStorageConnectionAccount();
-        account = decrypter.find("azure.account");
-        accountConnection.setAccountName(account.getUsername());
-        accountConnection.setAccountKey(account.getPassword());
-
-        dataStore.setAccountConnection(accountConnection);
+        AzureCloudConnection dataStore = BlobTestUtils.createCloudConnection();
 
         AzureBlobDataset dataset = new AzureBlobDataset();
         dataset.setConnection(dataStore);

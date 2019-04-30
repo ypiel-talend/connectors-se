@@ -61,17 +61,7 @@ public class HTMLInputIT {
     @BeforeEach
     public void init() throws Exception {
         containerName = "test-it-" + RandomStringUtils.randomAlphabetic(10).toLowerCase();
-        Server account;
-        final MavenDecrypter decrypter = new MavenDecrypter();
-
-        AzureCloudConnection dataStore = new AzureCloudConnection();
-        dataStore.setUseAzureSharedSignature(false);
-        AzureStorageConnectionAccount accountConnection = new AzureStorageConnectionAccount();
-        account = decrypter.find("azure.account");
-        accountConnection.setAccountName(account.getUsername());
-        accountConnection.setAccountKey(account.getPassword());
-
-        dataStore.setAccountConnection(accountConnection);
+        AzureCloudConnection dataStore = BlobTestUtils.createCloudConnection();
 
         AzureBlobDataset dataset = new AzureBlobDataset();
         dataset.setConnection(dataStore);
@@ -88,7 +78,6 @@ public class HTMLInputIT {
         storageAccount = componentService.createStorageAccount(blobInputProperties.getDataset().getConnection());
         BlobTestUtils.createStorage(blobInputProperties.getDataset().getContainerName(), storageAccount);
     }
-
     @Test
     public void testInput1File1Row() throws StorageException, IOException, URISyntaxException {
         final int recordSize = 1;
