@@ -113,6 +113,7 @@ public class ParquetOutputIT {
         COMPONENT.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
+        outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
         Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
                 .connections().from("inputFlow").to("outputComponent").build().run();
 

@@ -136,6 +136,20 @@ public class ParquetInputIT {
         Assert.assertArrayEquals(bytesValue, firstRecord.getBytes("byteArray"));
     }
 
+    @Test
+    public void testInput1FileMultipleRecords() throws StorageException, IOException, URISyntaxException {
+        final int recordSize = 6;
+        blobInputProperties.getDataset().setDirectory("parquet");
+        uploadTestFile("parquet/testParquet6Records.parquet", "testParquet6Records.parquet");
+
+        String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
+        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
+                .connections().from("azureInput").to("collector").build().run();
+        List<Record> records = COMPONENT.getCollectedData(Record.class);
+
+        Assert.assertEquals("Records amount is different", recordSize, records.size());
+    }
+
     @AfterEach
     public void removeContainer() throws URISyntaxException, StorageException {
         BlobTestUtils.deleteStorage(containerName, storageAccount);
