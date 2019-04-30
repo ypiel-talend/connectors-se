@@ -15,9 +15,6 @@ package org.talend.components.azure.source;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -27,8 +24,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BlobTestUtils;
+import org.talend.components.azure.common.Encoding;
 import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.common.connection.AzureStorageConnectionAccount;
+import org.talend.components.azure.common.excel.ExcelFormat;
+import org.talend.components.azure.common.excel.ExcelFormatOptions;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -45,8 +45,7 @@ import com.microsoft.azure.storage.StorageException;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
-public class ParquetInputIT {
-
+public class HTMLInputIT {
     @Service
     private AzureBlobComponentServices componentService;
 
@@ -76,7 +75,11 @@ public class ParquetInputIT {
 
         AzureBlobDataset dataset = new AzureBlobDataset();
         dataset.setConnection(dataStore);
-        dataset.setFileFormat(FileFormat.PARQUET);
+        dataset.setFileFormat(FileFormat.EXCEL);
+        ExcelFormatOptions excelFormatOptions = new ExcelFormatOptions();
+        excelFormatOptions.setExcelFormat(ExcelFormat.HTML);
+        excelFormatOptions.setEncoding(Encoding.UFT8);
+        dataset.setExcelOptions(excelFormatOptions);
 
         dataset.setContainerName(containerName);
         blobInputProperties = new BlobInputProperties();
@@ -87,18 +90,12 @@ public class ParquetInputIT {
     }
 
     @Test
-    public void testInput1File1Record() throws Exception {
+    public void testInput1File1Row() throws StorageException, IOException, URISyntaxException {
         final int recordSize = 1;
-        final int columnSize = 6;
-        final boolean booleanValue = true;
-        final long longValue = 0L;
-        final int intValue = 1;
-        final double doubleValue = 2.0;
-        final long dateValue = 1556612530082L;
-        final byte[] bytesValue = new byte[] { 1, 2, 3 };
+        final int columnSize = 2;
 
-        blobInputProperties.getDataset().setDirectory("parquet");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet1Record.parquet", "testParquet1Record.parquet");
+        blobInputProperties.getDataset().setDirectory("excelHTML");
+        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML1Row.html", "TestExcelHTML1Row.html");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
@@ -107,21 +104,39 @@ public class ParquetInputIT {
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
         Record firstRecord = records.get(0);
-        Assert.assertEquals(columnSize, firstRecord.getSchema().getEntries().size());
-        Assert.assertEquals(booleanValue, firstRecord.getBoolean("booleanValue"));
-        Assert.assertEquals(longValue, firstRecord.getLong("longValue"));
-        Assert.assertEquals(intValue, firstRecord.getInt("intValue"));
-        Assert.assertEquals(doubleValue, firstRecord.getDouble("doubleValue"), 0.01);
-        Assert.assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateValue), ZoneId.of("UTC")),
-                firstRecord.getDateTime("dateValue"));
-        Assert.assertArrayEquals(bytesValue, firstRecord.getBytes("byteArray"));
+        Assert.assertEquals("Record's schema is different", columnSize, firstRecord.getSchema().getEntries().size());
+        Assert.assertEquals("a1", firstRecord.getString("field0"));
+        Assert.assertEquals("b1", firstRecord.getString("field1"));
     }
 
     @Test
-    public void testInput1FileMultipleRecords() throws StorageException, IOException, URISyntaxException {
-        final int recordSize = 6;
-        blobInputProperties.getDataset().setDirectory("parquet");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties,"parquet/testParquet6Records.parquet", "testParquet6Records.parquet");
+    public void testInput1FileMultipleRows() throws StorageException, IOException, URISyntaxException {
+        final int recordSize = 5;
+        final int columnSize = 2;
+
+        blobInputProperties.getDataset().setDirectory("excelHTML");
+        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML5Rows.html", "TestExcelHTML5Rows.html");
+
+        String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
+        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
+                .connections().from("azureInput").to("collector").build().run();
+        List<Record> records = COMPONENT.getCollectedData(Record.class);
+
+        Assert.assertEquals("Records amount is different", recordSize, records.size());
+        for (int i = 0; i < recordSize; i++) {
+            Record record = records.get(i);
+            Assert.assertEquals("Record's schema is different", columnSize, record.getSchema().getEntries().size());
+            Assert.assertEquals("a" + (i+1), record.getString("field0"));
+            Assert.assertEquals("b" + (i+1), record.getString("field1"));
+        }
+    }
+
+    @Test
+    public void testInputMultipleFiles() throws StorageException, IOException, URISyntaxException {
+        final int recordSize = 1 + 5;
+
+        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML1Row.html", "TestExcelHTML1Row.html");
+        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML5Rows.html", "TestExcelHTML5Rows.html");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
@@ -135,5 +150,4 @@ public class ParquetInputIT {
     public void removeContainer() throws URISyntaxException, StorageException {
         BlobTestUtils.deleteStorage(containerName, storageAccount);
     }
-
 }

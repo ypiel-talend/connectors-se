@@ -16,6 +16,8 @@ package org.talend.components.azure;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -33,6 +35,7 @@ import org.junit.Assert;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.runtime.converters.CSVConverter;
+import org.talend.components.azure.source.BlobInputProperties;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -41,6 +44,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudAppendBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
+import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class BlobTestUtils {
@@ -52,6 +56,19 @@ public class BlobTestUtils {
             throws URISyntaxException, StorageException {
         CloudBlobClient blobConnection = connectionAccount.createCloudBlobClient();
         blobConnection.getContainerReference(storageName).createIfNotExists();
+    }
+
+    public static void uploadTestFile(CloudStorageAccount storageAccount, BlobInputProperties blobInputProperties,
+                                      String resourceName, String targetName) throws URISyntaxException, StorageException, IOException {
+        CloudBlobContainer container = storageAccount.createCloudBlobClient()
+                .getContainerReference(blobInputProperties.getDataset().getContainerName());
+        CloudBlockBlob blockBlob = container
+                .getBlockBlobReference(blobInputProperties.getDataset().getDirectory() + "/" + targetName);
+
+        File resourceFile = new File(BlobTestUtils.class.getClassLoader().getResource(resourceName).toURI());
+        try (FileInputStream fileInputStream = new FileInputStream(resourceFile)) {
+            blockBlob.upload(fileInputStream, resourceFile.length());
+        }
     }
 
     public static void createAndPopulateFileInStorage(CloudStorageAccount connectionAccount, AzureBlobDataset fileOptions,
