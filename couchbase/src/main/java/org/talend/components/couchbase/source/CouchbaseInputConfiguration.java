@@ -16,8 +16,10 @@ package org.talend.components.couchbase.source;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
+import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
@@ -26,7 +28,7 @@ import lombok.Data;
 
 @Version(1)
 @Data
-@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }) }),
+@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row("useN1QLQuery"), @GridLayout.Row("query") }),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
 
 @Documentation("Couchbase input Mapper Configuration")
@@ -35,6 +37,16 @@ public class CouchbaseInputConfiguration implements Serializable {
     @Option
     @Documentation("dataset")
     private CouchbaseDataSet dataSet;
+
+    @Option
+    @Documentation("Use N1QL query")
+    boolean useN1QLQuery = false;
+
+    @Option
+    @TextArea
+    @Documentation("The N1QL query.")
+    @ActiveIf(target = "useN1QLQuery", value = "true")
+    private String query;
 
     public CouchbaseDataSet getDataSet() {
         return dataSet;

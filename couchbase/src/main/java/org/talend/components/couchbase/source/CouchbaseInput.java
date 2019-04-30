@@ -81,7 +81,13 @@ public class CouchbaseInput implements Serializable {
 
         columnsSet = new HashSet<>();
 
-        N1qlQueryResult n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucket.name()));
+        N1qlQueryResult n1qlQueryRows;
+        if (configuration.useN1QLQuery) {
+            n1qlQueryRows = bucket.query(N1qlQuery.simple(configuration.getQuery()));
+        } else {
+            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucket.name()));
+        }
+
         index = n1qlQueryRows.rows();
     }
 
@@ -90,8 +96,13 @@ public class CouchbaseInput implements Serializable {
         if (!index.hasNext()) {
             return null;
         } else {
-            // unwrap JsonObject
-            JsonObject jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
+            JsonObject jsonObject;
+            if (configuration.useN1QLQuery) {
+                jsonObject = (JsonObject) index.next().value();
+            } else {
+                // unwrap JsonObject
+                jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
+            }
 
             if (columnsSet.isEmpty()) {
                 columnsSet.addAll(jsonObject.getNames());
