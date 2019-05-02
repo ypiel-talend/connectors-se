@@ -116,12 +116,25 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
+                <version>${surefire.version}</version>
                 <configuration>
                     <trimStackTrace>false</trimStackTrace>
-                    <runOrder>alphabetical</runOrder>
+                    <systemPropertyVariables>
+                        <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>org.talend.sdk.component</groupId>
+                <artifactId>talend-component-maven-plugin</artifactId>
+                <version>1.0.4</version>
+            </extension>
+        </extensions>
     </build>
 </project>

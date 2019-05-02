@@ -18,46 +18,28 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.talend.components.azure.BlobTestUtils;
+import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.datastore.AzureCloudConnection;
-import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.source.BlobInputProperties;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import static org.talend.components.azure.source.CSVInputIT.COMPONENT;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
-public class AvroOutputIT {
-
-    private String containerName;
-
+class AvroOutputIT extends BaseIT {
     private BlobOutputConfiguration blobOutputProperties;
 
-    private CloudStorageAccount storageAccount;
-
-    @Service
-    private AzureBlobComponentServices componentService;
-
     @BeforeEach
-    public void init() throws Exception {
-        containerName = "test-it-" + RandomStringUtils.randomAlphabetic(10).toLowerCase();
-        AzureCloudConnection dataStore = BlobTestUtils.createCloudConnection();
-
+    void initDataset() {
         AzureBlobDataset dataset = new AzureBlobDataset();
         dataset.setConnection(dataStore);
         dataset.setFileFormat(FileFormat.AVRO);
@@ -65,13 +47,10 @@ public class AvroOutputIT {
         dataset.setContainerName(containerName);
         blobOutputProperties = new BlobOutputConfiguration();
         blobOutputProperties.setDataset(dataset);
-
-        storageAccount = componentService.createStorageAccount(blobOutputProperties.getDataset().getConnection());
-        BlobTestUtils.createStorage(blobOutputProperties.getDataset().getContainerName(), storageAccount);
     }
 
     @Test
-    public void testOutput() throws URISyntaxException, StorageException {
+    void testOutput() throws URISyntaxException, StorageException {
         final int recordSize = 5;
         final String testStringValue = "test";
         final boolean testBooleanValue = true;
@@ -122,10 +101,5 @@ public class AvroOutputIT {
         Assert.assertEquals(testRecord.getDouble("doubleValue"), firstRecord.getDouble("doubleValue"), 0.01);
         Assert.assertEquals(testRecord.getDateTime("dateValue"), firstRecord.getDateTime("dateValue"));
         Assert.assertArrayEquals(testRecord.getBytes("byteArray"), firstRecord.getBytes("byteArray"));
-    }
-
-    @AfterEach
-    public void removeContainer() throws URISyntaxException, StorageException {
-        BlobTestUtils.deleteStorage(containerName, storageAccount);
     }
 }
