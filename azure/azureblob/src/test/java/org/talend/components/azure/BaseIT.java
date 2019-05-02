@@ -42,11 +42,14 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 
 @WithComponents("org.talend.components.azure")
 public class BaseIT {
+
     @ClassRule
     public static final SimpleComponentRule COMPONENT = new SimpleComponentRule("org.talend.components.azure");
 
     protected static String containerName;
+
     protected static CloudStorageAccount storageAccount;
+
     protected static AzureCloudConnection dataStore;
 
     @BeforeAll
@@ -64,7 +67,7 @@ public class BaseIT {
         CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
         CloudBlobContainer container = blobClient.getContainerReference(containerName);
 
-        for (ListBlobItem blob: container.listBlobs("", true)) {
+        for (ListBlobItem blob : container.listBlobs("", true)) {
             if (blob instanceof CloudBlob) {
                 ((CloudBlob) blob).delete();
             }

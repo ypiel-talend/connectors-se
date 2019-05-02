@@ -41,7 +41,7 @@ class AvroInputIT extends BaseIT {
     private BlobInputProperties blobInputProperties;
 
     @BeforeEach
-    void initDataset()  {
+    void initDataset() {
         AzureCloudConnection dataStore = BlobTestUtils.createCloudConnection();
 
         AzureBlobDataset dataset = new AzureBlobDataset();
@@ -64,7 +64,7 @@ class AvroInputIT extends BaseIT {
         final int intValue = 1;
         final double doubleValue = 2.0;
         final long dateValue = 1556789638915L;
-        final byte[] bytesValue = new byte[]{1, 2, 3};
+        final byte[] bytesValue = new byte[] { 1, 2, 3 };
 
         blobInputProperties.getDataset().setDirectory("avro");
         BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro1Record.avro", "testAvro1Record.avro");

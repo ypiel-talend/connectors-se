@@ -36,6 +36,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @WithComponents("org.talend.components.azure")
 class AvroOutputIT extends BaseIT {
+
     private BlobOutputConfiguration blobOutputProperties;
 
     @BeforeEach

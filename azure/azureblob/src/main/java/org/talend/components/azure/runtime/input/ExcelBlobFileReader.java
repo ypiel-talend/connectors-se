@@ -90,7 +90,10 @@ public class ExcelBlobFileReader extends BlobFileReader {
                     }
                 }
 
-                for (int i = getConfig().getExcelOptions().getHeader(); i < sheet.getPhysicalNumberOfRows(); i++) { //TODO check physical is working correctly
+                for (int i = getConfig().getExcelOptions().getHeader(); i < sheet.getPhysicalNumberOfRows(); i++) { // TODO check
+                                                                                                                    // physical is
+                                                                                                                    // working
+                                                                                                                    // correctly
                     Row row = sheet.getRow(i);
                     rows.add(row);
                 }
@@ -102,8 +105,8 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
         @Override
         protected boolean hasNextRecordTaken() {
-            return getConfig().getExcelOptions().isUseFooter() ? rows.size() > getConfig().getExcelOptions().getFooter() :
-                    rows.size() > 0;
+            return getConfig().getExcelOptions().isUseFooter() ? rows.size() > getConfig().getExcelOptions().getFooter()
+                    : rows.size() > 0;
         }
 
         @Override

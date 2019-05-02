@@ -38,11 +38,17 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 class Excel97IT extends BaseIT {
 
     private BlobInputProperties blobInputProperties;
+
     private double idValue = 1.0;
+
     private final String nameValue = "a";
+
     private final double longValue = 10000000000000.0;
+
     private final double doubleValue = 2.5;
+
     private final double dateValue = 43501.0;
+
     private final boolean booleanValue = true;
 
     @BeforeEach
@@ -180,7 +186,6 @@ class Excel97IT extends BaseIT {
         blobInputProperties.getDataset().getExcelOptions().setUseHeader(true);
         blobInputProperties.getDataset().getExcelOptions().setHeader(1);
 
-
         BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excel97/excel_97_1_record_with_header.xls",
                 "excel_97_1_record_with_header.xls");
         BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excel97/excel_97_5_records_with_header.xls",
@@ -253,7 +258,6 @@ class Excel97IT extends BaseIT {
 
         blobInputProperties.getDataset().getExcelOptions().setUseHeader(true);
         blobInputProperties.getDataset().getExcelOptions().setHeader(2);
-
 
         BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excel97/excel_97_1_record_with_big_header.xls",
                 "excel_97_1_record_with_big_header.xls");

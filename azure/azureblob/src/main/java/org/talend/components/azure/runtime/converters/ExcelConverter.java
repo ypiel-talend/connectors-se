@@ -28,11 +28,15 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import lombok.Getter;
 
-//TODO <Row> ???
+// TODO <Row> ???
 public class ExcelConverter implements RecordConverter {
+
     private static RecordBuilderFactory builderFactory;
+
     private final ExcelFormatOptions excelFormatOptions;
+
     private Schema schema;
+
     @Getter
     private List<String> columnNames;
 
@@ -51,7 +55,6 @@ public class ExcelConverter implements RecordConverter {
 
         return new ExcelConverter(excelFormatOptions);
     }
-
 
     /**
      * @param record
@@ -80,16 +83,16 @@ public class ExcelConverter implements RecordConverter {
                     cellType = ((Row) record).getCell(i).getCachedFormulaResultType();
                 }
                 switch (cellType) {
-                    case ERROR:
-                        throw new BlobRuntimeException("Error cell exists in excel document in the " + i + 1 + " column");
-                    case STRING:
-                        entryBuilder.withType(Schema.Type.STRING);
-                        break;
-                    case NUMERIC:
-                        entryBuilder.withType(Schema.Type.DOUBLE);
-                        break;
-                    case BOOLEAN:
-                        entryBuilder.withType(Schema.Type.BOOLEAN);
+                case ERROR:
+                    throw new BlobRuntimeException("Error cell exists in excel document in the " + i + 1 + " column");
+                case STRING:
+                    entryBuilder.withType(Schema.Type.STRING);
+                    break;
+                case NUMERIC:
+                    entryBuilder.withType(Schema.Type.DOUBLE);
+                    break;
+                case BOOLEAN:
+                    entryBuilder.withType(Schema.Type.BOOLEAN);
                 }
                 schemaBuilder.withEntry(entryBuilder.build());
             }
@@ -144,14 +147,14 @@ public class ExcelConverter implements RecordConverter {
         for (int i = 0; i < schema.getEntries().size(); i++) {
             Cell recordCell = ((Row) record).getCell(i);
             switch (schema.getEntries().get(i).getType()) {
-                case BOOLEAN:
-                    recordBuilder.withBoolean(columnNames.get(i), recordCell.getBooleanCellValue());
-                    break;
-                case DOUBLE:
-                    recordBuilder.withDouble(columnNames.get(i), recordCell.getNumericCellValue());
-                    break;
-                default:
-                    recordBuilder.withString(columnNames.get(i), recordCell.getStringCellValue());
+            case BOOLEAN:
+                recordBuilder.withBoolean(columnNames.get(i), recordCell.getBooleanCellValue());
+                break;
+            case DOUBLE:
+                recordBuilder.withDouble(columnNames.get(i), recordCell.getNumericCellValue());
+                break;
+            default:
+                recordBuilder.withString(columnNames.get(i), recordCell.getStringCellValue());
             }
         }
 

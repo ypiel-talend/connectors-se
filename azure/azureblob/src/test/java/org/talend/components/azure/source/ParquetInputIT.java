@@ -36,6 +36,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @WithComponents("org.talend.components.azure")
 class ParquetInputIT extends BaseIT {
+
     private static BlobInputProperties blobInputProperties;
 
     @BeforeEach
