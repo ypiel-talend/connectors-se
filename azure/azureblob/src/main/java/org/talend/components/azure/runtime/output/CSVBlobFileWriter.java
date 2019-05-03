@@ -147,9 +147,4 @@ public class CSVBlobFileWriter extends BlobFileWriter {
 
         return array;
     }
-
-    @Override
-    public void complete() {
-        // NOOP
-    }
 }

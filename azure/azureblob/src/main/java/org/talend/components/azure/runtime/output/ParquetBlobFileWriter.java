@@ -20,13 +20,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetFileWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
-import org.apache.parquet.hadoop.util.HadoopOutputFile;
-import org.apache.parquet.io.OutputFile;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
@@ -94,7 +91,7 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
                     .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
                     .withSchema(ParquetConverter.of().inferAvroSchema(recordSchema)).build();
             for (Record r : getBatch()) {
-                writer.write(ParquetConverter.of().fromRecord(r));
+                writer.write(ParquetConverter.of().fromRecord(r)); //TODO avoid of creating new converter every time
             }
 
             writer.close();

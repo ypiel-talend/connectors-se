@@ -48,7 +48,12 @@ public class AvroBlobFileWriter extends BlobFileWriter {
 
     @Override
     public void generateFile() throws URISyntaxException, StorageException {
-        String fileName = config.getDataset().getDirectory() + "/" + config.getBlobNameTemplate() + System.currentTimeMillis()
+        String directoryName = config.getDataset().getDirectory();
+        if (!directoryName.endsWith("/")) {
+            directoryName += "/";
+        }
+
+        String fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis()
                 + ".avro";
 
         CloudBlockBlob blob = getContainer().getBlockBlobReference(fileName);
@@ -87,12 +92,11 @@ public class AvroBlobFileWriter extends BlobFileWriter {
             return;
         }
 
-        byte[] batchBytes = appendFirstBatch();
+        byte[] batchBytes = convertBatchToBytes();
         getCurrentItem().uploadFromByteArray(batchBytes, 0, batchBytes.length);
     }
 
-    private byte[] appendFirstBatch() throws IOException {
-
+    private byte[] convertBatchToBytes() throws IOException {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>();
         DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
@@ -103,5 +107,4 @@ public class AvroBlobFileWriter extends BlobFileWriter {
         dataFileWriter.flush();
         return byteBuffer.toByteArray();
     }
-
 }

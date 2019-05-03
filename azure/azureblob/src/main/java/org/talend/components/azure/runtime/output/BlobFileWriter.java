@@ -30,7 +30,9 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class BlobFileWriter {
 
     private CloudStorageAccount connection;
@@ -52,9 +54,10 @@ public abstract class BlobFileWriter {
 
     public void newBatch() {
         batch = new LinkedList<>();
+        log.debug("New batch created");
     }
 
-    public abstract void generateFile() throws URISyntaxException, StorageException;
+    protected abstract void generateFile() throws URISyntaxException, StorageException;
 
     public void writeRecord(Record record) {
         if (schema == null) {
@@ -99,6 +102,7 @@ public abstract class BlobFileWriter {
      */
     public void complete() throws Exception {
         if (!getBatch().isEmpty()) {
+            log.info("Executing last batch with " + getBatch().size() + " records");
             flush();
         }
 

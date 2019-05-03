@@ -89,7 +89,7 @@ public class BlobOutput implements Serializable {
         try {
             fileWriter.complete();
         } catch (Exception e) {
-            throw new BlobRuntimeException(messageService.errorUniteFiles(), e);
+            throw new BlobRuntimeException(messageService.errorSubmitRows(), e);
         }
     }
 }
