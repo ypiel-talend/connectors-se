@@ -254,13 +254,6 @@
                             </classpathDependencyExcludes>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>filesafe-beam-test</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
                 </executions>
             </plugin>
         </plugins>
