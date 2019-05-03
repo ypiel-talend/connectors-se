@@ -16,6 +16,7 @@ package org.talend.components.azure.runtime.output;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -30,6 +31,8 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudAppendBlob;
+import com.microsoft.azure.storage.blob.CloudBlobDirectory;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class AvroBlobFileWriter extends BlobFileWriter {
@@ -53,11 +56,13 @@ public class AvroBlobFileWriter extends BlobFileWriter {
             directoryName += "/";
         }
 
-        String fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis()
+        String fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID()
                 + ".avro";
-
         CloudBlockBlob blob = getContainer().getBlockBlobReference(fileName);
         if (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+            if (config.isOverWriteData()) {
+                blob.delete();
+            }
             generateFile();
             return;
         }

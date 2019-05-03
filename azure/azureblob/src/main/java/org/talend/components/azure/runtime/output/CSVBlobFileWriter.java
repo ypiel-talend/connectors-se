@@ -18,6 +18,7 @@ import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.UUID;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -53,13 +54,22 @@ public class CSVBlobFileWriter extends BlobFileWriter {
 
     @Override
     public void generateFile() throws URISyntaxException, StorageException {
+        String directoryName = config.getDataset().getDirectory();
+        if (!directoryName.endsWith("/")) {
+            directoryName += "/";
+        }
+        String itemName = directoryName + config.getBlobNameTemplate()
+                + UUID.randomUUID() + ".csv";
         CloudAppendBlob currentItem = getContainer()
-                .getAppendBlobReference(config.getDataset().getDirectory() + "/" + config.getBlobNameTemplate() + ".csv");
+                .getAppendBlobReference(itemName);
 
         if (currentItem.exists()) {
+            if (!config.isOverWriteData()) {
+                generateFile();
+                return;
+            }
             log.warn("File {} existed, will be recreated", currentItem.getName());
         }
-
         currentItem.createOrReplace();
         setCurrentItem(currentItem);
     }

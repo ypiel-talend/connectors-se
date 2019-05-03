@@ -65,6 +65,9 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
 
         CloudBlockBlob blob = getContainer().getBlockBlobReference(fileName);
         if (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+            if (config.isOverWriteData()) {
+                blob.delete();
+            }
             generateFile();
             return;
         }

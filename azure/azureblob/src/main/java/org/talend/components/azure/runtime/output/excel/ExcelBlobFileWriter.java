@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -26,9 +27,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.talend.components.azure.common.excel.ExcelFormat;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.common.service.AzureComponentServices;
+import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.runtime.converters.ExcelConverter;
 import org.talend.components.azure.runtime.output.BlobFileWriter;
-import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
 
@@ -75,13 +76,18 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         if (!directoryName.endsWith("/")) {
             directoryName += "/";
         }
-        String tempName = directoryName + config.getBlobNameTemplate()
-                + System.currentTimeMillis() + fileExtention;
 
-        CloudBlockBlob excelFile = getContainer().getBlockBlobReference(tempName);
+        String itemName = directoryName + config.getBlobNameTemplate()
+                + UUID.randomUUID() + fileExtention;
+
+        CloudBlockBlob excelFile = getContainer().getBlockBlobReference(itemName);
         if (excelFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+            if (config.isOverWriteData()) {
+                excelFile.delete();
+            }
             generateFile();
             return;
+
         }
         setCurrentItem(excelFile);
     }
@@ -111,8 +117,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
     }
 
     /**
-     *
-     * @param sheet to append header
+     * @param sheet           to append header
      * @param firstDataRecord for retrieving schema
      */
     private void appendHeader(Sheet sheet, Record firstDataRecord) {
@@ -145,9 +150,9 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         bos = new ByteArrayOutputStream();
 
         switch (config.getDataset().getExcelOptions().getExcelFormat()) {
-        case EXCEL97:
-        case EXCEL2007:
-            flushBatchToByteArray();
+            case EXCEL97:
+            case EXCEL2007:
+                flushBatchToByteArray();
         }
 
         getCurrentItem().upload(new ByteArrayInputStream(bos.toByteArray()), -1);
@@ -161,10 +166,10 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         int dataRowCounter = 0;
         if (config.getDataset().getExcelOptions().isUseHeader() && config.getDataset().getExcelOptions().getHeader() > 0) {
             appendHeader(sheet, getBatch().get(0));
-            dataRowCounter+=config.getDataset().getExcelOptions().getHeader();
+            dataRowCounter += config.getDataset().getExcelOptions().getHeader();
         }
         converter.appendBatchToTheSheet(getBatch(), dataRowCounter);
-        dataRowCounter+=getBatch().size();
+        dataRowCounter += getBatch().size();
 
         if (config.getDataset().getExcelOptions().isUseFooter() && config.getDataset().getExcelOptions().getFooter() > 0) {
             appendFooter(sheet, dataRowCounter);
