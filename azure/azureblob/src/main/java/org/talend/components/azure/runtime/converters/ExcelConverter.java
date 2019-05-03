@@ -19,7 +19,10 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.talend.components.azure.common.excel.ExcelFormat;
 import org.talend.components.azure.common.excel.ExcelFormatOptions;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.sdk.component.api.record.Record;
@@ -80,7 +83,13 @@ public class ExcelConverter implements RecordConverter {
                 entryBuilder.withName(columnNames.get(i));
                 CellType cellType = columnTypes.get(i);
                 if (cellType == CellType.FORMULA) {
-                    cellType = ((Row) record).getCell(i).getCachedFormulaResultType();
+                    Cell cell = ((Row) record).getCell(i);
+                    if (excelFormatOptions.getExcelFormat() == ExcelFormat.EXCEL97) {
+                        cellType = cell.getCachedFormulaResultType();
+                    } else if (excelFormatOptions.getExcelFormat() == ExcelFormat.EXCEL2007){
+                        FormulaEvaluator formulaEvaluator = ((Row) record).getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
+                        cellType = formulaEvaluator.evaluateFormulaCell(cell);
+                    }
                 }
                 switch (cellType) {
                 case ERROR:
@@ -135,7 +144,7 @@ public class ExcelConverter implements RecordConverter {
     @Override
     public Record toRecord(Object record) {
         if (!(record instanceof Row)) {
-            throw new IllegalArgumentException("Record must be apache row");
+            throw new IllegalArgumentException("Record must be apache poi row");
         }
 
         if (schema == null) {

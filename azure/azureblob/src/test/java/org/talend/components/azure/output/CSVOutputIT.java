@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BaseIT;
@@ -30,7 +29,6 @@ import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.csv.RecordDelimiter;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.runtime.converters.CSVConverter;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
