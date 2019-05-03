@@ -39,6 +39,20 @@ class AvroOutputIT extends BaseIT {
 
     private BlobOutputConfiguration blobOutputProperties;
 
+    private final String testStringValue = "test";
+
+    private final boolean testBooleanValue = true;
+
+    private final long testLongValue = 0L;
+
+    private final int testIntValue = 1;
+
+    private final double testDoubleValue = 2.0;
+
+    private final ZonedDateTime testDateValue = ZonedDateTime.now();
+
+    private final byte[] bytes = new byte[] { 1, 2, 3 };
+
     @BeforeEach
     void initDataset() {
         AzureBlobDataset dataset = new AzureBlobDataset();
@@ -53,14 +67,6 @@ class AvroOutputIT extends BaseIT {
     @Test
     void testOutput() throws URISyntaxException, StorageException {
         final int recordSize = 5;
-        final String testStringValue = "test";
-        final boolean testBooleanValue = true;
-        final long testLongValue = 0L;
-        final int testIntValue = 1;
-        final double testDoubleValue = 2.0;
-        final ZonedDateTime testDateValue = ZonedDateTime.now();
-        final byte[] bytes = new byte[] { 1, 2, 3 };
-
         blobOutputProperties.getDataset().setDirectory("avroDir");
         blobOutputProperties.setBlobNameTemplate("testFile");
 
@@ -83,7 +89,7 @@ class AvroOutputIT extends BaseIT {
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
 
         Assert.assertTrue("No files were created in test container",
-                container.listBlobs(blobOutputProperties.getDataset().getDirectory(), true).iterator().hasNext());
+                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext());
 
         BlobInputProperties inputProperties = new BlobInputProperties();
         inputProperties.setDataset(blobOutputProperties.getDataset());
@@ -102,5 +108,33 @@ class AvroOutputIT extends BaseIT {
         Assert.assertEquals(testRecord.getDouble("doubleValue"), firstRecord.getDouble("doubleValue"), 0.01);
         Assert.assertEquals(testRecord.getDateTime("dateValue"), firstRecord.getDateTime("dateValue"));
         Assert.assertArrayEquals(testRecord.getBytes("byteArray"), firstRecord.getBytes("byteArray"));
+    }
+
+    @Test
+    public void testBatchSizeIsGreaterThanRowSize() throws URISyntaxException, StorageException {
+        final int recordSize = 5;
+        blobOutputProperties.getDataset().setDirectory("avroDir");
+        blobOutputProperties.setBlobNameTemplate("testFile");
+
+        Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder()
+                .withString("stringValue", testStringValue).withBoolean("booleanValue", testBooleanValue)
+                .withLong("longValue", testLongValue).withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
+                .withDateTime("dateValue", testDateValue).withBytes("byteArray", bytes).build();
+
+        List<Record> testRecords = new ArrayList<>();
+        for (int i = 0; i < recordSize; i++) {
+            testRecords.add(testRecord);
+        }
+        COMPONENT.setInputData(testRecords);
+
+        String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
+        outputConfig += "&$configuration.$maxBatchSize=" + (recordSize * 100);
+        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections().from("inputFlow").to("outputComponent").build().run();
+
+        CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
+
+        Assert.assertTrue("No files were created in test container",
+                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext());
     }
 }

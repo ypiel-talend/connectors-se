@@ -39,6 +39,20 @@ class ParquetOutputIT extends BaseIT {
 
     private BlobOutputConfiguration blobOutputProperties;
 
+    final String testStringValue = "test";
+
+    final boolean testBooleanValue = true;
+
+    final long testLongValue = 0L;
+
+    final int testIntValue = 1;
+
+    final double testDoubleValue = 2.0;
+
+    final ZonedDateTime testDateValue = ZonedDateTime.now();
+
+    final byte[] bytes = new byte[] { 1, 2, 3 };
+
     @BeforeEach
     public void initDataset() {
         AzureCloudConnection dataStore = BlobTestUtils.createCloudConnection();
@@ -55,12 +69,6 @@ class ParquetOutputIT extends BaseIT {
     @Test
     public void testOutput() throws Exception {
         final int recordSize = 6;
-        final boolean testBooleanValue = true;
-        final long testLongValue = 0L;
-        final int testIntValue = 1;
-        final double testDoubleValue = 2.0;
-        final ZonedDateTime testDateValue = ZonedDateTime.now();
-        final byte[] bytes = new byte[] { 1, 2, 3 };
 
         blobOutputProperties.getDataset().setDirectory("testDir");
         blobOutputProperties.setBlobNameTemplate("testFile");
@@ -84,7 +92,7 @@ class ParquetOutputIT extends BaseIT {
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
 
         Assert.assertTrue("No files were created in test container",
-                container.listBlobs(blobOutputProperties.getDataset().getDirectory(), true).iterator().hasNext());
+                container.listBlobs(blobOutputProperties.getDataset().getDirectory(), false).iterator().hasNext());
 
         BlobInputProperties inputProperties = new BlobInputProperties();
         inputProperties.setDataset(blobOutputProperties.getDataset());
@@ -102,5 +110,33 @@ class ParquetOutputIT extends BaseIT {
         Assert.assertEquals(testRecord.getDouble("doubleValue"), firstRecord.getDouble("doubleValue"), 0.01);
         Assert.assertEquals(testRecord.getDateTime("dateValue"), firstRecord.getDateTime("dateValue"));
         Assert.assertArrayEquals(testRecord.getBytes("byteArray"), firstRecord.getBytes("byteArray"));
+    }
+
+    @Test
+    public void testBatchSizeIsGreaterThanRowSize() throws Exception {
+        final int recordSize = 5;
+        blobOutputProperties.getDataset().setDirectory("avroDir");
+        blobOutputProperties.setBlobNameTemplate("testFile");
+
+        Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder()
+                .withString("stringValue", testStringValue).withBoolean("booleanValue", testBooleanValue)
+                .withLong("longValue", testLongValue).withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
+                .withDateTime("dateValue", testDateValue).withBytes("byteArray", bytes).build();
+
+        List<Record> testRecords = new ArrayList<>();
+        for (int i = 0; i < recordSize; i++) {
+            testRecords.add(testRecord);
+        }
+        COMPONENT.setInputData(testRecords);
+
+        String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
+        outputConfig += "&$configuration.$maxBatchSize=" + (recordSize * 100);
+        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections().from("inputFlow").to("outputComponent").build().run();
+
+        CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
+
+        Assert.assertTrue("No files were created in test container",
+                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext());
     }
 }

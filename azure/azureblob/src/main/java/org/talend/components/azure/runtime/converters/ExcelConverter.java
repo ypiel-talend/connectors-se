@@ -86,8 +86,9 @@ public class ExcelConverter implements RecordConverter {
                     Cell cell = ((Row) record).getCell(i);
                     if (excelFormatOptions.getExcelFormat() == ExcelFormat.EXCEL97) {
                         cellType = cell.getCachedFormulaResultType();
-                    } else if (excelFormatOptions.getExcelFormat() == ExcelFormat.EXCEL2007){
-                        FormulaEvaluator formulaEvaluator = ((Row) record).getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
+                    } else if (excelFormatOptions.getExcelFormat() == ExcelFormat.EXCEL2007) {
+                        FormulaEvaluator formulaEvaluator = ((Row) record).getSheet().getWorkbook().getCreationHelper()
+                                .createFormulaEvaluator();
                         cellType = formulaEvaluator.evaluateFormulaCell(cell);
                     }
                 }

@@ -36,6 +36,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @WithComponents("org.talend.components.azure")
 class Excel2007IT extends BaseIT {
+
     private BlobInputProperties blobInputProperties;
 
     private double idValue = 1.0;
