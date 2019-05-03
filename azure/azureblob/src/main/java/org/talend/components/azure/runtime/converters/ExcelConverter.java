@@ -46,6 +46,7 @@ public class ExcelConverter implements RecordConverter<Row> {
 
     @Getter
     private List<CellType> columnTypes;
+
     private Sheet sheet;
 
     ExcelConverter(ExcelFormatOptions excelFormatOptions) {
@@ -54,6 +55,7 @@ public class ExcelConverter implements RecordConverter<Row> {
 
     /**
      * Create excel converter for input
+     * 
      * @param excelFormatOptions
      * @param builderFactory
      * @return
@@ -66,9 +68,9 @@ public class ExcelConverter implements RecordConverter<Row> {
         return new ExcelConverter(excelFormatOptions);
     }
 
-
     /**
      * Create excel converter for output
+     * 
      * @param excelFormatOptions
      * @param currentSheet
      * @return
@@ -79,6 +81,7 @@ public class ExcelConverter implements RecordConverter<Row> {
 
         return converterForOutput;
     }
+
     /**
      * @param record
      * @return
@@ -201,38 +204,38 @@ public class ExcelConverter implements RecordConverter<Row> {
                 Cell cell = row.createCell(j);
                 String entityName = currentRecord.getSchema().getEntries().get(j).getName();
                 switch (currentRecord.getSchema().getEntries().get(j).getType()) {
-                    case BOOLEAN:
-                        cell.setCellType(CellType.BOOLEAN);
-                        cell.setCellValue(currentRecord.getBoolean(entityName));
-                        break;
-                    case DATETIME:
-                        cell.setCellType(CellType.NUMERIC);
-                        cell.setCellValue(Date.from(currentRecord.getDateTime(entityName).toInstant()));
-                        break;
-                    case INT:
-                        cell.setCellType(CellType.NUMERIC);
-                        cell.setCellValue(currentRecord.getInt(entityName));
-                        break;
-                    case LONG:
-                        cell.setCellType(CellType.NUMERIC);
-                        cell.setCellValue(currentRecord.getLong(entityName));
-                        break;
-                    case FLOAT:
-                        cell.setCellType(CellType.NUMERIC);
-                        cell.setCellValue(currentRecord.getFloat(entityName));
-                        break;
-                    case DOUBLE:
-                        cell.setCellType(CellType.NUMERIC);
-                        cell.setCellValue(currentRecord.getDouble(entityName));
-                        break;
-                    case BYTES:
-                        cell.setCellType(CellType.STRING);
-                        cell.setCellValue(Arrays.toString(currentRecord.getBytes(entityName)));
-                        break;
-                    default:
-                        cell.setCellType(CellType.STRING);
-                        cell.setCellValue(
-                                String.valueOf(currentRecord.get(Object.class, currentRecord.getSchema().getEntries().get(j).getName())));
+                case BOOLEAN:
+                    cell.setCellType(CellType.BOOLEAN);
+                    cell.setCellValue(currentRecord.getBoolean(entityName));
+                    break;
+                case DATETIME:
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(Date.from(currentRecord.getDateTime(entityName).toInstant()));
+                    break;
+                case INT:
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(currentRecord.getInt(entityName));
+                    break;
+                case LONG:
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(currentRecord.getLong(entityName));
+                    break;
+                case FLOAT:
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(currentRecord.getFloat(entityName));
+                    break;
+                case DOUBLE:
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(currentRecord.getDouble(entityName));
+                    break;
+                case BYTES:
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue(Arrays.toString(currentRecord.getBytes(entityName)));
+                    break;
+                default:
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue(String
+                            .valueOf(currentRecord.get(Object.class, currentRecord.getSchema().getEntries().get(j).getName())));
                 }
             }
         }

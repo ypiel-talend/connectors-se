@@ -56,8 +56,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
             directoryName += "/";
         }
 
-        String fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID()
-                + ".avro";
+        String fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
         CloudBlockBlob blob = getContainer().getBlockBlobReference(fileName);
         if (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
             if (config.isOverWriteData()) {

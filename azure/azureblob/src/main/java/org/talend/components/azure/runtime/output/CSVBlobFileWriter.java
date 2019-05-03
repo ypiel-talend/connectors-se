@@ -58,10 +58,8 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         if (!directoryName.endsWith("/")) {
             directoryName += "/";
         }
-        String itemName = directoryName + config.getBlobNameTemplate()
-                + UUID.randomUUID() + ".csv";
-        CloudAppendBlob currentItem = getContainer()
-                .getAppendBlobReference(itemName);
+        String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".csv";
+        CloudAppendBlob currentItem = getContainer().getAppendBlobReference(itemName);
 
         if (currentItem.exists()) {
             if (!config.isOverWriteData()) {

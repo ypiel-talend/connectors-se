@@ -77,8 +77,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
             directoryName += "/";
         }
 
-        String itemName = directoryName + config.getBlobNameTemplate()
-                + UUID.randomUUID() + fileExtention;
+        String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtention;
 
         CloudBlockBlob excelFile = getContainer().getBlockBlobReference(itemName);
         if (excelFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
@@ -96,8 +95,10 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
     public void writeRecord(Record record) {
         super.writeRecord(record);
         try {
-            if ((config.getDataset().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL97 && getBatch().size() == excel97MaxRows)
-                    || (config.getDataset().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL2007 && getBatch().size() == excel2007MaxRows)) {
+            if ((config.getDataset().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL97
+                    && getBatch().size() == excel97MaxRows)
+                    || (config.getDataset().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL2007
+                            && getBatch().size() == excel2007MaxRows)) {
                 flush();
                 newBatch();
             }
@@ -117,7 +118,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
     }
 
     /**
-     * @param sheet           to append header
+     * @param sheet to append header
      * @param firstDataRecord for retrieving schema
      */
     private void appendHeader(Sheet sheet, Record firstDataRecord) {
@@ -150,9 +151,9 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         bos = new ByteArrayOutputStream();
 
         switch (config.getDataset().getExcelOptions().getExcelFormat()) {
-            case EXCEL97:
-            case EXCEL2007:
-                flushBatchToByteArray();
+        case EXCEL97:
+        case EXCEL2007:
+            flushBatchToByteArray();
         }
 
         getCurrentItem().upload(new ByteArrayInputStream(bos.toByteArray()), -1);

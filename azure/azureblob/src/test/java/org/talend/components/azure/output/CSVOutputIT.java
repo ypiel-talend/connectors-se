@@ -86,8 +86,7 @@ class CSVOutputIT extends BaseIT {
         Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
                 .connections().from("inputFlow").to("outputComponent").build().run();
         BlobTestUtils.recordBuilderFactory = COMPONENT.findService(RecordBuilderFactory.class);
-        List<Record> retrievedRecords = BlobTestUtils.readDataFromCSVDirectory(
-                blobOutputProperties.getDataset().getDirectory(),
+        List<Record> retrievedRecords = BlobTestUtils.readDataFromCSVDirectory(blobOutputProperties.getDataset().getDirectory(),
                 storageAccount, blobOutputProperties.getDataset(),
                 CSVConverter.of(blobOutputProperties.getDataset().getCsvOptions()).getCsvFormat());
 

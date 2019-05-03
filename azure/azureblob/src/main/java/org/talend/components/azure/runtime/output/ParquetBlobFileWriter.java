@@ -94,7 +94,7 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
                     .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
                     .withSchema(ParquetConverter.of().inferAvroSchema(recordSchema)).build();
             for (Record r : getBatch()) {
-                writer.write(ParquetConverter.of().fromRecord(r)); //TODO avoid of creating new converter every time
+                writer.write(ParquetConverter.of().fromRecord(r)); // TODO avoid of creating new converter every time
             }
 
             writer.close();

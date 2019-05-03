@@ -133,15 +133,15 @@ public class BlobTestUtils {
     }
 
     public static List<Record> readDataFromCSVDirectory(String directoryName, CloudStorageAccount connectionAccount,
-                                                        AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException, IOException {
+            AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException, IOException {
         List<CSVRecord> csvRecords = readCSVRecords(directoryName, connectionAccount, config, format);
         CSVConverter converter = CSVConverter.of(config.getCsvOptions());
         converter.setRecordBuilderFactory(recordBuilderFactory);
         return csvRecords.stream().map(converter::toRecord).collect(Collectors.toList());
     }
 
-    private static List<CSVRecord> readCSVRecords(String directoryName, CloudStorageAccount connectionAccount, AzureBlobDataset config,
-            CSVFormat format) throws URISyntaxException, StorageException {
+    private static List<CSVRecord> readCSVRecords(String directoryName, CloudStorageAccount connectionAccount,
+            AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException {
         List<CSVRecord> records = new ArrayList<>();
         CloudBlobDirectory directory = connectionAccount.createCloudBlobClient().getContainerReference(config.getContainerName())
                 .getDirectoryReference(directoryName);

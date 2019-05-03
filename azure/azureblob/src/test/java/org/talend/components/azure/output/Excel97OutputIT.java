@@ -98,7 +98,6 @@ class Excel97OutputIT extends BaseIT {
         blobOutputProperties.getDataset().getExcelOptions().setUseHeader(true);
         blobOutputProperties.getDataset().getExcelOptions().setHeader(1);
 
-
         List<Record> testRecords = fillTestRecords(recordSize);
         COMPONENT.setInputData(testRecords);
 
@@ -126,11 +125,8 @@ class Excel97OutputIT extends BaseIT {
     @Test
     public void testOutputDoubleAndBooleanData() throws URISyntaxException, StorageException {
         final int recordSize = 1;
-        Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder()
-                .withInt("intValue", 1)
-                .withDouble("doubleValue", 2.0)
-                .withBoolean("booleanValue", true)
-                .build();
+        Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("intValue", 1)
+                .withDouble("doubleValue", 2.0).withBoolean("booleanValue", true).build();
 
         COMPONENT.setInputData(Collections.singleton(testRecord));
 
@@ -177,7 +173,6 @@ class Excel97OutputIT extends BaseIT {
         Assert.assertTrue("No files were created in test container",
                 container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext());
     }
-
 
     private List<Record> fillTestRecords(int recordSize) {
         List<Record> testRecords = new ArrayList<>();
