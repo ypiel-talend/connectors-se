@@ -96,7 +96,7 @@ public abstract class Platform implements Serializable {
         return column.isNullable() && !column.isPrimaryKey() ? "NULL" : "NOT NULL";
     }
 
-    private Table getTableModel(final Connection connection, final String name, final List<String> keys,
+    protected Table getTableModel(final Connection connection, final String name, final List<String> keys,
             final List<String> sortKeys, DistributionStrategy distributionStrategy, final List<String> distributionKeys,
             final int varcharLength, final List<Record> records) {
         final Table.TableBuilder builder = Table.builder().name(name).distributionStrategy(distributionStrategy);
