@@ -40,6 +40,8 @@
         <module>azure-eventhubs</module>
         <module>azure-dls-gen2</module>
         <module>marketo</module>
+        <module>connections</module>
+        <module>component-extension</module>
     </modules>
 
     <scm>
