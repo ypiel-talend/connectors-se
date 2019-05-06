@@ -31,8 +31,6 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudAppendBlob;
-import com.microsoft.azure.storage.blob.CloudBlobDirectory;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class AvroBlobFileWriter extends BlobFileWriter {

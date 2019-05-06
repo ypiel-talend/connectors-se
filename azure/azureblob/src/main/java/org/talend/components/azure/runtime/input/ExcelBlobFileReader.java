@@ -18,10 +18,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 
-import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -32,7 +29,6 @@ import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.runtime.converters.ExcelConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.microsoft.azure.storage.StorageException;

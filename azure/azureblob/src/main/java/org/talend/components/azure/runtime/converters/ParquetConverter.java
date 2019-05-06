@@ -14,7 +14,6 @@
 package org.talend.components.azure.runtime.converters;
 
 import org.apache.avro.generic.GenericRecord;
-import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class ParquetConverter extends AvroConverter implements RecordConverter<GenericRecord> {

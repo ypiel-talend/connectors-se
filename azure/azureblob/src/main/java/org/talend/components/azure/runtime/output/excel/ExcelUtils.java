@@ -20,7 +20,7 @@ import org.talend.components.azure.common.excel.ExcelFormat;
 
 public class ExcelUtils {
 
-    public static Workbook createWorkBook(ExcelFormat format) {
+    static Workbook createWorkBook(ExcelFormat format) {
         return format == ExcelFormat.EXCEL97 ? new HSSFWorkbook() : new XSSFWorkbook();
     }
 }

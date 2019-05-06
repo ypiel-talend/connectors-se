@@ -20,17 +20,13 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.azure.common.csv.CSVFormatOptions;
-import org.talend.components.azure.common.csv.FieldDelimiter;
-import org.talend.components.azure.common.csv.RecordDelimiter;
 import org.talend.components.azure.runtime.input.SchemaUtils;
 import org.talend.components.azure.service.FormatUtils;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

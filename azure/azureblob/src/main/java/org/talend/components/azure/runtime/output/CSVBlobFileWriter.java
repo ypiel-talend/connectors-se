@@ -85,7 +85,6 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         }
     }
 
-    // TODO move common implementation to the abstract class
     @Override
     public void flush() throws IOException, StorageException {
         if (getBatch().isEmpty()) {

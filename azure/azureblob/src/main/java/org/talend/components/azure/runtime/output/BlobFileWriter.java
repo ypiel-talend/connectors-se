@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -30,8 +29,6 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CloudBlobDirectory;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

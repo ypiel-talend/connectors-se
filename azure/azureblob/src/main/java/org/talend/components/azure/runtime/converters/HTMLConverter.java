@@ -24,7 +24,6 @@ import org.jsoup.select.Elements;
 import org.talend.components.azure.runtime.input.SchemaUtils;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class HTMLConverter implements RecordConverter<Element> {

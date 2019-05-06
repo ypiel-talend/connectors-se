@@ -15,7 +15,6 @@ package org.talend.components.azure.output;
 
 import java.io.Serializable;
 
-import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;

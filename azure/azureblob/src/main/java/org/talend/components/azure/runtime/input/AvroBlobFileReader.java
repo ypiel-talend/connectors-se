@@ -22,7 +22,6 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
-import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.runtime.converters.AvroConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -69,7 +68,7 @@ public class AvroBlobFileReader extends BlobFileReader {
         protected void readItem() {
             try (InputStream input = getCurrentItem().openInputStream()) {
 
-                DatumReader reader = new GenericDatumReader();
+                DatumReader<GenericRecord> reader = new GenericDatumReader<>();
                 DataFileStream<GenericRecord> dataFileStream = new DataFileStream<GenericRecord>(input, reader);
                 dataFileStream.forEach(record -> recordList.add(record));
             } catch (Exception e) {
