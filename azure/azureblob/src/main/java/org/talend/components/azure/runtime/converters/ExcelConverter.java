@@ -35,7 +35,7 @@ import lombok.Getter;
 
 public class ExcelConverter implements RecordConverter<Row> {
 
-    private static RecordBuilderFactory builderFactory;
+    private RecordBuilderFactory builderFactory;
 
     private final ExcelFormatOptions excelFormatOptions;
 
@@ -49,8 +49,9 @@ public class ExcelConverter implements RecordConverter<Row> {
 
     private Sheet sheet;
 
-    ExcelConverter(ExcelFormatOptions excelFormatOptions) {
+    private ExcelConverter(ExcelFormatOptions excelFormatOptions, RecordBuilderFactory builderFactory) {
         this.excelFormatOptions = excelFormatOptions;
+        this.builderFactory = builderFactory;
     }
 
     /**
@@ -61,11 +62,7 @@ public class ExcelConverter implements RecordConverter<Row> {
      * @return
      */
     public static ExcelConverter of(ExcelFormatOptions excelFormatOptions, RecordBuilderFactory builderFactory) {
-        if (ExcelConverter.builderFactory == null) {
-            ExcelConverter.builderFactory = builderFactory;
-        }
-
-        return new ExcelConverter(excelFormatOptions);
+        return new ExcelConverter(excelFormatOptions, builderFactory);
     }
 
     /**

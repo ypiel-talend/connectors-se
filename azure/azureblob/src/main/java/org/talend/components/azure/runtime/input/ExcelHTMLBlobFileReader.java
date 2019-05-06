@@ -81,8 +81,7 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
         @Override
         protected Record convertToRecord(Element row) {
             if (converter == null) {
-                converter = HTMLConverter.of();
-                converter.recordBuilderFactory = ExcelHTMLBlobFileReader.this.getRecordBuilderFactory();
+                converter = HTMLConverter.of(getRecordBuilderFactory());
             }
 
             return converter.toRecord(row);

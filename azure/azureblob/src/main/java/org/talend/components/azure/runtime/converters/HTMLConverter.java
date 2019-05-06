@@ -29,14 +29,17 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class HTMLConverter implements RecordConverter<Element> {
 
-    public static HTMLConverter of() {
-        return new HTMLConverter();
+    public static HTMLConverter of(RecordBuilderFactory recordBuilderFactory) {
+        return new HTMLConverter(recordBuilderFactory);
     }
 
-    @Service
-    public RecordBuilderFactory recordBuilderFactory;
+    private RecordBuilderFactory recordBuilderFactory;
 
     private Schema columns;
+
+    private HTMLConverter(RecordBuilderFactory recordBuilderFactory) {
+        this.recordBuilderFactory = recordBuilderFactory;
+    }
 
     @Override
     public Schema inferSchema(Element record) {

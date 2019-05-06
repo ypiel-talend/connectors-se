@@ -47,7 +47,6 @@ import org.talend.sdk.component.maven.Server;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudAppendBlob;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
@@ -57,7 +56,6 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class BlobTestUtils {
 
-    @Service
     public static RecordBuilderFactory recordBuilderFactory;
 
     public static AzureCloudConnection createCloudConnection() {
@@ -117,7 +115,7 @@ public class BlobTestUtils {
             throws Exception {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(byteArrayOutputStream));
-        CSVFormat format = CSVConverter.of(formatOptions).getCsvFormat();
+        CSVFormat format = CSVConverter.of(recordBuilderFactory, formatOptions).getCsvFormat();
 
         CSVPrinter printer = new CSVPrinter(writer, format);
 
@@ -135,8 +133,7 @@ public class BlobTestUtils {
     public static List<Record> readDataFromCSVDirectory(String directoryName, CloudStorageAccount connectionAccount,
             AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException, IOException {
         List<CSVRecord> csvRecords = readCSVRecords(directoryName, connectionAccount, config, format);
-        CSVConverter converter = CSVConverter.of(config.getCsvOptions());
-        converter.setRecordBuilderFactory(recordBuilderFactory);
+        CSVConverter converter = CSVConverter.of(recordBuilderFactory, config.getCsvOptions());
         return csvRecords.stream().map(converter::toRecord).collect(Collectors.toList());
     }
 

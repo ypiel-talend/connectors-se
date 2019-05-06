@@ -46,7 +46,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
     public AvroBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
         super(config, connectionServices);
         this.config = config;
-        converter = AvroConverter.of();
+        converter = AvroConverter.of(null);
     }
 
     @Override

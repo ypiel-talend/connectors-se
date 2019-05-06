@@ -66,8 +66,7 @@ public class ParquetBlobFileReader extends BlobFileReader {
         @Override
         protected Record convertToRecord(GenericRecord next) {
             if (converter == null) {
-                converter = ParquetConverter.of();
-                converter.recordBuilderFactory = ParquetBlobFileReader.this.getRecordBuilderFactory();
+                converter = ParquetConverter.of(getRecordBuilderFactory());
             }
 
             return converter.toRecord(next);

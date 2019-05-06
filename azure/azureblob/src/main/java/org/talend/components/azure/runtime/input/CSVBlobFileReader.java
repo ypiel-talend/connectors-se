@@ -82,7 +82,7 @@ public class CSVBlobFileReader extends BlobFileReader {
         @Override
         protected void readItem() {
             if (converter == null) {
-                converter = CSVConverter.of(getConfig().getCsvOptions());
+                converter = CSVConverter.of(getRecordBuilderFactory(), getConfig().getCsvOptions());
             }
 
             if (format == null) {

@@ -44,11 +44,10 @@ public class CSVConverter implements RecordConverter<CSVRecord> {
     @Getter
     private Schema schema;
 
-    @Service
-    @Setter
     public RecordBuilderFactory recordBuilderFactory;
 
-    private CSVConverter(CSVFormatOptions csvFormatOptions) {
+    private CSVConverter(RecordBuilderFactory recordBuilderFactory, CSVFormatOptions csvFormatOptions) {
+        this.recordBuilderFactory = recordBuilderFactory;
         this.isHeaderUsed = csvFormatOptions.isUseHeader();
         this.csvFormat = createCSVFormat(FormatUtils.getFieldDelimiterValue(csvFormatOptions),
                 FormatUtils.getRecordDelimiterValue(csvFormatOptions), csvFormatOptions.getTextEnclosureCharacter(),
@@ -88,8 +87,8 @@ public class CSVConverter implements RecordConverter<CSVRecord> {
         return format;
     }
 
-    public static CSVConverter of(CSVFormatOptions csvFormatOptions) {
-        return new CSVConverter(csvFormatOptions);
+    public static CSVConverter of(RecordBuilderFactory recordBuilderFactory, CSVFormatOptions csvFormatOptions) {
+        return new CSVConverter(recordBuilderFactory, csvFormatOptions);
     }
 
     @Override

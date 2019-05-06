@@ -127,7 +127,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
     private String convertBatchToString() throws IOException {
         StringWriter stringWriter = new StringWriter();
         Iterator<Record> recordIterator = getBatch().iterator();
-        CSVFormat format = CSVConverter.of(configCSV).getCsvFormat();
+        CSVFormat format = CSVConverter.of(null, configCSV).getCsvFormat();
 
         CSVPrinter printer = new CSVPrinter(stringWriter, format);
 

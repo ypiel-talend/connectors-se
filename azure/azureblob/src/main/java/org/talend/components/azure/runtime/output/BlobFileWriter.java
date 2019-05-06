@@ -37,8 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class BlobFileWriter {
 
-    private CloudStorageAccount connection;
-
     private List<Record> batch;
 
     private Schema schema;
@@ -48,7 +46,7 @@ public abstract class BlobFileWriter {
     private final CloudBlobContainer container;
 
     public BlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
-        this.connection = connectionServices.createStorageAccount(config.getDataset().getConnection());
+        CloudStorageAccount connection = connectionServices.createStorageAccount(config.getDataset().getConnection());
         CloudBlobClient blobClient = connectionServices.getConnectionService().createCloudBlobClient(connection,
                 AzureComponentServices.DEFAULT_RETRY_POLICY);
         container = blobClient.getContainerReference(config.getDataset().getContainerName());
