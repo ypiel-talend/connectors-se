@@ -15,6 +15,7 @@ package org.talend.components.jdbc.output.platforms;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.ErrorFactory;
 import org.talend.components.jdbc.configuration.DistributionStrategy;
 import org.talend.components.jdbc.configuration.RedshiftSortStrategy;
 import org.talend.components.jdbc.service.I18nMessage;
@@ -30,6 +31,7 @@ import java.util.UUID;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static org.talend.components.jdbc.ErrorFactory.toIllegalStateException;
 import static org.talend.sdk.component.api.record.Schema.Type.STRING;
 
 @Slf4j
@@ -71,7 +73,7 @@ public abstract class Platform implements Serializable {
         } catch (final Throwable e) {
             connection.rollback();
             if (!isTableExistsCreationError(e)) {
-                throw e;
+                throw toIllegalStateException(e);
             }
 
             log.trace("create table issue was ignored. The table and it's name space has been created by an other worker", e);
@@ -98,7 +100,7 @@ public abstract class Platform implements Serializable {
         return column.isNullable() && !column.isPrimaryKey() ? "NULL" : "NOT NULL";
     }
 
-    private Table getTableModel(final Connection connection, final String name, final List<String> keys,
+    protected Table getTableModel(final Connection connection, final String name, final List<String> keys,
             final RedshiftSortStrategy sortStrategy, final List<String> sortKeys, DistributionStrategy distributionStrategy,
             final List<String> distributionKeys, final int varcharLength, final List<Record> records) {
         final Table.TableBuilder builder = Table.builder().name(name).distributionStrategy(distributionStrategy)
@@ -119,6 +121,7 @@ public abstract class Platform implements Serializable {
 
     /**
      * Add platform related properties to jdbc connections
+     * 
      * @param dataSource the data source object to be configured
      */
     public void addDataSourceProperties(final HikariDataSource dataSource) {
