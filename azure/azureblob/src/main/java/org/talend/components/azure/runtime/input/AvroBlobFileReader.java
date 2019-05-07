@@ -13,6 +13,7 @@
 
 package org.talend.components.azure.runtime.input;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
@@ -30,7 +31,9 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.ListBlobItem;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AvroBlobFileReader extends BlobFileReader {
 
     public AvroBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
@@ -45,13 +48,12 @@ public class AvroBlobFileReader extends BlobFileReader {
 
     private class AvroFileRecordIterator extends ItemRecordIterator<GenericRecord> {
 
-        private LinkedList<GenericRecord> recordList;
-
         private AvroConverter converter;
 
-        public AvroFileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+        private DataFileStream<GenericRecord> avroItemIterator;
+
+        private AvroFileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
-            this.recordList = new LinkedList<>();
             takeFirstItem();
         }
 
@@ -66,11 +68,11 @@ public class AvroBlobFileReader extends BlobFileReader {
 
         @Override
         protected void readItem() {
-            try (InputStream input = getCurrentItem().openInputStream()) {
+            closePreviousInputStream();
 
+            try (InputStream input = getCurrentItem().openInputStream()) {
                 DatumReader<GenericRecord> reader = new GenericDatumReader<>();
-                DataFileStream<GenericRecord> dataFileStream = new DataFileStream<GenericRecord>(input, reader);
-                dataFileStream.forEach(record -> recordList.add(record));
+                avroItemIterator = new DataFileStream<>(input, reader);
             } catch (Exception e) {
                 throw new BlobRuntimeException(e);
             }
@@ -78,17 +80,27 @@ public class AvroBlobFileReader extends BlobFileReader {
 
         @Override
         protected boolean hasNextRecordTaken() {
-            return recordList.size() > 0;
+            return avroItemIterator.hasNext();
         }
 
         @Override
         protected GenericRecord takeNextRecord() {
-            return recordList.poll();
+            return avroItemIterator.next();
         }
 
         @Override
         protected void complete() {
-            //NOOP
+            closePreviousInputStream();
+        }
+
+        private void closePreviousInputStream() {
+            if (avroItemIterator != null) {
+                try {
+                    avroItemIterator.close();
+                } catch (IOException e) {
+                    log.warn("Can't close stream", e);
+                }
+            }
         }
     }
 }

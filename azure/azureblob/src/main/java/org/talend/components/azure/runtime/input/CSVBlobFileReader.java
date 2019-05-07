@@ -65,7 +65,7 @@ public class CSVBlobFileReader extends BlobFileReader {
 
         private String encodingValue;
 
-        public CSVFileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+        private CSVFileRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
             this.encodingValue = getConfig().getCsvOptions().getEncoding() == Encoding.OTHER
                     ? getConfig().getCsvOptions().getCustomEncoding()
@@ -94,7 +94,8 @@ public class CSVBlobFileReader extends BlobFileReader {
                 InputStreamReader inr = new InputStreamReader(currentItemInputStream, encodingValue);
                 CSVParser parser = new CSVParser(inr, format);
                 fileRecordIterator = parser.iterator();
-                if (fileRecordIterator.hasNext() && getConfig().getCsvOptions().isUseHeader() && getConfig().getCsvOptions().getHeader() >= 1) {
+                if (fileRecordIterator.hasNext() && getConfig().getCsvOptions().isUseHeader()
+                        && getConfig().getCsvOptions().getHeader() >= 1) {
                     for (int i = 0; i < getConfig().getCsvOptions().getHeader() - 1; i++) {
                         // skip extra header lines
                         fileRecordIterator.next();

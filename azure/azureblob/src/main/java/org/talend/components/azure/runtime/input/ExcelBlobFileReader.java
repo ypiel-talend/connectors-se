@@ -52,7 +52,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
         private ExcelConverter converter;
 
-        public ExcelRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+        private ExcelRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
             this.rows = new LinkedList<>();
             takeFirstItem();
@@ -112,7 +112,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
         @Override
         protected void complete() {
-            //NOOP
+            // NOOP
         }
     }
 }

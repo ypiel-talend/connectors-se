@@ -49,7 +49,7 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
         private Iterator<Element> rowIterator;
 
-        public HTMLRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+        private HTMLRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
             takeFirstItem();
         }
@@ -88,7 +88,7 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
         @Override
         protected void complete() {
-            //NOOP
+            // NOOP
         }
     }
 }

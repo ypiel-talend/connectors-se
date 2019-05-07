@@ -57,7 +57,7 @@ public class ParquetBlobFileReader extends BlobFileReader {
 
         private ParquetConverter converter;
 
-        public ParquetRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+        private ParquetRecordIterator(Iterable<ListBlobItem> blobItemsList) {
             super(blobItemsList);
             this.recordList = new LinkedList<>();
             takeFirstItem();
@@ -81,8 +81,7 @@ public class ParquetBlobFileReader extends BlobFileReader {
                 IOUtils.closeQuietly(input);
                 InputFile file = HadoopInputFile.fromPath(new org.apache.hadoop.fs.Path(tmp.toFile().getPath()),
                         new Configuration());
-                ParquetReader<GenericRecord> reader;
-                reader = AvroParquetReader.<GenericRecord> builder(file).build();
+                ParquetReader<GenericRecord> reader = AvroParquetReader.<GenericRecord> builder(file).build();
 
                 GenericRecord record;
                 while ((record = reader.read()) != null) {
@@ -105,7 +104,7 @@ public class ParquetBlobFileReader extends BlobFileReader {
 
         @Override
         protected void complete() {
-            //NOOP
+            // NOOP
         }
     }
 
