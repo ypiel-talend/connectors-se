@@ -109,5 +109,10 @@ public class ExcelBlobFileReader extends BlobFileReader {
         protected Row takeNextRecord() {
             return rows.poll();
         }
+
+        @Override
+        protected void complete() {
+            //NOOP
+        }
     }
 }

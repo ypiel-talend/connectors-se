@@ -85,5 +85,10 @@ public class AvroBlobFileReader extends BlobFileReader {
         protected GenericRecord takeNextRecord() {
             return recordList.poll();
         }
+
+        @Override
+        protected void complete() {
+            //NOOP
+        }
     }
 }

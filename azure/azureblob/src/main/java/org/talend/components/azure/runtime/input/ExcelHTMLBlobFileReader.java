@@ -85,5 +85,10 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
             return converter.toRecord(row);
         }
+
+        @Override
+        protected void complete() {
+            //NOOP
+        }
     }
 }
