@@ -26,7 +26,7 @@ import lombok.Data;
 
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("overWriteData"),
         @GridLayout.Row("blobNameTemplate") })
-@Documentation("TODO fill the documentation for this configuration")
+@Documentation("Options for the output component")
 @Data
 public class BlobOutputConfiguration implements Serializable {
 

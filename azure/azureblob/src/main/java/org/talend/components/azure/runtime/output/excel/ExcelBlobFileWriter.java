@@ -48,7 +48,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
 
     private int excel2007MaxRows = 1_048_576;
 
-    private final String fileExtention;
+    private final String fileExtension;
 
     public ExcelBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
         super(config, connectionServices);
@@ -57,9 +57,9 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         if (format == ExcelFormat.HTML) {
             throw new IllegalArgumentException("HTML excel output is not supported");
         } else if (format == ExcelFormat.EXCEL97) {
-            fileExtention = ".xls";
+            fileExtension = ".xls";
         } else {
-            fileExtention = ".xlsx";
+            fileExtension = ".xlsx";
         }
 
         if (config.getDataset().getExcelOptions().isUseHeader() || config.getDataset().getExcelOptions().isUseFooter()) {
@@ -77,7 +77,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
             directoryName += "/";
         }
 
-        String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtention;
+        String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension;
 
         CloudBlockBlob excelFile = getContainer().getBlockBlobReference(itemName);
         if (excelFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
