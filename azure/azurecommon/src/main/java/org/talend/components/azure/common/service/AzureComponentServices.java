@@ -54,7 +54,7 @@ public class AzureComponentServices {
 
     private static OperationContext talendOperationContext;
 
-    private static final String SAS_PATTERN = "(http.?)?://(.*)\\.(blob|file|queue|table)\\.core\\.windows\\.net\\/(.*)";
+    public static final String SAS_PATTERN = "(http.?)?://(.*)\\.(blob|file|queue|table)\\.core\\.windows\\.net\\/(.*)";
 
     @Service
     private MessageService i18nService;
