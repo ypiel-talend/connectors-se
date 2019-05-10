@@ -85,7 +85,7 @@ public class CouchbaseInput implements Serializable {
         if (configuration.useN1QLQuery) {
             n1qlQueryRows = bucket.query(N1qlQuery.simple(configuration.getQuery()));
         } else {
-            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucket.name()));
+            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`"));
         }
 
         index = n1qlQueryRows.rows();
