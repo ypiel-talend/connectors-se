@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -97,14 +96,18 @@ public class CSVBlobFileReader extends BlobFileReader {
                 if (fileRecordIterator.hasNext() && getConfig().getCsvOptions().isUseHeader()
                         && getConfig().getCsvOptions().getHeader() >= 1) {
                     for (int i = 0; i < getConfig().getCsvOptions().getHeader() - 1; i++) {
-                        // skip extra header lines
-                        fileRecordIterator.next();
+                        if (fileRecordIterator.hasNext()) {
+                            // skip extra header lines
+                            fileRecordIterator.next();
+                        }
                     }
 
-                    CSVRecord headerRecord = fileRecordIterator.next();
-                    // save schema from first file
-                    if (converter.getSchema() == null) {
-                        converter.toRecord(headerRecord);
+                    if (fileRecordIterator.hasNext()) {
+                        CSVRecord headerRecord = fileRecordIterator.next();
+                        // save schema from first file
+                        if (converter.getSchema() == null) {
+                            converter.toRecord(headerRecord);
+                        }
                     }
                 }
             } catch (Exception e) {

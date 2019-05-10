@@ -31,13 +31,13 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import com.monitorjbl.xlsx.impl.StreamingCell;
+import com.monitorjbl.xlsx.impl.StreamingRow;
 import lombok.Getter;
 
 public class ExcelConverter implements RecordConverter<Row> {
 
     private RecordBuilderFactory builderFactory;
-
-    private final ExcelFormatOptions excelFormatOptions;
 
     private Schema schema;
 
@@ -49,8 +49,7 @@ public class ExcelConverter implements RecordConverter<Row> {
 
     private Sheet sheet;
 
-    private ExcelConverter(ExcelFormatOptions excelFormatOptions, RecordBuilderFactory builderFactory) {
-        this.excelFormatOptions = excelFormatOptions;
+    private ExcelConverter(RecordBuilderFactory builderFactory) {
         this.builderFactory = builderFactory;
     }
 
@@ -61,8 +60,8 @@ public class ExcelConverter implements RecordConverter<Row> {
      * @param builderFactory
      * @return
      */
-    public static ExcelConverter of(ExcelFormatOptions excelFormatOptions, RecordBuilderFactory builderFactory) {
-        return new ExcelConverter(excelFormatOptions, builderFactory);
+    public static ExcelConverter of(RecordBuilderFactory builderFactory) {
+        return new ExcelConverter(builderFactory);
     }
 
     /**
@@ -73,7 +72,7 @@ public class ExcelConverter implements RecordConverter<Row> {
      * @return
      */
     public static ExcelConverter of(ExcelFormatOptions excelFormatOptions, Sheet currentSheet) {
-        ExcelConverter converterForOutput = of(excelFormatOptions, (RecordBuilderFactory) null);
+        ExcelConverter converterForOutput = of((RecordBuilderFactory) null);
         converterForOutput.sheet = currentSheet;
 
         return converterForOutput;
@@ -101,13 +100,8 @@ public class ExcelConverter implements RecordConverter<Row> {
                 CellType cellType = columnTypes.get(i);
                 if (cellType == CellType.FORMULA) {
                     Cell cell = record.getCell(i);
-                    if (excelFormatOptions.getExcelFormat() == ExcelFormat.EXCEL97) {
-                        cellType = cell.getCachedFormulaResultType();
-                    } else if (excelFormatOptions.getExcelFormat() == ExcelFormat.EXCEL2007) {
-                        FormulaEvaluator formulaEvaluator = record.getSheet().getWorkbook().getCreationHelper()
-                                .createFormulaEvaluator();
-                        cellType = formulaEvaluator.evaluateFormulaCell(cell);
-                    }
+                    cellType = cell.getCachedFormulaResultType();
+
                 }
                 switch (cellType) {
                 case ERROR:
