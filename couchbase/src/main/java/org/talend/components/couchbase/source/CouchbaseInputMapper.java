@@ -15,6 +15,7 @@ package org.talend.components.couchbase.source;
 
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.components.couchbase.service.I18nMessage;
+
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -28,7 +29,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 @Version(1)
-@Icon(value = Icon.IconType.CUSTOM, custom = "CouchbaseInput")
+@Icon(value = Icon.IconType.COUCHBASE)
 @PartitionMapper(name = "Input")
 @Documentation("Couchbase input Mapper")
 public class CouchbaseInputMapper implements Serializable {
