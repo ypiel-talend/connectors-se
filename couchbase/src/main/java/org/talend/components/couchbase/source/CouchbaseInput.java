@@ -87,8 +87,15 @@ public class CouchbaseInput implements Serializable {
         } else {
             n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`"));
         }
-
+        checkErrors(n1qlQueryRows);
         index = n1qlQueryRows.rows();
+    }
+
+    private void checkErrors(N1qlQueryResult n1qlQueryRows) {
+        if (!n1qlQueryRows.errors().isEmpty()) {
+            LOG.error(n1qlQueryRows.errors().toString());
+            throw new IllegalArgumentException(n1qlQueryRows.errors().toString());
+        }
     }
 
     @Producer
@@ -96,13 +103,7 @@ public class CouchbaseInput implements Serializable {
         if (!index.hasNext()) {
             return null;
         } else {
-            JsonObject jsonObject;
-            if (configuration.useN1QLQuery) {
-                jsonObject = (JsonObject) index.next().value();
-            } else {
-                // unwrap JsonObject
-                jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
-            }
+            JsonObject jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
 
             if (columnsSet.isEmpty()) {
                 columnsSet.addAll(jsonObject.getNames());
