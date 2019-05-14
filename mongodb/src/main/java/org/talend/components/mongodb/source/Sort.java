@@ -32,7 +32,7 @@ import java.io.Serializable;
 public class Sort implements Serializable {
 
     @Option
-    @Suggestable(value = UIMongoDBService.GET_SCHEMA_FIELDS, parameters = { "../../dataset" })
+    @Suggestable(value = UIMongoDBService.GET_SCHEMA_FIELDS, parameters = { "../../../dataset" })
     @Documentation("TODO fill the documentation for this parameter")
     private String column;
 

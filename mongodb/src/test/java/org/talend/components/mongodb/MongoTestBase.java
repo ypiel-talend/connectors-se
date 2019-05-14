@@ -77,10 +77,13 @@ public class MongoTestBase {
         }
         MongoClientOptions opts = builder.build();
         MongoClient client = new MongoClient(
-                new ServerAddress(testContext.getDataStore().getServer(), testContext.getDataStore().getPort()),
-                MongoCredential.createCredential(testContext.getDataStore().getUsername(),
-                        testContext.getDataStore().getAuthenticationDatabase(),
-                        testContext.getDataStore().getPassword().toCharArray()),
+                new ServerAddress(testContext.getDataStore().getServerAddress().getAddress(),
+                        testContext.getDataStore().getServerAddress().getPort()),
+                MongoCredential.createCredential(
+                        testContext.getDataStore().getMongoAuthentication().getUserPassConfiguration().getUsername(),
+                        testContext.getDataStore().getMongoAuthentication().getAuthDatabaseConfig().getAuthenticationDatabase(),
+                        testContext.getDataStore().getMongoAuthentication().getUserPassConfiguration().getPassword()
+                                .toCharArray()),
                 opts);
         return client;
     }

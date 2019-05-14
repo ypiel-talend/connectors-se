@@ -30,35 +30,43 @@ public class InputClientOptionsFactoryTest {
         MongoDBDataset dataset = new MongoDBDataset();
         dataset.setDatastore(datastore);
         MongoDBInputMapperConfiguration configuration = new MongoDBInputMapperConfiguration();
+        configuration.setConfigurationExtension(new MongoDBInputConfigurationExtension());
         configuration.setDataset(dataset);
-        configuration.setSetReadPreference(true);
-        configuration.setReadPreference(MongoDBInputMapperConfiguration.ReadPreference.NEAREST);
+        configuration.getConfigurationExtension().setSetReadPreference(true);
+        configuration.getConfigurationExtension().setReadPreference(MongoDBInputConfigurationExtension.ReadPreference.NEAREST);
         InputClientOptionsFactory clientOptionsFactory = new InputClientOptionsFactory(configuration, null);
-        MongoClientOptions clientOptions = clientOptionsFactory.createOptions();
+        MongoClientOptions.Builder clientOptionsBuilder = clientOptionsFactory.createOptionsBuilder();
+        MongoClientOptions clientOptions = clientOptionsBuilder.build();
 
         assertThat(clientOptions.getReadPreference(), sameInstance(ReadPreference.nearest()));
 
-        configuration.setReadPreference(MongoDBInputMapperConfiguration.ReadPreference.PRIMARY);
+        configuration.getConfigurationExtension().setReadPreference(MongoDBInputConfigurationExtension.ReadPreference.PRIMARY);
         clientOptionsFactory = new InputClientOptionsFactory(configuration, null);
-        clientOptions = clientOptionsFactory.createOptions();
+        clientOptionsBuilder = clientOptionsFactory.createOptionsBuilder();
+        clientOptions = clientOptionsBuilder.build();
 
         assertThat(clientOptions.getReadPreference(), sameInstance(ReadPreference.primary()));
 
-        configuration.setReadPreference(MongoDBInputMapperConfiguration.ReadPreference.PRIMARY_PREFERRED);
+        configuration.getConfigurationExtension()
+                .setReadPreference(MongoDBInputConfigurationExtension.ReadPreference.PRIMARY_PREFERRED);
         clientOptionsFactory = new InputClientOptionsFactory(configuration, null);
-        clientOptions = clientOptionsFactory.createOptions();
+        clientOptionsBuilder = clientOptionsFactory.createOptionsBuilder();
+        clientOptions = clientOptionsBuilder.build();
 
         assertThat(clientOptions.getReadPreference(), sameInstance(ReadPreference.primaryPreferred()));
 
-        configuration.setReadPreference(MongoDBInputMapperConfiguration.ReadPreference.SECONDARY);
+        configuration.getConfigurationExtension().setReadPreference(MongoDBInputConfigurationExtension.ReadPreference.SECONDARY);
         clientOptionsFactory = new InputClientOptionsFactory(configuration, null);
-        clientOptions = clientOptionsFactory.createOptions();
+        clientOptionsBuilder = clientOptionsFactory.createOptionsBuilder();
+        clientOptions = clientOptionsBuilder.build();
 
         assertThat(clientOptions.getReadPreference(), sameInstance(ReadPreference.secondary()));
 
-        configuration.setReadPreference(MongoDBInputMapperConfiguration.ReadPreference.SECONDARY_PREFERRED);
+        configuration.getConfigurationExtension()
+                .setReadPreference(MongoDBInputConfigurationExtension.ReadPreference.SECONDARY_PREFERRED);
         clientOptionsFactory = new InputClientOptionsFactory(configuration, null);
-        clientOptions = clientOptionsFactory.createOptions();
+        clientOptionsBuilder = clientOptionsFactory.createOptionsBuilder();
+        clientOptions = clientOptionsBuilder.build();
 
         assertThat(clientOptions.getReadPreference(), sameInstance(ReadPreference.secondaryPreferred()));
     }

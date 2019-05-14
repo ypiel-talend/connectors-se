@@ -86,9 +86,10 @@ public class MongoDBInputMapperTestIT extends MongoTestBase {
         List<Record> testData = convertToRecords(documents.iterator(), schema, recordBuilderFactory);
 
         MongoDBInputMapperConfiguration configuration = new MongoDBInputMapperConfiguration();
-        configuration.setQueryType(MongoDBInputMapperConfiguration.QueryType.FIND_QUERY);
-        configuration.setQuery("{}");
-        configuration.setSort(Arrays.asList(new Sort("col1", Sort.SortingOrder.desc)));
+        configuration.setConfigurationExtension(new MongoDBInputConfigurationExtension());
+        configuration.getConfigurationExtension().setQueryType(MongoDBInputConfigurationExtension.QueryType.FIND_QUERY);
+        configuration.getConfigurationExtension().setQuery("{}");
+        configuration.getConfigurationExtension().setSort(Arrays.asList(new Sort("col1", Sort.SortingOrder.desc)));
         MongoDBDataset dataset = new MongoDBDataset();
         dataset.setSchema(schema.getEntries().stream().map(Schema.Entry::getName).collect(Collectors.toList()));
         dataset.setCollection(MongoDBTestConstants.COLLECTION_NAME);
@@ -120,6 +121,9 @@ public class MongoDBInputMapperTestIT extends MongoTestBase {
         List<Record> testData = convertToRecords(documents.iterator(), schema, recordBuilderFactory);
 
         MongoDBInputMapperConfiguration configuration = new MongoDBInputMapperConfiguration();
+        configuration.setConfigurationExtension(new MongoDBInputConfigurationExtension());
+        configuration.getConfigurationExtension().setQueryType(MongoDBInputConfigurationExtension.QueryType.FIND_QUERY);
+        configuration.getConfigurationExtension().setQuery("{}");
         MongoDBDataset dataset = new MongoDBDataset();
         dataset.setSchema(schema.getEntries().stream().map(Schema.Entry::getName).collect(Collectors.toList()));
         dataset.setCollection(MongoDBTestConstants.COLLECTION_NAME);
@@ -159,11 +163,12 @@ public class MongoDBInputMapperTestIT extends MongoTestBase {
                 recordBuilderFactory);
 
         MongoDBInputMapperConfiguration configuration = new MongoDBInputMapperConfiguration();
-        configuration.setQueryType(MongoDBInputMapperConfiguration.QueryType.FIND_QUERY);
-        configuration.setQuery("{}");
+        configuration.setConfigurationExtension(new MongoDBInputConfigurationExtension());
+        configuration.getConfigurationExtension().setQueryType(MongoDBInputConfigurationExtension.QueryType.FIND_QUERY);
+        configuration.getConfigurationExtension().setQuery("{}");
         InputMapping mapping = new InputMapping("f", "b.c");
         InputMapping mapping1 = new InputMapping("e", "b.c");
-        configuration.setMapping(Arrays.asList(mapping, mapping1));
+        configuration.getConfigurationExtension().setMapping(Arrays.asList(mapping, mapping1));
         MongoDBDataset dataset = new MongoDBDataset();
         dataset.setSchema(schema.getEntries().stream().map(Schema.Entry::getName).collect(Collectors.toList()));
         dataset.setCollection(MongoDBTestConstants.COLLECTION_NAME);

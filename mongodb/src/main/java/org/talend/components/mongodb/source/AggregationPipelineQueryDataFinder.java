@@ -25,12 +25,12 @@ public class AggregationPipelineQueryDataFinder implements QueryDataFinder<Docum
     @Override
     public MongoCursor<Document> findData(MongoCollection<Document> collection, MongoDBInputMapperConfiguration configuration) {
         List<Document> aggregationStages = new ArrayList<>();
-        if (configuration.getAggregationStages() != null) {
-            configuration.getAggregationStages().stream()
+        if (configuration.getConfigurationExtension().getAggregationStages() != null) {
+            configuration.getConfigurationExtension().getAggregationStages().stream()
                     .forEach(stage -> aggregationStages.add(Document.parse(stage.getStage())));
         }
         MongoCursor<Document> cursor_tMongoDBInput_1 = collection.aggregate(aggregationStages)
-                .allowDiskUse(configuration.isExternalSort()).iterator();
+                .allowDiskUse(configuration.getConfigurationExtension().isExternalSort()).iterator();
         return cursor_tMongoDBInput_1;
     }
 }

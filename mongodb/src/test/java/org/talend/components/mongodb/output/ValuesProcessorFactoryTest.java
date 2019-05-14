@@ -30,7 +30,7 @@ public class ValuesProcessorFactoryTest {
     @Test
     public void testCreateInsertValuesProcessorFactory() {
         MongoDBOutputConfiguration config = createConfiguration();
-        config.setActionOnData(MongoDBOutputConfiguration.ActionOnData.INSERT);
+        config.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.INSERT);
         AbstractValuesProcessorFactory<?> valuesProcessorFactory = ValuesProcessorsFactory
                 .createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.InsertModelProcessorFactory.class));
@@ -42,7 +42,7 @@ public class ValuesProcessorFactoryTest {
     @Test
     public void testCreateDeleteValuesProcessorFactory() {
         MongoDBOutputConfiguration config = createConfiguration();
-        config.setActionOnData(MongoDBOutputConfiguration.ActionOnData.DELETE);
+        config.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.DELETE);
         AbstractValuesProcessorFactory<?> valuesProcessorFactory = ValuesProcessorsFactory
                 .createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.DeleteModelProcessorFactory.class));
@@ -53,7 +53,7 @@ public class ValuesProcessorFactoryTest {
     @Test
     public void testCreateUpdateValuesProcessorFactory() {
         MongoDBOutputConfiguration config = createConfiguration();
-        config.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPDATE);
+        config.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPDATE);
         AbstractValuesProcessorFactory<?> valuesProcessorFactory = ValuesProcessorsFactory
                 .createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.UpdateModelProcessFactory.class));
@@ -64,21 +64,21 @@ public class ValuesProcessorFactoryTest {
     @Test
     public void testCreateSetValuesProcessorFactory() {
         MongoDBOutputConfiguration config = createConfiguration();
-        config.setActionOnData(MongoDBOutputConfiguration.ActionOnData.SET);
-        config.setBulkWrite(true);
-        config.setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
+        config.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.SET);
+        config.getOutputConfigExtension().setBulkWrite(true);
+        config.getOutputConfigExtension().setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
         AbstractValuesProcessorFactory<?> valuesProcessorFactory = ValuesProcessorsFactory
                 .createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.SetOneModelProcessFactory.class));
         assertThat(valuesProcessorFactory.createProducer(config), instanceOf(SetOneModelProducer.class));
         assertThat(valuesProcessorFactory.createWriter(null), instanceOf(SetOneModelWriter.class));
 
-        config.setBulkWrite(false);
-        config.setUpdateAllDocuments(false);
+        config.getOutputConfigExtension().setBulkWrite(false);
+        config.getOutputConfigExtension().setUpdateAllDocuments(false);
         valuesProcessorFactory = ValuesProcessorsFactory.createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.SetOneModelProcessFactory.class));
 
-        config.setUpdateAllDocuments(true);
+        config.getOutputConfigExtension().setUpdateAllDocuments(true);
         valuesProcessorFactory = ValuesProcessorsFactory.createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.SetManyModelProcessFactory.class));
         assertThat(valuesProcessorFactory.createProducer(config), instanceOf(SetManyModelProducer.class));
@@ -88,7 +88,7 @@ public class ValuesProcessorFactoryTest {
     @Test
     public void testCreateUpsertValuesProcessorFactory() {
         MongoDBOutputConfiguration config = createConfiguration();
-        config.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT);
+        config.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT);
         AbstractValuesProcessorFactory<?> valuesProcessorFactory = ValuesProcessorsFactory
                 .createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.UpsertModelProcessFactory.class));
@@ -99,21 +99,21 @@ public class ValuesProcessorFactoryTest {
     @Test
     public void testCreateUpsertWithSetValuesProcessorFactory() {
         MongoDBOutputConfiguration config = createConfiguration();
-        config.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT_WITH_SET);
-        config.setBulkWrite(true);
-        config.setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
+        config.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT_WITH_SET);
+        config.getOutputConfigExtension().setBulkWrite(true);
+        config.getOutputConfigExtension().setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
         AbstractValuesProcessorFactory<?> valuesProcessorFactory = ValuesProcessorsFactory
                 .createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.UpsertWithSetModelProcessFactory.class));
         assertThat(valuesProcessorFactory.createProducer(config), instanceOf(UpsertWithSetModelProducer.class));
         assertThat(valuesProcessorFactory.createWriter(null), instanceOf(UpsertWithSetModelWriter.class));
 
-        config.setBulkWrite(false);
-        config.setUpdateAllDocuments(false);
+        config.getOutputConfigExtension().setBulkWrite(false);
+        config.getOutputConfigExtension().setUpdateAllDocuments(false);
         valuesProcessorFactory = ValuesProcessorsFactory.createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.UpsertWithSetModelProcessFactory.class));
 
-        config.setUpdateAllDocuments(true);
+        config.getOutputConfigExtension().setUpdateAllDocuments(true);
         valuesProcessorFactory = ValuesProcessorsFactory.createAbstractValuesProcessorFactory(config);
         assertThat(valuesProcessorFactory, instanceOf(ValuesProcessorsFactory.UpsertWithSetManyModelProcessFactory.class));
         assertThat(valuesProcessorFactory.createProducer(config), instanceOf(UpsertWithSetModelProducer.class));
@@ -126,7 +126,8 @@ public class ValuesProcessorFactoryTest {
         dataset.setDatastore(datastore);
         MongoDBOutputConfiguration config = new MongoDBOutputConfiguration();
         config.setDataset(dataset);
-        config.setKeys(Arrays.asList("a", "b"));
+        config.setOutputConfigExtension(new MongoOutputConfigurationExtension());
+        config.getOutputConfigExtension().setKeys(Arrays.asList("a", "b"));
         return config;
     }
 

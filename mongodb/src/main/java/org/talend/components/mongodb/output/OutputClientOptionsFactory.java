@@ -30,8 +30,9 @@ public class OutputClientOptionsFactory extends ClientOptionsFactory {
 
     @Override
     protected void setSpecificOptions(final MongoClientOptions.Builder builder) {
-        if (properties.isSetWriteConcern() && properties.getWriteConcern() != null) {
-            builder.writeConcern(convertWriteConcern(properties.getWriteConcern())).build();
+        if (properties.getOutputConfigExtension().isSetWriteConcern()
+                && properties.getOutputConfigExtension().getWriteConcern() != null) {
+            builder.writeConcern(convertWriteConcern(properties.getOutputConfigExtension().getWriteConcern())).build();
         }
     }
 

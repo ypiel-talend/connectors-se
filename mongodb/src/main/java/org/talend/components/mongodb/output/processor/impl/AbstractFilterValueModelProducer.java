@@ -35,7 +35,7 @@ public abstract class AbstractFilterValueModelProducer<T extends WriteModel<Docu
     private final Set<String> keys;
 
     public AbstractFilterValueModelProducer(MongoDBOutputConfiguration configuration) {
-        this.keys = new HashSet<>(configuration.getKeys());
+        this.keys = new HashSet<>(configuration.getOutputConfigExtension().getKeys());
     }
 
     @Override

@@ -33,7 +33,7 @@ public class DeleteModelProducer implements ModelProducer<DeleteOneModel<Documen
     private final Set<String> keys;
 
     public DeleteModelProducer(final MongoDBOutputConfiguration configuration) {
-        this.keys = new HashSet<>(configuration.getKeys());
+        this.keys = new HashSet<>(configuration.getOutputConfigExtension().getKeys());
     }
 
     @Override

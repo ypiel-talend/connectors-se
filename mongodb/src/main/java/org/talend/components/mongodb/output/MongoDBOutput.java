@@ -75,7 +75,7 @@ public class MongoDBOutput implements Serializable {
         // if (configuration.isDropCollectionIfExists()) {
         // collection.drop();
         // }
-        List<OutputMapping> outputMappings = configuration.getOutputMappingList();
+        List<OutputMapping> outputMappings = configuration.getOutputConfigExtension().getOutputMappingList();
         if (outputMappings != null) {
             mapping = outputMappings.stream().collect(Collectors.toMap(OutputMapping::getColumn, c -> c));
         } else {

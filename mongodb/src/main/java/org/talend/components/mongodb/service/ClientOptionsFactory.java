@@ -27,13 +27,13 @@ public abstract class ClientOptionsFactory {
         this.i18nMessage = i18nMessage;
     }
 
-    public MongoClientOptions createOptions() {
+    public MongoClientOptions.Builder createOptionsBuilder() {
         MongoClientOptions.Builder builder = MongoClientOptions.builder();
         if (datastore.isUseSSL()) {
             builder.sslEnabled(true);
         }
         setSpecificOptions(builder);
-        return builder.build();
+        return builder;
     }
 
     protected abstract void setSpecificOptions(final MongoClientOptions.Builder builder);

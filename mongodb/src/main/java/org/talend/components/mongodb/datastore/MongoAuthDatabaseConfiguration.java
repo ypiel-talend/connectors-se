@@ -11,33 +11,28 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.mongodb.source;
+package org.talend.components.mongodb.datastore;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.talend.components.mongodb.service.UIMongoDBService;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 
-@GridLayout({ @GridLayout.Row({ "column", "parentNodePath" }) })
-@Documentation("This is the mapping for input schema.")
+import lombok.Data;
+
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class InputMapping implements Serializable {
+@GridLayout({ @GridLayout.Row({ "setAuthenticationDatabase" }), @GridLayout.Row({ "authenticationDatabase" }) })
+public class MongoAuthDatabaseConfiguration implements Serializable {
 
     @Option
-    @Suggestable(value = UIMongoDBService.GET_SCHEMA_FIELDS, parameters = { "../../../dataset" })
-    @Documentation("Column for the mapping")
-    private String column;
+    @Documentation("If the username to be used to connect to MongoDB has been created in a specific Authentication database of MongoDB, select this check box to enter the name of this Authentication database in the Authentication database field that is displayed.")
+    private boolean setAuthenticationDatabase;
 
     @Option
-    @Documentation("Parent node path of the field")
-    private String parentNodePath;
+    @ActiveIf(target = "setAuthenticationDatabase", value = "true")
+    @Documentation("Set MongoDB Authentication database")
+    private String authenticationDatabase;
 
 }

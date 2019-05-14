@@ -30,7 +30,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 public class OutputMapping {
 
     @Option
-    @Suggestable(value = UIMongoDBService.GET_SCHEMA_FIELDS, parameters = { "../../dataset" })
+    @Suggestable(value = UIMongoDBService.GET_SCHEMA_FIELDS, parameters = { "../../../dataset" })
     @Documentation("TODO fill the documentation for this parameter")
     private String column;
 

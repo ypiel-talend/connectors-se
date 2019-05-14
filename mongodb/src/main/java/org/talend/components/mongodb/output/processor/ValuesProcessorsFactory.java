@@ -26,8 +26,8 @@ public class ValuesProcessorsFactory {
             MongoCollection<Document> collection, I18nMessage i18nMessage) {
         AbstractValuesProcessorFactory<T> factory = createAbstractValuesProcessorFactory(config);
         ModelWriter<T> writer;
-        if (config.isBulkWrite()) {
-            writer = new BulkModelWriter<>(collection, config.getBulkWriteType());
+        if (config.getOutputConfigExtension().isBulkWrite()) {
+            writer = new BulkModelWriter<>(collection, config.getOutputConfigExtension().getBulkWriteType());
         } else {
             writer = factory.createWriter(collection);
         }
@@ -38,7 +38,7 @@ public class ValuesProcessorsFactory {
     public static <T extends WriteModel<Document>> AbstractValuesProcessorFactory<T> createAbstractValuesProcessorFactory(
             MongoDBOutputConfiguration config) {
         AbstractValuesProcessorFactory<T> factory;
-        switch (config.getActionOnData()) {
+        switch (config.getOutputConfigExtension().getActionOnData()) {
         case INSERT:
             factory = (AbstractValuesProcessorFactory<T>) new InsertModelProcessorFactory();
             break;
@@ -49,7 +49,7 @@ public class ValuesProcessorsFactory {
             factory = (AbstractValuesProcessorFactory<T>) new UpdateModelProcessFactory();
             break;
         case SET:
-            if (config.isBulkWrite() || !config.isUpdateAllDocuments()) {
+            if (config.getOutputConfigExtension().isBulkWrite() || !config.getOutputConfigExtension().isUpdateAllDocuments()) {
                 factory = (AbstractValuesProcessorFactory<T>) new SetOneModelProcessFactory();
             } else {
                 factory = (AbstractValuesProcessorFactory<T>) new SetManyModelProcessFactory();
@@ -59,7 +59,7 @@ public class ValuesProcessorsFactory {
             factory = (AbstractValuesProcessorFactory<T>) new UpsertModelProcessFactory();
             break;
         case UPSERT_WITH_SET:
-            if (config.isBulkWrite() || !config.isUpdateAllDocuments()) {
+            if (config.getOutputConfigExtension().isBulkWrite() || !config.getOutputConfigExtension().isUpdateAllDocuments()) {
                 factory = (AbstractValuesProcessorFactory<T>) new UpsertWithSetModelProcessFactory();
             } else {
                 factory = (AbstractValuesProcessorFactory<T>) new UpsertWithSetManyModelProcessFactory();

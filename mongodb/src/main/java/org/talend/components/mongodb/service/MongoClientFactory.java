@@ -13,10 +13,7 @@
 
 package org.talend.components.mongodb.service;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
 import org.talend.components.mongodb.datastore.MongoDBDatastore;
 
 import java.util.Collections;
@@ -27,17 +24,20 @@ public abstract class MongoClientFactory {
 
     protected final MongoDBDatastore datastore;
 
-    protected final MongoClientOptions clientOptions;
+    protected final MongoClientOptions.Builder clientOptions;
 
-    public MongoClientFactory(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+    public MongoClientFactory(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
         this.datastore = datastore;
         this.clientOptions = clientOptions;
     }
 
-    public static MongoClientFactory getInstance(MongoDBDatastore datastore, MongoClientOptions clientOptions,
+    public static MongoClientFactory getInstance(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions,
             I18nMessage i18nMessage) {
+        if (datastore.isUseConnectionString()) {
+            return new ConnectionStringClientFactory(datastore, clientOptions);
+        }
         if (datastore.isAuthentication()) {
-            switch (datastore.getAuthenticationMechanism()) {
+            switch (datastore.getMongoAuthentication().getAuthenticationMechanism()) {
             case NEGOTIATE_MEC:
                 return new NegotiateAuthMongoClientBuilder(datastore, clientOptions);
             case PLAIN_MEC:
@@ -47,8 +47,8 @@ public abstract class MongoClientFactory {
             case KERBEROS_MEC:
                 return new KerberosAuthMongoClientFactory(datastore, clientOptions);
             default:
-                throw new IllegalArgumentException(
-                        i18nMessage.authMechanismNotSupported(datastore.getAuthenticationMechanism().name()));
+                throw new IllegalArgumentException(i18nMessage
+                        .authMechanismNotSupported(datastore.getMongoAuthentication().getAuthenticationMechanism().name()));
             }
         }
         return new DefaultMongoClientFactory(datastore, clientOptions);
@@ -62,32 +62,46 @@ public abstract class MongoClientFactory {
             addressesList = datastore.getReplicaAddresses().stream().map(a -> new ServerAddress(a.getAddress(), a.getPort()))
                     .collect(Collectors.toList());
         } else {
-            addressesList = Collections.singletonList(new ServerAddress(datastore.getServer(), datastore.getPort()));
+            addressesList = Collections.singletonList(
+                    new ServerAddress(datastore.getServerAddress().getAddress(), datastore.getServerAddress().getPort()));
         }
         return addressesList;
     }
 
-    public static class DefaultMongoClientFactory extends MongoClientFactory {
+    public static class ConnectionStringClientFactory extends MongoClientFactory {
 
-        public DefaultMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+        public ConnectionStringClientFactory(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
             super(datastore, clientOptions);
         }
 
         @Override
         protected MongoClient createClient() {
-            return new MongoClient(getServerAddresses(), clientOptions);
+            return new MongoClient(new MongoClientURI(datastore.getConnectionString(), clientOptions));
+        }
+
+    }
+
+    public static class DefaultMongoClientFactory extends MongoClientFactory {
+
+        public DefaultMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
+            super(datastore, clientOptions);
+        }
+
+        @Override
+        protected MongoClient createClient() {
+            return new MongoClient(getServerAddresses(), clientOptions.build());
         }
     }
 
     public abstract static class AuthenticationMongoClientFactory extends MongoClientFactory {
 
-        public AuthenticationMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+        public AuthenticationMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
             super(datastore, clientOptions);
         }
 
         @Override
         protected MongoClient createClient() {
-            return new MongoClient(getServerAddresses(), getMongoCredentials(), clientOptions);
+            return new MongoClient(getServerAddresses(), getMongoCredentials(), clientOptions.build());
         }
 
         protected abstract MongoCredential getMongoCredentials();
@@ -96,42 +110,44 @@ public abstract class MongoClientFactory {
 
     public static class PlainAuthMongoClientFactory extends AuthenticationMongoClientFactory {
 
-        public PlainAuthMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+        public PlainAuthMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
             super(datastore, clientOptions);
         }
 
         @Override
         protected MongoCredential getMongoCredentials() {
-            return MongoCredential.createPlainCredential(datastore.getUsername(), datastore.getDatabase(),
-                    datastore.getPassword().toCharArray());
+            return MongoCredential.createPlainCredential(
+                    datastore.getMongoAuthentication().getUserPassConfiguration().getUsername(), datastore.getDatabase(),
+                    datastore.getMongoAuthentication().getUserPassConfiguration().getPassword().toCharArray());
         }
     }
 
     public static class KerberosAuthMongoClientFactory extends AuthenticationMongoClientFactory {
 
-        public KerberosAuthMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+        public KerberosAuthMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
             super(datastore, clientOptions);
         }
 
         @Override
         protected MongoCredential getMongoCredentials() {
-            System.setProperty("java.security.krb5.realm", datastore.getKerberosCreds().getRealm());
-            System.setProperty("java.security.krb5.kdc", datastore.getKerberosCreds().getKdcServer());
+            System.setProperty("java.security.krb5.realm", datastore.getMongoAuthentication().getKerberosCreds().getRealm());
+            System.setProperty("java.security.krb5.kdc", datastore.getMongoAuthentication().getKerberosCreds().getKdcServer());
             System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-            return MongoCredential.createGSSAPICredential(datastore.getKerberosCreds().getUserPrincipal());
+            return MongoCredential
+                    .createGSSAPICredential(datastore.getMongoAuthentication().getKerberosCreds().getUserPrincipal());
         }
 
     }
 
     protected abstract static class WithAuthDatabaseMongoClientFactory extends AuthenticationMongoClientFactory {
 
-        public WithAuthDatabaseMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+        public WithAuthDatabaseMongoClientFactory(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
             super(datastore, clientOptions);
         }
 
         protected String getAuthDatabase() {
-            if (datastore.isSetAuthenticationDatabase()) {
-                return datastore.getAuthenticationDatabase();
+            if (datastore.getMongoAuthentication().getAuthDatabaseConfig().isSetAuthenticationDatabase()) {
+                return datastore.getMongoAuthentication().getAuthDatabaseConfig().getAuthenticationDatabase();
             }
             return datastore.getDatabase();
         }
@@ -140,28 +156,29 @@ public abstract class MongoClientFactory {
 
     public static class ScramSha1AuthMongoClientBuilder extends WithAuthDatabaseMongoClientFactory {
 
-        public ScramSha1AuthMongoClientBuilder(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+        public ScramSha1AuthMongoClientBuilder(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
             super(datastore, clientOptions);
         }
 
         @Override
         protected MongoCredential getMongoCredentials() {
-            return MongoCredential.createScramSha1Credential(datastore.getUsername(), getAuthDatabase(),
-                    datastore.getPassword().toCharArray());
+            return MongoCredential.createScramSha1Credential(
+                    datastore.getMongoAuthentication().getUserPassConfiguration().getUsername(), getAuthDatabase(),
+                    datastore.getMongoAuthentication().getUserPassConfiguration().getPassword().toCharArray());
         }
 
     }
 
     public static class NegotiateAuthMongoClientBuilder extends WithAuthDatabaseMongoClientFactory {
 
-        public NegotiateAuthMongoClientBuilder(MongoDBDatastore datastore, MongoClientOptions clientOptions) {
+        public NegotiateAuthMongoClientBuilder(MongoDBDatastore datastore, MongoClientOptions.Builder clientOptions) {
             super(datastore, clientOptions);
         }
 
         @Override
         protected MongoCredential getMongoCredentials() {
-            return MongoCredential.createCredential(datastore.getUsername(), getAuthDatabase(),
-                    datastore.getPassword().toCharArray());
+            return MongoCredential.createCredential(datastore.getMongoAuthentication().getUserPassConfiguration().getUsername(),
+                    getAuthDatabase(), datastore.getMongoAuthentication().getUserPassConfiguration().getPassword().toCharArray());
         }
 
     }

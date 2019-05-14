@@ -72,9 +72,9 @@ public class MongoDBInputSource implements Serializable {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;
-        this.dataFinder = configuration.getQueryType() == MongoDBInputMapperConfiguration.QueryType.FIND_QUERY
-                ? new FindQueryDataFinder()
-                : new AggregationPipelineQueryDataFinder();
+        this.dataFinder = configuration.getConfigurationExtension()
+                .getQueryType() == MongoDBInputConfigurationExtension.QueryType.FIND_QUERY ? new FindQueryDataFinder()
+                        : new AggregationPipelineQueryDataFinder();
     }
 
     @PostConstruct
@@ -85,7 +85,7 @@ public class MongoDBInputSource implements Serializable {
 
         checkIndexList(collection);
 
-        pathMap = parsePathMap(configuration.getMapping());
+        pathMap = parsePathMap(configuration.getConfigurationExtension().getMapping());
         if (configuration.getDataset().getSchema() != null && !configuration.getDataset().getSchema().isEmpty()) {
             columnsList.addAll(configuration.getDataset().getSchema());
         }
@@ -102,7 +102,7 @@ public class MongoDBInputSource implements Serializable {
                 // - contain the db DBcolumnName between two backslashed quotes
                 // - is followed at some point by a colon
                 // - there is no comma between the the DBcolumnName and the colon
-                if (configuration.getQuery().matches(".*" + key + "[^,]*:.*")) {
+                if (configuration.getConfigurationExtension().getQuery().matches(".*" + key + "[^,]*:.*")) {
                     // We have an index, do not print error message
                     needIndexWarning = false;
                 } else {

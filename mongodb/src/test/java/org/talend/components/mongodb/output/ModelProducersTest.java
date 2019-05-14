@@ -142,7 +142,8 @@ public class ModelProducersTest {
         dataset.setDatastore(datastore);
         MongoDBOutputConfiguration config = new MongoDBOutputConfiguration();
         config.setDataset(dataset);
-        config.setKeys(Arrays.asList("a"));
+        config.setOutputConfigExtension(new MongoOutputConfigurationExtension());
+        config.getOutputConfigExtension().setKeys(Arrays.asList("a"));
         return config;
     }
 

@@ -30,12 +30,13 @@ public class InputClientOptionsFactory extends ClientOptionsFactory {
 
     @Override
     protected void setSpecificOptions(final MongoClientOptions.Builder builder) {
-        if (properties.isSetReadPreference() && properties.getReadPreference() != null) {
-            builder.readPreference(convertReadPreference(properties.getReadPreference())).build();
+        if (properties.getConfigurationExtension().isSetReadPreference()
+                && properties.getConfigurationExtension().getReadPreference() != null) {
+            builder.readPreference(convertReadPreference(properties.getConfigurationExtension().getReadPreference())).build();
         }
     }
 
-    private ReadPreference convertReadPreference(MongoDBInputMapperConfiguration.ReadPreference readPreference) {
+    private ReadPreference convertReadPreference(MongoDBInputConfigurationExtension.ReadPreference readPreference) {
         switch (readPreference) {
         case NEAREST:
             return ReadPreference.nearest();

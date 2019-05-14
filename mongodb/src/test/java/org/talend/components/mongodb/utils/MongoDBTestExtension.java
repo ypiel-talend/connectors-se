@@ -16,7 +16,7 @@ package org.talend.components.mongodb.utils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.*;
-import org.talend.components.mongodb.datastore.MongoDBDatastore;
+import org.talend.components.mongodb.datastore.*;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -56,17 +56,26 @@ public class MongoDBTestExtension implements ExtensionContext.Store.CloseableRes
 
         MongoDBDatastore dataStore = new MongoDBDatastore();
 
-        dataStore.setServer(dockerHostAddress);
-        dataStore.setPort(port);
-        dataStore.setUseSSL(true);
-        dataStore.setAuthentication(true);
-        dataStore.setUsername(MongoDBTestConstants.USERNAME);
-        dataStore.setPassword(MongoDBTestConstants.PASSWORD);
-        dataStore.setDatabase(MongoDBTestConstants.DATABASE_NAME);
-        dataStore.setSetAuthenticationDatabase(true);
-        dataStore.setAuthenticationDatabase(MongoDBTestConstants.AUTH_DATABASE);
-        dataStore.setAuthenticationMechanism(MongoDBDatastore.AuthenticationMechanism.NEGOTIATE_MEC);
+        MongoServerAddress serverAddress = new MongoServerAddress(dockerHostAddress, port);
+        dataStore.setServerAddress(serverAddress);
 
+        dataStore.setUseSSL(true);
+        dataStore.setDatabase(MongoDBTestConstants.DATABASE_NAME);
+        dataStore.setAuthentication(true);
+
+        MongoAuthentication authentication = new MongoAuthentication();
+        MongoUserPassConfiguration userPass = new MongoUserPassConfiguration();
+        userPass.setUsername(MongoDBTestConstants.USERNAME);
+        userPass.setPassword(MongoDBTestConstants.PASSWORD);
+        authentication.setUserPassConfiguration(userPass);
+
+        MongoAuthDatabaseConfiguration authDbConfig = new MongoAuthDatabaseConfiguration();
+        authDbConfig.setSetAuthenticationDatabase(true);
+        authDbConfig.setAuthenticationDatabase(MongoDBTestConstants.AUTH_DATABASE);
+        authentication.setAuthDatabaseConfig(authDbConfig);
+        authentication.setAuthenticationMechanism(MongoAuthentication.AuthenticationMechanism.NEGOTIATE_MEC);
+
+        dataStore.setMongoAuthentication(authentication);
         testContext.dataStore = dataStore;
 
         log.info("docker machine: " + dockerHostAddress + ":" + port);

@@ -13,23 +13,26 @@
 
 package org.talend.components.mongodb.datastore;
 
-import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
+import java.io.Serializable;
+
+import lombok.Data;
+
 @Data
-@GridLayout({ @GridLayout.Row({ "address", "port" }) })
-@Documentation("Replica server addresses for MongoDB components")
-public class ReplicaAddress {
+@GridLayout({ @GridLayout.Row({ "username" }), @GridLayout.Row({ "password" }) })
+public class MongoUserPassConfiguration implements Serializable {
 
     @Option
-    @Documentation("Replica server")
-    private String address;
+    @Documentation("Enter the username")
+    private String username;
 
     @Option
-    @Documentation("Replica port")
-    @DefaultValue("27017")
-    private int port;
+    @Credential
+    @Documentation("Enter the password")
+    private String password;
+
 }

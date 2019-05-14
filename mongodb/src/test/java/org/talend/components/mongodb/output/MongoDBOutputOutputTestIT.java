@@ -76,10 +76,10 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.INSERT);
-        outputConfiguration.setDropCollectionIfExists(true);
-        outputConfiguration.setBulkWrite(true);
-        outputConfiguration.setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.INSERT);
+        outputConfiguration.getOutputConfigExtension().setDropCollectionIfExists(true);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(true);
+        outputConfiguration.getOutputConfigExtension().setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
@@ -102,10 +102,10 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.INSERT);
-        outputConfiguration.setDropCollectionIfExists(true);
-        outputConfiguration.setBulkWrite(false);
-        outputConfiguration.setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.INSERT);
+        outputConfiguration.getOutputConfigExtension().setDropCollectionIfExists(true);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(false);
+        outputConfiguration.getOutputConfigExtension().setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
@@ -139,11 +139,11 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setKeys(Arrays.asList("col1"));
+        outputConfiguration.getOutputConfigExtension().setKeys(Arrays.asList("col1"));
 
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.DELETE);
-        outputConfiguration.setBulkWrite(true);
-        outputConfiguration.setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.DELETE);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(true);
+        outputConfiguration.getOutputConfigExtension().setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
@@ -171,11 +171,11 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setKeys(Arrays.asList("col1"));
+        outputConfiguration.getOutputConfigExtension().setKeys(Arrays.asList("col1"));
 
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.DELETE);
-        outputConfiguration.setBulkWrite(false);
-        outputConfiguration.setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.DELETE);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(false);
+        outputConfiguration.getOutputConfigExtension().setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
@@ -209,11 +209,11 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setKeys(Arrays.asList("col1"));
+        outputConfiguration.getOutputConfigExtension().setKeys(Arrays.asList("col1"));
 
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT);
-        outputConfiguration.setBulkWrite(true);
-        outputConfiguration.setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(true);
+        outputConfiguration.getOutputConfigExtension().setBulkWriteType(MongoDBOutputConfiguration.BulkWriteType.ORDERED);
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
@@ -250,10 +250,10 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setKeys(Arrays.asList("col1"));
+        outputConfiguration.getOutputConfigExtension().setKeys(Arrays.asList("col1"));
 
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT);
-        outputConfiguration.setBulkWrite(false);
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(false);
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
@@ -290,10 +290,10 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setKeys(Arrays.asList("col1"));
+        outputConfiguration.getOutputConfigExtension().setKeys(Arrays.asList("col1"));
 
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPDATE);
-        outputConfiguration.setBulkWrite(false);
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPDATE);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(false);
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
         Job.components().component("emitter", "test://emitter").component("mongoDBOutput", "MongoDB://MongoDBOutput?" + config)
@@ -334,10 +334,10 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setKeys(Arrays.asList("col2"));
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT_WITH_SET);
-        outputConfiguration.setBulkWrite(false);
-        outputConfiguration.setUpdateAllDocuments(true);
+        outputConfiguration.getOutputConfigExtension().setKeys(Arrays.asList("col2"));
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT_WITH_SET);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(false);
+        outputConfiguration.getOutputConfigExtension().setUpdateAllDocuments(true);
 
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
@@ -383,10 +383,10 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setKeys(Arrays.asList("col2"));
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT_WITH_SET);
-        outputConfiguration.setBulkWrite(false);
-        outputConfiguration.setUpdateAllDocuments(false);
+        outputConfiguration.getOutputConfigExtension().setKeys(Arrays.asList("col2"));
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.UPSERT_WITH_SET);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(false);
+        outputConfiguration.getOutputConfigExtension().setUpdateAllDocuments(false);
 
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
@@ -430,10 +430,10 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
         componentsHandler.setInputData(data);
 
         MongoDBOutputConfiguration outputConfiguration = createConfiguration();
-        outputConfiguration.setKeys(Arrays.asList("col1"));
-        outputConfiguration.setActionOnData(MongoDBOutputConfiguration.ActionOnData.SET);
-        outputConfiguration.setBulkWrite(false);
-        outputConfiguration.setUpdateAllDocuments(true);
+        outputConfiguration.getOutputConfigExtension().setKeys(Arrays.asList("col1"));
+        outputConfiguration.getOutputConfigExtension().setActionOnData(MongoDBOutputConfiguration.ActionOnData.SET);
+        outputConfiguration.getOutputConfigExtension().setBulkWrite(false);
+        outputConfiguration.getOutputConfigExtension().setUpdateAllDocuments(true);
 
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
@@ -466,6 +466,7 @@ public class MongoDBOutputOutputTestIT extends MongoTestBase {
 
         MongoDBOutputConfiguration outputConfiguration = new MongoDBOutputConfiguration();
         outputConfiguration.setDataset(dataset);
+        outputConfiguration.setOutputConfigExtension(new MongoOutputConfigurationExtension());
         return outputConfiguration;
     }
 

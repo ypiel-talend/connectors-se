@@ -23,19 +23,21 @@ public class FindQueryDataFinder implements QueryDataFinder<Document> {
 
     @Override
     public MongoCursor<Document> findData(MongoCollection<Document> collection, MongoDBInputMapperConfiguration configuration) {
-        Document myQuery = Document.parse(configuration.getQuery());
-        FindIterable<Document> iterable = collection.find(myQuery).noCursorTimeout(configuration.isNoQueryTimeout());
-        iterable.limit(configuration.getLimit());
+        Document myQuery = Document.parse(configuration.getConfigurationExtension().getQuery());
+        FindIterable<Document> iterable = collection.find(myQuery)
+                .noCursorTimeout(configuration.getConfigurationExtension().isNoQueryTimeout());
+        iterable.limit(configuration.getConfigurationExtension().getLimit());
         initSorting(iterable, configuration);
         return iterable.iterator();
     }
 
     private final void initSorting(final FindIterable<Document> findIterable, MongoDBInputMapperConfiguration configuration) {
-        if (configuration.getSort() == null || configuration.getSort().isEmpty()) {
+        if (configuration.getConfigurationExtension().getSort() == null
+                || configuration.getConfigurationExtension().getSort().isEmpty()) {
             return;
         }
         BasicDBObject orderBy = new BasicDBObject();
-        configuration.getSort().stream()
+        configuration.getConfigurationExtension().getSort().stream()
                 .forEach(s -> orderBy.put(s.getColumn(), (s.getOrder() == Sort.SortingOrder.asc) ? 1 : -1));
         findIterable.sort(orderBy);
     }

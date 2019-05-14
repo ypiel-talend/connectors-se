@@ -25,42 +25,49 @@ import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
 @DataStore("MongoDBDatastore")
 @Checkable(UIMongoDBService.HEALTH_CHECK)
-@GridLayout({ @GridLayout.Row({ "useReplicaSetAddress" }), @GridLayout.Row({ "replicaAddresses" }),
-        @GridLayout.Row({ "server", "port" }), @GridLayout.Row({ "database" }), @GridLayout.Row({ "useSSL" }),
-        @GridLayout.Row({ "authentication" }), @GridLayout.Row({ "authenticationMechanism" }),
-        @GridLayout.Row({ "kerberosCreds" }), @GridLayout.Row({ "username", "password" }),
-        @GridLayout.Row({ "setAuthenticationDatabase" }), @GridLayout.Row({ "authenticationDatabase" }) })
+@GridLayout({ @GridLayout.Row({ "useConnectionString" }), @GridLayout.Row({ "connectionString" }),
+        @GridLayout.Row({ "useReplicaSetAddress" }), @GridLayout.Row({ "replicaAddresses" }),
+        @GridLayout.Row({ "serverAddress" }), @GridLayout.Row({ "database" }), @GridLayout.Row({ "useSSL" }),
+        @GridLayout.Row({ "authentication" }), @GridLayout.Row({ "mongoAuthentication" }) })
 @Documentation("Connection for MongoDB components")
 public class MongoDBDatastore implements Serializable {
 
     @Option
+    @Documentation("Use connection string")
+    @DefaultValue("false")
+    private boolean useConnectionString;
+
+    @Option
+    @Documentation("Database connection string")
+    @DefaultValue("mongodb://")
+    @ActiveIf(target = "useConnectionString", value = "true")
+    private String connectionString;
+
+    @Option
     @Documentation("Use replica addresses instead of single server")
+    @ActiveIf(target = "useConnectionString", value = "false")
     private boolean useReplicaSetAddress;
 
     @Option
     @Documentation("Replica addresses set")
-    @ActiveIf(target = "useReplicaSetAddress", value = "true")
-    private List<ReplicaAddress> replicaAddresses;
+    @ActiveIfs({ @ActiveIf(target = "useReplicaSetAddress", value = "true"),
+            @ActiveIf(target = "useConnectionString", value = "false") })
+    private List<MongoServerAddress> replicaAddresses;
 
     @Option
     @Documentation("Server address")
-    @ActiveIf(target = "useReplicaSetAddress", value = "false")
-    private String server;
-
-    @Option
-    @Documentation("Server port")
-    @DefaultValue("27017")
-    @ActiveIf(target = "useReplicaSetAddress", value = "false")
-    private int port;
+    @ActiveIfs({ @ActiveIf(target = "useReplicaSetAddress", value = "false"),
+            @ActiveIf(target = "useConnectionString", value = "false") })
+    private MongoServerAddress serverAddress;
 
     @Option
     @Documentation("Database to use")
+    @ActiveIf(target = "useConnectionString", value = "false")
     private String database;
 
     @Option
@@ -69,52 +76,13 @@ public class MongoDBDatastore implements Serializable {
 
     @Option
     @Documentation("Enable the database authentication.")
+    @ActiveIf(target = "useConnectionString", value = "false")
     private boolean authentication;
 
     @Option
-    @ActiveIf(target = "authentication", value = "true")
-    @Documentation("Among the mechanisms listed on the Authentication mechanism drop-down list, the NEGOTIATE one is recommended if you are not using Kerberos, because it automatically select the authentication mechanism the most adapted to the MongoDB version you are using.")
-    @DefaultValue("NEGOTIATE_MEC")
-    private AuthenticationMechanism authenticationMechanism;
-
-    public enum AuthenticationMechanism {
-        NEGOTIATE_MEC,
-        PLAIN_MEC,
-        SCRAMSHA1_MEC,
-        KERBEROS_MEC
-    }
-
-    @Option
-    @ActiveIfs(value = { @ActiveIf(target = "authentication", value = "true"),
-            @ActiveIf(target = "authenticationMechanism", value = { "NEGOTIATE_MEC", "SCRAMSHA1_MEC" }) })
-    @Documentation("If the username to be used to connect to MongoDB has been created in a specific Authentication database of MongoDB, select this check box to enter the name of this Authentication database in the Authentication database field that is displayed.")
-    private boolean setAuthenticationDatabase;
-
-    @Option
-    @ActiveIfs(value = { @ActiveIf(target = "authentication", value = "true"),
-            @ActiveIf(target = "setAuthenticationDatabase", value = "true"),
-            @ActiveIf(target = "authenticationMechanism", value = { "NEGOTIATE_MEC", "SCRAMSHA1_MEC" }) })
-    @Documentation("Set MongoDB Authentication database")
-    private String authenticationDatabase;
-
-    @Option
-    @ActiveIfs(value = { @ActiveIf(target = "authentication", value = "true"),
-            @ActiveIf(target = "authenticationMechanism", value = { "NEGOTIATE_MEC", "SCRAMSHA1_MEC", "PLAIN_MEC" }) })
-    @Documentation("Enter the username")
-    private String username;
-
-    @Option
-    @Credential
-    @ActiveIfs(value = { @ActiveIf(target = "authentication", value = "true"),
-            @ActiveIf(target = "authenticationMechanism", value = { "NEGOTIATE_MEC", "SCRAMSHA1_MEC", "PLAIN_MEC" }) })
-    @Documentation("Enter the password")
-    private String password;
-
-    @Option
-    @Credential
-    @ActiveIfs(value = { @ActiveIf(target = "authentication", value = "true"),
-            @ActiveIf(target = "authenticationMechanism", value = { "KERBEROS_MEC" }) })
-    @Documentation("Credentials for Kerberos authentication")
-    private KerberosCredentials kerberosCreds;
+    @Documentation("Authentication configuration")
+    @ActiveIfs({ @ActiveIf(target = "authentication", value = "true"),
+            @ActiveIf(target = "useConnectionString", value = "false") })
+    private MongoAuthentication mongoAuthentication;
 
 }

@@ -29,12 +29,9 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
 @GridLayouts({
-        @GridLayout(value = { @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "setReadPreference" }),
-                @GridLayout.Row({ "readPreference" }), @GridLayout.Row({ "queryType" }), @GridLayout.Row({ "aggregationStages" }),
-                @GridLayout.Row({ "query" }), @GridLayout.Row({ "limit" }), @GridLayout.Row({ "mapping" }),
-                @GridLayout.Row({ "sort" }) }, names = GridLayout.FormType.MAIN),
-        @GridLayout(value = { @GridLayout.Row({ "noQueryTimeout" }),
-                @GridLayout.Row({ "externalSort" }) }, names = GridLayout.FormType.ADVANCED), })
+        @GridLayout(value = { @GridLayout.Row({ "dataset" }),
+                @GridLayout.Row({ "configurationExtension" }) }, names = GridLayout.FormType.MAIN),
+        @GridLayout(value = { @GridLayout.Row({ "configurationExtension" }) }, names = GridLayout.FormType.ADVANCED), })
 @Documentation("Configuration for MongoDB input component")
 public class MongoDBInputMapperConfiguration implements Serializable {
 
@@ -43,65 +40,7 @@ public class MongoDBInputMapperConfiguration implements Serializable {
     private MongoDBDataset dataset;
 
     @Option
-    @Documentation("Set read preference")
-    private boolean setReadPreference;
-
-    @Option
-    @ActiveIf(target = "setReadPreference", value = "true")
-    @Documentation("Read preference type")
-    private ReadPreference readPreference;
-
-    public enum ReadPreference {
-        PRIMARY,
-        PRIMARY_PREFERRED,
-        SECONDARY,
-        SECONDARY_PREFERRED,
-        NEAREST;
-    }
-
-    public enum QueryType {
-        FIND_QUERY,
-        AGGREGATION_PIPELINE_QUERY;
-    }
-
-    @Option
-    @Documentation("Query type to use to get the data")
-    @DefaultValue("FIND_QUERY")
-    private QueryType queryType;
-
-    @Option
-    @TextArea
-    @Documentation("Query to use to get the data")
-    @ActiveIf(target = "queryType", value = "FIND_QUERY")
-    private String query = "{}";
-
-    @Option
-    @Documentation("Limit")
-    @ActiveIf(target = "queryType", value = "FIND_QUERY")
-    private int limit;
-
-    @Option
-    @Documentation("Columns to documents fields mapping")
-    private List<InputMapping> mapping;
-
-    @Option
-    @Documentation("Columns to sort data by")
-    @ActiveIf(target = "queryType", value = "FIND_QUERY")
-    private List<Sort> sort;
-
-    @Option
-    @Documentation("Set no timeout for queries")
-    @ActiveIf(target = "queryType", value = "FIND_QUERY")
-    private boolean noQueryTimeout;
-
-    @Option
-    @Documentation("Aggregation stages")
-    @ActiveIf(target = "queryType", value = "AGGREGATION_PIPELINE_QUERY")
-    private List<AggregationStage> aggregationStages;
-
-    @Option
-    @Documentation("Enable external sort")
-    @ActiveIf(target = "queryType", value = "AGGREGATION_PIPELINE_QUERY")
-    private boolean externalSort;
+    @Documentation("Input configuration properties not included in dataset")
+    private MongoDBInputConfigurationExtension configurationExtension;
 
 }

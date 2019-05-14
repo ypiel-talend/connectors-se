@@ -15,8 +15,7 @@ package org.talend.components.mongodb.service;
 
 import com.mongodb.MongoCredential;
 import org.junit.jupiter.api.Test;
-import org.talend.components.mongodb.datastore.KerberosCredentials;
-import org.talend.components.mongodb.datastore.MongoDBDatastore;
+import org.talend.components.mongodb.datastore.*;
 
 import static com.mongodb.AuthenticationMechanism.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,7 +26,7 @@ public class MongoClientFactoryTest {
 
     @Test
     public void testCreateDefaultClientFactory() {
-        MongoDBDatastore datastore = new MongoDBDatastore();
+        MongoDBDatastore datastore = createDatastore();
         datastore.setAuthentication(false);
 
         MongoClientFactory factory = MongoClientFactory.getInstance(datastore, null, null);
@@ -37,11 +36,16 @@ public class MongoClientFactoryTest {
 
     @Test
     public void testCreateNegotiateClientFactory() {
-        MongoDBDatastore datastore = new MongoDBDatastore();
+        MongoDBDatastore datastore = createDatastore();
         datastore.setAuthentication(true);
-        datastore.setAuthenticationMechanism(MongoDBDatastore.AuthenticationMechanism.NEGOTIATE_MEC);
-        datastore.setUsername("User");
-        datastore.setPassword("Password");
+        MongoAuthentication authentication = new MongoAuthentication();
+        authentication.setAuthenticationMechanism(MongoAuthentication.AuthenticationMechanism.NEGOTIATE_MEC);
+        MongoUserPassConfiguration userPassAuth = new MongoUserPassConfiguration();
+        userPassAuth.setUsername("User");
+        userPassAuth.setPassword("Password");
+        authentication.setUserPassConfiguration(userPassAuth);
+        authentication.setAuthDatabaseConfig(new MongoAuthDatabaseConfiguration());
+        datastore.setMongoAuthentication(authentication);
         datastore.setDatabase("Database");
 
         MongoClientFactory factory = MongoClientFactory.getInstance(datastore, null, null);
@@ -55,11 +59,18 @@ public class MongoClientFactoryTest {
 
     @Test
     public void testCreatePlainClientFactory() {
-        MongoDBDatastore datastore = new MongoDBDatastore();
+        MongoDBDatastore datastore = createDatastore();
         datastore.setAuthentication(true);
-        datastore.setAuthenticationMechanism(MongoDBDatastore.AuthenticationMechanism.PLAIN_MEC);
-        datastore.setUsername("User");
-        datastore.setPassword("Password");
+        // datastore.setAuthenticationMechanism(MongoDBDatastore.AuthenticationMechanism.PLAIN_MEC);
+        // datastore.setUsername("User");
+        // datastore.setPassword("Password");
+        MongoAuthentication authentication = new MongoAuthentication();
+        authentication.setAuthenticationMechanism(MongoAuthentication.AuthenticationMechanism.PLAIN_MEC);
+        MongoUserPassConfiguration userPassAuth = new MongoUserPassConfiguration();
+        userPassAuth.setUsername("User");
+        userPassAuth.setPassword("Password");
+        authentication.setUserPassConfiguration(userPassAuth);
+        datastore.setMongoAuthentication(authentication);
         datastore.setDatabase("Database");
 
         MongoClientFactory factory = MongoClientFactory.getInstance(datastore, null, null);
@@ -74,11 +85,22 @@ public class MongoClientFactoryTest {
 
     @Test
     public void testCreateScramSha1ClientFactory() {
-        MongoDBDatastore datastore = new MongoDBDatastore();
+        MongoDBDatastore datastore = createDatastore();
         datastore.setAuthentication(true);
-        datastore.setAuthenticationMechanism(MongoDBDatastore.AuthenticationMechanism.SCRAMSHA1_MEC);
-        datastore.setUsername("User");
-        datastore.setPassword("Password");
+        // datastore.setAuthenticationMechanism(MongoDBDatastore.AuthenticationMechanism.SCRAMSHA1_MEC);
+        // datastore.setUsername("User");
+        // datastore.setPassword("Password");
+        MongoAuthentication authentication = new MongoAuthentication();
+        authentication.setAuthenticationMechanism(MongoAuthentication.AuthenticationMechanism.SCRAMSHA1_MEC);
+
+        MongoUserPassConfiguration userPassAuth = new MongoUserPassConfiguration();
+        userPassAuth.setUsername("User");
+        userPassAuth.setPassword("Password");
+
+        authentication.setUserPassConfiguration(userPassAuth);
+        authentication.setAuthDatabaseConfig(new MongoAuthDatabaseConfiguration());
+
+        datastore.setMongoAuthentication(authentication);
         datastore.setDatabase("Database");
 
         MongoClientFactory factory = MongoClientFactory.getInstance(datastore, null, null);
@@ -92,14 +114,18 @@ public class MongoClientFactoryTest {
 
     @Test
     public void testCreateKerberosClientFactory() {
-        MongoDBDatastore datastore = new MongoDBDatastore();
+        MongoDBDatastore datastore = createDatastore();
         datastore.setAuthentication(true);
-        datastore.setAuthenticationMechanism(MongoDBDatastore.AuthenticationMechanism.KERBEROS_MEC);
+        // datastore.setAuthenticationMechanism(MongoDBDatastore.AuthenticationMechanism.KERBEROS_MEC);
+        MongoAuthentication authentication = new MongoAuthentication();
+        authentication.setAuthenticationMechanism(MongoAuthentication.AuthenticationMechanism.KERBEROS_MEC);
+        datastore.setMongoAuthentication(authentication);
         KerberosCredentials kerbCreds = new KerberosCredentials();
         kerbCreds.setKdcServer("Server");
         kerbCreds.setRealm("Realm");
         kerbCreds.setUserPrincipal("UserPrincipal");
-        datastore.setKerberosCreds(kerbCreds);
+        // datastore.setKerberosCreds(kerbCreds);
+        authentication.setKerberosCreds(kerbCreds);
         datastore.setDatabase("Database");
 
         MongoClientFactory factory = MongoClientFactory.getInstance(datastore, null, null);
@@ -109,5 +135,11 @@ public class MongoClientFactoryTest {
         MongoCredential credentials = ((MongoClientFactory.KerberosAuthMongoClientFactory) factory).getMongoCredentials();
 
         assertEquals(GSSAPI, credentials.getAuthenticationMechanism());
+    }
+
+    private MongoDBDatastore createDatastore() {
+        MongoDBDatastore datastore = new MongoDBDatastore();
+        datastore.setMongoAuthentication(new MongoAuthentication());
+        return datastore;
     }
 }

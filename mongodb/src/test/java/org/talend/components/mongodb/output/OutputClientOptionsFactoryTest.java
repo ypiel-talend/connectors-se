@@ -36,7 +36,8 @@ public class OutputClientOptionsFactoryTest {
         configuration.getDataset().getDatastore().setUseSSL(true);
 
         OutputClientOptionsFactory factory = new OutputClientOptionsFactory(configuration, i18nMessage);
-        MongoClientOptions clientOptions = factory.createOptions();
+        MongoClientOptions.Builder clientOptionsBuilder = factory.createOptionsBuilder();
+        MongoClientOptions clientOptions = clientOptionsBuilder.build();
 
         assertTrue(clientOptions.isSslEnabled());
     }
@@ -44,11 +45,12 @@ public class OutputClientOptionsFactoryTest {
     @Test
     public void testWriteConcernAcknowledged() {
         MongoDBOutputConfiguration configuration = createConfiguration();
-        configuration.setSetWriteConcern(true);
-        configuration.setWriteConcern(MongoDBOutputConfiguration.WriteConcern.ACKNOWLEDGED);
+        configuration.getOutputConfigExtension().setSetWriteConcern(true);
+        configuration.getOutputConfigExtension().setWriteConcern(MongoDBOutputConfiguration.WriteConcern.ACKNOWLEDGED);
 
         OutputClientOptionsFactory factory = new OutputClientOptionsFactory(configuration, i18nMessage);
-        MongoClientOptions clientOptions = factory.createOptions();
+        MongoClientOptions.Builder clientOptionsBuilder = factory.createOptionsBuilder();
+        MongoClientOptions clientOptions = clientOptionsBuilder.build();
 
         assertSame(WriteConcern.ACKNOWLEDGED, clientOptions.getWriteConcern(), "Write concern should be ACKNOWLEDGED");
     }
@@ -56,11 +58,12 @@ public class OutputClientOptionsFactoryTest {
     @Test
     public void testWriteConcernJournaled() {
         MongoDBOutputConfiguration configuration = createConfiguration();
-        configuration.setSetWriteConcern(true);
-        configuration.setWriteConcern(MongoDBOutputConfiguration.WriteConcern.JOURNALED);
+        configuration.getOutputConfigExtension().setSetWriteConcern(true);
+        configuration.getOutputConfigExtension().setWriteConcern(MongoDBOutputConfiguration.WriteConcern.JOURNALED);
 
         OutputClientOptionsFactory factory = new OutputClientOptionsFactory(configuration, i18nMessage);
-        MongoClientOptions clientOptions = factory.createOptions();
+        MongoClientOptions.Builder clientOptionsBuilder = factory.createOptionsBuilder();
+        MongoClientOptions clientOptions = clientOptionsBuilder.build();
 
         assertSame(WriteConcern.JOURNALED, clientOptions.getWriteConcern(), "Write concern should be JOURNALED");
     }
@@ -68,11 +71,12 @@ public class OutputClientOptionsFactoryTest {
     @Test
     public void testWriteConcernUnacknowledged() {
         MongoDBOutputConfiguration configuration = createConfiguration();
-        configuration.setSetWriteConcern(true);
-        configuration.setWriteConcern(MongoDBOutputConfiguration.WriteConcern.UNACKNOWLEDGED);
+        configuration.getOutputConfigExtension().setSetWriteConcern(true);
+        configuration.getOutputConfigExtension().setWriteConcern(MongoDBOutputConfiguration.WriteConcern.UNACKNOWLEDGED);
 
         OutputClientOptionsFactory factory = new OutputClientOptionsFactory(configuration, i18nMessage);
-        MongoClientOptions clientOptions = factory.createOptions();
+        MongoClientOptions.Builder clientOptionsBuilder = factory.createOptionsBuilder();
+        MongoClientOptions clientOptions = clientOptionsBuilder.build();
 
         assertSame(WriteConcern.UNACKNOWLEDGED, clientOptions.getWriteConcern(), "Write concern should be UNACKNOWLEDGED");
     }
@@ -80,11 +84,12 @@ public class OutputClientOptionsFactoryTest {
     @Test
     public void testWriteConcernReplicaAcknowledged() {
         MongoDBOutputConfiguration configuration = createConfiguration();
-        configuration.setSetWriteConcern(true);
-        configuration.setWriteConcern(MongoDBOutputConfiguration.WriteConcern.REPLICA_ACKNOWLEDGED);
+        configuration.getOutputConfigExtension().setSetWriteConcern(true);
+        configuration.getOutputConfigExtension().setWriteConcern(MongoDBOutputConfiguration.WriteConcern.REPLICA_ACKNOWLEDGED);
 
         OutputClientOptionsFactory factory = new OutputClientOptionsFactory(configuration, i18nMessage);
-        MongoClientOptions clientOptions = factory.createOptions();
+        MongoClientOptions.Builder clientOptionsBuilder = factory.createOptionsBuilder();
+        MongoClientOptions clientOptions = clientOptionsBuilder.build();
 
         assertSame(WriteConcern.W2, clientOptions.getWriteConcern(), "Write concern should be REPLICA_ACKNOWLEDGED");
     }
@@ -107,6 +112,7 @@ public class OutputClientOptionsFactoryTest {
         dataset.setDatastore(datastore);
         MongoDBOutputConfiguration configuration = new MongoDBOutputConfiguration();
         configuration.setDataset(dataset);
+        configuration.setOutputConfigExtension(new MongoOutputConfigurationExtension());
         return configuration;
     }
 
