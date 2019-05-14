@@ -24,4 +24,6 @@ public interface I18nMessage {
     String cannotCloseCouchbaseEnv();
 
     String cannotGuessWhenDataIsNull();
+
+    String queryResultError();
 }

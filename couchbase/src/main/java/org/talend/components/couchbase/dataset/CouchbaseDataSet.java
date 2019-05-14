@@ -38,7 +38,7 @@ public class CouchbaseDataSet implements Serializable {
 
     @Option
     @Documentation("Schema")
-    @Structure
+    @Structure(type = Structure.Type.OUT)
     private List<String> schema;
 
     @Option

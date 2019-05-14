@@ -40,7 +40,7 @@ public class CouchbaseInputConfiguration implements Serializable {
 
     @Option
     @Documentation("Use N1QL query")
-    boolean useN1QLQuery = false;
+    private boolean useN1QLQuery = false;
 
     @Option
     @TextArea

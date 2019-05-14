@@ -86,8 +86,8 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         environment.shutdown();
     }
 
-    void executeJob() {
-        final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
+    void executeJob(CouchbaseInputConfiguration configuration) {
+        final String inputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
                 .component("collector", "test://collector").connections().from("Couchbase_Input").to("collector").build().run();
     }
@@ -98,7 +98,7 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         componentsHandler.resetState();
         insertTestDataToDB();
 
-        executeJob();
+        executeJob(getInputConfiguration());
 
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
 
@@ -125,10 +125,25 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     void firstValueIsNullInInputDBTest() {
         insertTestDataWithNullValueToDB();
 
-        executeJob();
+        executeJob(getInputConfiguration());
 
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
         assertEquals(2, res.get(0).getSchema().getEntries().size());
+    }
+
+    @Test
+    @DisplayName("Execution of customN1QL query")
+    void n1qlQueryInputDBTest() {
+        insertTestDataToDB();
+
+        CouchbaseInputConfiguration configurationWithN1ql = getInputConfiguration();
+        configurationWithN1ql.setUseN1QLQuery(true);
+        configurationWithN1ql.setQuery("SELECT `t_long_max`, `t_string`, `t_double_max` FROM " + BUCKET_NAME);
+        executeJob(configurationWithN1ql);
+
+        final List<Record> res = componentsHandler.getCollectedData(Record.class);
+        assertEquals(3, res.get(0).getSchema().getEntries().size());
+        assertEquals(3, res.get(1).getSchema().getEntries().size());
     }
 
     private CouchbaseInputConfiguration getInputConfiguration() {

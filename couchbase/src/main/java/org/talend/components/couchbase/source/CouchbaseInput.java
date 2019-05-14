@@ -82,7 +82,7 @@ public class CouchbaseInput implements Serializable {
         columnsSet = new HashSet<>();
 
         N1qlQueryResult n1qlQueryRows;
-        if (configuration.useN1QLQuery) {
+        if (configuration.isUseN1QLQuery()) {
             n1qlQueryRows = bucket.query(N1qlQuery.simple(configuration.getQuery()));
         } else {
             n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`"));
@@ -93,7 +93,7 @@ public class CouchbaseInput implements Serializable {
 
     private void checkErrors(N1qlQueryResult n1qlQueryRows) {
         if (!n1qlQueryRows.errors().isEmpty()) {
-            LOG.error(n1qlQueryRows.errors().toString());
+            LOG.error(i18n.queryResultError());
             throw new IllegalArgumentException(n1qlQueryRows.errors().toString());
         }
     }
@@ -103,16 +103,27 @@ public class CouchbaseInput implements Serializable {
         if (!index.hasNext()) {
             return null;
         } else {
-            JsonObject jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
+            JsonObject jsonObject = index.next().value();
+
+            if (!configuration.isUseN1QLQuery()) {
+                // unwrap JSON (because we use SELECT * all values will be wrapped with bucket name)
+                jsonObject = (JsonObject) jsonObject.get(configuration.getDataSet().getDatastore().getBucket());
+            }
 
             if (columnsSet.isEmpty()) {
-                columnsSet.addAll(jsonObject.getNames());
+                if (configuration.getDataSet().getSchema() != null && !configuration.getDataSet().getSchema().isEmpty()) {
+                    columnsSet.addAll(configuration.getDataSet().getSchema());
+                } else {
+                    columnsSet.addAll(jsonObject.getNames());
+                }
             }
             if (schema == null) {
                 schema = parseSchema(jsonObject);
             }
             final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-            schema.getEntries().stream().forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), jsonObject)));
+            JsonObject finalJsonObject = jsonObject;
+            schema.getEntries().stream()
+                    .forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), finalJsonObject)));
 
             return recordBuilder.build();
         }
@@ -150,24 +161,24 @@ public class CouchbaseInput implements Serializable {
     }
 
     private Schema.Type getSchemaType(Object value) {
-        if (value instanceof String) {
-            return Schema.Type.STRING;
+        if (value instanceof String || value instanceof JsonObject) {
+            return STRING;
         } else if (value instanceof Boolean) {
-            return Schema.Type.BOOLEAN;
+            return BOOLEAN;
         } else if (value instanceof Date) {
-            return Schema.Type.DATETIME;
+            return DATETIME;
         } else if (value instanceof Double) {
-            return Schema.Type.DOUBLE;
+            return DOUBLE;
         } else if (value instanceof Integer) {
             return INT;
         } else if (value instanceof Long) {
-            return Schema.Type.LONG;
+            return LONG;
         } else if (value instanceof Byte[]) {
             throw new IllegalArgumentException("BYTES is unsupported");
         } else if (value instanceof JsonArray) {
             return ARRAY;
         } else {
-            return Schema.Type.STRING;
+            return STRING;
         }
     }
 
@@ -206,7 +217,8 @@ public class CouchbaseInput implements Serializable {
             recordBuilder.withBoolean(entryBuilder.build(), value == null ? null : (Boolean) value);
             break;
         case RECORD:
-            throw new IllegalArgumentException("Record is unsupported");
+            recordBuilder.withString(entryBuilder.build(), value == null ? null : value.toString());
+            // throw new IllegalArgumentException("Record is unsupported");
         }
     }
 }
