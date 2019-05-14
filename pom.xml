@@ -36,6 +36,7 @@
         <module>jdbc</module>
         <module>salesforce</module>
         <module>mongodb</module>
+        <module>cosmosdb</module>
     </modules>
 
     <scm>
