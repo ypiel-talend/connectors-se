@@ -6,3 +6,4 @@ package org.talend.components.couchbase;
 
 import org.talend.sdk.component.api.component.Components;
 import org.talend.sdk.component.api.component.Icon;
+gi
