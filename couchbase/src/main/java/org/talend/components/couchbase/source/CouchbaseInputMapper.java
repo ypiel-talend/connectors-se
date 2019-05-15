@@ -15,6 +15,7 @@ package org.talend.components.couchbase.source;
 
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.components.couchbase.service.I18nMessage;
+
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;

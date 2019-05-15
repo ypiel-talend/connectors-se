@@ -13,6 +13,7 @@
 
 package org.talend.components.couchbase.source;
 
+import com.couchbase.client.core.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
@@ -75,12 +76,28 @@ public class CouchbaseInput implements Serializable {
             bucket = service.openConnection(configuration.getDataSet().getDatastore());
         } catch (Exception e) {
             LOG.error(i18n.connectionKO());
+            throw new CouchbaseException(i18n.connectionKO());
         }
 
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
-        N1qlQueryResult n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM " + bucket.name()));
+        columnsSet = new HashSet<>();
+
+        N1qlQueryResult n1qlQueryRows;
+        if (configuration.isUseN1QLQuery()) {
+            n1qlQueryRows = bucket.query(N1qlQuery.simple(configuration.getQuery()));
+        } else {
+            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`"));
+        }
+        checkErrors(n1qlQueryRows);
         index = n1qlQueryRows.rows();
+    }
+
+    private void checkErrors(N1qlQueryResult n1qlQueryRows) {
+        if (!n1qlQueryRows.errors().isEmpty()) {
+            LOG.error(i18n.queryResultError());
+            throw new IllegalArgumentException(n1qlQueryRows.errors().toString());
+        }
     }
 
     @Producer
@@ -88,12 +105,31 @@ public class CouchbaseInput implements Serializable {
         if (!index.hasNext()) {
             return null;
         } else {
-            // unwrap JsonObject
-            JsonObject jsonObject = (JsonObject) index.next().value().get(configuration.getDataSet().getDatastore().getBucket());
+            JsonObject jsonObject = index.next().value();
+
+            if (!configuration.isUseN1QLQuery()) {
+                // unwrap JSON (because we use SELECT * all values will be wrapped with bucket name)
+                jsonObject = (JsonObject) jsonObject.get(configuration.getDataSet().getDatastore().getBucket());
+            }
+
+            if (columnsSet.isEmpty()) {
+                if (configuration.getDataSet().getSchema() != null && !configuration.getDataSet().getSchema().isEmpty()) {
+                    columnsSet.addAll(configuration.getDataSet().getSchema());
+                } else {
+                    columnsSet.addAll(jsonObject.getNames());
+                }
+            }
+
             if (schema == null) {
                 schema = service.getSchema(jsonObject);
             }
-            return createRecord(schema, jsonObject);
+
+            final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
+            JsonObject finalJsonObject = jsonObject;
+            schema.getEntries().stream()
+                    .forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), finalJsonObject)));
+
+            return recordBuilder.build();
         }
     }
 
@@ -114,6 +150,28 @@ public class CouchbaseInput implements Serializable {
             return null;
         }
         return jsonObject.get(currentName);
+    }
+
+    private Schema.Type getSchemaType(Object value) {
+        if (value instanceof String || value instanceof JsonObject) {
+            return STRING;
+        } else if (value instanceof Boolean) {
+            return BOOLEAN;
+        } else if (value instanceof Date) {
+            return DATETIME;
+        } else if (value instanceof Double) {
+            return DOUBLE;
+        } else if (value instanceof Integer) {
+            return INT;
+        } else if (value instanceof Long) {
+            return LONG;
+        } else if (value instanceof Byte[]) {
+            throw new IllegalArgumentException("BYTES is unsupported");
+        } else if (value instanceof JsonArray) {
+            return ARRAY;
+        } else {
+            return STRING;
+        }
     }
 
     private void addColumn(Record.Builder recordBuilder, final Schema.Entry entry, Object value) {

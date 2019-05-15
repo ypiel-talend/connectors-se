@@ -19,9 +19,7 @@ import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
-import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -33,10 +31,6 @@ import lombok.Data;
 @Data
 @DataStore("CouchbaseDataStore")
 @Checkable("healthCheck")
-// @GridLayouts({
-// @GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "password" }),
-// @GridLayout.Row({ "bootstrapNodes" }) }),
-// @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectTimeout" }) }) })
 
 @GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "password" }),
         @GridLayout.Row({ "bootstrapNodes" }) })
