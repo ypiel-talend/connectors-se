@@ -142,6 +142,7 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         executeJob(configurationWithN1ql);
 
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
+        assertEquals(2, res.size());
         assertEquals(3, res.get(0).getSchema().getEntries().size());
         assertEquals(3, res.get(1).getSchema().getEntries().size());
     }

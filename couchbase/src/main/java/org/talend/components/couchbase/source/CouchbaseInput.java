@@ -13,6 +13,7 @@
 
 package org.talend.components.couchbase.source;
 
+import com.couchbase.client.core.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
@@ -75,6 +76,7 @@ public class CouchbaseInput implements Serializable {
             bucket = service.openConnection(configuration.getDataSet().getDatastore());
         } catch (Exception e) {
             LOG.error(i18n.connectionKO());
+            throw new CouchbaseException(i18n.connectionKO());
         }
 
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
@@ -202,6 +204,7 @@ public class CouchbaseInput implements Serializable {
         case BYTES:
             throw new IllegalArgumentException("BYTES is unsupported");
         case STRING:
+        case RECORD:
             recordBuilder.withString(entryBuilder.build(), value == null ? null : value.toString());
             break;
         case LONG:
@@ -215,10 +218,6 @@ public class CouchbaseInput implements Serializable {
             break;
         case BOOLEAN:
             recordBuilder.withBoolean(entryBuilder.build(), value == null ? null : (Boolean) value);
-            break;
-        case RECORD:
-            recordBuilder.withString(entryBuilder.build(), value == null ? null : value.toString());
-            // throw new IllegalArgumentException("Record is unsupported");
         }
     }
 }
