@@ -121,15 +121,10 @@ public class CouchbaseInput implements Serializable {
             }
 
             if (schema == null) {
-                schema = service.getSchema(jsonObject);
+                schema = service.getSchema(jsonObject, columnsSet);
             }
 
-            final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-            JsonObject finalJsonObject = jsonObject;
-            schema.getEntries().stream()
-                    .forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), finalJsonObject)));
-
-            return recordBuilder.build();
+            return createRecord(schema, jsonObject);
         }
     }
 
@@ -150,28 +145,6 @@ public class CouchbaseInput implements Serializable {
             return null;
         }
         return jsonObject.get(currentName);
-    }
-
-    private Schema.Type getSchemaType(Object value) {
-        if (value instanceof String || value instanceof JsonObject) {
-            return STRING;
-        } else if (value instanceof Boolean) {
-            return BOOLEAN;
-        } else if (value instanceof Date) {
-            return DATETIME;
-        } else if (value instanceof Double) {
-            return DOUBLE;
-        } else if (value instanceof Integer) {
-            return INT;
-        } else if (value instanceof Long) {
-            return LONG;
-        } else if (value instanceof Byte[]) {
-            throw new IllegalArgumentException("BYTES is unsupported");
-        } else if (value instanceof JsonArray) {
-            return ARRAY;
-        } else {
-            return STRING;
-        }
     }
 
     private void addColumn(Record.Builder recordBuilder, final Schema.Entry entry, Object value) {

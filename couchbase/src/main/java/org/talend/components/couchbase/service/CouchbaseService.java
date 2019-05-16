@@ -118,10 +118,12 @@ public class CouchbaseService {
         }
     }
 
-    public Schema getSchema(JsonObject jsonObject) {
+    public Schema getSchema(JsonObject jsonObject, Set<String> jsonKeys) {
         Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
 
-        Set<String> jsonKeys = jsonObject.getNames();
+        if (jsonKeys == null || jsonKeys.isEmpty()) {
+            jsonKeys = jsonObject.getNames();
+        }
 
         for (String key : jsonKeys) {
             // receive value from JSON
@@ -135,7 +137,7 @@ public class CouchbaseService {
             entryBuilder.withNullable(true).withName(key).withType(type);
 
             if (type == RECORD) {
-                entryBuilder.withElementSchema(getSchema((JsonObject) value));
+                entryBuilder.withElementSchema(getSchema((JsonObject) value, null));
             } else if (type == ARRAY) {
                 entryBuilder.withElementSchema(defineSchemaForArray((JsonArray) value));
             }
@@ -155,7 +157,7 @@ public class CouchbaseService {
         schemaBuilder.withType(type);
         if (type == RECORD) {
             schemaBuilder.withEntry(
-                    builderFactory.newEntryBuilder().withElementSchema(getSchema((JsonObject) firstValueInArray)).build());
+                    builderFactory.newEntryBuilder().withElementSchema(getSchema((JsonObject) firstValueInArray, null)).build());
         } else if (type == ARRAY) {
             schemaBuilder.withEntry(builderFactory.newEntryBuilder()
                     .withElementSchema(defineSchemaForArray((JsonArray) firstValueInArray)).build());

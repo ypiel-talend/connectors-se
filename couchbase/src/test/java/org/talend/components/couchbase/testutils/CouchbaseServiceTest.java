@@ -54,11 +54,11 @@ public class CouchbaseServiceTest {
         assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
     }
 
-    @Test
-    void creatingSchemaTest() {
-        Schema schema = couchbaseService.getSchema(createStructuredJsonObject());
-        System.out.println();
-    }
+    // @Test
+    // void creatingSchemaTest() {
+    // Schema schema = couchbaseService.getSchema(createStructuredJsonObject());
+    // System.out.println();
+    // }
 
     public JsonObject createStructuredJsonObject() {
         JsonObject jsonObjectInnerInner = JsonObject.create();
