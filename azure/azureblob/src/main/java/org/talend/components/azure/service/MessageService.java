@@ -18,6 +18,8 @@ import org.talend.sdk.component.api.internationalization.Internationalized;
 @Internationalized
 public interface MessageService {
 
+    String illegalContainerName();
+
     String errorRetrieveContainers();
 
     String errorCreateBlobItem();

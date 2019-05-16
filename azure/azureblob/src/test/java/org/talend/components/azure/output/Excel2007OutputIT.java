@@ -39,6 +39,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @WithComponents("org.talend.components.azure")
 public class Excel2007OutputIT extends BaseIT {
+
     BlobOutputConfiguration blobOutputProperties;
 
     @BeforeEach

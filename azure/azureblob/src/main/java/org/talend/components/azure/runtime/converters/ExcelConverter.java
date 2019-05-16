@@ -100,7 +100,7 @@ public class ExcelConverter implements RecordConverter<Row> {
                 CellType cellType = columnTypes.get(i);
                 if (cellType == CellType.FORMULA) {
                     Cell cell = record.getCell(i);
-                    cellType = cell.getCachedFormulaResultType();
+                    cellType = cell.getCachedFormulaResultTypeEnum();
 
                 }
                 switch (cellType) {
@@ -127,7 +127,7 @@ public class ExcelConverter implements RecordConverter<Row> {
         List<CellType> cellTypes = new ArrayList<>();
 
         while (cellIterator.hasNext()) {
-            cellTypes.add(cellIterator.next().getCellType());
+            cellTypes.add(cellIterator.next().getCellTypeEnum());
         }
 
         return cellTypes;

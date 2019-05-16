@@ -165,8 +165,7 @@ public class BlobTestUtils {
     public static List<Record> fillTestRecords(int recordSize) {
         List<Record> testRecords = new ArrayList<>();
         for (int i = 0; i < recordSize; i++) {
-            Record testRecord = recordBuilderFactory.newRecordBuilder()
-                    .withString("stringValue", "abc" + i).build();
+            Record testRecord = recordBuilderFactory.newRecordBuilder().withString("stringValue", "abc" + i).build();
             testRecords.add(testRecord);
         }
         return testRecords;

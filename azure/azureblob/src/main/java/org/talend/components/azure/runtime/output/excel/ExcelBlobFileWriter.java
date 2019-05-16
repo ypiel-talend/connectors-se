@@ -95,7 +95,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
             if ((config.getDataset().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL97
                     && getBatch().size() == excel97MaxRows)
                     || (config.getDataset().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL2007
-                    && getBatch().size() == excel2007MaxRows)) {
+                            && getBatch().size() == excel2007MaxRows)) {
                 flush();
                 newBatch();
             }
@@ -115,7 +115,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
     }
 
     /**
-     * @param sheet           to append header
+     * @param sheet to append header
      * @param firstDataRecord for retrieving schema
      */
     private void appendHeader(Sheet sheet, Record firstDataRecord) {
