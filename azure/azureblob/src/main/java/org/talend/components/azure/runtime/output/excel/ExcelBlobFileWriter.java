@@ -71,7 +71,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
      * Generates a temp file for batch (or part of batch)
      */
     @Override
-    public CloudBlob generateFile() throws URISyntaxException, StorageException {
+    public void generateFile() throws URISyntaxException, StorageException {
         String directoryName = config.getDataset().getDirectory();
         if (!directoryName.endsWith("/")) {
             directoryName += "/";
@@ -80,12 +80,12 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension;
 
         CloudBlob excelFile = getContainer().getBlockBlobReference(itemName);
-        if (excelFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            excelFile = generateFile();
+        while (excelFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+            itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension;
+            excelFile = getContainer().getBlockBlobReference(itemName);
 
         }
         setCurrentItem(excelFile);
-        return excelFile;
     }
 
     @Override

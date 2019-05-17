@@ -61,17 +61,18 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public CloudBlob generateFile() throws URISyntaxException, StorageException {
+    public void generateFile() throws URISyntaxException, StorageException {
         String fileName = config.getDataset().getDirectory() + "/" + config.getBlobNameTemplate() + System.currentTimeMillis()
                 + ".parquet";
 
         CloudBlob blob = getContainer().getBlockBlobReference(fileName);
-        if (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            blob = generateFile();
+        while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+            fileName = config.getDataset().getDirectory() + "/" + config.getBlobNameTemplate() + System.currentTimeMillis()
+                    + ".parquet";
+            blob = getContainer().getBlockBlobReference(fileName);
         }
 
         setCurrentItem(blob);
-        return blob;
     }
 
     @Override

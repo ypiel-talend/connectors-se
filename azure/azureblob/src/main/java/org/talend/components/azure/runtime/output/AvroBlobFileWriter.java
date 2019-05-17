@@ -45,7 +45,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public CloudBlob generateFile() throws URISyntaxException, StorageException {
+    public void generateFile() throws URISyntaxException, StorageException {
         String directoryName = config.getDataset().getDirectory();
         if (!directoryName.endsWith("/")) {
             directoryName += "/";
@@ -54,11 +54,11 @@ public class AvroBlobFileWriter extends BlobFileWriter {
         String fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
         CloudBlob blob = getContainer().getBlockBlobReference(fileName);
         while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            blob = generateFile();
+            fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
+            blob = getContainer().getBlockBlobReference(fileName);
         }
 
         setCurrentItem(blob);
-        return blob;
     }
 
     @Override

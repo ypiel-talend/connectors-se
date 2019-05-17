@@ -54,7 +54,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public CloudBlob generateFile() throws URISyntaxException, StorageException {
+    public void generateFile() throws URISyntaxException, StorageException {
         String directoryName = config.getDataset().getDirectory();
         if (!directoryName.endsWith("/")) {
             directoryName += "/";
@@ -62,14 +62,13 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".csv";
         CloudAppendBlob currentItem = getContainer().getAppendBlobReference(itemName);
 
-        while (currentItem.exists()) {
-            currentItem = (CloudAppendBlob) generateFile();
+        while (currentItem.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+            itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
+            currentItem = getContainer().getAppendBlobReference(itemName);
         }
 
         currentItem.createOrReplace();
         setCurrentItem(currentItem);
-
-        return currentItem;
     }
 
     @Override
