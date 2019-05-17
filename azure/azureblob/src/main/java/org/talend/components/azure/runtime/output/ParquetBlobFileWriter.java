@@ -76,6 +76,10 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
 
     @Override
     public void flush() {
+        if (getBatch().isEmpty()) {
+            return;
+        }
+
         File tempFilePath = null;
         try {
             tempFilePath = File.createTempFile("tempFile", ".parquet");
@@ -92,8 +96,9 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
             blobOutputStream.flush();
             blobOutputStream.close();
         } catch (IOException | StorageException e) {
-            e.printStackTrace();
+            throw new BlobRuntimeException(e);
         } finally {
+            getBatch().clear();
             if (tempFilePath != null) {
                 tempFilePath.delete();
             }

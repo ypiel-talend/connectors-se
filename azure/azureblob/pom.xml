@@ -257,17 +257,16 @@
                     <includes>
                         <include>**/*IT.java</include>
                     </includes>
-                    <systemPropertyVariables><!--
-                        <javax.net.ssl.trustStore>src/test/resources/truststore.ks</javax.net.ssl.trustStore>
-                        <javax.net.ssl.trustStorePassword>changeit</javax.net.ssl.trustStorePassword>-->
+                    <systemPropertyVariables>
                         <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
+                            <!--TODO uncomment it to enable its on CI -->
+                            <!--<goal>integration-test</goal>
+                            <goal>verify</goal>-->
                         </goals>
                         <configuration>
                             <classpathDependencyExcludes>

@@ -151,6 +151,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
 
         getCurrentItem().upload(new ByteArrayInputStream(bos.toByteArray()), -1);
         bos.close();
+        getBatch().clear();
     }
 
     private void flushBatchToByteArray() throws IOException {

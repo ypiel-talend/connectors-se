@@ -128,10 +128,11 @@ public class ExcelConverter implements RecordConverter<Row> {
 
     public List<String> inferSchemaNames(Row next, boolean isHeader) {
         List<String> columns = new ArrayList<>();
-        for (int i = 0;; i++) {
+        //TODO check it works correctly
+        for (int i = 0;i < next.getLastCellNum(); i++) {
             Cell cell = next.getCell(i);
             if (cell == null)
-                break;
+                continue;
 
             String columnName;
             if (isHeader) {

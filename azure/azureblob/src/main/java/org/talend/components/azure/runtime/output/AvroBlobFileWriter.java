@@ -81,6 +81,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
 
         byte[] batchBytes = convertBatchToBytes();
         getCurrentItem().uploadFromByteArray(batchBytes, 0, batchBytes.length);
+        getBatch().clear();
     }
 
     private byte[] convertBatchToBytes() throws IOException {
