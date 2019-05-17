@@ -16,18 +16,24 @@ package org.talend.components.couchbase.output;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
+import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.Data;
 
 @Version(1)
 @Data
-@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "idFieldName" }) }),
+@GridLayouts({
+        @GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "idFieldName" }),
+                @GridLayout.Row({ "useN1QLQueryWithParameters" }), @GridLayout.Row({ "query" }),
+                @GridLayout.Row({ "parameterizedValues" }) }),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
 
 @Documentation("Couchbase input configuration")
@@ -40,6 +46,22 @@ public class CouchbaseOutputConfiguration implements Serializable {
     @Option
     @Required
     @Documentation("Field to use as ID")
+    @ActiveIf(target = "useN1QLQueryWithParameters", value = "false")
     private String idFieldName;
+
+    @Option
+    @Documentation("Use N1QL query \nwith parameters")
+    private boolean useN1QLQueryWithParameters = false;
+
+    @Option
+    @TextArea
+    @Documentation("The N1QL query.")
+    @ActiveIf(target = "useN1QLQueryWithParameters", value = "true")
+    private String query;
+
+    @Option
+    @Documentation("Mapping for output data")
+    @ActiveIf(target = "useN1QLQueryWithParameters", value = "true")
+    private List<ParameterizedValues> parameterizedValues;
 
 }
