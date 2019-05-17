@@ -51,9 +51,9 @@ public class ExcelBlobFileReader extends BlobFileReader {
     @Override
     protected ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems) {
         if (getConfig().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL97) {
-            return new BatchExcelRecordIterator(blobItems);
+            return new BatchExcelRecordIterator(blobItems, getRecordBuilderFactory());
         } else {
-            return new StreamingExcelRecordIterator(blobItems);
+            return new StreamingExcelRecordIterator(blobItems, getRecordBuilderFactory());
         }
     }
 
@@ -63,8 +63,8 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
         private ExcelConverter converter;
 
-        private BatchExcelRecordIterator(Iterable<ListBlobItem> blobItemsList) {
-            super(blobItemsList);
+        private BatchExcelRecordIterator(Iterable<ListBlobItem> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
+            super(blobItemsList, recordBuilderFactory);
             this.rows = new LinkedList<>();
             takeFirstItem();
         }
@@ -77,7 +77,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
         @Override
         protected void readItem() {
             if (converter == null) {
-                converter = ExcelConverter.of(getRecordBuilderFactory());
+                converter = ExcelConverter.of(super.getRecordBuilderFactory());
             }
 
             try (InputStream input = getCurrentItem().openInputStream()) {
@@ -132,8 +132,8 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
         private LinkedList<Row> batch;
 
-        public StreamingExcelRecordIterator(Iterable<ListBlobItem> blobItemsList) {
-            super(blobItemsList);
+        public StreamingExcelRecordIterator(Iterable<ListBlobItem> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
+            super(blobItemsList, recordBuilderFactory);
             batch = new LinkedList<>();
             takeFirstItem();
         }

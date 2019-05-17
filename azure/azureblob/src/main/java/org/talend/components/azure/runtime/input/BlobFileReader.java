@@ -104,10 +104,14 @@ public abstract class BlobFileReader {
         private Iterator<ListBlobItem> blobItems;
 
         @Getter(AccessLevel.PROTECTED)
+        private RecordBuilderFactory recordBuilderFactory;
+
+        @Getter(AccessLevel.PROTECTED)
         private CloudBlob currentItem;
 
-        protected ItemRecordIterator(Iterable<ListBlobItem> blobItemsList) {
+        protected ItemRecordIterator(Iterable<ListBlobItem> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
             this.blobItems = blobItemsList.iterator();
+            this.recordBuilderFactory = recordBuilderFactory;
         }
 
         @Override
