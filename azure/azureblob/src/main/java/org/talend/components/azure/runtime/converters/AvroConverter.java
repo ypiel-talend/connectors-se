@@ -239,30 +239,35 @@ public class AvroConverter implements RecordConverter<GenericRecord> {
         Schema.Entry.Builder builder = recordBuilderFactory.newEntryBuilder();
         builder.withName(field.name());
         org.apache.avro.Schema.Type type = field.schema().getType();
+        String logicalType = field.schema().getProp("logicalType"); //FIXME field.schema().getLogicalType() returns null
+
         switch (type) {
             case RECORD:
-            builder.withType(Schema.Type.RECORD);
-            builder.withElementSchema(buildRecordFieldSchema(field));
-            break;
+                builder.withType(Schema.Type.RECORD);
+                builder.withElementSchema(buildRecordFieldSchema(field));
+                break;
             case ENUM:
-        case ARRAY:
-            builder.withType(Schema.Type.ARRAY);
-            builder.withElementSchema(buildArrayFieldSchema(field));
+            case ARRAY:
+                builder.withType(Schema.Type.ARRAY);
+                builder.withElementSchema(buildArrayFieldSchema(field));
             break;
             case LONG:
-                String logicalType = field.schema().getProp("logicalType"); //FIXME field.schema().getLogicalType() returns null
-                if ("timestamp-millis".equals(logicalType) || "time-millis".equals(logicalType) || "date".equals(logicalType)) {
+                if ("timestamp-millis".equals(logicalType)) {
                     builder.withType(Schema.Type.DATETIME);
                     break;
                 }
             case STRING:
             case BYTES:
             case INT:
+                if ("date".equals(logicalType) || "time-milis".equals(logicalType)) {
+                    builder.withType(Schema.Type.DATETIME);
+                    break;
+                }
             case FLOAT:
-        case DOUBLE:
-        case BOOLEAN:
-        case NULL:
-            builder.withType(translateToRecordType(type));
+            case DOUBLE:
+            case BOOLEAN:
+            case NULL:
+                builder.withType(translateToRecordType(type));
             break;
         }
         return builder.build();
