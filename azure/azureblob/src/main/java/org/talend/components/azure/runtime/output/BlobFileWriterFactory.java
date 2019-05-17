@@ -34,7 +34,7 @@ public class BlobFileWriterFactory {
         case PARQUET:
             return new ParquetBlobFileWriter(config, connectionServices);
         default:
-            throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
+            throw new IllegalArgumentException("Unsupported file format");
         }
     }
 
