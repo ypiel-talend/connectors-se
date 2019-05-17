@@ -21,18 +21,13 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.talend.components.azure.common.excel.ExcelFormat;
-import org.talend.components.azure.common.excel.ExcelFormatOptions;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.monitorjbl.xlsx.impl.StreamingCell;
-import com.monitorjbl.xlsx.impl.StreamingRow;
 import lombok.Getter;
 
 public class ExcelConverter implements RecordConverter<Row> {
@@ -55,10 +50,9 @@ public class ExcelConverter implements RecordConverter<Row> {
 
     /**
      * Create excel converter for input
-     * 
-     * @param excelFormatOptions
-     * @param builderFactory
-     * @return
+     *
+     * @param builderFactory framework service should be injected
+     * @return new instance of ExcelConverter could be used for input component
      */
     public static ExcelConverter of(RecordBuilderFactory builderFactory) {
         return new ExcelConverter(builderFactory);
@@ -66,13 +60,12 @@ public class ExcelConverter implements RecordConverter<Row> {
 
     /**
      * Create excel converter for output
-     * 
-     * @param excelFormatOptions
-     * @param currentSheet
-     * @return
+     *
+     * @param currentSheet sheet with rows
+     * @return new instance of ExcelConverter could be used for output component
      */
-    public static ExcelConverter of(ExcelFormatOptions excelFormatOptions, Sheet currentSheet) {
-        ExcelConverter converterForOutput = of((RecordBuilderFactory) null);
+    public static ExcelConverter ofOutput(Sheet currentSheet) {
+        ExcelConverter converterForOutput = of(null);
         converterForOutput.sheet = currentSheet;
 
         return converterForOutput;

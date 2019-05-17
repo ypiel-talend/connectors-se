@@ -94,7 +94,8 @@ public class ExcelBlobFileReader extends BlobFileReader {
                 }
                 boolean isHeaderUsed = getConfig().getExcelOptions().isUseHeader();
 
-                for (int i = isHeaderUsed ? getConfig().getExcelOptions().getHeader() : 0; i < sheet.getPhysicalNumberOfRows(); i++) {
+                for (int i = isHeaderUsed ? getConfig().getExcelOptions().getHeader() : 0; i < sheet
+                        .getPhysicalNumberOfRows(); i++) {
                     Row row = sheet.getRow(i);
                     rows.add(row);
                 }

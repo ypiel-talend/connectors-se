@@ -53,9 +53,4 @@ public class BlobSource implements Serializable {
     public Record next() {
         return reader.readRecord();
     }
-
-    @PreDestroy
-    public void release() {
-        // NOOP
-    }
 }

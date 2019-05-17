@@ -53,8 +53,8 @@ public class BaseIT {
         dataStore = BlobTestUtils.createCloudConnection();
         AzureBlobComponentServices componentService = componentsHandler.findService(AzureBlobComponentServices.class);
 
-         storageAccount = componentService.createStorageAccount(dataStore);
-         BlobTestUtils.createStorage(containerName, storageAccount);
+        storageAccount = componentService.createStorageAccount(dataStore);
+        BlobTestUtils.createStorage(containerName, storageAccount);
     }
 
     @AfterEach

@@ -28,17 +28,13 @@ import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.runtime.converters.AvroConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class AvroBlobFileWriter extends BlobFileWriter {
 
     private BlobOutputConfiguration config;
-
-    private Schema recordSchema;
 
     private AvroConverter converter;
 
@@ -63,15 +59,6 @@ public class AvroBlobFileWriter extends BlobFileWriter {
 
         setCurrentItem(blob);
         return blob;
-    }
-
-    @Override
-    public void writeRecord(Record record) {
-        super.writeRecord(record);
-
-        if (recordSchema == null) {
-            recordSchema = record.getSchema();
-        }
     }
 
     @Override
@@ -100,7 +87,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>();
         DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
-        dataFileWriter.create(converter.inferAvroSchema(recordSchema), byteBuffer);
+        dataFileWriter.create(converter.inferAvroSchema(getSchema()), byteBuffer);
         for (Record record : getBatch()) {
             dataFileWriter.append(converter.fromRecord(record));
         }

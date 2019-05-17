@@ -35,7 +35,6 @@ import org.talend.sdk.component.api.record.Record;
 
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class ExcelBlobFileWriter extends BlobFileWriter {
 
@@ -157,7 +156,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
     private void flushBatchToByteArray() throws IOException {
         Workbook item = ExcelUtils.createWorkBook(config.getDataset().getExcelOptions().getExcelFormat());
         Sheet sheet = item.createSheet(config.getDataset().getExcelOptions().getSheetName());
-        converter = ExcelConverter.of(config.getDataset().getExcelOptions(), sheet);
+        converter = ExcelConverter.ofOutput(sheet);
         int dataRowCounter = 0;
         if (config.getDataset().getExcelOptions().isUseHeader() && config.getDataset().getExcelOptions().getHeader() > 0) {
             appendHeader(sheet, getBatch().get(0));
