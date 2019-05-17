@@ -80,7 +80,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
         Record firstRecord = records.get(0);
@@ -106,7 +106,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
         Record firstRecord = records.get(0);
@@ -127,7 +127,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
     }
@@ -145,7 +145,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
         Record firstRecord = records.get(0);
@@ -172,7 +172,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
         Record firstRecord = records.get(0);
@@ -194,7 +194,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
     }
@@ -212,7 +212,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
         Record firstRecord = records.get(0);
@@ -239,7 +239,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
         Record firstRecord = records.get(0);
@@ -261,7 +261,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
     }
@@ -279,7 +279,7 @@ class Excel2007IT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals("Records amount is different", recordSize, records.size());
         Record firstRecord = records.get(0);

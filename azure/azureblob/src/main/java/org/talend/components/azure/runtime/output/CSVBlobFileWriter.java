@@ -34,6 +34,7 @@ import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudAppendBlob;
+import com.microsoft.azure.storage.blob.CloudBlob;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -53,7 +54,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public void generateFile() throws URISyntaxException, StorageException {
+    public CloudBlob generateFile() throws URISyntaxException, StorageException {
         String directoryName = config.getDataset().getDirectory();
         if (!directoryName.endsWith("/")) {
             directoryName += "/";
@@ -61,13 +62,14 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".csv";
         CloudAppendBlob currentItem = getContainer().getAppendBlobReference(itemName);
 
-        if (currentItem.exists()) {
-            generateFile();
-            return;
+        while (currentItem.exists()) {
+            currentItem = (CloudAppendBlob) generateFile();
         }
 
         currentItem.createOrReplace();
         setCurrentItem(currentItem);
+
+        return currentItem;
     }
 
     @Override

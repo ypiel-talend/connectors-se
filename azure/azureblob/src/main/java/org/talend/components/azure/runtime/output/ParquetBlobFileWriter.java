@@ -33,6 +33,7 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class ParquetBlobFileWriter extends BlobFileWriter {
@@ -62,17 +63,17 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public void generateFile() throws URISyntaxException, StorageException {
+    public CloudBlob generateFile() throws URISyntaxException, StorageException {
         String fileName = config.getDataset().getDirectory() + "/" + config.getBlobNameTemplate() + System.currentTimeMillis()
                 + ".parquet";
 
-        CloudBlockBlob blob = getContainer().getBlockBlobReference(fileName);
+        CloudBlob blob = getContainer().getBlockBlobReference(fileName);
         if (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            generateFile();
-            return;
+            blob = generateFile();
         }
 
         setCurrentItem(blob);
+        return blob;
     }
 
     @Override

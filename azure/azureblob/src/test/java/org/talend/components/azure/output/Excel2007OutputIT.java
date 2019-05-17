@@ -45,7 +45,7 @@ public class Excel2007OutputIT extends BaseIT {
     @BeforeEach
     void initDataset() {
         if (BlobTestUtils.recordBuilderFactory == null) {
-            BlobTestUtils.recordBuilderFactory = COMPONENT.findService(RecordBuilderFactory.class);
+            BlobTestUtils.recordBuilderFactory = componentsHandler.findService(RecordBuilderFactory.class);
         }
 
         AzureBlobDataset dataset = new AzureBlobDataset();
@@ -70,7 +70,7 @@ public class Excel2007OutputIT extends BaseIT {
         final int recordSize = 5;
 
         List<Record> testRecords = BlobTestUtils.fillTestRecords(recordSize);
-        COMPONENT.setInputData(testRecords);
+        componentsHandler.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
@@ -88,7 +88,7 @@ public class Excel2007OutputIT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals(recordSize, records.size());
         Record firstRecord = records.get(0);
@@ -103,7 +103,7 @@ public class Excel2007OutputIT extends BaseIT {
         blobOutputProperties.getDataset().getExcelOptions().setHeader(1);
 
         List<Record> testRecords = BlobTestUtils.fillTestRecords(recordSize);
-        COMPONENT.setInputData(testRecords);
+        componentsHandler.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
@@ -121,7 +121,7 @@ public class Excel2007OutputIT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals(recordSize, records.size());
     }
@@ -129,10 +129,10 @@ public class Excel2007OutputIT extends BaseIT {
     @Test
     public void testOutputDoubleAndBooleanData() throws URISyntaxException, StorageException {
         final int recordSize = 1;
-        Record testRecord = COMPONENT.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("intValue", 1)
+        Record testRecord = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("intValue", 1)
                 .withDouble("doubleValue", 2.0).withBoolean("booleanValue", true).build();
 
-        COMPONENT.setInputData(Collections.singleton(testRecord));
+        componentsHandler.setInputData(Collections.singleton(testRecord));
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
@@ -150,7 +150,7 @@ public class Excel2007OutputIT extends BaseIT {
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
         Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("azureInput").to("collector").build().run();
-        List<Record> records = COMPONENT.getCollectedData(Record.class);
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assert.assertEquals(recordSize, records.size());
         Record firstRecord = records.get(0);
@@ -165,7 +165,7 @@ public class Excel2007OutputIT extends BaseIT {
         final int recordSize = 5;
 
         List<Record> testRecords = BlobTestUtils.fillTestRecords(recordSize);
-        COMPONENT.setInputData(testRecords);
+        componentsHandler.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + (recordSize * 100);

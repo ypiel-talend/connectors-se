@@ -31,6 +31,7 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class AvroBlobFileWriter extends BlobFileWriter {
@@ -48,20 +49,20 @@ public class AvroBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public void generateFile() throws URISyntaxException, StorageException {
+    public CloudBlob generateFile() throws URISyntaxException, StorageException {
         String directoryName = config.getDataset().getDirectory();
         if (!directoryName.endsWith("/")) {
             directoryName += "/";
         }
 
         String fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
-        CloudBlockBlob blob = getContainer().getBlockBlobReference(fileName);
-        if (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            generateFile();
-            return;
+        CloudBlob blob = getContainer().getBlockBlobReference(fileName);
+        while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+            blob = generateFile();
         }
 
         setCurrentItem(blob);
+        return blob;
     }
 
     @Override

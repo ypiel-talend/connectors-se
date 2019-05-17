@@ -54,7 +54,7 @@ public abstract class BlobFileWriter {
         log.debug("New batch created");
     }
 
-    protected abstract void generateFile() throws URISyntaxException, StorageException;
+    protected abstract CloudBlob generateFile() throws URISyntaxException, StorageException;
 
     public void writeRecord(Record record) {
         if (schema == null) {

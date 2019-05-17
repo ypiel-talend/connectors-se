@@ -34,6 +34,7 @@ import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
 
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class ExcelBlobFileWriter extends BlobFileWriter {
@@ -71,7 +72,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
      * Generates a temp file for batch (or part of batch)
      */
     @Override
-    public void generateFile() throws URISyntaxException, StorageException {
+    public CloudBlob generateFile() throws URISyntaxException, StorageException {
         String directoryName = config.getDataset().getDirectory();
         if (!directoryName.endsWith("/")) {
             directoryName += "/";
@@ -79,13 +80,13 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
 
         String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension;
 
-        CloudBlockBlob excelFile = getContainer().getBlockBlobReference(itemName);
+        CloudBlob excelFile = getContainer().getBlockBlobReference(itemName);
         if (excelFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            generateFile();
-            return;
+            excelFile = generateFile();
 
         }
         setCurrentItem(excelFile);
+        return excelFile;
     }
 
     @Override
