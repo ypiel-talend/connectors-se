@@ -11,18 +11,19 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.common.exception;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+public class BlobRuntimeException extends RuntimeException {
 
-@Internationalized
-public interface MessageService {
+    public BlobRuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    String connected();
+    public BlobRuntimeException(Throwable cause) {
+        super(cause);
+    }
 
-    String connectionError(String errorMessage);
-
-    String connectionIsNull();
-
-    String wrongSASFormat();
+    public BlobRuntimeException(String message) {
+        super(message);
+    }
 }

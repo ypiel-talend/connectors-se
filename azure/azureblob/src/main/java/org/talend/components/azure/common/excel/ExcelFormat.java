@@ -11,18 +11,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.common.excel;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import java.io.Serializable;
 
-@Internationalized
-public interface MessageService {
-
-    String connected();
-
-    String connectionError(String errorMessage);
-
-    String connectionIsNull();
-
-    String wrongSASFormat();
+public enum ExcelFormat implements Serializable {
+    EXCEL2007,
+    EXCEL97,
+    HTML
 }

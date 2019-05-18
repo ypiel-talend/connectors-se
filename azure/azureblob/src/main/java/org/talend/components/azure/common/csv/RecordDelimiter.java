@@ -11,18 +11,20 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.common.csv;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import lombok.Getter;
 
-@Internationalized
-public interface MessageService {
+public enum RecordDelimiter {
+    LF("\n"),
+    CR("\r"),
+    CRLF("\r\n"),
+    OTHER("");
 
-    String connected();
+    @Getter
+    private String delimiterValue;
 
-    String connectionError(String errorMessage);
-
-    String connectionIsNull();
-
-    String wrongSASFormat();
+    RecordDelimiter(String delimiter) {
+        this.delimiterValue = delimiter;
+    }
 }

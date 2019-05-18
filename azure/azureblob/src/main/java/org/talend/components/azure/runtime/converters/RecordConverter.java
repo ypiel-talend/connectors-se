@@ -11,18 +11,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.runtime.converters;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 
-@Internationalized
-public interface MessageService {
+// TODO should be extracted to common library
+public interface RecordConverter<T> {
 
-    String connected();
+    Schema inferSchema(T record);
 
-    String connectionError(String errorMessage);
+    Record toRecord(T record);
 
-    String connectionIsNull();
-
-    String wrongSASFormat();
+    T fromRecord(Record record);
 }

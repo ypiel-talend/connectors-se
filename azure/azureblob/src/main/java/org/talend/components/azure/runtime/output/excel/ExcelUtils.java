@@ -11,18 +11,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.runtime.output.excel;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.talend.components.azure.common.excel.ExcelFormat;
 
-@Internationalized
-public interface MessageService {
+public class ExcelUtils {
 
-    String connected();
-
-    String connectionError(String errorMessage);
-
-    String connectionIsNull();
-
-    String wrongSASFormat();
+    static Workbook createWorkBook(ExcelFormat format) {
+        return format == ExcelFormat.EXCEL97 ? new HSSFWorkbook() : new XSSFWorkbook();
+    }
 }
