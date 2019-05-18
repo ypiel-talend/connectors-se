@@ -11,18 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.common;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
-
-@Internationalized
-public interface MessageService {
-
-    String connected();
-
-    String connectionError(String errorMessage);
-
-    String connectionIsNull();
-
-    String wrongSASFormat();
+public enum FileFormat {
+    CSV,
+    /* EXCEL, */ // FIXME uncomment it when excel will be ready to integrate
+    AVRO,
+    PARQUET
 }

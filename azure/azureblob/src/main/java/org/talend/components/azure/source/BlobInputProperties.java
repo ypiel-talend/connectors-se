@@ -11,18 +11,23 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.source;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import java.io.Serializable;
 
-@Internationalized
-public interface MessageService {
+import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.meta.Documentation;
 
-    String connected();
+import lombok.Data;
 
-    String connectionError(String errorMessage);
+@GridLayout({ @GridLayout.Row({ "dataset" }) })
+@Documentation("Options for the input component")
+@Data
+public class BlobInputProperties implements Serializable {
 
-    String connectionIsNull();
-
-    String wrongSASFormat();
+    @Option
+    @Documentation("Azure Connection")
+    private AzureBlobDataset dataset;
 }

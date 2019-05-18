@@ -11,18 +11,20 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.service;
 
 import org.talend.sdk.component.api.internationalization.Internationalized;
 
 @Internationalized
 public interface MessageService {
 
-    String connected();
+    String illegalContainerName();
 
-    String connectionError(String errorMessage);
+    String errorRetrieveContainers();
 
-    String connectionIsNull();
+    String errorCreateBlobItem();
 
-    String wrongSASFormat();
+    String errorSubmitRows();
+
+    String cantStartReadBlobItems();
 }

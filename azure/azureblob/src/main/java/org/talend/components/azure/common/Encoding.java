@@ -11,18 +11,20 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.common;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+public enum Encoding {
+    UFT8("UTF-8"),
+    ISO_8859_15("ISO-8859-15"),
+    OTHER("");
 
-@Internationalized
-public interface MessageService {
+    Encoding(String encodingCharsetValue) {
+        this.encodingCharsetValue = encodingCharsetValue;
+    }
 
-    String connected();
+    private String encodingCharsetValue;
 
-    String connectionError(String errorMessage);
-
-    String connectionIsNull();
-
-    String wrongSASFormat();
+    public String getEncodingValue() {
+        return encodingCharsetValue;
+    }
 }

@@ -11,18 +11,18 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.azure.common.service;
+package org.talend.components.azure.runtime.converters;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import org.apache.avro.generic.GenericRecord;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-@Internationalized
-public interface MessageService {
+public class ParquetConverter extends AvroConverter implements RecordConverter<GenericRecord> {
 
-    String connected();
+    public static ParquetConverter of(RecordBuilderFactory recordBuilderFactory) {
+        return new ParquetConverter(recordBuilderFactory);
+    }
 
-    String connectionError(String errorMessage);
-
-    String connectionIsNull();
-
-    String wrongSASFormat();
+    private ParquetConverter(RecordBuilderFactory recordBuilderFactory) {
+        super(recordBuilderFactory);
+    }
 }
