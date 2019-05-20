@@ -13,7 +13,6 @@
 
 package org.talend.components.couchbase.source;
 
-import com.couchbase.client.core.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
@@ -71,14 +70,7 @@ public class CouchbaseInput implements Serializable {
 
     @PostConstruct
     public void init() {
-        Bucket bucket = null;
-        try {
-            bucket = service.openConnection(configuration.getDataSet().getDatastore());
-        } catch (Exception e) {
-            LOG.error(i18n.connectionKO());
-            throw new CouchbaseException(i18n.connectionKO());
-        }
-
+        Bucket bucket = service.openConnection(configuration.getDataSet().getDatastore());
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
         columnsSet = new HashSet<>();
@@ -87,10 +79,18 @@ public class CouchbaseInput implements Serializable {
         if (configuration.isUseN1QLQuery()) {
             n1qlQueryRows = bucket.query(N1qlQuery.simple(configuration.getQuery()));
         } else {
-            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`"));
+            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`" + getLimit()));
         }
         checkErrors(n1qlQueryRows);
         index = n1qlQueryRows.rows();
+    }
+
+    private String getLimit() {
+        if (configuration.getLimit().isEmpty()) {
+            return "";
+        } else {
+            return " LIMIT " + configuration.getLimit().trim();
+        }
     }
 
     private void checkErrors(N1qlQueryResult n1qlQueryRows) {
@@ -112,20 +112,17 @@ public class CouchbaseInput implements Serializable {
                 jsonObject = (JsonObject) jsonObject.get(configuration.getDataSet().getDatastore().getBucket());
             }
 
-            if (columnsSet.isEmpty()) {
-                if (configuration.getDataSet().getSchema() != null && !configuration.getDataSet().getSchema().isEmpty()) {
-                    columnsSet.addAll(configuration.getDataSet().getSchema());
-                } else {
-                    columnsSet.addAll(jsonObject.getNames());
-                }
+            if (columnsSet.isEmpty() && configuration.getDataSet().getSchema() != null
+                    && !configuration.getDataSet().getSchema().isEmpty()) {
+                columnsSet.addAll(configuration.getDataSet().getSchema());
             }
             if (schema == null) {
-                schema = parseSchema(jsonObject);
+                schema = service.defineSchema(jsonObject, columnsSet);
             }
             final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
             JsonObject finalJsonObject = jsonObject;
             schema.getEntries().stream()
-                    .forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), finalJsonObject)));
+                    .forEach(entry -> addColumn(recordBuilder, entry, service.getJsonValue(entry.getName(), finalJsonObject)));
 
             return recordBuilder.build();
         }
@@ -134,54 +131,6 @@ public class CouchbaseInput implements Serializable {
     @PreDestroy
     public void release() {
         service.closeConnection();
-    }
-
-    private Schema parseSchema(JsonObject document) {
-        final Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
-        columnsSet.stream().forEach(name -> addField(schemaBuilder, name, getValue(name, document)));
-        return schemaBuilder.build();
-    }
-
-    private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
-        if (value == null) {
-            LOG.warn(i18n.cannotGuessWhenDataIsNull());
-            return;
-        }
-        final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        Schema.Type type = getSchemaType(value);
-        entryBuilder.withName(name).withNullable(true).withType(type);
-        if (type == ARRAY) {
-            List<?> listValue = ((JsonArray) value).toList();
-            Object listObject = listValue.isEmpty() ? null : listValue.get(0);
-            entryBuilder.withElementSchema(builderFactory.newSchemaBuilder(getSchemaType(listObject)).build());
-        }
-        schemaBuilder.withEntry(entryBuilder.build());
-    }
-
-    public Object getValue(String currentName, JsonObject jsonObject) {
-        return jsonObject.get(currentName);
-    }
-
-    private Schema.Type getSchemaType(Object value) {
-        if (value instanceof String || value instanceof JsonObject) {
-            return STRING;
-        } else if (value instanceof Boolean) {
-            return BOOLEAN;
-        } else if (value instanceof Date) {
-            return DATETIME;
-        } else if (value instanceof Double) {
-            return DOUBLE;
-        } else if (value instanceof Integer) {
-            return INT;
-        } else if (value instanceof Long) {
-            return LONG;
-        } else if (value instanceof Byte[]) {
-            throw new IllegalArgumentException("BYTES is unsupported");
-        } else if (value instanceof JsonArray) {
-            return ARRAY;
-        } else {
-            return STRING;
-        }
     }
 
     private void addColumn(Record.Builder recordBuilder, final Schema.Entry entry, Object value) {

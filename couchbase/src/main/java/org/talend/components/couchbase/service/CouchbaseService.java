@@ -13,24 +13,45 @@
 
 package org.talend.components.couchbase.service;
 
+import com.couchbase.client.core.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
+import com.couchbase.client.java.document.json.JsonArray;
+import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
+import org.talend.components.couchbase.source.CouchbaseInput;
+import org.talend.components.couchbase.source.CouchbaseInputConfiguration;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.api.service.schema.DiscoverSchema;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static org.talend.sdk.component.api.record.Schema.Type.*;
+import static org.talend.sdk.component.api.record.Schema.Type.STRING;
 
 @Version(1)
 @Slf4j
 @Service
 public class CouchbaseService {
+
+    private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
 
     private CouchbaseEnvironment environment;
 
@@ -44,6 +65,9 @@ public class CouchbaseService {
     @Service
     private I18nMessage i18n;
 
+    @Service
+    RecordBuilderFactory builderFactory;
+
     public String[] resolveAddresses(String nodes) {
         String[] addresses = nodes.replaceAll(" ", "").split(",");
         for (int i = 0; i < addresses.length; i++) {
@@ -52,7 +76,7 @@ public class CouchbaseService {
         return addresses;
     }
 
-    public Bucket openConnection(CouchbaseDataStore dataStore) throws Exception {
+    public Bucket openConnection(CouchbaseDataStore dataStore) {
         String bootStrapNodes = dataStore.getBootstrapNodes();
         String bucketName = dataStore.getBucket();
         String password = dataStore.getPassword();
@@ -60,9 +84,14 @@ public class CouchbaseService {
 
         String[] urls = resolveAddresses(bootStrapNodes);
 
-        this.environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(connectTimeout).build();
-        this.cluster = CouchbaseCluster.create(environment, urls);
-        this.bucket = this.cluster.openBucket(bucketName, password);
+        try {
+            this.environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(connectTimeout).build();
+            this.cluster = CouchbaseCluster.create(environment, urls);
+            this.bucket = this.cluster.openBucket(bucketName, password);
+        } catch (Exception e) {
+            LOG.error(i18n.connectionKO());
+            throw new CouchbaseException(i18n.connectionKO());
+        }
         return bucket;
     }
 
@@ -76,6 +105,69 @@ public class CouchbaseService {
         } finally {
             closeConnection();
         }
+    }
+
+    @DiscoverSchema("discover")
+    public Schema addColumns(@Option("dataSet") final CouchbaseDataSet dataSet) {
+        CouchbaseInputConfiguration configuration = new CouchbaseInputConfiguration();
+        configuration.setDataSet(dataSet);
+        CouchbaseInput couchbaseInput = new CouchbaseInput(configuration, this, builderFactory, i18n);
+        couchbaseInput.init();
+        Record record = couchbaseInput.next();
+        couchbaseInput.release();
+
+        return record.getSchema();
+    }
+
+    public Schema defineSchema(JsonObject document, Set<String> columnsSet) {
+        if (columnsSet.isEmpty()) {
+            columnsSet.addAll(document.getNames());
+        }
+        final Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
+        columnsSet.stream().forEach(name -> addField(schemaBuilder, name, getJsonValue(name, document)));
+        return schemaBuilder.build();
+    }
+
+    private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
+        if (value == null) {
+            LOG.warn(i18n.cannotGuessWhenDataIsNull());
+            return;
+        }
+        final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
+        Schema.Type type = getSchemaType(value);
+        entryBuilder.withName(name).withNullable(true).withType(type);
+        if (type == ARRAY) {
+            List<?> listValue = ((JsonArray) value).toList();
+            Object listObject = listValue.isEmpty() ? null : listValue.get(0);
+            entryBuilder.withElementSchema(builderFactory.newSchemaBuilder(getSchemaType(listObject)).build());
+        }
+        schemaBuilder.withEntry(entryBuilder.build());
+    }
+
+    private Schema.Type getSchemaType(Object value) {
+        if (value instanceof String || value instanceof JsonObject) {
+            return STRING;
+        } else if (value instanceof Boolean) {
+            return BOOLEAN;
+        } else if (value instanceof Date) {
+            return DATETIME;
+        } else if (value instanceof Double) {
+            return DOUBLE;
+        } else if (value instanceof Integer) {
+            return INT;
+        } else if (value instanceof Long) {
+            return LONG;
+        } else if (value instanceof Byte[]) {
+            throw new IllegalArgumentException("BYTES is unsupported");
+        } else if (value instanceof JsonArray) {
+            return ARRAY;
+        } else {
+            return STRING;
+        }
+    }
+
+    public Object getJsonValue(String jsonKey, JsonObject json) {
+        return json.get(jsonKey);
     }
 
     public void closeConnection() {

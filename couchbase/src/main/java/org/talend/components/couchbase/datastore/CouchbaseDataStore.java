@@ -32,12 +32,17 @@ import lombok.Data;
 @DataStore("CouchbaseDataStore")
 @Checkable("healthCheck")
 
-@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "password" }),
-        @GridLayout.Row({ "bootstrapNodes" }) })
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bootstrapNodes" }), @GridLayout.Row({ "bucket" }),
+        @GridLayout.Row({ "password" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectTimeout" }) })
 
 @Documentation("Couchbase connection")
 public class CouchbaseDataStore implements Serializable {
+
+    @Option
+    @Required
+    @Documentation("Bootstrap nodes")
+    private String bootstrapNodes;
 
     @Option
     @Required
@@ -49,11 +54,6 @@ public class CouchbaseDataStore implements Serializable {
     @Credential
     @Documentation("Password")
     private String password;
-
-    @Option
-    @Required
-    @Documentation("Bootstrap nodes")
-    private String bootstrapNodes;
 
     @Option
     @Required

@@ -67,11 +67,7 @@ public class CouchbaseOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        try {
-            bucket = service.openConnection(configuration.getDataSet().getDatastore());
-        } catch (Exception e) {
-            LOG.error(i18n.connectionKO());
-        }
+        bucket = service.openConnection(configuration.getDataSet().getDatastore());
         idFieldName = configuration.getIdFieldName();
     }
 
