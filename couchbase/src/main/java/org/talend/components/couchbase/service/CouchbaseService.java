@@ -128,6 +128,14 @@ public class CouchbaseService {
         return schemaBuilder.build();
     }
 
+    public boolean isResultNeedWrapper(String query) {
+        String selectPart = query.substring(0, query.indexOf('*') + 1);
+        if (selectPart.trim().replaceAll(" ", "").toLowerCase().equals("select*")) {
+            return true;
+        }
+        return false;
+    }
+
     private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
         if (value == null) {
             LOG.warn(i18n.cannotGuessWhenDataIsNull());
