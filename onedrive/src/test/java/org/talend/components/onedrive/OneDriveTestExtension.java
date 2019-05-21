@@ -31,7 +31,8 @@ public class OneDriveTestExtension implements BeforeAllCallback, ParameterResolv
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws IOException {
         log.info("extension before all start");
-        System.out.println("onedrive-integration-user:" + System.getenv("onedrive-integration-user"));
+        log.info("NEXUS_USER" + System.getenv("NEXUS_USER") + System.getProperty("NEXUS_USER"));
+        log.info("onedrive-integration-user:" + System.getenv("onedrive-integration-user")+ System.getProperty("onedrive-integration-user"));
 
         readPropertiesFile();
 
