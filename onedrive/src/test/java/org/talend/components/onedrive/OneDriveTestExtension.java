@@ -15,6 +15,7 @@ import org.talend.sdk.component.maven.Server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 
 @Slf4j
@@ -31,8 +32,12 @@ public class OneDriveTestExtension implements BeforeAllCallback, ParameterResolv
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws IOException {
         log.info("extension before all start");
-        log.info("NEXUS_USER" + System.getenv("NEXUS_USER") + System.getProperty("NEXUS_USER"));
-        log.info("onedrive-integration-user:" + System.getenv("onedrive-integration-user")+ System.getProperty("onedrive-integration-user"));
+        log.info("NEXUS_USER" + System.getenv("NEXUS_USER"));
+        log.info("onedrive-integration-user:" + System.getenv("onedrive-integration-user"));
+
+        for (Map.Entry<String, String> s: System.getenv().entrySet()) {
+            log.info(s.getKey() + ":" + s.getValue());
+        }
 
         readPropertiesFile();
 
