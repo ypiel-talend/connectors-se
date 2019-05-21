@@ -82,7 +82,7 @@ spec:
                                 usernameVariable: 'onedrive-integration-user')
                     ]) {
                         script {
-                            sh "echo onedrive-integration-user:${onedrive-integration-user}"
+                            sh "echo 'onedrive-integration-user':${'onedrive-integration-user'}"
                             sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -e ${talendOssRepositoryArg}"
                         }
                     }
