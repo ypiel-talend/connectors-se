@@ -73,6 +73,14 @@ spec:
                     // real task
                     withCredentials([
                             usernamePassword(
+                                credentialsId: 'onedrive-integration',
+                                passwordVariable: 'onedrive-integration-password',
+                                usernameVariable: 'onedrive-integration-user')
+                    ]) {
+                        sh """echo onedrive-integration-user: ${onedrive-integration-user}"""
+                    }
+                    withCredentials([
+                            usernamePassword(
                                     credentialsId: 'nexus-artifact-zl-credentials',
                                     usernameVariable: 'NEXUS_USER',
                                     passwordVariable: 'NEXUS_PASSWORD')
