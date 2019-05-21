@@ -76,13 +76,13 @@ spec:
                                     credentialsId: 'nexus-artifact-zl-credentials',
                                     usernameVariable: 'NEXUS_USER',
                                     passwordVariable: 'NEXUS_PASSWORD')
-                            ,usernamePassword(
+                            , usernamePassword(
                                 credentialsId: 'onedrive-integration',
-                                passwordVariable: 'onedrive-integration-password',
-                                usernameVariable: 'onedrive-integration-user')
+                                usernameVariable: 'ONEDRIVE_INTEGRATION_USER',
+                                passwordVariable: 'ONEDRIVE_INTEGRATION_PASSWORD')
                     ]) {
                         script {
-                            sh "echo 'onedrive-integration-user':${onedrive-integration-user}"
+//                            sh "echo 'ONEDRIVE_INTEGRATION_USER:'${ONEDRIVE_INTEGRATION_USER}"
                             sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -e ${talendOssRepositoryArg}"
                         }
                     }
