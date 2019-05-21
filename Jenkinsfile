@@ -76,6 +76,10 @@ spec:
                                     credentialsId: 'nexus-artifact-zl-credentials',
                                     usernameVariable: 'NEXUS_USER',
                                     passwordVariable: 'NEXUS_PASSWORD')
+                            ,usernamePassword(
+                                credentialsId: 'onedrive-integration',
+                                passwordVariable: 'onedrive-integration-password',
+                                usernameVariable: 'onedrive-integration-user')
                     ]) {
                         sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -e ${talendOssRepositoryArg}"
                     }
