@@ -19,6 +19,7 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
+import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -45,6 +46,7 @@ public class CouchbaseInputConfiguration implements Serializable {
 
     @Option
     @TextArea
+    @Code("sql")
     @Documentation("The N1QL query.")
     @ActiveIf(target = "useN1QLQuery", value = "true")
     private String query;

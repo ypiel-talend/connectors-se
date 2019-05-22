@@ -117,11 +117,12 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     private CouchbaseOutputConfiguration getOutputConfiguration() {
         CouchbaseDataStore couchbaseDataStore = new CouchbaseDataStore();
         couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
-        couchbaseDataStore.setBucket(BUCKET_NAME);
-        couchbaseDataStore.setPassword(BUCKET_PASSWORD);
+        couchbaseDataStore.setUsername(CLUSTER_USERNAME);
+        couchbaseDataStore.setPassword(CLUSTER_PASSWORD);
         couchbaseDataStore.setConnectTimeout(DEFAULT_TIMEOUT_IN_SEC);
 
         CouchbaseDataSet couchbaseDataSet = new CouchbaseDataSet();
+        couchbaseDataSet.setBucket(BUCKET_NAME);
         couchbaseDataSet.setDatastore(couchbaseDataStore);
 
         CouchbaseOutputConfiguration configuration = new CouchbaseOutputConfiguration();

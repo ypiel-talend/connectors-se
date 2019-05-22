@@ -16,6 +16,7 @@ package org.talend.components.couchbase.dataset;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
@@ -30,19 +31,24 @@ import lombok.Data;
 @Version(1)
 @Data
 @DataSet("CouchbaseDataSet")
-@GridLayouts({ @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "schema" }) }),
-        @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "datastore" }) }) })
+@GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "schema" }) })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "datastore" }) })
 
 @Documentation("Couchbase DataSet")
 public class CouchbaseDataSet implements Serializable {
 
     @Option
+    @Documentation("Connection")
+    private CouchbaseDataStore datastore;
+
+    @Option
+    @Required
+    @Documentation("Bucket name")
+    private String bucket;
+
+    @Option
     @Documentation("Schema")
     @Structure(type = Structure.Type.OUT, discoverSchema = "discover")
     private List<String> schema;
-
-    @Option
-    @Documentation("Connection")
-    private CouchbaseDataStore datastore;
 
 }

@@ -14,6 +14,7 @@
 package org.talend.components.couchbase.output;
 
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
@@ -67,7 +68,8 @@ public class CouchbaseOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        bucket = service.openConnection(configuration.getDataSet().getDatastore());
+        Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
+        bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
         idFieldName = configuration.getIdFieldName();
     }
 
@@ -78,6 +80,7 @@ public class CouchbaseOutput implements Serializable {
 
     @PreDestroy
     public void release() {
+        service.closeBucket(bucket);
         service.closeConnection();
     }
 

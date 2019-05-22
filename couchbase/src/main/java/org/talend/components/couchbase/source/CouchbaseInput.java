@@ -14,6 +14,7 @@
 package org.talend.components.couchbase.source;
 
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.query.N1qlQuery;
@@ -60,6 +61,8 @@ public class CouchbaseInput implements Serializable {
 
     private Iterator<N1qlQueryRow> index;
 
+    private Bucket bucket;
+
     public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
             final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n) {
         this.configuration = configuration;
@@ -70,7 +73,8 @@ public class CouchbaseInput implements Serializable {
 
     @PostConstruct
     public void init() {
-        Bucket bucket = service.openConnection(configuration.getDataSet().getDatastore());
+        Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
+        bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
         columnsSet = new HashSet<>();
@@ -109,7 +113,7 @@ public class CouchbaseInput implements Serializable {
 
             if (!configuration.isUseN1QLQuery() || service.isResultNeedWrapper(configuration.getQuery())) {
                 // unwrap JSON (because we use SELECT * all values will be wrapped with bucket name)
-                jsonObject = (JsonObject) jsonObject.get(configuration.getDataSet().getDatastore().getBucket());
+                jsonObject = (JsonObject) jsonObject.get(configuration.getDataSet().getBucket());
             }
 
             if (columnsSet.isEmpty() && configuration.getDataSet().getSchema() != null
@@ -130,6 +134,7 @@ public class CouchbaseInput implements Serializable {
 
     @PreDestroy
     public void release() {
+        service.closeBucket(bucket);
         service.closeConnection();
     }
 

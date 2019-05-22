@@ -26,4 +26,8 @@ public interface I18nMessage {
     String cannotGuessWhenDataIsNull();
 
     String queryResultError();
+
+    String cannotOpenBucket();
+
+    String connectedToCluster(String clusterName);
 }

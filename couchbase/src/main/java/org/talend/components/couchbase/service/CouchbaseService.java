@@ -44,7 +44,6 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.talend.sdk.component.api.record.Schema.Type.*;
-import static org.talend.sdk.component.api.record.Schema.Type.STRING;
 
 @Version(1)
 @Slf4j
@@ -56,8 +55,6 @@ public class CouchbaseService {
     private CouchbaseEnvironment environment;
 
     private Cluster cluster;
-
-    private Bucket bucket;
 
     @Service
     private CouchbaseDataStore couchBaseConnection;
@@ -71,34 +68,36 @@ public class CouchbaseService {
     public String[] resolveAddresses(String nodes) {
         String[] addresses = nodes.replaceAll(" ", "").split(",");
         for (int i = 0; i < addresses.length; i++) {
-            log.info(i18n.bootstrapNodes(i, addresses[i]));
+            LOG.info(i18n.bootstrapNodes(i, addresses[i]));
         }
         return addresses;
     }
 
-    public Bucket openConnection(CouchbaseDataStore dataStore) {
+    public Cluster openConnection(CouchbaseDataStore dataStore) {
         String bootStrapNodes = dataStore.getBootstrapNodes();
-        String bucketName = dataStore.getBucket();
+        String username = dataStore.getUsername();
         String password = dataStore.getPassword();
         int connectTimeout = dataStore.getConnectTimeout() * 1000; // convert to sec
 
         String[] urls = resolveAddresses(bootStrapNodes);
 
         try {
-            this.environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(connectTimeout).build();
-            this.cluster = CouchbaseCluster.create(environment, urls);
-            this.bucket = this.cluster.openBucket(bucketName, password);
+            environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(connectTimeout).build();
+            cluster = CouchbaseCluster.create(environment, urls);
+            cluster.authenticate(username, password);
+            String clusterName = cluster.clusterManager().info().raw().get("name").toString();
+            LOG.debug(i18n.connectedToCluster(clusterName));
         } catch (Exception e) {
             LOG.error(i18n.connectionKO());
-            throw new CouchbaseException(i18n.connectionKO());
+            throw new CouchbaseException(e);
         }
-        return bucket;
+        return cluster;
     }
 
     @HealthCheck("healthCheck")
     public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final CouchbaseDataStore datastore) {
         try {
-            bucket = openConnection(datastore);
+            openConnection(datastore);
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK");
         } catch (Exception exception) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, exception.getMessage());
@@ -178,15 +177,29 @@ public class CouchbaseService {
         return json.get(jsonKey);
     }
 
-    public void closeConnection() {
+    public Bucket openBucket(Cluster cluster, String bucketName) {
+        Bucket bucket;
+        try {
+            bucket = cluster.openBucket(bucketName);
+        } catch (Exception e) {
+            LOG.error(i18n.cannotOpenBucket());
+            throw new CouchbaseException(e);
+        }
+        return bucket;
+    }
+
+    public void closeBucket(Bucket bucket) {
         if (bucket != null) {
             if (bucket.close()) {
-                log.debug(i18n.bucketWasClosed(bucket.name()));
+                LOG.debug(i18n.bucketWasClosed(bucket.name()));
             } else {
-                log.debug(i18n.cannotCloseBucket(bucket.name()));
+                LOG.debug(i18n.cannotCloseBucket(bucket.name()));
             }
             bucket = null;
         }
+    }
+
+    public void closeConnection() {
         if (cluster != null) {
             if (cluster.disconnect()) {
                 log.debug(i18n.clusterWasClosed());
