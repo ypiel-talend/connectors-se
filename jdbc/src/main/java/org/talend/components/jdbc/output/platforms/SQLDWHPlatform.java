@@ -27,7 +27,7 @@ public class SQLDWHPlatform extends MSSQLPlatform {
             return;
         }
 
-        final String sql = buildQuery(getTableModel(connection, name, keys, null,  distributionStrategy,
+        final String sql = buildQuery(getTableModel(connection, name, keys, sortKeys,  distributionStrategy,
                 distributionKeys, varcharLength, records));
 
         try (final Statement statement = connection.createStatement()) {
