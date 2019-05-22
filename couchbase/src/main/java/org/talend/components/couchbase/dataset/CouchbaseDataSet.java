@@ -31,7 +31,7 @@ import lombok.Data;
 @Version(1)
 @Data
 @DataSet("CouchbaseDataSet")
-@GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "bucket" }), @GridLayout.Row({ "schema" }) })
+@GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "schema" }), @GridLayout.Row({ "bucket" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "datastore" }) })
 
 @Documentation("Couchbase DataSet")
@@ -42,13 +42,12 @@ public class CouchbaseDataSet implements Serializable {
     private CouchbaseDataStore datastore;
 
     @Option
-    @Required
-    @Documentation("Bucket name")
-    private String bucket;
-
-    @Option
     @Documentation("Schema")
     @Structure(type = Structure.Type.OUT, discoverSchema = "discover")
     private List<String> schema;
 
+    @Option
+    @Required
+    @Documentation("Bucket name")
+    private String bucket;
 }
