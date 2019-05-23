@@ -90,6 +90,10 @@ public class CouchbaseOutput implements Serializable {
         for (Schema.Entry entry : entries) {
             String entryName = entry.getName();
 
+            if (idFieldName.equals(entryName)) {
+                continue;
+            }
+
             Object value = null;
 
             switch (entry.getType()) {
@@ -108,7 +112,19 @@ public class CouchbaseOutput implements Serializable {
                 value = record.getDouble(entryName);
                 break;
             case STRING:
-                value = record.getString(entryName);
+                try {
+                    value = JsonObject.fromJson(record.getString(entryName));
+                } catch (Exception e) {
+                    // can't create JSON object String ignore exception
+                } finally {
+                    if (value != null)
+                        break;
+                }
+                try {
+                    value = JsonArray.fromJson(record.getString(entryName));
+                } catch (Exception e) {
+                    value = record.getString(entryName);
+                }
                 break;
             case BOOLEAN:
                 value = record.getBoolean(entryName);
@@ -126,9 +142,6 @@ public class CouchbaseOutput implements Serializable {
                 throw new IllegalArgumentException("Unknown Type " + entry.getType());
             }
 
-            if (entryName.equals(idFieldName)) {
-                value = String.valueOf(value);
-            }
             if (value instanceof Float) {
                 jsonObject.put(entryName, Double.parseDouble(value.toString()));
             } else if (value instanceof ZonedDateTime) {
@@ -140,6 +153,6 @@ public class CouchbaseOutput implements Serializable {
                 jsonObject.put(entryName, value);
             }
         }
-        return JsonDocument.create(String.valueOf(jsonObject.get(idFieldName)), jsonObject);
+        return JsonDocument.create(record.getString(idFieldName), jsonObject);
     }
 }
