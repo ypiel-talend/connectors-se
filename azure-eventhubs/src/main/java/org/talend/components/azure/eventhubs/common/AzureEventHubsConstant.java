@@ -14,6 +14,8 @@
 
 package org.talend.components.azure.eventhubs.common;
 
+import java.nio.charset.Charset;
+
 public class AzureEventHubsConstant {
 
     public static final String DEFAULT_CONSUMER_GROUP = "$Default";
@@ -46,5 +48,11 @@ public class AzureEventHubsConstant {
     public static final String CHECKPOINTING_EVERY = "CHECKPOINTING_EVERY";
 
     public static final String PARTITION_ID = "PARTITION_ID";
+
+    public static final String DEFAULT_PARTITION_ID = "0";
+
+    public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
+    public static final String PAYLOAD_COLUMN = "payload";
 
 }

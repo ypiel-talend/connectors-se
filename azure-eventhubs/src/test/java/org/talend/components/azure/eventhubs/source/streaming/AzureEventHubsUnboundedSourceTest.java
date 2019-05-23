@@ -50,8 +50,7 @@ class AzureEventHubsUnboundedSourceTest extends AzureEventHubsTestBase {
         AzureEventHubsStreamInputConfiguration inputConfiguration = new AzureEventHubsStreamInputConfiguration();
         final AzureEventHubsStreamDataSet dataSet = new AzureEventHubsStreamDataSet();
         dataSet.setDatastore(getDataStore());
-        dataSet.setEventHubName(EVENTHUB_NAME);
-        dataSet.setConsumerGroupName("consumer-group-1");
+        dataSet.setEventHubName(SHARED_EVENTHUB_NAME);
 
         AzureStorageConnectionAccount connectionAccount = new AzureStorageConnectionAccount();
         connectionAccount.setAccountName(ACCOUNT_NAME);
@@ -60,6 +59,7 @@ class AzureEventHubsUnboundedSourceTest extends AzureEventHubsTestBase {
         dataSet.setStorageConn(connectionAccount);
         dataSet.setContainerName("eventhub-test-1");
 
+        inputConfiguration.setConsumerGroupName(CONSUME_GROUP);
         inputConfiguration.setDataset(dataSet);
 
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
@@ -74,16 +74,16 @@ class AzureEventHubsUnboundedSourceTest extends AzureEventHubsTestBase {
         AzureEventHubsStreamInputConfiguration inputConfiguration = new AzureEventHubsStreamInputConfiguration();
         final AzureEventHubsStreamDataSet dataSet = new AzureEventHubsStreamDataSet();
         dataSet.setDatastore(getDataStore());
-        dataSet.setEventHubName(EVENTHUB_NAME);
-        dataSet.setConsumerGroupName("consumer-group-2");
+        dataSet.setEventHubName(SHARED_EVENTHUB_NAME);
 
         AzureStorageConnectionAccount connectionAccount = new AzureStorageConnectionAccount();
         connectionAccount.setAccountName(ACCOUNT_NAME);
         connectionAccount.setProtocol(Protocol.HTTPS);
         connectionAccount.setAccountKey(ACCOUNT_KEY);
         dataSet.setStorageConn(connectionAccount);
-        dataSet.setContainerName(EVENTHUB_NAME);
+        dataSet.setContainerName(SHARED_EVENTHUB_NAME);
 
+        inputConfiguration.setConsumerGroupName(CONSUME_GROUP);
         inputConfiguration.setDataset(dataSet);
         inputConfiguration.setCommitOffsetEvery(5);
 
