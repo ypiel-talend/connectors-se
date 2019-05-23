@@ -30,10 +30,7 @@ import lombok.Data;
 
 @Version(1)
 @Data
-@GridLayouts({
-        @GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "idFieldName" }),
-                @GridLayout.Row({ "useN1QLQueryWithParameters" }), @GridLayout.Row({ "query" }),
-                @GridLayout.Row({ "parameterizedValues" }) }),
+@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "idFieldName" }) }),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
 
 @Documentation("Couchbase input configuration")
@@ -46,22 +43,5 @@ public class CouchbaseOutputConfiguration implements Serializable {
     @Option
     @Required
     @Documentation("Field to use as ID")
-    @ActiveIf(target = "useN1QLQueryWithParameters", value = "false")
     private String idFieldName;
-
-    @Option
-    @Documentation("Use N1QL query \nwith parameters")
-    private boolean useN1QLQueryWithParameters = false;
-
-    @Option
-    @TextArea
-    @Documentation("The N1QL query.")
-    @ActiveIf(target = "useN1QLQueryWithParameters", value = "true")
-    private String query;
-
-    @Option
-    @Documentation("Mapping for output data")
-    @ActiveIf(target = "useN1QLQueryWithParameters", value = "true")
-    private List<ParameterizedValues> parameterizedValues;
-
 }

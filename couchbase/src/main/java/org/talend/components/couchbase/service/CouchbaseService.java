@@ -120,63 +120,12 @@ public class CouchbaseService {
         return record.getSchema();
     }
 
-    public Schema defineSchema(JsonObject document, Set<String> columnsSet) {
-        if (columnsSet.isEmpty()) {
-            columnsSet.addAll(document.getNames());
-        }
-        final Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
-        columnsSet.stream().forEach(name -> addField(schemaBuilder, name, getJsonValue(name, document)));
-        return schemaBuilder.build();
-    }
-
     public boolean isResultNeedWrapper(String query) {
         String selectPart = query.substring(0, query.indexOf('*') + 1);
         if (selectPart.trim().replaceAll(" ", "").toLowerCase().equals("select*")) {
             return true;
         }
         return false;
-    }
-
-    private void addField(final Schema.Builder schemaBuilder, final String name, Object value) {
-        if (value == null) {
-            LOG.warn(i18n.cannotGuessWhenDataIsNull());
-            return;
-        }
-        final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
-        Schema.Type type = getSchemaType(value);
-        entryBuilder.withName(name).withNullable(true).withType(type);
-        if (type == ARRAY) {
-            List<?> listValue = ((JsonArray) value).toList();
-            Object listObject = listValue.isEmpty() ? null : listValue.get(0);
-            entryBuilder.withElementSchema(builderFactory.newSchemaBuilder(getSchemaType(listObject)).build());
-        }
-        schemaBuilder.withEntry(entryBuilder.build());
-    }
-
-    private Schema.Type getSchemaType(Object value) {
-        if (value instanceof String || value instanceof JsonObject) {
-            return STRING;
-        } else if (value instanceof Boolean) {
-            return BOOLEAN;
-        } else if (value instanceof Date) {
-            return DATETIME;
-        } else if (value instanceof Double) {
-            return DOUBLE;
-        } else if (value instanceof Integer) {
-            return INT;
-        } else if (value instanceof Long) {
-            return LONG;
-        } else if (value instanceof Byte[]) {
-            throw new IllegalArgumentException("BYTES is unsupported");
-        } else if (value instanceof JsonArray) {
-            return ARRAY;
-        } else {
-            return STRING;
-        }
-    }
-
-    public Object getJsonValue(String jsonKey, JsonObject json) {
-        return json.get(jsonKey);
     }
 
     public Bucket openBucket(Cluster cluster, String bucketName) {
@@ -230,6 +179,11 @@ public class CouchbaseService {
         for (String key : jsonKeys) {
             // receive value from JSON
             Object value = jsonObject.get(key);
+
+            if (value == null) {
+                LOG.warn(i18n.cannotGuessWhenDataIsNull());
+                continue;
+            }
 
             // With this value we can define type
             Schema.Type type = defineValueType(value);
