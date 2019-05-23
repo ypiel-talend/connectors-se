@@ -120,15 +120,12 @@ public class CouchbaseInput implements Serializable {
                     && !configuration.getDataSet().getSchema().isEmpty()) {
                 columnsSet.addAll(configuration.getDataSet().getSchema());
             }
-            if (schema == null) {
-                schema = service.defineSchema(jsonObject, columnsSet);
-            }
-            final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-            JsonObject finalJsonObject = jsonObject;
-            schema.getEntries().stream()
-                    .forEach(entry -> addColumn(recordBuilder, entry, service.getJsonValue(entry.getName(), finalJsonObject)));
 
-            return recordBuilder.build();
+            if (schema == null) {
+                schema = service.getSchema(jsonObject, columnsSet);
+            }
+
+            return createRecord(schema, jsonObject);
         }
     }
 
@@ -138,6 +135,20 @@ public class CouchbaseInput implements Serializable {
         service.closeConnection();
     }
 
+    private Record createRecord(Schema schema, JsonObject jsonObject) {
+        final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
+        schema.getEntries().stream().forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), jsonObject)));
+        Record record = recordBuilder.build();
+        return record;
+    }
+
+    public Object getValue(String currentName, JsonObject jsonObject) {
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.get(currentName);
+    }
+
     private void addColumn(Record.Builder recordBuilder, final Schema.Entry entry, Object value) {
         final Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
         Schema.Type type = entry.getType();
@@ -145,9 +156,20 @@ public class CouchbaseInput implements Serializable {
 
         switch (type) {
         case ARRAY:
-            List<?> listValue = ((JsonArray) value).toList();
-            entryBuilder.withElementSchema(entry.getElementSchema());
-            recordBuilder.withArray(entryBuilder.build(), listValue);
+            Schema elementSchema = entry.getElementSchema();
+            entryBuilder.withElementSchema(elementSchema);
+            if (elementSchema.getType() == RECORD) {
+                List<Record> recordList = new ArrayList<>();
+                // schema of the first element
+                Schema currentSchema = elementSchema.getEntries().get(0).getElementSchema();
+                for (int i = 0; i < ((JsonArray) value).size(); i++) {
+                    JsonObject currentJsonObject = (JsonObject) ((JsonArray) value).get(i);
+                    recordList.add(createRecord(currentSchema, currentJsonObject));
+                }
+                recordBuilder.withArray(entryBuilder.build(), recordList);
+            } else {
+                recordBuilder.withArray(entryBuilder.build(), ((JsonArray) value).toList());
+            }
             break;
         case FLOAT:
             recordBuilder.withFloat(entryBuilder.build(), value == null ? null : (Float) value);
@@ -158,7 +180,6 @@ public class CouchbaseInput implements Serializable {
         case BYTES:
             throw new IllegalArgumentException("BYTES is unsupported");
         case STRING:
-        case RECORD:
             recordBuilder.withString(entryBuilder.build(), value == null ? null : value.toString());
             break;
         case LONG:
@@ -172,6 +193,11 @@ public class CouchbaseInput implements Serializable {
             break;
         case BOOLEAN:
             recordBuilder.withBoolean(entryBuilder.build(), value == null ? null : (Boolean) value);
+            break;
+        case RECORD:
+            entryBuilder.withElementSchema(entry.getElementSchema());
+            recordBuilder.withRecord(entryBuilder.build(), createRecord(entry.getElementSchema(), (JsonObject) value));
+            break;
         }
     }
 }

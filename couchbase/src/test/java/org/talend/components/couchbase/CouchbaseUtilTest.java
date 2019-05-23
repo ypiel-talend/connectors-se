@@ -44,7 +44,7 @@ public abstract class CouchbaseUtilTest implements Extension {
 
     public static final String CLUSTER_PASSWORD = "secret";
 
-    public static final int DEFAULT_TIMEOUT_IN_SEC = 20;
+    public static final int DEFAULT_TIMEOUT_IN_SEC = 40;
 
     private static final List<String> ports = new ArrayList(
             Arrays.asList(new String[] { "8091:8091", "8092:8092", "8093:8093", "8094:8094", "11210:11210" }));

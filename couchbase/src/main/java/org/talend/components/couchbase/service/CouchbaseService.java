@@ -56,6 +56,8 @@ public class CouchbaseService {
 
     private Cluster cluster;
 
+    private Bucket bucket;
+
     @Service
     private CouchbaseDataStore couchBaseConnection;
 
@@ -63,7 +65,7 @@ public class CouchbaseService {
     private I18nMessage i18n;
 
     @Service
-    RecordBuilderFactory builderFactory;
+    private RecordBuilderFactory builderFactory;
 
     public String[] resolveAddresses(String nodes) {
         String[] addresses = nodes.replaceAll(" ", "").split(",");
@@ -215,6 +217,79 @@ public class CouchbaseService {
                 log.debug(i18n.cannotCloseCouchbaseEnv());
             }
             environment = null;
+        }
+    }
+
+    public Schema getSchema(JsonObject jsonObject, Set<String> jsonKeys) {
+        Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
+
+        if (jsonKeys == null || jsonKeys.isEmpty()) {
+            jsonKeys = jsonObject.getNames();
+        }
+
+        for (String key : jsonKeys) {
+            // receive value from JSON
+            Object value = jsonObject.get(key);
+
+            // With this value we can define type
+            Schema.Type type = defineValueType(value);
+
+            // We can add to schema builder entry
+            Schema.Entry.Builder entryBuilder = builderFactory.newEntryBuilder();
+            entryBuilder.withNullable(true).withName(key).withType(type);
+
+            if (type == RECORD) {
+                entryBuilder.withElementSchema(getSchema((JsonObject) value, null));
+            } else if (type == ARRAY) {
+                entryBuilder.withElementSchema(defineSchemaForArray((JsonArray) value));
+            }
+            Schema.Entry currentEntry = entryBuilder.build();
+            schemaBuilder.withEntry(currentEntry);
+        }
+        return schemaBuilder.build();
+    }
+
+    private Schema defineSchemaForArray(JsonArray jsonArray) {
+        Object firstValueInArray = jsonArray.get(0);
+        Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
+        if (firstValueInArray == null) {
+            throw new IllegalArgumentException("First value of Array is null. Can't define type of values in array");
+        }
+        Schema.Type type = defineValueType(firstValueInArray);
+        schemaBuilder.withType(type);
+        if (type == RECORD) {
+            schemaBuilder.withEntry(
+                    builderFactory.newEntryBuilder().withElementSchema(getSchema((JsonObject) firstValueInArray, null)).build());
+        } else if (type == ARRAY) {
+            schemaBuilder.withEntry(builderFactory.newEntryBuilder()
+                    .withElementSchema(defineSchemaForArray((JsonArray) firstValueInArray)).build());
+        }
+        return schemaBuilder.withType(type).build();
+    }
+
+    private Schema.Type defineValueType(Object value) {
+        if (value instanceof String) {
+            return STRING;
+        } else if (value instanceof Boolean) {
+            return BOOLEAN;
+        } else if (value instanceof Date) { // TODO: Not sure if Date can come from Couchbase
+            return DATETIME;
+        } else if (value instanceof Double) {
+            return DOUBLE;
+        } else if (value instanceof Integer) {
+            return INT;
+        } else if (value instanceof Long) {
+            return LONG;
+        } else if (value instanceof Byte[]) {
+            throw new IllegalArgumentException("BYTES is unsupported");
+        } else if (value instanceof JsonArray) {
+            return ARRAY;
+        } else if (value instanceof JsonObject) {
+            return RECORD;
+        } else if (value instanceof Float) {
+            return FLOAT;
+        } else {
+            return STRING;
         }
     }
 }
