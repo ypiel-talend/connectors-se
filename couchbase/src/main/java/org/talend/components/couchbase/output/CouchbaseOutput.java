@@ -112,19 +112,7 @@ public class CouchbaseOutput implements Serializable {
                 value = record.getDouble(entryName);
                 break;
             case STRING:
-                try {
-                    value = JsonObject.fromJson(record.getString(entryName));
-                } catch (Exception e) {
-                    // can't create JSON object String ignore exception
-                } finally {
-                    if (value != null)
-                        break;
-                }
-                try {
-                    value = JsonArray.fromJson(record.getString(entryName));
-                } catch (Exception e) {
-                    value = record.getString(entryName);
-                }
+                value = createJsonFromString(record.getString(entryName));
                 break;
             case BOOLEAN:
                 value = record.getBoolean(entryName);
@@ -154,5 +142,24 @@ public class CouchbaseOutput implements Serializable {
             }
         }
         return JsonDocument.create(record.getString(idFieldName), jsonObject);
+    }
+
+    private Object createJsonFromString(String str) {
+        Object value = null;
+        try {
+            value = JsonObject.fromJson(str);
+        } catch (Exception e) {
+            // can't create JSON object from String ignore exception
+            // and try to create JSON array
+        } finally {
+            if (value != null)
+                return value;
+        }
+        try {
+            value = JsonArray.fromJson(str);
+        } catch (Exception e) {
+            value = str;
+        }
+        return value;
     }
 }

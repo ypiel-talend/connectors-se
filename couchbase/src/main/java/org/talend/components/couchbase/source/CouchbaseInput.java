@@ -39,7 +39,7 @@ import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
 
-import static org.talend.sdk.component.api.record.Schema.Type.*;
+import static org.talend.sdk.component.api.record.Schema.Type.RECORD;
 
 @Slf4j
 @Documentation("This component reads data from Couchbase.")
@@ -138,8 +138,7 @@ public class CouchbaseInput implements Serializable {
     private Record createRecord(Schema schema, JsonObject jsonObject) {
         final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
         schema.getEntries().stream().forEach(entry -> addColumn(recordBuilder, entry, getValue(entry.getName(), jsonObject)));
-        Record record = recordBuilder.build();
-        return record;
+        return recordBuilder.build();
     }
 
     public Object getValue(String currentName, JsonObject jsonObject) {
@@ -157,6 +156,10 @@ public class CouchbaseInput implements Serializable {
         switch (type) {
         case ARRAY:
             Schema elementSchema = entry.getElementSchema();
+            if (value == null) {
+                recordBuilder.withArray(entryBuilder.withElementSchema(elementSchema).build(), null);
+                return;
+            }
             entryBuilder.withElementSchema(elementSchema);
             if (elementSchema.getType() == RECORD) {
                 List<Record> recordList = new ArrayList<>();
@@ -196,6 +199,10 @@ public class CouchbaseInput implements Serializable {
             break;
         case RECORD:
             entryBuilder.withElementSchema(entry.getElementSchema());
+            if (value == null) {
+                recordBuilder.withRecord(entryBuilder.build(), null);
+                return;
+            }
             recordBuilder.withRecord(entryBuilder.build(), createRecord(entry.getElementSchema(), (JsonObject) value));
             break;
         }

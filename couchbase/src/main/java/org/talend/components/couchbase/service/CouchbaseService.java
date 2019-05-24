@@ -38,7 +38,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
@@ -55,8 +54,6 @@ public class CouchbaseService {
     private CouchbaseEnvironment environment;
 
     private Cluster cluster;
-
-    private Bucket bucket;
 
     @Service
     private CouchbaseDataStore couchBaseConnection;
@@ -122,10 +119,7 @@ public class CouchbaseService {
 
     public boolean isResultNeedWrapper(String query) {
         String selectPart = query.substring(0, query.indexOf('*') + 1);
-        if (selectPart.trim().replaceAll(" ", "").toLowerCase().equals("select*")) {
-            return true;
-        }
-        return false;
+        return selectPart.replaceAll(" ", "").equalsIgnoreCase("select*");
     }
 
     public Bucket openBucket(Cluster cluster, String bucketName) {
@@ -146,7 +140,6 @@ public class CouchbaseService {
             } else {
                 LOG.debug(i18n.cannotCloseBucket(bucket.name()));
             }
-            bucket = null;
         }
     }
 
@@ -226,7 +219,7 @@ public class CouchbaseService {
             return STRING;
         } else if (value instanceof Boolean) {
             return BOOLEAN;
-        } else if (value instanceof Date) { // TODO: Not sure if Date can come from Couchbase
+        } else if (value instanceof Date) {
             return DATETIME;
         } else if (value instanceof Double) {
             return DOUBLE;
