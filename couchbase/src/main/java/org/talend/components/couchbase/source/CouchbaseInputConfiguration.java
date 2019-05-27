@@ -40,7 +40,7 @@ public class CouchbaseInputConfiguration implements Serializable {
     private CouchbaseDataSet dataSet;
 
     @Option
-    @Documentation("Limit")
+    @Documentation("Maximum number of documents to be returned")
     private String limit = "";
 
     public CouchbaseDataSet getDataSet() {
