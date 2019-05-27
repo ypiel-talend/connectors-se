@@ -50,7 +50,7 @@ public class JmsDataStore implements Serializable {
 
     @Option
     @Documentation("Checkbox for User login/password checking")
-    private boolean userIdentity = false;
+    private boolean userIdentity = true;
 
     @Option
     @Documentation("Input for User Name")
