@@ -57,12 +57,12 @@ public class ActionService {
         return new Values(jmsService.getProviders().keySet().stream().map(id -> new Values.Item(id, id)).collect(toList()));
     }
 
-    @DiscoverSchema(DISCOVER_SCHEMA)
-    public Schema guessSchema(BasicConfiguration config) {
-        return recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName(MESSAGE_CONTENT).withType(Schema.Type.STRING).build())
-                .build();
-    }
+    // @DiscoverSchema(DISCOVER_SCHEMA)
+    // public Schema guessSchema(BasicConfiguration config) {
+    // return recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
+    // .withEntry(recordBuilderFactory.newEntryBuilder().withName(MESSAGE_CONTENT).withType(Schema.Type.STRING).build())
+    // .build();
+    // }
 
     @HealthCheck(ACTION_BASIC_HEALTH_CHECK)
     public HealthCheckStatus validateBasicDatastore(@Option final JmsDataStore datastore) {
