@@ -44,6 +44,7 @@ public class JmsDataStore implements Serializable {
     private String moduleList;
 
     @Option
+    @Required
     @Pattern("^(tcp|ssl)://")
     @Documentation("Input for JMS server URL")
     private String url;
