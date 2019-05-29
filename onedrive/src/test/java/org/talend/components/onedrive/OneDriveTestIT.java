@@ -79,7 +79,7 @@ class OneDriveTestIT {
     void listComponentGetFilesInDirectory() {
         log.info("Integration test 'List. Get files in directory' start ");
         OneDriveListConfiguration dataSet = new OneDriveListConfiguration();
-        dataSet.setDataStore(testContext.getDataStoreLoginPassword());
+        dataSet.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
         dataSet.setObjectPath("/integr-tests/get");
         // dataSet.setObjectType(OneDriveObjectType.DIRECTORY);
         dataSet.setRecursively(true);
@@ -98,7 +98,7 @@ class OneDriveTestIT {
     void listComponentGetRoot() {
         log.info("Integration test 'List. Get root' start ");
         OneDriveListConfiguration dataSet = new OneDriveListConfiguration();
-        dataSet.setDataStore(testContext.getDataStoreLoginPassword());
+        dataSet.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
 
         final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
         Job.components().component("onedrive-list", "OneDrive://List?" + config).component("collector", "test://collector")
@@ -116,7 +116,7 @@ class OneDriveTestIT {
         String filePath = "integr-tests/create/dir1/dir1_2";
         // create config
         OneDriveCreateConfiguration dataSetCreate = new OneDriveCreateConfiguration();
-        dataSetCreate.setDataStore(testContext.getDataStoreLoginPassword());
+        dataSetCreate.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
         dataSetCreate.setCreateDirectoriesByList(false);
         dataSetCreate.setObjectType(OneDriveObjectType.FILE);
         dataSetCreate.setObjectPath(filePath + "/" + fileName);
@@ -144,7 +144,7 @@ class OneDriveTestIT {
         log.info("Integration test 'Create. Create folder list' start.");
         // create config
         OneDriveCreateConfiguration dataSetCreate = new OneDriveCreateConfiguration();
-        dataSetCreate.setDataStore(testContext.getDataStoreLoginPassword());
+        dataSetCreate.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
         dataSetCreate.setCreateDirectoriesByList(true);
         final String configCreate = configurationByExample().forInstance(dataSetCreate).configured().toQueryString();
 
@@ -185,7 +185,7 @@ class OneDriveTestIT {
         log.info("Integration test 'Delete. All files in folder.");
         // create config
         OneDriveDeleteConfiguration dataSet = new OneDriveDeleteConfiguration();
-        dataSet.setDataStore(testContext.getDataStoreLoginPassword());
+        dataSet.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
         final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
 
         DriveItem newFile = oneDriveHttpClientService.createItem(testContext.getDataStoreLoginPassword(), null,
@@ -209,7 +209,7 @@ class OneDriveTestIT {
         log.info("Integration test 'Get. Files to folder. Destination: " + TEMP_DIR);
         // create config
         OneDriveGetConfiguration dataSet = new OneDriveGetConfiguration();
-        dataSet.setDataStore(testContext.getDataStoreLoginPassword());
+        dataSet.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
         dataSet.setStoreFilesLocally(true);
         dataSet.setStoreDirectory(TEMP_DIR);
         final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
@@ -239,7 +239,7 @@ class OneDriveTestIT {
         log.info("Integration test 'Get. Files to byte array.");
         // create config
         OneDriveGetConfiguration dataSet = new OneDriveGetConfiguration();
-        dataSet.setDataStore(testContext.getDataStoreLoginPassword());
+        dataSet.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
         dataSet.setStoreFilesLocally(false);
         final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
 
@@ -280,7 +280,7 @@ class OneDriveTestIT {
         log.info("Integration test 'Get. Files to byte array.");
         // create config
         OneDriveGetConfiguration dataSet = new OneDriveGetConfiguration();
-        dataSet.setDataStore(testContext.getDataStoreLoginPassword());
+        dataSet.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
         dataSet.setStoreFilesLocally(false);
         final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
 
@@ -308,8 +308,8 @@ class OneDriveTestIT {
         log.info("Integration test 'Put. Files from folder. Source: " + TEMP_DIR);
         // create config
         OneDrivePutConfiguration dataSet = new OneDrivePutConfiguration();
-        dataSet.setDataStore(testContext.getDataStoreLoginPassword());
-        dataSet.setLocalSource(true);
+        dataSet.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
+        dataSet.setDataSource(OneDrivePutConfiguration.DataSource.File);
         final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
 
         String folderPath = "integr-tests/put";
@@ -354,8 +354,8 @@ class OneDriveTestIT {
         log.info("Integration test 'Put. Files from byte array.");
         // create config
         OneDrivePutConfiguration dataSet = new OneDrivePutConfiguration();
-        dataSet.setDataStore(testContext.getDataStoreLoginPassword());
-        dataSet.setLocalSource(false);
+        dataSet.getDataSet().setDataStore(testContext.getDataStoreLoginPassword());
+        dataSet.setDataSource(OneDrivePutConfiguration.DataSource.Content);
         final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
 
         String folderPath = "integr-tests/putbytes";
