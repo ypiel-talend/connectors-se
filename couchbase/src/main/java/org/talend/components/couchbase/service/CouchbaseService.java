@@ -225,9 +225,9 @@ public class CouchbaseService {
         } else if (value instanceof Byte[]) {
             throw new IllegalArgumentException("BYTES is unsupported");
         } else if (value instanceof JsonArray) {
-            return ARRAY;
+            return STRING;
         } else if (value instanceof JsonObject) {
-            return RECORD;
+            return STRING;
         } else if (value instanceof Float) {
             return FLOAT;
         } else {

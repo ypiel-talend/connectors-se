@@ -147,13 +147,12 @@ public class CouchbaseInput implements Serializable {
         Schema.Type type = entry.getType();
         entryBuilder.withName(entry.getName()).withNullable(true).withType(type);
 
+        if (value == null)
+            return;
+
         switch (type) {
         case ARRAY:
             Schema elementSchema = entry.getElementSchema();
-            if (value == null) {
-                recordBuilder.withArray(entryBuilder.withElementSchema(elementSchema).build(), null);
-                return;
-            }
             entryBuilder.withElementSchema(elementSchema);
             if (elementSchema.getType() == RECORD) {
                 List<Record> recordList = new ArrayList<>();
@@ -169,34 +168,30 @@ public class CouchbaseInput implements Serializable {
             }
             break;
         case FLOAT:
-            recordBuilder.withFloat(entryBuilder.build(), value == null ? null : (Float) value);
+            recordBuilder.withFloat(entryBuilder.build(), (Float) value);
             break;
         case DOUBLE:
-            recordBuilder.withDouble(entryBuilder.build(), value == null ? null : (Double) value);
+            recordBuilder.withDouble(entryBuilder.build(), (Double) value);
             break;
         case BYTES:
             throw new IllegalArgumentException("BYTES is unsupported");
         case STRING:
-            recordBuilder.withString(entryBuilder.build(), value == null ? null : value.toString());
+            recordBuilder.withString(entryBuilder.build(), value.toString());
             break;
         case LONG:
-            recordBuilder.withLong(entryBuilder.build(), value == null ? null : (Long) value);
+            recordBuilder.withLong(entryBuilder.build(), (Long) value);
             break;
         case INT:
-            recordBuilder.withInt(entryBuilder.build(), value == null ? null : (Integer) value);
+            recordBuilder.withInt(entryBuilder.build(), (Integer) value);
             break;
         case DATETIME:
-            recordBuilder.withDateTime(entryBuilder.build(), value == null ? null : (ZonedDateTime) value);
+            recordBuilder.withDateTime(entryBuilder.build(), (ZonedDateTime) value);
             break;
         case BOOLEAN:
-            recordBuilder.withBoolean(entryBuilder.build(), value == null ? null : (Boolean) value);
+            recordBuilder.withBoolean(entryBuilder.build(), (Boolean) value);
             break;
         case RECORD:
             entryBuilder.withElementSchema(entry.getElementSchema());
-            if (value == null) {
-                recordBuilder.withRecord(entryBuilder.build(), null);
-                return;
-            }
             recordBuilder.withRecord(entryBuilder.build(), createRecord(entry.getElementSchema(), (JsonObject) value));
             break;
         }
