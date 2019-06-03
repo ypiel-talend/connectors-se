@@ -34,7 +34,7 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.couchbase")
@@ -90,7 +90,6 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("Check input data")
     void couchbaseInputDataTest() {
         componentsHandler.resetState();
@@ -101,6 +100,10 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
 
         TestData testData = new TestData();
+
+        assertNotNull(res);
+
+        assertEquals(2, res.size());
 
         assertEquals(testData.getCol1() + "1", res.get(0).getString("t_string"));
         assertEquals(testData.getCol2(), res.get(0).getInt("t_int_min"));
@@ -119,7 +122,6 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("When input data is null, record will be skipped")
     void firstValueIsNullInInputDBTest() {
         insertTestDataWithNullValueToDB();
@@ -127,6 +129,11 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         executeJob(getInputConfiguration());
 
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
+
+        assertNotNull(res);
+
+        assertFalse(res.isEmpty());
+
         assertEquals(2, res.get(0).getSchema().getEntries().size());
     }
 
