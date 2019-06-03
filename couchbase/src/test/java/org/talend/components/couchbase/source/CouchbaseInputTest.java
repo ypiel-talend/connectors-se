@@ -20,10 +20,7 @@ import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.talend.components.couchbase.CouchbaseUtilTest;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
@@ -93,6 +90,7 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("Check input data")
     void couchbaseInputDataTest() {
         componentsHandler.resetState();
@@ -121,6 +119,7 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("When input data is null, record will be skipped")
     void firstValueIsNullInInputDBTest() {
         insertTestDataWithNullValueToDB();
