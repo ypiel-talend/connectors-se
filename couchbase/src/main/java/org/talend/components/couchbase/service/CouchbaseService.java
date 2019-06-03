@@ -117,6 +117,11 @@ public class CouchbaseService {
         return record.getSchema();
     }
 
+    public boolean isResultNeedWrapper(String query) {
+        String selectPart = query.substring(0, query.indexOf('*') + 1);
+        return selectPart.replaceAll(" ", "").equalsIgnoreCase("select*");
+    }
+
     public Bucket openBucket(Cluster cluster, String bucketName) {
         Bucket bucket;
         try {

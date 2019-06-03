@@ -76,4 +76,14 @@ public class CouchbaseServiceTest extends CouchbaseUtilTest {
         assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
         assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
     }
+
+    @Test
+    @DisplayName("Define if query use select *")
+    void ifN1qlResultShouldBeUnwrapped() {
+        assertTrue(couchbaseService.isResultNeedWrapper("SELECT * FROM `test`"));
+
+        assertFalse(couchbaseService.isResultNeedWrapper("SELECT name, surname FROM `test`"));
+        assertFalse(couchbaseService.isResultNeedWrapper("SELECT COUNT(*) AS count FROM `test`"));
+        assertFalse(couchbaseService.isResultNeedWrapper("SELECT test.* FROM `test` limit 10"));
+    }
 }
