@@ -63,16 +63,16 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         bucket.insert(JsonDocument.create("RRRR1", jsonObjects.get(0)));
         bucket.insert(JsonDocument.create("RRRR2", jsonObjects.get(1)));
 
-        bucket.close();
-        cluster.disconnect();
-        environment.shutdown();
-
         //Wait while data is writing (Jenkins fix)
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
     }
 
     private void insertTestDataWithNullValueToDB() {
@@ -87,16 +87,16 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
 
         bucket.insert(JsonDocument.create("RRRR1", json));
 
-        bucket.close();
-        cluster.disconnect();
-        environment.shutdown();
-
         //Wait while data is writing (Jenkins fix)
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
     }
 
     void executeJob(CouchbaseInputConfiguration configuration) {
