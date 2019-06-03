@@ -58,6 +58,12 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
 
         bucket.bucketManager().flush();
 
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         List<JsonObject> jsonObjects = super.createJsonObjects();
 
         bucket.insert(JsonDocument.create("RRRR1", jsonObjects.get(0)));
@@ -82,6 +88,12 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
 
         bucket.bucketManager().flush();
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         JsonObject json = JsonObject.create().put("t_string1", "RRRR1").put("t_string2", "RRRR2").putNull("t_string3");
 
