@@ -54,6 +54,8 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
         Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
 
+        bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+
         bucket.bucketManager().flush();
 
         List<JsonObject> jsonObjects = super.createJsonObjects();
