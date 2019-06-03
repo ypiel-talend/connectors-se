@@ -66,6 +66,13 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         bucket.close();
         cluster.disconnect();
         environment.shutdown();
+
+        //Wait while data is writing (Jenkins fix)
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void insertTestDataWithNullValueToDB() {
@@ -83,6 +90,13 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         bucket.close();
         cluster.disconnect();
         environment.shutdown();
+
+        //Wait while data is writing (Jenkins fix)
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     void executeJob(CouchbaseInputConfiguration configuration) {
