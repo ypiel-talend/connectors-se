@@ -141,8 +141,9 @@ class AvroOutputIT extends BaseIT {
     }
 
     @Test
-    void testOutputNull() throws URISyntaxException, StorageException {
+    void testOutputNull() {
         final int recordSize = 1;
+        final int schemaSize = 9;
         Schema.Builder schemaBuilder = new SchemaImpl.BuilderImpl();
         Schema schema = schemaBuilder.withType(Schema.Type.RECORD)
                 .withEntry(new SchemaImpl.EntryImpl("nullStringColumn", Schema.Type.STRING, true, null, null, null))
@@ -175,8 +176,15 @@ class AvroOutputIT extends BaseIT {
         Assert.assertEquals(recordSize, records.size());
         Record firstRecord = records.get(0);
 
+        Assert.assertEquals(schemaSize, firstRecord.getSchema().getEntries().size());
         Assert.assertNull(firstRecord.getString("nullStringColumn"));
-
-        System.out.println(firstRecord);
+        Assert.assertNull(firstRecord.getString("nullStringColumn2"));
+        Assert.assertNull(firstRecord.get(Integer.class, "nullIntColumn"));
+        Assert.assertNull(firstRecord.get(Long.class, "nullLongColumn"));
+        Assert.assertNull(firstRecord.get(Float.class, "nullFloatColumn"));
+        Assert.assertNull(firstRecord.get(Double.class, "nullDoubleColumn"));
+        Assert.assertNull(firstRecord.get(Boolean.class, "nullBooleanColumn"));
+        Assert.assertNull(firstRecord.get(byte[].class, "nullByteArrayColumn"));
+        Assert.assertNull(firstRecord.getDateTime("nullDateColumn"));
     }
 }

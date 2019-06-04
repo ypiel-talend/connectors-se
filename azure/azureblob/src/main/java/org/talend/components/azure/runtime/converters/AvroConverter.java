@@ -272,7 +272,10 @@ public class AvroConverter implements RecordConverter<GenericRecord> {
             if (org.apache.avro.Schema.Type.ARRAY.equals(field.schema().getType())) {
                 buildArrayField(field, value, recordBuilder, entry);
             } else {
-                buildField(field, value, recordBuilder, entry);
+                if (!entry.isNullable() || value != null) {
+                    buildField(field, value, recordBuilder, entry);
+                } // else skip null value for nullable field
+
             }
         }
         return recordBuilder.build();
@@ -392,9 +395,6 @@ public class AvroConverter implements RecordConverter<GenericRecord> {
     protected void buildField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder, Entry entry) {
         String logicalType = field.schema().getProp(AVRO_LOGICAL_TYPE);
         org.apache.avro.Schema.Type fieldType = getFieldType(field);
-        if (value == null && entry.isNullable()) {
-
-        }
         switch (fieldType) {
         case RECORD:
             recordBuilder.withRecord(entry, (Record) value);
