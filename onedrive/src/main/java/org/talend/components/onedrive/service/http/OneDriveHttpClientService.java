@@ -100,13 +100,13 @@ public class OneDriveHttpClientService {
      *
      * @param parentId - parent item id
      * @param objectType - File or Directory
-     * @param itemPath - full path to new item relatively to parent
+     * @param remotePath - full path to new item relatively to parent
      * @throws IOException
      */
-    public DriveItem createItem(OneDriveDataStore dataStore, String parentId, OneDriveObjectType objectType, String itemPath)
+    public DriveItem createItem(OneDriveDataStore dataStore, String parentId, OneDriveObjectType objectType, String remotePath)
             throws IOException {
         log.debug("create item: " + (parentId == null ? "root" : parentId));
-        if (itemPath == null || itemPath.isEmpty()) {
+        if (remotePath == null || remotePath.isEmpty()) {
             return null;
         }
         GraphClient graphClient = graphClientService.getGraphClient(dataStore);
@@ -114,7 +114,7 @@ public class OneDriveHttpClientService {
         if (parentId == null || parentId.isEmpty()) {
             parentId = getRoot(dataStore).id;
         }
-        String[] pathParts = itemPath.split("/");
+        String[] pathParts = remotePath.split("/");
         String parentRelativePath = Arrays.stream(pathParts).limit(pathParts.length - 1).collect(Collectors.joining("/"));
         String itemName = pathParts[pathParts.length - 1];
 
@@ -124,18 +124,18 @@ public class OneDriveHttpClientService {
             newItem = createItemInternal(graphClient, parentId, parentRelativePath, objectType, itemName);
             log.debug("new item " + newItem.name + " was created");
         } catch (GraphServiceException e) {
-            newItem = handleCreateItemError(e, dataStore, parentId, objectType, itemPath, pathParts, itemName);
+            newItem = handleCreateItemError(e, dataStore, parentId, objectType, remotePath, pathParts, itemName);
         }
         return newItem;
     }
 
     private DriveItem handleCreateItemError(GraphServiceException e, OneDriveDataStore dataStore, String parentId,
-            OneDriveObjectType objectType, String itemPath, String[] pathParts, String itemName) throws IOException {
+            OneDriveObjectType objectType, String remotePath, String[] pathParts, String itemName) throws IOException {
         GraphClient graphClient = graphClientService.getGraphClient(dataStore);
         DriveItem newItem;
         if (e.getResponseCode() == ERROR_CODE_CONFLICT) {
             // file exists, return file data
-            newItem = getItemByName(dataStore, parentId, itemPath);
+            newItem = getItemByName(dataStore, parentId, remotePath);
             log.debug("new item " + newItem.name + " was created before");
         } else if (e.getResponseCode() == ERROR_CODE_ITEM_NOT_FOUND) {
             // create parent folders
@@ -297,15 +297,15 @@ public class OneDriveHttpClientService {
     /**
      * write data to file onto server
      *
-     * @param itemPath - path to file on the server
+     * @param remotePath - path to file on the server
      * @param inputStream - stream with data
      * @param fileLength - the length of data
      * @return
      * @throws IOException
      */
-    public DriveItem putItemData(OneDriveDataStore dataStore, String itemPath, InputStream inputStream, int fileLength)
+    public DriveItem putItemData(OneDriveDataStore dataStore, String remotePath, InputStream inputStream, int fileLength)
             throws IOException {
-        log.debug("put item data: " + itemPath);
+        log.debug("put item data: " + remotePath);
 
         OneDriveObjectType objectType = OneDriveObjectType.FILE;
         if (inputStream == null) {
@@ -315,7 +315,7 @@ public class OneDriveHttpClientService {
         GraphClient graphClient = graphClientService.getGraphClient(dataStore);
 
         // create item
-        DriveItem newItem = createItem(dataStore, null, objectType, itemPath);
+        DriveItem newItem = createItem(dataStore, null, objectType, remotePath);
         log.debug("new item was created: " + newItem.id);
 
         if (objectType == OneDriveObjectType.FILE) {
@@ -329,12 +329,12 @@ public class OneDriveHttpClientService {
 
                 @Override
                 public void progress(long currentBytes, long allBytes) {
-                    log.debug("progress: " + itemPath + " -> " + currentBytes + ":" + allBytes);
+                    log.debug("progress: " + remotePath + " -> " + currentBytes + ":" + allBytes);
                 }
 
                 @Override
                 public void success(DriveItem o) {
-                    log.debug("file was uploaded: " + itemPath + ", itemId: " + o.id);
+                    log.debug("file was uploaded: " + remotePath + ", itemId: " + o.id);
                 }
 
                 @Override

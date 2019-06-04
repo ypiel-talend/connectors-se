@@ -271,7 +271,7 @@ class OneDriveTestIT {
 
         Assertions.assertEquals(2, res.size());
         Map<String, String> fileData = Collections
-                .unmodifiableMap(res.stream().collect(Collectors.toMap(i -> i.getString("id"), i -> i.getString("payload"))));
+                .unmodifiableMap(res.stream().collect(Collectors.toMap(i -> i.getString("id"), i -> i.getString("localFile"))));
         String fileContent1 = new String(Base64.getDecoder().decode(fileData.get(file1.id)), StringHelper.STRING_CHARSET);
         String fileContent2 = new String(Base64.getDecoder().decode(fileData.get(file2.id)), StringHelper.STRING_CHARSET);
         Assertions.assertEquals(fileContentOrigin1, fileContent1);
@@ -336,11 +336,12 @@ class OneDriveTestIT {
 
         List<JsonObject> inputData = new ArrayList<>();
 
-        JsonObject jsonObject = jsonBuilderFactory.createObjectBuilder().add("itemPath", folderPath).addNull("localPath").build();
+        JsonObject jsonObject = jsonBuilderFactory.createObjectBuilder().add("remotePath", folderPath).addNull("localFile")
+                .build();
         inputData.add(jsonObject);
         for (String filePath : new String[] { filePath1, filePath2 }) {
-            jsonObject = jsonBuilderFactory.createObjectBuilder().add("itemPath", filePath)
-                    .add("localPath", TEMP_DIR + "/" + filePath).build();
+            jsonObject = jsonBuilderFactory.createObjectBuilder().add("remotePath", filePath)
+                    .add("localFile", TEMP_DIR + "/" + filePath).build();
             inputData.add(jsonObject);
         }
         componentsHandler.setInputData(inputData);
@@ -381,11 +382,12 @@ class OneDriveTestIT {
 
         List<JsonObject> inputData = new ArrayList<>();
 
-        JsonObject jsonObject = jsonBuilderFactory.createObjectBuilder().add("itemPath", folderPath).addNull("payload").build();
+        JsonObject jsonObject = jsonBuilderFactory.createObjectBuilder().add("remotePath", folderPath).addNull("localFile")
+                .build();
         inputData.add(jsonObject);
         for (Map.Entry<String, String> payload : payloads.entrySet()) {
-            jsonObject = jsonBuilderFactory.createObjectBuilder().add("itemPath", payload.getKey())
-                    .add("payload", payload.getValue()).build();
+            jsonObject = jsonBuilderFactory.createObjectBuilder().add("remotePath", payload.getKey())
+                    .add("localFile", payload.getValue()).build();
             inputData.add(jsonObject);
         }
         componentsHandler.setInputData(inputData);

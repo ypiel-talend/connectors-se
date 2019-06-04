@@ -70,32 +70,32 @@ public class OneDrivePutSource implements Serializable {
     }
 
     private DriveItem putLocalFile(JsonObject record) throws IOException {
-        String itemPath = record.getString("itemPath");
-        String localPath = record.getString("localPath", null);
+        String remotePath = record.getString("remotePath");
+        String localFile = record.getString("localFile", null);
 
-        if (localPath == null || localPath.isEmpty() || !new File(localPath).isFile()) {
-            return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), itemPath, null, 0);
+        if (localFile == null || localFile.isEmpty() || !new File(localFile).isFile()) {
+            return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), remotePath, null, 0);
         } else {
-            File f = new File(localPath);
+            File f = new File(localFile);
             int fileLength = (int) f.length();
             try (InputStream inputStream = new FileInputStream(f)) {
-                return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), itemPath, inputStream,
+                return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), remotePath, inputStream,
                         fileLength);
             }
         }
     }
 
     private DriveItem putBytes(JsonObject record) throws IOException {
-        String itemPath = record.getString("itemPath");
-        String payloadBase64 = record.getString("payload", null);
+        String remotePath = record.getString("remotePath");
+        String payloadBase64 = record.getString("localFile", null);
 
         if (payloadBase64 == null) {
-            return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), itemPath, null, 0);
+            return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), remotePath, null, 0);
         } else {
             byte[] payload = Base64.getDecoder().decode(payloadBase64);
             int fileLength = payload.length;
             try (InputStream inputStream = new ByteArrayInputStream(payload)) {
-                return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), itemPath, inputStream,
+                return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), remotePath, inputStream,
                         fileLength);
             }
         }
