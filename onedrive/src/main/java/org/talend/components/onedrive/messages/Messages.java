@@ -15,4 +15,5 @@ public interface Messages {
 
     String healthCheckApplicationIdIsEmpty();
 
+    String putFileErrorFileDoesNotExist();
 }

@@ -355,6 +355,37 @@ class OneDriveTestIT {
     }
 
     @Test
+    @DisplayName("Put. Put files which does not exist")
+    void putComponentFilesFromFolderFileDoesNotExist() throws IOException {
+        log.info("Integration test 'Put. Files from folder. Source: " + TEMP_DIR);
+        // create config
+        OneDrivePutConfiguration dataSet = new OneDrivePutConfiguration();
+        dataSet.setDataSet(testContext.getDataSetLoginPassword());
+        dataSet.setDataSource(OneDrivePutConfiguration.DataSource.File);
+        final String config = configurationByExample().forInstance(dataSet).configured().toQueryString();
+
+        String folderPath = "integr-tests/put";
+        String fileDoesNotExistPath = "integr-tests/put/thisFileDoesNotExist.txt";
+
+        List<JsonObject> inputData = new ArrayList<>();
+
+        JsonObject jsonObject = jsonBuilderFactory.createObjectBuilder().add("remotePath", folderPath).addNull("localFile")
+                .build();
+        inputData.add(jsonObject);
+        jsonObject = jsonBuilderFactory.createObjectBuilder().add("remotePath", fileDoesNotExistPath)
+                .add("localFile", TEMP_DIR + "/" + fileDoesNotExistPath).build();
+        inputData.add(jsonObject);
+        componentsHandler.setInputData(inputData);
+
+        Job.components().component("emitter", "test://emitter").component("onedrive-put", "OneDrive://Put?" + config)
+                .component("collector", "test://collector").connections().from("emitter").to("onedrive-put").from("onedrive-put")
+                .to("collector").build().run();
+        final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
+
+        Assertions.assertEquals(1, res.size());
+    }
+
+    @Test
     @DisplayName("Put. Put files from byte array")
     void putComponentFilesFromByteArray() throws IOException {
         log.info("Integration test 'Put. Files from byte array.");

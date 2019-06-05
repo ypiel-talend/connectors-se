@@ -3,6 +3,7 @@ package org.talend.components.onedrive.sources.put;
 import com.microsoft.graph.models.extensions.DriveItem;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.onedrive.helpers.CommonHelper;
+import org.talend.components.onedrive.messages.Messages;
 import org.talend.components.onedrive.service.graphclient.GraphClientService;
 import org.talend.components.onedrive.service.http.OneDriveAuthHttpClientService;
 import org.talend.components.onedrive.service.http.OneDriveHttpClientService;
@@ -39,12 +40,16 @@ public class OneDrivePutSource implements Serializable {
 
     private GraphClientService graphClientService;
 
+    private Messages i18n;
+
     public OneDrivePutSource(@Option("configuration") final OneDrivePutConfiguration configuration,
             final OneDriveHttpClientService oneDriveHttpClientService,
-            final OneDriveAuthHttpClientService oneDriveAuthHttpClientService, GraphClientService graphClientService) {
+            final OneDriveAuthHttpClientService oneDriveAuthHttpClientService, GraphClientService graphClientService,
+            Messages i18n) {
         this.configuration = configuration;
         this.oneDriveHttpClientService = oneDriveHttpClientService;
         this.graphClientService = graphClientService;
+        this.i18n = i18n;
     }
 
     @ElementListener
@@ -73,7 +78,9 @@ public class OneDrivePutSource implements Serializable {
         String remotePath = record.getString("remotePath");
         String localFile = record.getString("localFile", null);
 
-        if (localFile == null || localFile.isEmpty() || !new File(localFile).isFile()) {
+        if (localFile != null && !localFile.isEmpty() && !new File(localFile).exists()) {
+            throw new RuntimeException(i18n.putFileErrorFileDoesNotExist());
+        } else if (localFile == null || localFile.isEmpty() || new File(localFile).exists() && !new File(localFile).isFile()) {
             return oneDriveHttpClientService.putItemData(configuration.getDataSet().getDataStore(), remotePath, null, 0);
         } else {
             File f = new File(localFile);
