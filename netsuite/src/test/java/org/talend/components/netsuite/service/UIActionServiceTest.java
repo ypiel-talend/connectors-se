@@ -19,6 +19,7 @@ import com.netsuite.webservices.v2018_2.platform.core.types.SearchDate;
 import com.netsuite.webservices.v2018_2.platform.core.types.SearchDateFieldOperator;
 import com.netsuite.webservices.v2018_2.platform.core.types.SearchMultiSelectFieldOperator;
 import com.netsuite.webservices.v2018_2.transactions.purchases.PurchaseOrder;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.netsuite.NetSuiteBaseTest;
@@ -51,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 @WithComponents("org.talend.components.netsuite")
 public class UIActionServiceTest extends NetSuiteBaseTest {
 
@@ -69,12 +71,13 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testHealthCheckFailed() {
+        log.info("Test 'healthcheck failed' start ");
 
         NetSuiteDataStore dataStoreWrong = new NetSuiteDataStore();
         dataStoreWrong.setLoginType(LoginType.BASIC);
         dataStoreWrong.setRole(3);
-        dataStoreWrong.setAccount(System.getProperty("netsuite.account"));
-        dataStoreWrong.setEndpoint(System.getProperty("netsuite.endpoint.url"));
+        dataStoreWrong.setAccount(NETSUITE_ACCOUNT);
+        dataStoreWrong.setEndpoint(NETSUITE_ENDPOINT_URL);
         dataStoreWrong.setEmail("test_junit@talend.com");
         dataStoreWrong.setPassword("wrongPassword");
         dataStoreWrong.setApplicationId(UUID.randomUUID().toString());
@@ -84,6 +87,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testGuessSchema() {
+        log.info("Test 'guess schema' start ");
         List<String> fields = Arrays.asList(PurchaseOrder.class.getDeclaredFields()).stream()
                 .map(field -> field.getName().toLowerCase()).collect(toList());
         NetSuiteOutputProperties outputDataSet = new NetSuiteOutputProperties();
@@ -102,6 +106,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testLoadRecordTypes() {
+        log.info("Test 'load record types' start ");
         List<String> expectedList = Arrays.asList(RecordTypeEnum.values()).stream().map(RecordTypeEnum::getTypeName).sorted()
                 .collect(toList());
         uiActionService.validateConnection(dataStore);
@@ -113,6 +118,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testLoadCustomRecordTypes() {
+        log.info("Test 'load custom record types' start ");
         dataStore.setEnableCustomization(true);
         uiActionService.validateConnection(dataStore);
         SuggestionValues values = uiActionService.loadRecordTypes(dataStore);
@@ -124,6 +130,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testLoadFields() {
+        log.info("Test 'load fields' start ");
         List<String> expectedList = Arrays.asList(AccountSearchBasic.class.getDeclaredFields()).stream().map(Field::getName)
                 .filter(NetSuiteDatasetRuntime.FILTER_EXTRA_SEARCH_FIELDS).sorted().collect(toList());
 
@@ -139,6 +146,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testLoadCustomSearchFields() {
+        log.info("Test 'load custom search fields' start ");
         List<String> expectedList = Arrays.asList(CustomRecordSearchBasic.class.getDeclaredFields()).stream().map(Field::getName)
                 .filter(NetSuiteDatasetRuntime.FILTER_EXTRA_SEARCH_FIELDS).collect(toList());
         expectedList.add("custrecordtemp_value_for_search");
@@ -157,6 +165,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testLoadTransactionSearchFields() {
+        log.info("Test 'load transaction search fields' start ");
         List<String> expectedList = Arrays.asList(TransactionSearchBasic.class.getDeclaredFields()).stream().map(Field::getName)
                 .filter(NetSuiteDatasetRuntime.FILTER_EXTRA_SEARCH_FIELDS).sorted().collect(toList());
 
@@ -172,6 +181,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testLoadSearchOperator() {
+        log.info("Test 'load search operator' start ");
         NetSuiteDataSet dataSet = new NetSuiteDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setRecordType("Account");
@@ -188,6 +198,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
     @Test
     public void testLoadSearchOperatorForDateType() {
+        log.info("Test 'load search operator for Date type' start ");
         NetSuiteDataSet dataSet = new NetSuiteDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setRecordType("PurchaseOrder");

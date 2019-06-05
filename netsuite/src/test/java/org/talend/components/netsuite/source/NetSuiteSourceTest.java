@@ -13,6 +13,7 @@
 package org.talend.components.netsuite.source;
 
 import com.netsuite.webservices.v2018_2.lists.accounting.types.AccountType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.netsuite.NetSuiteBaseTest;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Slf4j
 @WithComponents("org.talend.components.netsuite")
 public class NetSuiteSourceTest extends NetSuiteBaseTest {
 
@@ -48,6 +50,7 @@ public class NetSuiteSourceTest extends NetSuiteBaseTest {
 
     @Test
     void testSearchBankAccounts() {
+        log.info("Test 'search bank account' start ");
         dataSet.setRecordType("Account");
         dataSet.setSchema(service.getSchema(dataSet, null).getEntries().stream().map(entry -> entry.getName())
                 .collect(Collectors.toList()));
@@ -62,6 +65,7 @@ public class NetSuiteSourceTest extends NetSuiteBaseTest {
 
     @Test
     void testSearchCustomRecords() {
+        log.info("Test 'search custom records' start ");
         clientService.getMetaDataSource().setCustomizationEnabled(true);
         dataSet.setRecordType("customrecord398");
         dataSet.setSchema(service.getSchema(dataSet, null).getEntries().stream().map(entry -> entry.getName())
@@ -79,11 +83,13 @@ public class NetSuiteSourceTest extends NetSuiteBaseTest {
 
     @Test
     void testSearchSublistItems() {
+        log.info("Test 'search sublist items' start ");
         assertNotNull(searchSublistItems(false));
     }
 
     @Test
     void testSearchSublistItemsEmpty() {
+        log.info("Test 'search sublist items empty' start ");
         assertNull(searchSublistItems(true));
     }
 
@@ -108,6 +114,7 @@ public class NetSuiteSourceTest extends NetSuiteBaseTest {
 
     @Test
     public void testSearchCustomRecordWithCustomFields() {
+        log.info("Test 'search custom record with custom fields' start ");
         clientService.getMetaDataSource().setCustomizationEnabled(true);
         dataSet.setRecordType("customrecordsearch_date_type");
         inputProperties.setSearchCondition(Collections.singletonList(
@@ -116,6 +123,5 @@ public class NetSuiteSourceTest extends NetSuiteBaseTest {
         List<Record> records = buildAndRunEmitterJob(inputProperties);
         assertEquals(1, records.size());
         assertTrue("FirstRecord".equals(records.get(0).get(String.class, "Name")));
-
     }
 }

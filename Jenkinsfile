@@ -67,8 +67,20 @@ spec:
                                     credentialsId: 'nexus-artifact-zl-credentials',
                                     usernameVariable: 'NEXUS_USER',
                                     passwordVariable: 'NEXUS_PASSWORD')
+                            , usernamePassword(
+                                credentialsId: 'netsuite-integration',
+                                usernameVariable: 'NETSUITE_INTEGRATION_USER',
+                                passwordVariable: 'NETSUITE_INTEGRATION_PASSWORD')
+                            , usernamePassword(
+                                credentialsId: 'netsuite-integration-consumer',
+                                usernameVariable: 'NETSUITE_INTEGRATION_CONSUMER_USER',
+                                passwordVariable: 'NETSUITE_INTEGRATION_CONSUMER_PASSWORD')
+                            , usernamePassword(
+                                credentialsId: 'netsuite-integration-token',
+                                usernameVariable: 'NETSUITE_INTEGRATION_TOKEN_USER',
+                                passwordVariable: 'NETSUITE_INTEGRATION_TOKEN_PASSWORD')
                     ]) {
-                        sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -e ${talendOssRepositoryArg}"
+                        sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/ -e ${talendOssRepositoryArg}"
                     }
                 }
             }

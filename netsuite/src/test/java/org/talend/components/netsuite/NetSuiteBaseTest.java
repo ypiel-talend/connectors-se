@@ -33,9 +33,12 @@ import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
@@ -53,6 +56,10 @@ public abstract class NetSuiteBaseTest {
 
     public static final String TEST_COLLECTOR = "TestCollector";
 
+    public static String NETSUITE_ENDPOINT_URL;
+
+    public static String NETSUITE_ACCOUNT;
+
     protected static NetSuiteClientService<?> clientService;
 
     protected static NetSuiteDataStore dataStore;
@@ -69,14 +76,16 @@ public abstract class NetSuiteBaseTest {
     public static final SimpleComponentRule COMPONENT = new SimpleComponentRule("org.talend.components.netsuite");
 
     @BeforeAll
-    public static void setupOnce() {
+    public static void setupOnce() throws IOException {
+        readPropertiesFile();
+
         final MavenDecrypter decrypter = new MavenDecrypter();
         Server consumer = decrypter.find("netsuite.consumer");
         Server token = decrypter.find("netsuite.token");
         dataStore = new NetSuiteDataStore();
         dataStore.setEnableCustomization(false);
-        dataStore.setAccount(System.getProperty("netsuite.account"));
-        dataStore.setEndpoint(System.getProperty("netsuite.endpoint.url"));
+        dataStore.setAccount(NETSUITE_ACCOUNT);
+        dataStore.setEndpoint(NETSUITE_ENDPOINT_URL);
         dataStore.setLoginType(LoginType.TBA);
         dataStore.setConsumerKey(consumer.getUsername());
         dataStore.setConsumerSecret(consumer.getPassword());
@@ -87,6 +96,15 @@ public abstract class NetSuiteBaseTest {
         clientService = service.getClientService(dataStore);
         messages = COMPONENT.findService(Messages.class);
         factory = COMPONENT.findService(RecordBuilderFactory.class);
+    }
+
+    private static void readPropertiesFile() throws IOException {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("connection.properties")) {
+            Properties props = new Properties();
+            props.load(is);
+            NETSUITE_ENDPOINT_URL = props.getProperty("netsuite.endpoint.url", "");
+            NETSUITE_ACCOUNT = props.getProperty("netsuite.account", "");
+        }
     }
 
     protected String getComponentName(String familyName, String componentType) {

@@ -90,16 +90,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemPropertyVariables>
-            <netsuite.endpoint.url>${netsuite.endpoint.url}</netsuite.endpoint.url>
-            <netsuite.account>${netsuite.account}</netsuite.account>
-            <netsuite.email>${netsuite.email}</netsuite.email>
-            <netsuite.password>${netsuite.password}</netsuite.password>
-            <netsuite.role>${netsuite.roleId}</netsuite.role>
-            <netsuite.applicationId>${netsuite.applicationId}</netsuite.applicationId>
-          </systemPropertyVariables>
-        </configuration>
+        <!--        <configuration>-->
+<!--          <systemPropertyVariables>-->
+<!--            <netsuite.endpoint.url>${netsuite.endpoint.url}</netsuite.endpoint.url>-->
+<!--            <netsuite.account>${netsuite.account}</netsuite.account>-->
+<!--            <netsuite.email>${netsuite.email}</netsuite.email>-->
+<!--            <netsuite.password>${netsuite.password}</netsuite.password>-->
+<!--            <netsuite.roleId>${netsuite.roleId}</netsuite.roleId>-->
+<!--            <netsuite.applicationId>${netsuite.applicationId}</netsuite.applicationId>-->
+<!--          </systemPropertyVariables>-->
+<!--        </configuration>-->
         <executions>
           <execution>
             <id>default-test</id>
