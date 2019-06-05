@@ -271,7 +271,7 @@ class OneDriveTestIT {
 
         Assertions.assertEquals(2, res.size());
         Map<String, String> fileData = Collections
-                .unmodifiableMap(res.stream().collect(Collectors.toMap(i -> i.getString("id"), i -> i.getString("localFile"))));
+                .unmodifiableMap(res.stream().collect(Collectors.toMap(i -> i.getString("id"), i -> i.getString("payload"))));
         String fileContent1 = new String(Base64.getDecoder().decode(fileData.get(file1.id)), StringHelper.STRING_CHARSET);
         String fileContent2 = new String(Base64.getDecoder().decode(fileData.get(file2.id)), StringHelper.STRING_CHARSET);
         Assertions.assertEquals(fileContentOrigin1, fileContent1);
