@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.talend.components.onedrive.helpers.StringHelper;
-import org.talend.components.onedrive.service.http.OneDriveAuthHttpClientService;
 import org.talend.components.onedrive.service.http.OneDriveHttpClientService;
 import org.talend.components.onedrive.sources.create.OneDriveCreateConfiguration;
 import org.talend.components.onedrive.sources.delete.OneDriveDeleteConfiguration;
@@ -41,6 +40,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
@@ -60,8 +60,8 @@ class OneDriveTestIT {
     @Service
     private JsonBuilderFactory jsonBuilderFactory;
 
-    @Service
-    private OneDriveAuthHttpClientService oneDriveAuthHttpClientService;
+    // @Service
+    // private OneDriveAuthHttpClientService oneDriveAuthHttpClientService;
 
     @Service
     private OneDriveHttpClientService oneDriveHttpClientService;
@@ -333,6 +333,16 @@ class OneDriveTestIT {
                 }
             }
         }
+
+        // clear dir
+        DriveItem file1 = oneDriveHttpClientService.getItemByPath(testContext.getDataSetLoginPassword().getDataStore(),
+                filePath1);
+        DriveItem file2 = oneDriveHttpClientService.getItemByPath(testContext.getDataSetLoginPassword().getDataStore(),
+                filePath2);
+        Optional.ofNullable(file1).ifPresent(
+                item -> oneDriveHttpClientService.deleteItem(testContext.getDataSetLoginPassword().getDataStore(), item.id));
+        Optional.ofNullable(file2).ifPresent(
+                item -> oneDriveHttpClientService.deleteItem(testContext.getDataSetLoginPassword().getDataStore(), item.id));
 
         List<JsonObject> inputData = new ArrayList<>();
 

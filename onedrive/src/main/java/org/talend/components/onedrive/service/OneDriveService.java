@@ -130,7 +130,8 @@ public class OneDriveService {
             log.debug("start health check");
             healthChecker.checkHealth(dataStore);
         } catch (Exception e) {
-            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.healthCheckFailed(e.getMessage()));
+            log.debug("Check connection error: " + e.getMessage());
+            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.healthCheckFailed());
         }
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.healthCheckOk());
     }

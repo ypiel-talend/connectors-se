@@ -78,9 +78,22 @@ public class OneDriveHttpClientService {
         if (path == null || path.isEmpty()) {
             driveItem = getRoot(dataStore);
         } else {
-            driveItem = graphClient.getDriveRequestBuilder().root().itemWithPath(path).buildRequest().get();
+            try {
+                driveItem = graphClient.getDriveRequestBuilder().root().itemWithPath(path).buildRequest().get();
+            } catch (GraphServiceException e) {
+                driveItem = handleGetItemError(e);
+            }
         }
         return driveItem;
+    }
+
+    private DriveItem handleGetItemError(GraphServiceException e) {
+        if (e.getResponseCode() == ERROR_CODE_ITEM_NOT_FOUND) {
+            return null;
+        } else {
+            // unexpected error
+            throw e;
+        }
     }
 
     public DriveItem getItemByName(OneDriveDataStore dataStore, String parentId, String itemName) {
@@ -90,7 +103,11 @@ public class OneDriveHttpClientService {
         if (parentId == null || parentId.isEmpty()) {
             driveItem = graphClient.getDriveRequestBuilder().root().itemWithPath(itemName).buildRequest().get();
         } else {
-            driveItem = graphClient.getDriveRequestBuilder().items(parentId).itemWithPath(itemName).buildRequest().get();
+            try {
+                driveItem = graphClient.getDriveRequestBuilder().items(parentId).itemWithPath(itemName).buildRequest().get();
+            } catch (GraphServiceException e) {
+                driveItem = handleGetItemError(e);
+            }
         }
         return driveItem;
     }

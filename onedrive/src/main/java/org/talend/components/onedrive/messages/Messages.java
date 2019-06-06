@@ -7,7 +7,7 @@ public interface Messages {
 
     String healthCheckOk();
 
-    String healthCheckFailed(String error);
+    String healthCheckFailed();
 
     String healthCheckLoginIsEmpty();
 
