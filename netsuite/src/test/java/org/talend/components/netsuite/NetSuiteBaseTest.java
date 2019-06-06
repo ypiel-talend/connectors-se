@@ -72,11 +72,18 @@ public abstract class NetSuiteBaseTest {
 
     protected static RecordBuilderFactory factory;
 
+    private static boolean setupIsDone;
+
     @ClassRule
     public static final SimpleComponentRule COMPONENT = new SimpleComponentRule("org.talend.components.netsuite");
 
     @BeforeAll
     public static void setupOnce() throws IOException {
+        // if (setupIsDone)
+        // return;
+        setupIsDone = true;
+
+        System.out.println("-------------------------------- setup once ---------------------------------------");
         readPropertiesFile();
 
         final MavenDecrypter decrypter = new MavenDecrypter();

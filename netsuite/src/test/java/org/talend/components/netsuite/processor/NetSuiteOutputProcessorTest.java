@@ -30,6 +30,7 @@ import org.talend.components.netsuite.dataset.NetSuiteDataSet;
 import org.talend.components.netsuite.dataset.NetSuiteInputProperties;
 import org.talend.components.netsuite.dataset.NetSuiteOutputProperties;
 import org.talend.components.netsuite.dataset.NetSuiteOutputProperties.DataAction;
+import org.talend.components.netsuite.dataset.SearchConditionConfiguration;
 import org.talend.components.netsuite.source.NsObjectInputTransducer;
 import org.talend.components.netsuite.test.TestCollector;
 import org.talend.components.netsuite.test.TestEmitter;
@@ -94,7 +95,6 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
 
         outputProperties.setAction(DataAction.DELETE);
         buildAndRunCollectorJob(outputProperties, updateRecord);
-
         assertTrue(buildAndRunEmitterJob(inputDataSet).isEmpty());
     }
 
@@ -127,9 +127,11 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
             outputProperties.setAction(DataAction.ADD);
             buildAndRunCollectorJob(outputProperties, record);
 
+            inputDataSet.setSearchCondition(Collections.singletonList(
+                    new SearchConditionConfiguration("Custrecord79", "String.is", preparedCustomField79Value, "")));
             Record finalRecord = buildAndRunEmitterJob(inputDataSet).stream()
-                    .filter(r -> preparedCustomField79Value.equals(r.getString("Custrecord79"))).findFirst()
-                    .orElseThrow(IllegalStateException::new);
+                    // .filter(r -> preparedCustomField79Value.equals(r.getString("Custrecord79")))
+                    .findFirst().orElseThrow(IllegalStateException::new);
             updateRecord = inputTransducer.read(() -> this.prepareCustomRecord(finalRecord));
             record = finalRecord;
         } else {
@@ -140,9 +142,11 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
         buildAndRunCollectorJob(outputProperties, updateRecord);
 
         final String preparedCustomField80Value = updateRecord.getString("Custrecord80");
+        inputDataSet.setSearchCondition(Collections
+                .singletonList(new SearchConditionConfiguration("Custrecord80", "String.is", preparedCustomField80Value, "")));
         Record resultUpdatedRecord = buildAndRunEmitterJob(inputDataSet).stream()
-                .filter(r -> preparedCustomField80Value.equals(r.getString("Custrecord80"))).findFirst()
-                .orElseThrow(IllegalStateException::new);
+                // .filter(r -> preparedCustomField80Value.equals(r.getString("Custrecord80")))
+                .findFirst().orElseThrow(IllegalStateException::new);
 
         assertEquals(updateRecord.getString("Name"), resultUpdatedRecord.getString("Name"));
 
@@ -180,9 +184,11 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
         inputDataSet.setDataSet(dataSet);
 
         String messageStringPrepared = record.getString("Message");
+        inputDataSet.setSearchCondition(
+                Collections.singletonList(new SearchConditionConfiguration("Message", "String.is", messageStringPrepared, "")));
         Record resultRecord = buildAndRunEmitterJob(inputDataSet).stream()
-                .filter(r -> messageStringPrepared.equals(r.getString("Message"))).findFirst()
-                .orElseThrow(IllegalStateException::new);
+                // .filter(r -> messageStringPrepared.equals(r.getString("Message")))
+                .findFirst().orElseThrow(IllegalStateException::new);
         assertEquals(record.getString("Custbody111"), resultRecord.getString("Custbody111"));
 
         outputProperties.setAction(DataAction.DELETE);
