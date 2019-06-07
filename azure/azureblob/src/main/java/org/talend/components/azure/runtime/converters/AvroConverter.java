@@ -133,21 +133,23 @@ public class AvroConverter implements RecordConverter<GenericRecord> {
                 }
                 break;
             case FLOAT:
-            case DOUBLE:
                 OptionalDouble optionalFloat = fromRecord.getOptionalFloat(name);
                 if (optionalFloat.isPresent()) {
-                    toRecord.put(name, optionalFloat.getAsDouble());
+                    toRecord.put(name, Double.valueOf(optionalFloat.getAsDouble()).floatValue());
+                } else {
+                    toRecord.put(name, null);
+                }
+            case DOUBLE:
+                OptionalDouble optionalDouble = fromRecord.getOptionalDouble(name);
+                if (optionalDouble.isPresent()) {
+                    toRecord.put(name, optionalDouble.getAsDouble());
                 } else {
                     toRecord.put(name, null);
                 }
                 break;
             case BOOLEAN:
                 Optional<Boolean> optionalBooleanValue = fromRecord.getOptionalBoolean(name);
-                if (optionalBooleanValue.isPresent()) {
-                    toRecord.put(name, optionalBooleanValue.get());
-                } else {
-                    toRecord.put(name, null);
-                }
+                toRecord.put(name, optionalBooleanValue.orElse(null));
                 break;
             }
         }

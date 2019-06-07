@@ -187,4 +187,38 @@ class AvroOutputIT extends BaseIT {
         Assert.assertNull(firstRecord.get(byte[].class, "nullByteArrayColumn"));
         Assert.assertNull(firstRecord.getDateTime("nullDateColumn"));
     }
+
+    @Test
+    void testSchemaIsNotMissingForNullsInFirstRecord() {
+        final int recordSize = 2;
+        final int fieldSize = 2;
+        Schema.Builder schemaBuilder = new SchemaImpl.BuilderImpl();
+        Schema schema = schemaBuilder.withType(Schema.Type.RECORD)
+                .withEntry(new SchemaImpl.EntryImpl("stringColumn", Schema.Type.STRING, true, null, null, null))
+                .withEntry(new SchemaImpl.EntryImpl("intColumn", Schema.Type.INT, true, null, null, null)).build();
+
+        List<Record> testRecords = new ArrayList<>();
+        testRecords.add(componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
+                .withString("stringColumn", "a").build()); //stringColumn:a, intColumn:null
+
+        testRecords.add(componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
+                .withString("stringColumn", "b").withInt("intColumn", Integer.MAX_VALUE).build()); //stringColumn:a, intColumn:not null
+        componentsHandler.setInputData(testRecords);
+
+        String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
+        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections().from("inputFlow").to("outputComponent").build().run();
+
+        BlobInputProperties inputProperties = new BlobInputProperties();
+        inputProperties.setDataset(blobOutputProperties.getDataset());
+
+        String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
+        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
+                .connections().from("azureInput").to("collector").build().run();
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
+
+        Assert.assertEquals(recordSize, records.size());
+        Assert.assertEquals(fieldSize, records.get(0).getSchema().getEntries().size());
+        Assert.assertEquals(fieldSize, records.get(1).getSchema().getEntries().size());
+    }
 }
