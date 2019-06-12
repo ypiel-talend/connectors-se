@@ -22,7 +22,6 @@ import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus.Status;
-import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 @Service
 public class UIActionService {
@@ -53,7 +52,7 @@ public class UIActionService {
         }
     }
 
-    @DiscoverSchema(GUESS_SCHEMA)
+    // @DiscoverSchema(GUESS_SCHEMA)
     public Schema guessSchema(@Option final NetSuiteDataSet dataSet) {
         return service.getSchema(dataSet, null);
     }

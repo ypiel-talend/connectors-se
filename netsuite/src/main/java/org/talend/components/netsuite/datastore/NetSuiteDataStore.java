@@ -43,7 +43,7 @@ public class NetSuiteDataStore implements Serializable {
 
     @Option
     @Required
-    @Pattern("https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)")
+    @Pattern("^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)")
     @DefaultValue("https://webservices.netsuite.com/services/NetSuitePort_2018_2")
     @Documentation("NetSuite endpoint to connect")
     private String endpoint;
@@ -71,8 +71,9 @@ public class NetSuiteDataStore implements Serializable {
 
     @Option
     @ActiveIf(target = "loginType", value = "BASIC")
+    @Pattern("^[1-9][0-9]*$")
     @Documentation("Role assigned")
-    private int role;
+    private String role;
 
     @Option
     @Required

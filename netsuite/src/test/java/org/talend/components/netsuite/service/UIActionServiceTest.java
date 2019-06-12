@@ -75,7 +75,7 @@ public class UIActionServiceTest extends NetSuiteBaseTest {
 
         NetSuiteDataStore dataStoreWrong = new NetSuiteDataStore();
         dataStoreWrong.setLoginType(LoginType.BASIC);
-        dataStoreWrong.setRole(3);
+        dataStoreWrong.setRole("3");
         dataStoreWrong.setAccount(NETSUITE_ACCOUNT);
         dataStoreWrong.setEndpoint(NETSUITE_ENDPOINT_URL);
         dataStoreWrong.setEmail("test_junit@talend.com");

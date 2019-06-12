@@ -25,6 +25,7 @@ import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -53,7 +54,8 @@ public class NetSuiteService {
             connect(dataStore);
         }
         return dataSetRuntime.getRecordTypes().stream()
-                .map(record -> new SuggestionValues.Item(record.getName(), record.getDisplayName())).collect(toList());
+                .map(record -> new SuggestionValues.Item(record.getName(), record.getDisplayName()))
+                .sorted(Comparator.comparing(i -> i.getLabel().toLowerCase())).collect(toList());
     }
 
     List<SuggestionValues.Item> getSearchTypes(NetSuiteDataSet dataSet) {

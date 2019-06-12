@@ -22,8 +22,6 @@ import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure.Type;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
@@ -33,8 +31,7 @@ import java.util.List;
 @DataSet
 @AllArgsConstructor
 @NoArgsConstructor
-@GridLayouts({
-        @GridLayout({ @GridLayout.Row({ "dataStore" }), @GridLayout.Row({ "recordType" }), @GridLayout.Row({ "schema" }) }),
+@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataStore" }), @GridLayout.Row({ "recordType" }) }),
         @GridLayout(names = { GridLayout.FormType.ADVANCED }, value = { @GridLayout.Row({ "dataStore" }) }) })
 @Documentation("Common properties that are present in Input & Output components")
 public class NetSuiteDataSet implements Serializable {
@@ -49,7 +46,7 @@ public class NetSuiteDataSet implements Serializable {
     private String recordType;
 
     @Option
-    @Structure(discoverSchema = UIActionService.GUESS_SCHEMA, type = Type.OUT)
+    // @Structure(discoverSchema = UIActionService.GUESS_SCHEMA, type = Type.OUT)
     @Documentation("Design Schema")
     private List<String> schema;
 }

@@ -53,7 +53,7 @@ public class NetSuiteEndpoint {
      * Creates new instance using given client factory and connection configuration.
      *
      * @param clientFactory client factory
-     * @param connectionConfig connection configuration
+     * @param dataStore data store
      */
     public NetSuiteEndpoint(NetSuiteClientFactory<?> clientFactory, Messages i18n, NetSuiteDataStore dataStore) {
         this.clientFactory = clientFactory;
@@ -87,12 +87,12 @@ public class NetSuiteEndpoint {
                 throw new NetSuiteException(new NetSuiteErrorCode(NetSuiteErrorCode.CLIENT_ERROR), i18n.passwordRequired());
             }
 
-            if (properties.getRole() == 0) {
+            if (properties.getRole().trim().isEmpty()) {
                 throw new NetSuiteException(new NetSuiteErrorCode(NetSuiteErrorCode.CLIENT_ERROR), i18n.roleRequired());
             }
 
             credentials = new NetSuiteCredentials(properties.getEmail(), properties.getPassword(), properties.getAccount(),
-                    String.valueOf(properties.getRole()), properties.getApplicationId());
+                    properties.getRole().trim(), properties.getApplicationId());
         } else {
             if (StringUtils.isEmpty(properties.getConsumerKey())) {
                 throw new NetSuiteException(new NetSuiteErrorCode(NetSuiteErrorCode.CLIENT_ERROR), i18n.consumerKeyRequired());
