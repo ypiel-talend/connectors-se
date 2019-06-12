@@ -87,7 +87,7 @@ public class NetSuiteEndpoint {
                 throw new NetSuiteException(new NetSuiteErrorCode(NetSuiteErrorCode.CLIENT_ERROR), i18n.passwordRequired());
             }
 
-            if (properties.getRole().trim().isEmpty()) {
+            if (properties.getRole() == null || properties.getRole().trim().isEmpty()) {
                 throw new NetSuiteException(new NetSuiteErrorCode(NetSuiteErrorCode.CLIENT_ERROR), i18n.roleRequired());
             }
 
