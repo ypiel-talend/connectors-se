@@ -10,14 +10,39 @@
 
     <artifactId>component-extension</artifactId>
 
-    <name>Components :: Extension </name>
+    <name>Components :: Extension</name>
 
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.8</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.26</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.talend.sdk.component</groupId>
             <artifactId>component-runtime-manager</artifactId>
             <version>${component-runtime.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.4.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.26</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

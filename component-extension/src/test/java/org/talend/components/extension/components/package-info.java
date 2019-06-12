@@ -11,21 +11,9 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.extension;
+@Components(family = "Test")
+@Icon(value = Icon.IconType.DEFAULT)
+package org.talend.components.extension.components;
 
-import org.talend.sdk.component.runtime.manager.ComponentManager;
-
-import java.util.stream.Stream;
-
-public class ComponentExtCustomizer implements ComponentManager.Customizer {
-
-    @Override
-    public Stream<String> containerClassesAndPackages() {
-        return Stream.of(DatastoreRef.class.getName());
-    }
-
-    @Override
-    public boolean ignoreBeamClassLoaderExclusions() {
-        return false;
-    }
-}
+import org.talend.sdk.component.api.component.Components;
+import org.talend.sdk.component.api.component.Icon;
