@@ -199,10 +199,11 @@ class AvroOutputIT extends BaseIT {
 
         List<Record> testRecords = new ArrayList<>();
         testRecords.add(componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
-                .withString("stringColumn", "a").build()); //stringColumn:a, intColumn:null
+                .withString("stringColumn", "a").build()); // stringColumn:a, intColumn:null
 
         testRecords.add(componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
-                .withString("stringColumn", "b").withInt("intColumn", Integer.MAX_VALUE).build()); //stringColumn:a, intColumn:not null
+                .withString("stringColumn", "b").withInt("intColumn", Integer.MAX_VALUE).build()); // stringColumn:a,
+                                                                                                   // intColumn:not null
         componentsHandler.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
