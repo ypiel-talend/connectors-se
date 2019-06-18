@@ -96,7 +96,7 @@ public class Output implements Serializable {
                 throw new IllegalStateException(i18n.errorStartMessagesDelivery());
             }
 
-            session = service.getSession(connection);
+            session = service.getSession(connection, true);
 
             destination = service.getDestination(session, configuration.getBasicConfig().getDestination(),
                     configuration.getBasicConfig().getMessageType());

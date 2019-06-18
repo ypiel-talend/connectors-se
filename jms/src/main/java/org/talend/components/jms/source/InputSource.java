@@ -98,7 +98,7 @@ public class InputSource implements Serializable {
                 throw new IllegalStateException(i18n.errorStartMessagesDelivery());
             }
 
-            session = service.getSession(connection);
+            session = service.getSession(connection, configuration.isDoAcknowledge());
 
             destination = service.getDestination(session, configuration.getBasicConfig().getDestination(),
                     configuration.getBasicConfig().getMessageType());
@@ -123,7 +123,8 @@ public class InputSource implements Serializable {
         String textMessage = null;
         Message message = null;
         try {
-            message = consumer.receive(configuration.getTimeout() * 1000);
+            message = configuration.getTimeout() == -1 ? consumer.receiveNoWait()
+                    : consumer.receive(configuration.getTimeout() * 1000);
             if (message != null) {
                 textMessage = ((TextMessage) message).getText();
                 doAcknowledge(message);

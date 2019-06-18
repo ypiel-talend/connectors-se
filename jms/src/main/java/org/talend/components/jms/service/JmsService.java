@@ -164,8 +164,8 @@ public class JmsService {
         return (MessageType.QUEUE == messageType) ? session.createQueue(destination) : session.createTopic(destination);
     }
 
-    public Session getSession(Connection connection) throws JMSException {
-        return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    public Session getSession(Connection connection, boolean autoAcknowledge) throws JMSException {
+        return connection.createSession(false, autoAcknowledge ? Session.AUTO_ACKNOWLEDGE : Session.CLIENT_ACKNOWLEDGE);
     }
 
     public ConnectionFactory getConnectionFactory(Context context) throws NamingException {

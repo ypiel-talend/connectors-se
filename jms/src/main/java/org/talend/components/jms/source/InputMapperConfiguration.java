@@ -33,9 +33,17 @@ public class InputMapperConfiguration implements Serializable {
     private BasicConfiguration basicConfig;
 
     @Option
-    @Min(0)
     @Documentation("JMS receive message timeout. A timeout of zero never expires, and the call blocks indefinitely.")
-    private Integer timeout = 0;
+    private Integer timeout = -1;
+
+    @Option
+    @Documentation("Specify a maximum read time")
+    private boolean useMaxReadTime = false;
+
+    @Option
+    @ActiveIf(target = "useMaxReadTime", value = "true")
+    @Documentation("Stop reading after this length of time (ms).")
+    private Long maxReadTime = 60000L;
 
     @Option
     @Documentation("Message Selector Expression used to receive only messages whose headers and properties match the selector")
