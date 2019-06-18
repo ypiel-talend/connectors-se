@@ -202,7 +202,7 @@ class AvroOutputIT extends BaseIT {
                 .withString("stringColumn", "a").build()); // stringColumn:a, intColumn:null
 
         testRecords.add(componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
-                .withString("stringColumn", "b").withInt("intColumn", Integer.MAX_VALUE).build()); // stringColumn:a,
+                .withString("stringColumn", "b").withInt("intColumn", Integer.MAX_VALUE).build()); // stringColumn:b,
                                                                                                    // intColumn:not null
         componentsHandler.setInputData(testRecords);
 
