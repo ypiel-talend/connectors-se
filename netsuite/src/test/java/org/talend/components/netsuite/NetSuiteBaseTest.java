@@ -60,6 +60,8 @@ public abstract class NetSuiteBaseTest {
 
     public static String NETSUITE_ACCOUNT;
 
+    public static String NETSUITE_ROLE_ID;
+
     protected static NetSuiteClientService<?> clientService;
 
     protected static NetSuiteDataStore dataStore;
@@ -111,6 +113,7 @@ public abstract class NetSuiteBaseTest {
             props.load(is);
             NETSUITE_ENDPOINT_URL = props.getProperty("netsuite.endpoint.url", "");
             NETSUITE_ACCOUNT = props.getProperty("netsuite.account", "");
+            NETSUITE_ROLE_ID = props.getProperty("netsuite.roleId", "");
         }
     }
 

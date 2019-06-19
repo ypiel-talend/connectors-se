@@ -20,6 +20,7 @@ public class NetSuiteServiceTest extends NetSuiteBaseTest {
     public void testConnectFailedMissingUserCredentials() {
         log.info("Integration test 'test failed missing user credentials' start ");
         NetSuiteDataStore dataStoreLocal = new NetSuiteDataStore();
+        dataStoreLocal.setApiVersion(ApiVersion.V2018_2);
 
         // Missing endpoint
         Assertions.assertThrows(NetSuiteException.class, () -> service.connect(dataStoreLocal));
@@ -43,7 +44,6 @@ public class NetSuiteServiceTest extends NetSuiteBaseTest {
         // Missing roleId
         dataStoreLocal.setPassword(netsuiteCredentials.getPassword());
         Assertions.assertThrows(NetSuiteException.class, () -> service.connect(dataStoreLocal));
-
     }
 
     @Test
