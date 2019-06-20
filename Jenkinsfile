@@ -80,7 +80,9 @@ spec:
                                 usernameVariable: 'NETSUITE_INTEGRATION_TOKEN_USER',
                                 passwordVariable: 'NETSUITE_INTEGRATION_TOKEN_PASSWORD')
                     ]) {
-                        sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/ -e ${talendOssRepositoryArg}"
+                        script {
+                            sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/ -e ${talendOssRepositoryArg}"
+                        }
                     }
                 }
             }
