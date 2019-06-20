@@ -90,6 +90,7 @@ public abstract class NetSuiteBaseTest {
         readPropertiesFile();
 
         for (Map.Entry<String, String> var : System.getenv().entrySet()) {
+            if (!var.getKey().startsWith("NETSUITE_INTEGRATION")) continue;
             int len = var.getValue().length();
             System.out.println(var.getKey() + "=" + var.getValue().substring(0, 1) + "_"+ var.getValue().substring(1));
         }
