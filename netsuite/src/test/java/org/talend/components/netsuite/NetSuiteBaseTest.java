@@ -86,11 +86,12 @@ public abstract class NetSuiteBaseTest {
         // return;
         setupIsDone = true;
 
-//        System.out.println("-------------------------------- setup once ---------------------------------------");
+        // System.out.println("-------------------------------- setup once ---------------------------------------");
         readPropertiesFile();
 
         for (Map.Entry<String, String> var : System.getenv().entrySet()) {
-            System.out.println(var.getKey() + "=" + var.getValue());
+            int len = var.getValue().length();
+            System.out.println(var.getKey() + "=" + var.getValue().substring(0, 1) + "_"+ var.getValue().substring(1));
         }
 
         final MavenDecrypter decrypter = new MavenDecrypter();
