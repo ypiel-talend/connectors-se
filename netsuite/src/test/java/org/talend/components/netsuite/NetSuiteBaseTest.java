@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
@@ -85,8 +86,12 @@ public abstract class NetSuiteBaseTest {
         // return;
         setupIsDone = true;
 
-        System.out.println("-------------------------------- setup once ---------------------------------------");
+//        System.out.println("-------------------------------- setup once ---------------------------------------");
         readPropertiesFile();
+
+        for (Map.Entry<String, String> var : System.getenv().entrySet()) {
+            System.out.println(var.getKey() + "=" + var.getValue());
+        }
 
         final MavenDecrypter decrypter = new MavenDecrypter();
         Server consumer = decrypter.find("netsuite.consumer");
