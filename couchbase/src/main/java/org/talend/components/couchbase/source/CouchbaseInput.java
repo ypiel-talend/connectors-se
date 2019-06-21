@@ -132,7 +132,7 @@ public class CouchbaseInput implements Serializable {
     @PreDestroy
     public void release() {
         service.closeBucket(bucket);
-        service.closeConnection();
+        service.closeConnection(configuration.getDataSet().getDatastore());
     }
 
     private Record createRecord(Schema schema, JsonObject jsonObject) {
