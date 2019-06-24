@@ -38,18 +38,17 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 public abstract class NetSuiteBaseTest {
 
-    public static final String FAMILY_NAME = "NetSuite";
+    private static final String FAMILY_NAME = "NetSuite";
 
-    public static final String EMITTER = "Input";
+    private static final String EMITTER = "Input";
 
-    public static final String COLLECTOR = "Output";
+    private static final String COLLECTOR = "Output";
 
     public static final String TEST_FAMILY_NAME = "NetSuiteTest";
 
@@ -57,11 +56,11 @@ public abstract class NetSuiteBaseTest {
 
     public static final String TEST_COLLECTOR = "TestCollector";
 
-    public static String NETSUITE_ENDPOINT_URL;
+    protected static String NETSUITE_ENDPOINT_URL;
 
-    public static String NETSUITE_ACCOUNT;
+    protected static String NETSUITE_ACCOUNT;
 
-    public static String NETSUITE_ROLE_ID;
+    protected static String NETSUITE_ROLE_ID;
 
     protected static NetSuiteClientService<?> clientService;
 
@@ -75,25 +74,12 @@ public abstract class NetSuiteBaseTest {
 
     protected static RecordBuilderFactory factory;
 
-    private static boolean setupIsDone;
-
     @ClassRule
     public static final SimpleComponentRule COMPONENT = new SimpleComponentRule("org.talend.components.netsuite");
 
     @BeforeAll
     public static void setupOnce() throws IOException {
-        // if (setupIsDone)
-        // return;
-        setupIsDone = true;
-
-        // System.out.println("-------------------------------- setup once ---------------------------------------");
         readPropertiesFile();
-
-        for (Map.Entry<String, String> var : System.getenv().entrySet()) {
-            if (!var.getKey().startsWith("NETSUITE_INTEGRATION")) continue;
-            int len = var.getValue().length();
-            System.out.println(var.getKey() + "=" + var.getValue().substring(0, 1) + "_"+ var.getValue().substring(1));
-        }
 
         final MavenDecrypter decrypter = new MavenDecrypter();
         Server consumer = decrypter.find("netsuite.consumer");
@@ -124,11 +110,11 @@ public abstract class NetSuiteBaseTest {
         }
     }
 
-    protected String getComponentName(String familyName, String componentType) {
+    private String getComponentName(String familyName, String componentType) {
         return String.format("%s://%s", familyName, componentType);
     }
 
-    protected String getComponentWithConfig(String component, String config) {
+    private String getComponentWithConfig(String component, String config) {
         return String.format("%s?%s", component, config);
     }
 
