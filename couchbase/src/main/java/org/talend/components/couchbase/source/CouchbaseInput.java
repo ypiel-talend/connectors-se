@@ -111,8 +111,8 @@ public class CouchbaseInput implements Serializable {
         } else {
             JsonObject jsonObject = index.next().value();
 
-            if (!configuration.isUseN1QLQuery() || service.isResultNeedWrapper(configuration.getQuery())) {
-                // unwrap JSON (because we use SELECT * all values will be wrapped with bucket name)
+            if (!configuration.isUseN1QLQuery()) {
+                // unwrap JSON (we use SELECT * to retrieve all values. Result will be wrapped with bucket name)
                 jsonObject = (JsonObject) jsonObject.get(configuration.getDataSet().getBucket());
             }
 
