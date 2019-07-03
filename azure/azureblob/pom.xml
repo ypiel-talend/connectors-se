@@ -48,6 +48,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.talend.locales.connectors-se</groupId>
+            <artifactId>azureblob</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.talend.components</groupId>
             <artifactId>azurecommon</artifactId>
             <version>1.2.2-SNAPSHOT</version>

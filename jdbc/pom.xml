@@ -24,6 +24,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.talend.locales.connectors-se</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>${HikariCP.version}</version>

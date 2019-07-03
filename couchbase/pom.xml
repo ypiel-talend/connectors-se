@@ -21,6 +21,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.talend.locales.connectors-se</groupId>
+      <artifactId>couchbase</artifactId>
+      <version>1.2.2</version>
+    </dependency>
+    <dependency>
       <groupId>com.couchbase.client</groupId>
       <artifactId>java-client</artifactId>
       <version>${couchbase.client.version}</version>
