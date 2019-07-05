@@ -80,10 +80,10 @@ public abstract class BlobFileReader {
             case CSV:
                 return new CSVBlobFileReader(config, recordBuilderFactory, connectionServices);
             // FIXME uncomment it when excel will be ready to integrate
+
+            case AVRO:
+                return new AvroBlobFileReader(config, recordBuilderFactory, connectionServices);
             /*
-             * case AVRO:
-             * return new AvroBlobFileReader(config, recordBuilderFactory, connectionServices);
-             * 
              * case EXCEL: {
              * if (config.getExcelOptions().getExcelFormat() == ExcelFormat.HTML) {
              * return new ExcelHTMLBlobFileReader(config, recordBuilderFactory, connectionServices);
@@ -91,9 +91,11 @@ public abstract class BlobFileReader {
              * return new ExcelBlobFileReader(config, recordBuilderFactory, connectionServices);
              * }
              * }
-             * case PARQUET:
-             * return new ParquetBlobFileReader(config, recordBuilderFactory, connectionServices);
              */
+
+            case PARQUET:
+                return new ParquetBlobFileReader(config, recordBuilderFactory, connectionServices);
+
             default:
                 throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
             }
