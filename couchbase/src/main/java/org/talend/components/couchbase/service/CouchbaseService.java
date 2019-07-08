@@ -285,4 +285,14 @@ public class CouchbaseService {
             return usages.decrementAndGet();
         }
     }
+
+    public int getTotalNumberOfRecordsInBucket(Bucket bucket) {
+        try {
+            JsonObject basicBucketStatistic = (JsonObject) bucket.bucketManager().info().raw().get("basicStats");
+            return Integer.valueOf(basicBucketStatistic.get("itemCount").toString());
+        } catch (Exception e){
+            // todo: inform user that we can't get number of records
+        }
+        return 1;
+    }
 }

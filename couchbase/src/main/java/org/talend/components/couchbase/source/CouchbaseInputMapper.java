@@ -13,6 +13,8 @@
 
 package org.talend.components.couchbase.source;
 
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.components.couchbase.service.I18nMessage;
 
@@ -52,6 +54,22 @@ public class CouchbaseInputMapper implements Serializable {
 
     @Assessor
     public long estimateSize() {
+        long limit;
+        try {
+            limit = Long.parseLong(configuration.getLimit());
+        } catch (NumberFormatException e) {
+            // Can't parse limit value or it's empty. Try to get total number of records from bucket
+            try {
+                Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
+                Bucket bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
+                limit = service.getTotalNumberOfRecordsInBucket(bucket);
+            } catch (Exception e1){
+                // If we can't recieve
+                return 100;
+            }
+        }
+
+
         // this method should return the estimation of the dataset size
         // it is recommended to return a byte value
         // if you don't have the exact size you can use a rough estimation
