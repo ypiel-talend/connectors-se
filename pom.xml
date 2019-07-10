@@ -92,6 +92,9 @@
         <node.version>v10.15.3</node.version>
         <yarn.version>v1.15.2</yarn.version>
 
+	<!-- version pour les traductions sur https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/org/talend/locales/connectors-se -->
+        <locales.version>1.2.3</locales.version>
+
         <!-- The XTM customer id that manage the translation of this project-->
         <xtm.customer.id>12240076</xtm.customer.id>
         <xtm.api.url>https://www.xtm-cloud.com/rest-api</xtm.api.url>

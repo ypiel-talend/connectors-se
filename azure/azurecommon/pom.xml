@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.talend.locales.connectors-se</groupId>
       <artifactId>azurecommon</artifactId>
-      <version>1.2.2</version>
+      <version>${locales.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
