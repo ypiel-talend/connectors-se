@@ -221,7 +221,7 @@ spec:
             }
             steps {
             	withCredentials([gitCredentials, nexusCredentials]) {
-					container('maven') {
+					container('main') {
                 		configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
 							sh """
 							    git config --global push.default current
