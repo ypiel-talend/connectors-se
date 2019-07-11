@@ -227,7 +227,7 @@ spec:
 							    git config --global push.default current
 							    git checkout ${env.BRANCH_NAME}
 							    mvn -B -s $MAVEN_SETTINGS release:clean release:prepare
-							    if [[ $? -eq 0 ]] ; then
+							    if [[ \$? -eq 0 ]] ; then
 							    	mvn -B -Darguments='-Dmaven.javadoc.skip=true -DskipTests' release:perform
 							    	PROJECT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
 							    	git push origin release/${PROJECT_VERSION}
