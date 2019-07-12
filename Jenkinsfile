@@ -88,7 +88,7 @@ spec:
                     sh 'for i in ci_documentation ci_nexus ci_site; do rm -Rf $i; rsync -av . $i; done'
                     // real task
                     withCredentials([nexusCredentials]) {
-                        sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -e ${talendOssRepositoryArg}"
+                        sh "mvn -U -B -s .jenkins/settings.xml -DskipTests clean install -PITs -e ${talendOssRepositoryArg}"
                     }
                 }
             }
@@ -222,19 +222,19 @@ spec:
             steps {
             	withCredentials([gitCredentials, nexusCredentials]) {
 					container('main') {
-                		configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
-							sh """
-							    git config --global push.default current
-							    git checkout ${env.BRANCH_NAME}
-							    mvn -B -s $MAVEN_SETTINGS release:clean release:prepare
-							    if [[ \$? -eq 0 ]] ; then
-							    	mvn -B -Darguments='-Dmaven.javadoc.skip=true -DskipTests' release:perform
-							    	PROJECT_VERSION=\$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
-							    	git push origin release/\${PROJECT_VERSION}
-							    	git push
-							    fi
-							"""
-						}
+                		
+						sh """
+						    git config --global push.default current
+						    git checkout ${env.BRANCH_NAME}
+						    mvn -B -s .jenkins/settings.xml release:clean release:prepare
+						    if [[ \$? -eq 0 ]] ; then
+						    	mvn -B -s .jenkins/settings.xml -Darguments='-Dmaven.javadoc.skip=true -DskipTests' release:perform
+						    	PROJECT_VERSION=\$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
+						    	git push origin release/\${PROJECT_VERSION}
+						    	git push
+						    fi
+						"""
+						
               		}
             	}
             }
