@@ -100,7 +100,8 @@ spec:
 	                     	    |mvn package -DskipTests --batch-mode  -s ../settings.xml
 	                     	    |cd target
 	                     	    |java -jar prvalidator-1.0.jar ${GITHUB_LOGIN} ${GITHUB_TOKEN} ${env.CHANGE_ID} ${env.GIT_COMMIT} connectors-ee \${current_rep}
-	                        """.stripMargin()           
+	                        """.stripMargin()   
+	                    }        
                     }
                 }
             }
