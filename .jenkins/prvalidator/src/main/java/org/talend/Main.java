@@ -32,9 +32,9 @@ public class Main {
 
         final List<String> sourceFiles = ext.fileListFromPullRequest(reqNumber);
 
-        sourceFiles.forEach(System.out::println);
-
         String comments = new CommentBuilder().buildComment(sourceFiles, bugs);
+
+        System.out.println("Send comments : " + comments);
 
         ext.addComment(reqNumber, comments);
     }
