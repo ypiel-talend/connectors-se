@@ -14,6 +14,7 @@
 package org.talend.components.couchbase.service;
 
 import com.couchbase.client.core.CouchbaseException;
+import com.couchbase.client.core.env.QueryServiceConfig;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
@@ -83,7 +84,9 @@ public class CouchbaseService {
         String[] urls = resolveAddresses(bootStrapNodes);
         try {
             ClusterHolder holder = clustersPool.computeIfAbsent(dataStore, ds -> {
-                CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(connectTimeout)
+                CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder()
+                        .connectTimeout(connectTimeout)
+                        .queryServiceConfig(QueryServiceConfig.create(10, 100))
                         .build();
                 Cluster cluster = CouchbaseCluster.create(environment, urls);
                 cluster.authenticate(username, password);
@@ -127,7 +130,7 @@ public class CouchbaseService {
     public Schema addColumns(@Option("dataSet") final CouchbaseDataSet dataSet) {
         CouchbaseInputConfiguration configuration = new CouchbaseInputConfiguration();
         configuration.setDataSet(dataSet);
-        CouchbaseInput couchbaseInput = new CouchbaseInput(configuration, this, builderFactory, i18n);
+        CouchbaseInput couchbaseInput = new CouchbaseInput(configuration, this, builderFactory, i18n,0,0);
         couchbaseInput.init();
         Record record = couchbaseInput.next();
         couchbaseInput.release();
@@ -293,6 +296,6 @@ public class CouchbaseService {
         } catch (Exception e){
             // todo: inform user that we can't get number of records
         }
-        return 1;
+        return 100;
     }
 }

@@ -163,4 +163,12 @@ public abstract class CouchbaseUtilTest implements Extension {
 
         return jsonObjects;
     }
+
+    public List<JsonObject> create1000JsonObjects(){
+        List<JsonObject> jsonObjects = new ArrayList<>();
+        for (int i=0; i<1000; i++){
+            jsonObjects.add(JsonObject.create().put("key" + i, "value" + i));
+        }
+        return jsonObjects;
+    }
 }

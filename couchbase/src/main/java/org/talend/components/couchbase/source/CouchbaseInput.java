@@ -63,12 +63,24 @@ public class CouchbaseInput implements Serializable {
 
     private Bucket bucket;
 
+    private long offset;
+
+    private long limit;
+
+//    public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
+//                          final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n) {
+//
+//    }
+
     public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
-            final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n) {
+            final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n,
+                          long offset, long limit) {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;
         this.i18n = i18n;
+        this.offset = offset;
+        this.limit = limit;
     }
 
     @PostConstruct
@@ -83,18 +95,14 @@ public class CouchbaseInput implements Serializable {
         if (configuration.isUseN1QLQuery()) {
             n1qlQueryRows = bucket.query(N1qlQuery.simple(configuration.getQuery()));
         } else {
-            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`" + getLimit()));
+            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`" + getOffset()));
         }
         checkErrors(n1qlQueryRows);
         index = n1qlQueryRows.rows();
     }
 
-    private String getLimit() {
-        if (configuration.getLimit().isEmpty()) {
-            return "";
-        } else {
-            return " LIMIT " + configuration.getLimit().trim();
-        }
+    private String getOffset(){
+        return " LIMIT " + limit + " OFFSET " + offset;
     }
 
     private void checkErrors(N1qlQueryResult n1qlQueryRows) {
@@ -131,7 +139,7 @@ public class CouchbaseInput implements Serializable {
 
     @PreDestroy
     public void release() {
-        service.closeBucket(bucket);
+//        service.closeBucket(bucket);
         service.closeConnection(configuration.getDataSet().getDatastore());
     }
 
