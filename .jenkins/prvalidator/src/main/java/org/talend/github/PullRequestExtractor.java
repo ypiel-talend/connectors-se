@@ -46,18 +46,15 @@ public class PullRequestExtractor {
         try {
             GHPullRequest request = this.repository.getPullRequest(requestNumber);
             final List<GHPullRequestReview> reviews = request.listReviews().asList();
+            boolean alreadyComment = reviews.stream()
+                    .map(GHPullRequestReview::getBody)
+                    .anyMatch((String body) -> Objects.equals(commment, body));
 
-            GHPullRequestReview review = null;
-            if (reviews.isEmpty()) {
+            if (!alreadyComment) {
                 System.out.println("reviews empty : create");
-                review = request.createReview().body("Code review").create();
-
-            } else {
-
-                review = reviews.get(reviews.size() - 1);
-                System.out.println("reviews exists : modify last, review " + review.getId());
+                final GHPullRequestReview review = request.createReview().body("Code review").create();
+                review.submit(commment, GHPullRequestReviewEvent.COMMENT);
             }
-            review.submit(commment, GHPullRequestReviewEvent.COMMENT);
         }
         catch (IOException | RuntimeException ex) {
             System.out.println("Non blocking exception on PR comments :" + ex.getMessage());
