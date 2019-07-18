@@ -52,6 +52,8 @@ public class MainTest extends CouchbaseUtilTest{
 
         assertNotNull(res);
         assertEquals(1000, res.size());
+
+        flashBucket();
     }
 
     private CouchbaseInputConfiguration getInputConfiguration() {
@@ -99,6 +101,23 @@ public class MainTest extends CouchbaseUtilTest{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
+    }
+
+    private void flashBucket() {
+        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder()
+                .connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
+                .queryServiceConfig(QueryServiceConfig.create(10,200))
+                .build();
+        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
+        Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
+
+        bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+
+        bucket.bucketManager().flush();
 
         bucket.close();
         cluster.disconnect();

@@ -64,8 +64,7 @@ public class CouchbaseOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
-        bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
+        bucket = service.openConnection(configuration.getDataSet());
         idFieldName = configuration.getIdFieldName();
     }
 
@@ -76,8 +75,7 @@ public class CouchbaseOutput implements Serializable {
 
     @PreDestroy
     public void release() {
-        service.closeBucket(bucket);
-        service.closeConnection(configuration.getDataSet().getDatastore());
+        service.closeConnection(configuration.getDataSet());
     }
 
     private JsonDocument toJsonDocument(String idFieldName, Record record) {

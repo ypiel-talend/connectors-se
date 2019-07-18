@@ -46,7 +46,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,7 +58,7 @@ public class CouchbaseService {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
 
-    private final Map<CouchbaseDataStore, ClusterHolder> clustersPool = new ConcurrentHashMap<>();
+    private final Map<CouchbaseDataSet, BucketHolder> bucketPool = new ConcurrentHashMap<>();
 
     @Service
     private I18nMessage i18n;
@@ -75,28 +74,27 @@ public class CouchbaseService {
         return addresses;
     }
 
-    public Cluster openConnection(CouchbaseDataStore dataStore) {
-        String bootStrapNodes = dataStore.getBootstrapNodes();
-        String username = dataStore.getUsername();
-        String password = dataStore.getPassword();
-        int connectTimeout = dataStore.getConnectTimeout() * 1000; // convert to sec
+    public Bucket openConnection(CouchbaseDataSet dataSet) {
+        String bootStrapNodes = dataSet.getDatastore().getBootstrapNodes();
+        String username = dataSet.getDatastore().getUsername();
+        String password = dataSet.getDatastore().getPassword();
+        int connectTimeout = dataSet.getDatastore().getConnectTimeout() * 1000; // convert to sec
 
         String[] urls = resolveAddresses(bootStrapNodes);
         try {
-            ClusterHolder holder = clustersPool.computeIfAbsent(dataStore, ds -> {
+            BucketHolder holder = bucketPool.computeIfAbsent(dataSet, ds -> {
                 CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder()
                         .connectTimeout(connectTimeout)
                         .queryServiceConfig(QueryServiceConfig.create(10, 100))
                         .build();
                 Cluster cluster = CouchbaseCluster.create(environment, urls);
                 cluster.authenticate(username, password);
-                return new ClusterHolder(environment, cluster);
+                Bucket bucket = cluster.openBucket(dataSet.getBucket());
+                return new BucketHolder(environment, cluster, bucket);
             });
             holder.use();
-            Cluster cluster = holder.getCluster();
-            String clusterName = cluster.clusterManager().info().raw().get("name").toString();
-            LOG.debug(i18n.connectedToCluster(clusterName));
-            return cluster;
+            Bucket bucket = holder.getBucket();
+            return bucket;
         } catch (Exception e) {
             LOG.error(i18n.connectionKO());
             throw new CouchbaseException(e);
@@ -105,9 +103,19 @@ public class CouchbaseService {
     }
 
     @HealthCheck("healthCheck")
-    public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final CouchbaseDataStore datastore) {
+    public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final CouchbaseDataStore dataStore) {
+        CouchbaseEnvironment environment = null;
+        Cluster cluster = null;
         try {
-            openConnection(datastore);
+            environment = new DefaultCouchbaseEnvironment.Builder()
+                    .connectTimeout(dataStore.getConnectTimeout())
+                    .queryServiceConfig(QueryServiceConfig.create(10, 100))
+                    .build();
+            cluster = CouchbaseCluster.create(environment, dataStore.getBootstrapNodes());
+            cluster.authenticate(dataStore.getUsername(), dataStore.getPassword());
+            String clusterName = cluster.clusterManager().info().raw().get("name").toString();
+            LOG.debug(i18n.connectedToCluster(clusterName));
+
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK");
         } catch (Exception exception) {
             String message = "";
@@ -122,7 +130,12 @@ public class CouchbaseService {
             LOG.error(message, exception);
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, message);
         } finally {
-            closeConnection(datastore);
+            if (cluster != null){
+                cluster.disconnect();
+            }
+            if (environment != null){
+                environment.shutdown();
+            }
         }
     }
 
@@ -138,29 +151,8 @@ public class CouchbaseService {
         return record.getSchema();
     }
 
-    public Bucket openBucket(Cluster cluster, String bucketName) {
-        Bucket bucket;
-        try {
-            bucket = cluster.openBucket(bucketName);
-        } catch (Exception e) {
-            LOG.error(i18n.cannotOpenBucket());
-            throw new CouchbaseException(e);
-        }
-        return bucket;
-    }
-
-    public void closeBucket(Bucket bucket) {
-        if (bucket != null) {
-            if (bucket.close()) {
-                LOG.debug(i18n.bucketWasClosed(bucket.name()));
-            } else {
-                LOG.debug(i18n.cannotCloseBucket(bucket.name()));
-            }
-        }
-    }
-
-    public void closeConnection(CouchbaseDataStore ds) {
-        ClusterHolder holder = clustersPool.get(ds);
+    public void closeConnection(CouchbaseDataSet ds) {
+        BucketHolder holder = bucketPool.get(ds);
         if (holder == null) {
             return;
         }
@@ -168,9 +160,18 @@ public class CouchbaseService {
         if (stillUsed > 0) {
             return;
         }
-        clustersPool.remove(ds);
+        bucketPool.remove(ds);
+        Bucket bucket = holder.getBucket();
         Cluster cluster = holder.getCluster();
         CouchbaseEnvironment environment = holder.getEnv();
+
+        if (bucket != null) {
+            if (bucket.close()) {
+                LOG.debug(i18n.bucketWasClosed(bucket.name()));
+            } else {
+                LOG.debug(i18n.cannotCloseBucket(bucket.name()));
+            }
+        }
         if (cluster != null) {
             if (cluster.disconnect()) {
                 log.debug(i18n.clusterWasClosed());
@@ -265,7 +266,7 @@ public class CouchbaseService {
         }
     }
 
-    public static class ClusterHolder {
+    public static class BucketHolder {
 
         @Getter
         private final CouchbaseEnvironment env;
@@ -273,11 +274,15 @@ public class CouchbaseService {
         @Getter
         private final Cluster cluster;
 
+        @Getter
+        private final Bucket bucket;
+
         private final AtomicInteger usages = new AtomicInteger();
 
-        public ClusterHolder(final CouchbaseEnvironment env, final Cluster cluster) {
+        public BucketHolder(final CouchbaseEnvironment env, final Cluster cluster, final Bucket bucket) {
             this.env = env;
             this.cluster = cluster;
+            this.bucket = bucket;
         }
 
         public void use() {

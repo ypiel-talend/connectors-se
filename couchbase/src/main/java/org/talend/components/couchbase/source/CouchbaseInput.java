@@ -85,8 +85,7 @@ public class CouchbaseInput implements Serializable {
 
     @PostConstruct
     public void init() {
-        Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
-        bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
+        bucket = service.openConnection(configuration.getDataSet());
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
         columnsSet = new HashSet<>();
@@ -139,8 +138,7 @@ public class CouchbaseInput implements Serializable {
 
     @PreDestroy
     public void release() {
-//        service.closeBucket(bucket);
-        service.closeConnection(configuration.getDataSet().getDatastore());
+        service.closeConnection(configuration.getDataSet());
     }
 
     private Record createRecord(Schema schema, JsonObject jsonObject) {

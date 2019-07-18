@@ -82,8 +82,7 @@ public class CouchbaseInputMapper implements Serializable {
         } catch (NumberFormatException e) {
             // Can't parse processors value or it's empty. Try to get total number of records from bucket
             try {
-                Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
-                Bucket bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
+                Bucket bucket = service.openConnection(configuration.getDataSet());
                 estimateSize = service.getTotalNumberOfRecordsInBucket(bucket);
                 return estimateSize;
             } catch (Exception e1){
