@@ -18,6 +18,7 @@ import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.env.CouchbaseEnvironment;
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.components.couchbase.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
@@ -47,13 +48,17 @@ public class CouchbaseOutput implements Serializable {
 
     private I18nMessage i18n;
 
-    private Bucket bucket;
-
     private String idFieldName;
 
     private final CouchbaseOutputConfiguration configuration;
 
     private final CouchbaseService service;
+
+    private CouchbaseEnvironment couchbaseEnvironment;
+
+    private Cluster cluster;
+
+    private Bucket bucket;
 
     public CouchbaseOutput(@Option("configuration") final CouchbaseOutputConfiguration configuration,
             final CouchbaseService service, final I18nMessage i18n) {
@@ -64,7 +69,9 @@ public class CouchbaseOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        bucket = service.openConnection(configuration.getDataSet());
+        couchbaseEnvironment = service.startCouchbaseEnvironment(configuration.getDataSet().getDatastore().getConnectTimeout());
+        cluster = service.openCluster(couchbaseEnvironment, configuration.getDataSet());
+        bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
         idFieldName = configuration.getIdFieldName();
     }
 
@@ -75,7 +82,9 @@ public class CouchbaseOutput implements Serializable {
 
     @PreDestroy
     public void release() {
-        service.closeConnection(configuration.getDataSet());
+        service.closeBucket(bucket);
+        service.closeCluster(cluster);
+        service.closeEnvironment(couchbaseEnvironment);
     }
 
     private JsonDocument toJsonDocument(String idFieldName, Record record) {

@@ -40,13 +40,9 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.talend.sdk.component.api.record.Schema.Type.*;
@@ -57,8 +53,6 @@ import static org.talend.sdk.component.api.record.Schema.Type.*;
 public class CouchbaseService {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
-
-    private final Map<CouchbaseDataSet, BucketHolder> bucketPool = new ConcurrentHashMap<>();
 
     @Service
     private I18nMessage i18n;
@@ -74,32 +68,42 @@ public class CouchbaseService {
         return addresses;
     }
 
-    public Bucket openConnection(CouchbaseDataSet dataSet) {
-        String bootStrapNodes = dataSet.getDatastore().getBootstrapNodes();
-        String username = dataSet.getDatastore().getUsername();
-        String password = dataSet.getDatastore().getPassword();
-        int connectTimeout = dataSet.getDatastore().getConnectTimeout() * 1000; // convert to sec
+    public CouchbaseEnvironment startCouchbaseEnvironment(int connectTimeoutInMS) {
+        CouchbaseEnvironment couchbaseEnvironment;
 
-        String[] urls = resolveAddresses(bootStrapNodes);
         try {
-            BucketHolder holder = bucketPool.computeIfAbsent(dataSet, ds -> {
-                CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder()
-                        .connectTimeout(connectTimeout)
-                        .queryServiceConfig(QueryServiceConfig.create(10, 100))
-                        .build();
-                Cluster cluster = CouchbaseCluster.create(environment, urls);
-                cluster.authenticate(username, password);
-                Bucket bucket = cluster.openBucket(dataSet.getBucket());
-                return new BucketHolder(environment, cluster, bucket);
-            });
-            holder.use();
-            Bucket bucket = holder.getBucket();
-            return bucket;
+            couchbaseEnvironment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(connectTimeoutInMS * 1000).build();
         } catch (Exception e) {
             LOG.error(i18n.connectionKO());
             throw new CouchbaseException(e);
         }
+        return couchbaseEnvironment;
+    }
 
+    public Cluster openCluster(CouchbaseEnvironment couchbaseEnvironment, CouchbaseDataSet couchbaseDataSet) {
+        Cluster cluster;
+        String[] urls = resolveAddresses(couchbaseDataSet.getDatastore().getBootstrapNodes());
+        String username = couchbaseDataSet.getDatastore().getUsername();
+        String password = couchbaseDataSet.getDatastore().getPassword();
+        try {
+            cluster = CouchbaseCluster.create(couchbaseEnvironment, urls);
+            cluster.authenticate(username, password);
+        } catch (Exception e) {
+            LOG.error(i18n.connectionKO());
+            throw new CouchbaseException(e);
+        }
+        return cluster;
+    }
+
+    public Bucket openBucket(Cluster cluster, String bucketName) {
+        Bucket bucket;
+        try {
+            bucket = cluster.openBucket(bucketName);
+        } catch (Exception e) {
+            LOG.error(i18n.connectionKO());
+            throw new CouchbaseException(e);
+        }
+        return bucket;
     }
 
     @HealthCheck("healthCheck")
@@ -107,10 +111,8 @@ public class CouchbaseService {
         CouchbaseEnvironment environment = null;
         Cluster cluster = null;
         try {
-            environment = new DefaultCouchbaseEnvironment.Builder()
-                    .connectTimeout(dataStore.getConnectTimeout())
-                    .queryServiceConfig(QueryServiceConfig.create(10, 100))
-                    .build();
+            environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(dataStore.getConnectTimeout())
+                    .queryServiceConfig(QueryServiceConfig.create(10, 100)).build();
             cluster = CouchbaseCluster.create(environment, dataStore.getBootstrapNodes());
             cluster.authenticate(dataStore.getUsername(), dataStore.getPassword());
             String clusterName = cluster.clusterManager().info().raw().get("name").toString();
@@ -130,10 +132,10 @@ public class CouchbaseService {
             LOG.error(message, exception);
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, message);
         } finally {
-            if (cluster != null){
+            if (cluster != null) {
                 cluster.disconnect();
             }
-            if (environment != null){
+            if (environment != null) {
                 environment.shutdown();
             }
         }
@@ -143,7 +145,7 @@ public class CouchbaseService {
     public Schema addColumns(@Option("dataSet") final CouchbaseDataSet dataSet) {
         CouchbaseInputConfiguration configuration = new CouchbaseInputConfiguration();
         configuration.setDataSet(dataSet);
-        CouchbaseInput couchbaseInput = new CouchbaseInput(configuration, this, builderFactory, i18n,0,0);
+        CouchbaseInput couchbaseInput = new CouchbaseInput(configuration, this, builderFactory, i18n, 0, 0);
         couchbaseInput.init();
         Record record = couchbaseInput.next();
         couchbaseInput.release();
@@ -151,20 +153,7 @@ public class CouchbaseService {
         return record.getSchema();
     }
 
-    public void closeConnection(CouchbaseDataSet ds) {
-        BucketHolder holder = bucketPool.get(ds);
-        if (holder == null) {
-            return;
-        }
-        int stillUsed = holder.release();
-        if (stillUsed > 0) {
-            return;
-        }
-        bucketPool.remove(ds);
-        Bucket bucket = holder.getBucket();
-        Cluster cluster = holder.getCluster();
-        CouchbaseEnvironment environment = holder.getEnv();
-
+    public void closeBucket(Bucket bucket) {
         if (bucket != null) {
             if (bucket.close()) {
                 LOG.debug(i18n.bucketWasClosed(bucket.name()));
@@ -172,6 +161,9 @@ public class CouchbaseService {
                 LOG.debug(i18n.cannotCloseBucket(bucket.name()));
             }
         }
+    }
+
+    public void closeCluster(Cluster cluster) {
         if (cluster != null) {
             if (cluster.disconnect()) {
                 log.debug(i18n.clusterWasClosed());
@@ -179,8 +171,11 @@ public class CouchbaseService {
                 log.debug(i18n.cannotCloseCluster());
             }
         }
-        if (environment != null) {
-            if (environment.shutdown()) {
+    }
+
+    public void closeEnvironment(CouchbaseEnvironment couchbaseEnvironment) {
+        if (couchbaseEnvironment != null) {
+            if (couchbaseEnvironment.shutdown()) {
                 log.debug(i18n.couchbaseEnvWasClosed());
             } else {
                 log.debug(i18n.cannotCloseCouchbaseEnv());
@@ -266,40 +261,12 @@ public class CouchbaseService {
         }
     }
 
-    public static class BucketHolder {
-
-        @Getter
-        private final CouchbaseEnvironment env;
-
-        @Getter
-        private final Cluster cluster;
-
-        @Getter
-        private final Bucket bucket;
-
-        private final AtomicInteger usages = new AtomicInteger();
-
-        public BucketHolder(final CouchbaseEnvironment env, final Cluster cluster, final Bucket bucket) {
-            this.env = env;
-            this.cluster = cluster;
-            this.bucket = bucket;
-        }
-
-        public void use() {
-            usages.incrementAndGet();
-        }
-
-        public int release() {
-            return usages.decrementAndGet();
-        }
-    }
-
     public int getTotalNumberOfRecordsInBucket(Bucket bucket) {
         try {
             JsonObject basicBucketStatistic = (JsonObject) bucket.bucketManager().info().raw().get("basicStats");
             return Integer.valueOf(basicBucketStatistic.get("itemCount").toString());
-        } catch (Exception e){
-            // todo: inform user that we can't get number of records
+        } catch (Exception e) {
+            LOG.warn(i18n.cannotDefineTotalNumberOfRecordsInBucket());
         }
         return 100;
     }

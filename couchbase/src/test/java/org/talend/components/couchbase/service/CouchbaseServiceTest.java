@@ -11,14 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.talend.components.couchbase.testutils;
+package org.talend.components.couchbase.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.talend.components.couchbase.CouchbaseUtilTest;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
-import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;

@@ -74,6 +74,7 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     @BeforeEach
     void createTestRecords() {
         records = super.createRecords();
+
         componentsHandler.setInputData(records);
         executeJob();
     }

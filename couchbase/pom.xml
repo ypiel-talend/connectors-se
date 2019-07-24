@@ -13,8 +13,8 @@
   <name>Components :: Couchbase</name>
 
   <properties>
-    <testcontainers.version>1.10.3</testcontainers.version>
-    <couchbase.client.version>2.7.4</couchbase.client.version>
+    <testcontainers.version>1.11.4</testcontainers.version>
+    <couchbase.client.version>2.7.7</couchbase.client.version>
   </properties>
 
   <dependencies>
@@ -22,12 +22,6 @@
       <groupId>com.couchbase.client</groupId>
       <artifactId>java-client</artifactId>
       <version>${couchbase.client.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-      <version>${testcontainers.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>

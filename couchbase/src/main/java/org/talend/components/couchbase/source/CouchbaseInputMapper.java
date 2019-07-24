@@ -15,6 +15,7 @@ package org.talend.components.couchbase.source;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.env.CouchbaseEnvironment;
 import org.talend.components.couchbase.service.CouchbaseService;
 import org.talend.components.couchbase.service.I18nMessage;
 
@@ -48,11 +49,17 @@ public class CouchbaseInputMapper implements Serializable {
 
     private long offset;
 
-    private long processors;
+    private long limit;
 
     private long estimateSize;
 
-    private long limit;
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
+    public void setLimit(long limit) {
+        this.limit = limit;
+    }
 
     public CouchbaseInputMapper(@Option("configuration") final CouchbaseInputConfiguration configuration,
             final CouchbaseService service, final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
@@ -60,13 +67,6 @@ public class CouchbaseInputMapper implements Serializable {
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
         this.i18nMessage = i18nMessage;
-    }
-
-    public CouchbaseInputMapper(@Option("configuration") final CouchbaseInputConfiguration configuration, CouchbaseService service,
-                                RecordBuilderFactory recordBuilderFactory, I18nMessage i18nMessage, long offset, long limit) {
-        this(configuration, service, recordBuilderFactory, i18nMessage);
-        this.offset = offset;
-        this.limit = limit;
     }
 
     @Assessor
@@ -78,18 +78,15 @@ public class CouchbaseInputMapper implements Serializable {
         try {
             estimateSize = Long.parseLong(configuration.getLimit());
             return estimateSize;
-            //TODO: change data type for processors value from string to long
+            // TODO: change data type for processors value from string to long
         } catch (NumberFormatException e) {
             // Can't parse processors value or it's empty. Try to get total number of records from bucket
-            try {
-                Bucket bucket = service.openConnection(configuration.getDataSet());
-                estimateSize = service.getTotalNumberOfRecordsInBucket(bucket);
-                return estimateSize;
-            } catch (Exception e1){
-                // If we can't receive
-                estimateSize = 100;
-                return estimateSize;
-            }
+            CouchbaseEnvironment couchbaseEnvironment = service
+                    .startCouchbaseEnvironment(configuration.getDataSet().getDatastore().getConnectTimeout());
+            Cluster cluster = service.openCluster(couchbaseEnvironment, configuration.getDataSet());
+            Bucket bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
+            estimateSize = service.getTotalNumberOfRecordsInBucket(bucket);
+            return estimateSize;
         }
     }
 
@@ -103,13 +100,13 @@ public class CouchbaseInputMapper implements Serializable {
         //
         // default implementation returns this which means it doesn't support the work to be split
 
-        processors = estimateSize / bundles;
+        long processors = estimateSize / bundles;
 
         List<CouchbaseInputMapper> inputMapperList = new ArrayList<>();
 
-        for (int i=0; i < processors; i++){
-            //check if last processor
-            if (i == (processors - 1)){
+        for (int i = 0; i < processors; i++) {
+            // check if last processor
+            if (i == (processors - 1)) {
                 offset = (i * bundles);
                 limit = bundles + (estimateSize % bundles);
 
@@ -117,7 +114,10 @@ public class CouchbaseInputMapper implements Serializable {
                 offset = i * bundles;
                 limit = bundles;
             }
-            CouchbaseInputMapper couchbaseInputMapper = new CouchbaseInputMapper(configuration, service, recordBuilderFactory, i18nMessage, offset, limit);
+            CouchbaseInputMapper couchbaseInputMapper = new CouchbaseInputMapper(configuration, service, recordBuilderFactory,
+                    i18nMessage);
+            couchbaseInputMapper.setLimit(limit);
+            couchbaseInputMapper.setOffset(offset);
             inputMapperList.add(couchbaseInputMapper);
         }
         return inputMapperList;
@@ -128,10 +128,6 @@ public class CouchbaseInputMapper implements Serializable {
         // here we create an actual worker,
         // you are free to rework the configuration etc but our default generated implementation
         // propagates the partition mapper entries.
-//        if (processors == 0) {
-//            return new CouchbaseInput(configuration, service, recordBuilderFactory, i18nMessage);
-//        } else {
         return new CouchbaseInput(configuration, service, recordBuilderFactory, i18nMessage, offset, limit);
-//        }
     }
 }

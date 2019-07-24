@@ -20,7 +20,9 @@ import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.talend.components.couchbase.CouchbaseUtilTest;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
@@ -30,9 +32,12 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
+import org.talend.sdk.component.runtime.input.Mapper;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
@@ -48,69 +53,6 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     @Service
     private RecordBuilderFactory recordBuilderFactory;
 
-    private void insertTestDataToDB() {
-        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
-                .build();
-        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
-        Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
-
-        bucket.bucketManager().createN1qlPrimaryIndex(true, false);
-
-        bucket.bucketManager().flush();
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        List<JsonObject> jsonObjects = super.createJsonObjects();
-
-        bucket.insert(JsonDocument.create("RRRR1", jsonObjects.get(0)));
-        bucket.insert(JsonDocument.create("RRRR2", jsonObjects.get(1)));
-
-        // Wait while data is writing (Jenkins fix)
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        bucket.close();
-        cluster.disconnect();
-        environment.shutdown();
-    }
-
-    private void insertTestDataWithNullValueToDB() {
-        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
-                .build();
-        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
-        Bucket bucket = cluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
-
-        bucket.bucketManager().flush();
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        JsonObject json = JsonObject.create().put("t_string1", "RRRR1").put("t_string2", "RRRR2").putNull("t_string3");
-
-        bucket.insert(JsonDocument.create("RRRR1", json));
-
-        // Wait while data is writing (Jenkins fix)
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        bucket.close();
-        cluster.disconnect();
-        environment.shutdown();
-    }
-
     void executeJob(CouchbaseInputConfiguration configuration) {
         final String inputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         Job.components().component("Couchbase_Input", "Couchbase://Input?" + inputConfig)
@@ -118,14 +60,29 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     }
 
     @Test
+    @DisplayName("Partition input data")
+    void couchbasePartitionInputDataTest() {
+        componentsHandler.resetState();
+        insert1000JsonObjectsToDB();
+
+        Mapper mapper = componentsHandler.asManager()
+                .findMapper("Couchbase", "Input", 1, configurationByExample(getInputConfiguration())).get();
+
+        final List<Record> res = componentsHandler.collect(Record.class, mapper, 2000, 4).collect(Collectors.toList());
+
+        assertNotNull(res);
+        assertEquals(1000, res.size());
+    }
+
+    @Test
     @DisplayName("Check input data")
     void couchbaseInputDataTest() {
         componentsHandler.resetState();
-        insertTestDataToDB();
+        insertTwoJsonObjectsToDB();
 
         executeJob(getInputConfiguration());
 
-        final List<Record> res = componentsHandler.getCollectedData(Record.class);
+        List<Record> res = componentsHandler.getCollectedData(Record.class);
 
         TestData testData = new TestData();
 
@@ -144,7 +101,6 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         assertEquals(testData.getCol9(), res.get(0).getDouble("t_double_max"));
         assertEquals(testData.isCol10(), res.get(0).getBoolean("t_boolean"));
         assertEquals(testData.getCol11().toString(), res.get(0).getDateTime("t_datetime").toString());
-        // assertEquals(testData.getCol12(), res.get(0).getArray(List.class, "t_array"));
 
         assertEquals(testData.getCol1() + "2", res.get(1).getString("t_string"));
     }
@@ -159,16 +115,14 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
 
         assertNotNull(res);
-
         assertFalse(res.isEmpty());
-
         assertEquals(2, res.get(0).getSchema().getEntries().size());
     }
 
     @Test
     @DisplayName("Execution of customN1QL query")
     void n1qlQueryInputDBTest() {
-        insertTestDataToDB();
+        insertTwoJsonObjectsToDB();
 
         CouchbaseInputConfiguration configurationWithN1ql = getInputConfiguration();
         configurationWithN1ql.setUseN1QLQuery(true);
@@ -194,5 +148,73 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
 
         CouchbaseInputConfiguration configuration = new CouchbaseInputConfiguration();
         return configuration.setDataSet(couchbaseDataSet);
+    }
+
+    private void insert1000JsonObjectsToDB() {
+        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
+                .build();
+        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
+        cluster.authenticate(CLUSTER_USERNAME, CLUSTER_PASSWORD);
+        Bucket bucket = cluster.openBucket(BUCKET_NAME);
+
+        bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+
+        flushAndWaitForCompleteDelete(bucket);
+
+        List<JsonObject> jsonObjects = super.create1000JsonObjects();
+
+        for (int i = 0; i < jsonObjects.size(); i++) {
+            bucket.insert(JsonDocument.create("id_" + String.valueOf(i), jsonObjects.get(i)));
+        }
+
+        checkIfDataWasWritten(bucket, 1000);
+
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
+    }
+
+    private void insertTwoJsonObjectsToDB() {
+        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
+                .build();
+        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
+        cluster.authenticate(CLUSTER_USERNAME, CLUSTER_PASSWORD);
+        Bucket bucket = cluster.openBucket(BUCKET_NAME);
+
+        bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+
+        flushAndWaitForCompleteDelete(bucket);
+
+        List<JsonObject> jsonObjects = super.createJsonObjects();
+        bucket.insert(JsonDocument.create("RRRR1", jsonObjects.get(0)));
+        bucket.insert(JsonDocument.create("RRRR2", jsonObjects.get(1)));
+
+        // Wait while data is writing (Jenkins fix)
+        checkIfDataWasWritten(bucket, 2);
+
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
+    }
+
+    private void insertTestDataWithNullValueToDB() {
+        CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(DEFAULT_TIMEOUT_IN_SEC * 1000)
+                .build();
+        Cluster cluster = CouchbaseCluster.create(environment, COUCHBASE_CONTAINER.getContainerIpAddress());
+        cluster.authenticate(CLUSTER_USERNAME, CLUSTER_PASSWORD);
+        Bucket bucket = cluster.openBucket(BUCKET_NAME);
+
+        flushAndWaitForCompleteDelete(bucket);
+
+        JsonObject json = JsonObject.create().put("t_string1", "RRRR1").put("t_string2", "RRRR2").putNull("t_string3");
+
+        bucket.insert(JsonDocument.create("RRRR1", json));
+
+        // Wait while data is writing (Jenkins fix)
+        checkIfDataWasWritten(bucket, 1);
+
+        bucket.close();
+        cluster.disconnect();
+        environment.shutdown();
     }
 }

@@ -17,6 +17,7 @@ import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
@@ -61,20 +62,24 @@ public class CouchbaseInput implements Serializable {
 
     private Iterator<N1qlQueryRow> index;
 
-    private Bucket bucket;
-
     private long offset;
 
     private long limit;
 
-//    public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
-//                          final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n) {
-//
-//    }
+    private CouchbaseEnvironment couchbaseEnvironment;
+
+    private Cluster cluster;
+
+    private Bucket bucket;
+
+    // public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
+    // final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n) {
+    //
+    // }
 
     public CouchbaseInput(@Option("configuration") final CouchbaseInputConfiguration configuration,
-            final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n,
-                          long offset, long limit) {
+            final CouchbaseService service, final RecordBuilderFactory builderFactory, final I18nMessage i18n, long offset,
+            long limit) {
         this.configuration = configuration;
         this.service = service;
         this.builderFactory = builderFactory;
@@ -85,7 +90,9 @@ public class CouchbaseInput implements Serializable {
 
     @PostConstruct
     public void init() {
-        bucket = service.openConnection(configuration.getDataSet());
+        couchbaseEnvironment = service.startCouchbaseEnvironment(configuration.getDataSet().getDatastore().getConnectTimeout());
+        cluster = service.openCluster(couchbaseEnvironment, configuration.getDataSet());
+        bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
         bucket.bucketManager().createN1qlPrimaryIndex(true, false);
 
         columnsSet = new HashSet<>();
@@ -94,13 +101,13 @@ public class CouchbaseInput implements Serializable {
         if (configuration.isUseN1QLQuery()) {
             n1qlQueryRows = bucket.query(N1qlQuery.simple(configuration.getQuery()));
         } else {
-            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`" + getOffset()));
+            n1qlQueryRows = bucket.query(N1qlQuery.simple("SELECT * FROM `" + bucket.name() + "`" + getLimitOffset()));
         }
         checkErrors(n1qlQueryRows);
         index = n1qlQueryRows.rows();
     }
 
-    private String getOffset(){
+    private String getLimitOffset() {
         return " LIMIT " + limit + " OFFSET " + offset;
     }
 
@@ -138,7 +145,9 @@ public class CouchbaseInput implements Serializable {
 
     @PreDestroy
     public void release() {
-        service.closeConnection(configuration.getDataSet());
+        service.closeBucket(bucket);
+        service.closeCluster(cluster);
+        service.closeEnvironment(couchbaseEnvironment);
     }
 
     private Record createRecord(Schema schema, JsonObject jsonObject) {

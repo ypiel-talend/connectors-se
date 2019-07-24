@@ -13,6 +13,7 @@
 
 package org.talend.components.couchbase;
 
+import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.bucket.BucketType;
 import com.couchbase.client.java.cluster.DefaultBucketSettings;
 import com.couchbase.client.java.document.json.JsonObject;
@@ -22,8 +23,10 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.runtime.record.SchemaImpl;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.couchbase.CouchbaseContainer;
 
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -59,6 +62,8 @@ public abstract class CouchbaseUtilTest implements Extension {
                 .withNewBucket(DefaultBucketSettings.builder().enableFlush(true).name(BUCKET_NAME).password(BUCKET_PASSWORD)
                         .quota(BUCKET_QUOTA).type(BucketType.COUCHBASE).build());
         COUCHBASE_CONTAINER.setPortBindings(ports);
+        COUCHBASE_CONTAINER.waitingFor(Wait.forHttp("/").forPort(8091));
+        // COUCHBASE_CONTAINER.withStartupTimeout(Duration.ofSeconds(240));
         COUCHBASE_CONTAINER.start();
     }
 
@@ -88,6 +93,45 @@ public abstract class CouchbaseUtilTest implements Extension {
         private ZonedDateTime col11 = ZonedDateTime.of(2018, 10, 30, 10, 30, 59, 0, ZoneId.of("UTC"));
 
         private List<String> col12 = new ArrayList<>(Arrays.asList("data1", "data2", "data3"));
+    }
+
+    public void flushAndWaitForCompleteDelete(Bucket bucket) {
+        bucket.bucketManager().flush();
+
+        for (int i = 0; i < 20; i++) {
+            JsonObject basicBucketStatistic = (JsonObject) bucket.bucketManager().info().raw().get("basicStats");
+            int totalRecordsInBucket = Integer.valueOf(basicBucketStatistic.get("itemCount").toString());
+            if (totalRecordsInBucket == 0) {
+                // deleting all documents from bucket was successful
+                return;
+            } else {
+                // wait 0.5 sec and check total number of items again
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void checkIfDataWasWritten(Bucket bucket, int totalRecordCount) {
+        for (int i = 0; i < 20; i++) {
+            JsonObject basicBucketStatistic = (JsonObject) bucket.bucketManager().info().raw().get("basicStats");
+            int totalRecordsInBucket = Integer.valueOf(basicBucketStatistic.get("itemCount").toString());
+
+            if (totalRecordsInBucket == totalRecordCount) {
+                // deleting all documents from bucket was successful
+                return;
+            } else {
+                // wait 0.5 sec and check total number of items again
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public List<Record> createRecords() {
@@ -157,16 +201,15 @@ public abstract class CouchbaseUtilTest implements Extension {
                 .put("t_array", testData.col12);
 
         List<JsonObject> jsonObjects = new ArrayList<>();
-
         jsonObjects.add(json1);
         jsonObjects.add(json2);
 
         return jsonObjects;
     }
 
-    public List<JsonObject> create1000JsonObjects(){
+    public List<JsonObject> create1000JsonObjects() {
         List<JsonObject> jsonObjects = new ArrayList<>();
-        for (int i=0; i<1000; i++){
+        for (int i = 0; i < 1000; i++) {
             jsonObjects.add(JsonObject.create().put("key" + i, "value" + i));
         }
         return jsonObjects;

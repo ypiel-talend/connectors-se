@@ -36,4 +36,6 @@ public interface I18nMessage {
     String destinationUnreachable();
 
     String connectionKODetailed(String details);
+
+    String cannotDefineTotalNumberOfRecordsInBucket();
 }
