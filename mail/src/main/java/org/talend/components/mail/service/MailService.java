@@ -15,29 +15,54 @@
  */
 package org.talend.components.mail.service;
 
+import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
+import java.util.List;
 import java.util.OptionalInt;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import javax.mail.Authenticator;
+import javax.mail.Folder;
+import javax.mail.FolderNotFoundException;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
+import javax.mail.Store;
 
 import org.talend.components.mail.configuration.MailConnection;
+import org.talend.components.mail.configuration.MailDataSet;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.completion.SuggestionValues;
+import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
 @Service
 public class MailService {
 
+    @Suggestions("ListFolders")
+    public SuggestionValues listFolders(final MailDataSet dataSet, final String folder) throws MessagingException {
+        final Session session = createSession(dataSet.getConnection());
+        try (final Store store = session.getStore()) {
+            connect(session, store);
+            if (folder == null || folder.trim().isEmpty()) {
+                return mapFolderToSuggestions(store.getDefaultFolder());
+            }
+            try {
+                return mapFolderToSuggestions(findFolder(store, folder));
+            } catch (final FolderNotFoundException fnfe) {
+                return mapFolderToSuggestions(store.getDefaultFolder());
+            }
+        }
+    }
+
     @HealthCheck("MailConnectionCheck")
     public HealthCheckStatus check(final MailConnection connection) {
         try {
             final Session session = createSession(connection);
-            final String protocol = session.getProperty("mail.transport.protocol");
             final javax.mail.Service service;
             switch (connection.getTransport()) {
             case POP3:
@@ -50,9 +75,7 @@ public class MailService {
                 service = session.getTransport();
             }
             try {
-                service.connect(session.getProperty("mail." + protocol + ".host"),
-                        Integer.parseInt(session.getProperty("mail." + protocol + ".port")),
-                        session.getProperty("mail." + protocol + ".user"), session.getProperty("mail." + protocol + ".password"));
+                connect(session, service);
                 return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connected successfully.");
             } finally {
                 if (service.isConnected()) {
@@ -103,5 +126,30 @@ public class MailService {
             });
         }
         return Session.getInstance(properties);
+    }
+
+    private void connect(final Session session, final javax.mail.Service service) throws MessagingException {
+        final String protocol = session.getProperty("mail.transport.protocol");
+        service.connect(session.getProperty("mail." + protocol + ".host"),
+                Integer.parseInt(session.getProperty("mail." + protocol + ".port")),
+                session.getProperty("mail." + protocol + ".user"), session.getProperty("mail." + protocol + ".password"));
+    }
+
+    private Folder findFolder(final Store store, final String folder) throws MessagingException {
+        Folder out = store.getFolder(folder);
+        while (out != null && !out.exists()) {
+            out = out.getParent();
+        }
+        if (out == null) {
+            return store.getDefaultFolder();
+        }
+        return out;
+    }
+
+    private SuggestionValues mapFolderToSuggestions(final Folder folder) throws MessagingException {
+        final List<SuggestionValues.Item> items = Stream.of(folder.list())
+                .map(it -> new SuggestionValues.Item(it.getFullName(), it.getFullName())).collect(toList());
+        return new SuggestionValues(true,
+                items.isEmpty() ? singletonList(new SuggestionValues.Item(folder.getFullName(), folder.getFullName())) : items);
     }
 }

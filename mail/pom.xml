@@ -14,6 +14,7 @@
 
   <properties>
     <talend.validation.placeholder>true</talend.validation.placeholder>
+    <spotbugs.failOnError>true</spotbugs.failOnError>
   </properties>
 
   <dependencies>

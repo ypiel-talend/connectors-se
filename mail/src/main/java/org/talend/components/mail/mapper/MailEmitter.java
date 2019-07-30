@@ -64,6 +64,7 @@ import org.talend.components.mail.service.MailService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Row;
@@ -81,6 +82,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @Slf4j
 @Version
 @RequiredArgsConstructor
@@ -93,8 +96,10 @@ public class MailEmitter implements Serializable {
 
     private final Configuration configuration;
 
+    @SuppressFBWarnings(justification = "services are serializable (talend component kit)", value = "SE_BAD_FIELD")
     private final MailService service;
 
+    @SuppressFBWarnings(justification = "services are serializable (talend component kit)", value = "SE_BAD_FIELD")
     private final RecordBuilderFactory recordBuilderFactory;
 
     private transient State state;
@@ -261,6 +266,7 @@ public class MailEmitter implements Serializable {
 
         @Option
         // @Required // cloud rules
+        @Suggestable(value = "ListFolders", parameters = { "dataset", "." })
         @Documentation("The folder to read.")
         private String inbox = "INBOX";
 
@@ -495,6 +501,7 @@ public class MailEmitter implements Serializable {
         ANSWERED(Flags.Flag.ANSWERED),
         CUSTOM(Flags.Flag.USER);
 
+        @SuppressFBWarnings(justification = "enums are serializable", value = "SE_BAD_FIELD")
         private final Flags.Flag mailFlag;
     }
 

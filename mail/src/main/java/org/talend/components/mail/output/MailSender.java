@@ -56,6 +56,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @Slf4j
 @Version
 @RequiredArgsConstructor
@@ -80,6 +82,7 @@ public class MailSender implements Serializable {
 
     private final Configuration configuration;
 
+    @SuppressFBWarnings(justification = "services are serializable (talend component kit)", value = "SE_BAD_FIELD")
     private final MailService service;
 
     private transient State state;

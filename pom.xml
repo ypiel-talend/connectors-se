@@ -97,6 +97,8 @@
         <!-- The XTM customer id that manage the translation of this project-->
         <xtm.customer.id>12240076</xtm.customer.id>
         <xtm.api.url>https://www.xtm-cloud.com/rest-api</xtm.api.url>
+
+        <spotbugs.failOnError>false</spotbugs.failOnError>
     </properties>
 
     <dependencyManagement>
@@ -211,6 +213,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.8</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -606,7 +614,7 @@
                         <goals><goal>check</goal></goals>
                         <configuration>
                             <effort>Max</effort>
-                            <failOnError>false</failOnError>
+                            <failOnError>${spotbugs.failOnError}</failOnError>
                         </configuration>
                     </execution>
                 </executions>

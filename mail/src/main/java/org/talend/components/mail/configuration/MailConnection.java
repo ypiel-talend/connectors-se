@@ -87,7 +87,9 @@ public class MailConnection implements Serializable {
     private Collection<Property> properties;
 
     @Data
-    public static class Property {
+    public static class Property implements Serializable {
+
+        private static final long serialVersionUID = 1;
 
         @Option
         @Documentation("Property name, generally it has the form of `mail.xxx.yyy`.")
