@@ -51,7 +51,7 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     @Test
     @DisplayName("Test endpoint OK [Valid]")
-    public void validateConnectionOK() {
+    void validateConnectionOK() {
         final HealthCheckStatus status = service.checkEndpoint(getDataStore(), i18n);
         assertEquals(i18n.healthCheckOk(), status.getComment());
         assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
@@ -60,7 +60,7 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     @Test
     @DisplayName("Test endpoint Failed [Invalid]")
-    public void validateConnectionFailed() {
+    void validateConnectionFailed() {
         final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
         dataStore.setEndpoint(INVALID_ENDPOINT);
         final HealthCheckStatus status = service.checkEndpoint(dataStore, i18n);
@@ -71,7 +71,7 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     @Test
     @DisplayName("Test eventhub name OK [Valid]")
-    public void checkExistEventHub() {
+    void checkExistEventHub() {
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setConnection(getDataStore());
         dataSet.setEventHubName(SHARED_EVENTHUB_NAME);
@@ -81,7 +81,7 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     @Test
     @DisplayName("Test eventhub name Failed [Invalid]")
-    public void checkNotExistEventHub() {
+    void checkNotExistEventHub() {
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setConnection(getDataStore());
         dataSet.setEventHubName(BAD_SHARED_EVENTHUB_NAME);
@@ -93,11 +93,11 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     @Test
     @DisplayName("Test bad SAS Key Name [Invalid]")
-    public void checkBadSASKeyName() {
+    void checkBadSASKeyName() {
         final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
         dataStore.setEndpoint(ENDPOINT);
         dataStore.setSasKeyName(BAD_SASKEY_NAME);
-        dataStore.setSasKey(SASKEY);
+        dataStore.setSasKey(server.getPassword());
         final ValidationResult status = service.checkEventHub(dataStore, SHARED_EVENTHUB_NAME, i18n);
         assertNotNull(status);
         assertEquals(ValidationResult.Status.KO, status.getStatus());
@@ -106,10 +106,10 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     @Test
     @DisplayName("Test bad SAS Key [Invalid]")
-    public void checkBadSASKey() {
+    void checkBadSASKey() {
         final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
         dataStore.setEndpoint(ENDPOINT);
-        dataStore.setSasKeyName(SASKEY_NAME);
+        dataStore.setSasKeyName(server.getUsername());
         dataStore.setSasKey(BAD_SASKEY);
         final ValidationResult status = service.checkEventHub(dataStore, SHARED_EVENTHUB_NAME, i18n);
         assertNotNull(status);
@@ -119,11 +119,11 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     @Test
     @DisplayName("Test check list of partion ids [Valid]")
-    public void checkListPartionIds() {
+    void checkListPartionIds() {
         final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
         dataStore.setEndpoint(ENDPOINT);
-        dataStore.setSasKeyName(SASKEY_NAME);
-        dataStore.setSasKey(SASKEY);
+        dataStore.setSasKeyName(server.getUsername());
+        dataStore.setSasKey(server.getPassword());
 
         AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setConnection(dataStore);

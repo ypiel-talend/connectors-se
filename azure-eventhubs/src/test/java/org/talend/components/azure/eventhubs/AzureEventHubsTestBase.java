@@ -18,48 +18,41 @@ import java.io.Serializable;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.talend.components.azure.eventhubs.datastore.AzureEventHubsDataStore;
+import org.talend.sdk.component.api.DecryptedServer;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
-import org.talend.sdk.component.junit5.WithComponents;
-import org.talend.sdk.component.maven.MavenDecrypter;
+import org.talend.sdk.component.junit5.WithMavenServers;
 import org.talend.sdk.component.maven.Server;
 
 import lombok.Data;
 
 @Data
-@WithComponents("org.talend.components.azure.eventhubs")
+@WithMavenServers
 public class AzureEventHubsTestBase implements Serializable {
 
-    public static String ENDPOINT = "sb://comp-test.servicebus.windows.net";
-
-    public static String SASKEY_NAME;
-
-    public static String SASKEY;
+    public static String ENDPOINT = "sb://" +
+            System.getProperty("talend.components.azure.event-hubs.namespace", "comp-test") +
+            ".servicebus.windows.net";
 
     protected static final String SHARED_EVENTHUB_NAME = "eh-test";
 
     protected static final String CONSUME_GROUP = "consumer-group-1";
 
-    static {
-        final MavenDecrypter decrypter = new MavenDecrypter();
-        final Server serverSaskey = decrypter.find("azure-eventhubs-saskey");
-        SASKEY_NAME = serverSaskey.getUsername();
-        SASKEY = serverSaskey.getPassword();
-    }
+    @DecryptedServer("azure-eventhubs-saskey") // todo: passthrough/mocked mode to enable local run without credentials?
+    protected Server server;
 
     @Injected
     private BaseComponentsHandler componentsHandler;
 
-    public AzureEventHubsDataStore getDataStore() {
-        AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
+    protected AzureEventHubsDataStore getDataStore() {
+        final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
         dataStore.setEndpoint(ENDPOINT);
-        dataStore.setSasKeyName(SASKEY_NAME);
-        dataStore.setSasKey(SASKEY);
+        dataStore.setSasKeyName(server.getUsername());
+        dataStore.setSasKey(server.getPassword());
         return dataStore;
     }
 
     protected String getUniqueID() {
         return Integer.toString(ThreadLocalRandom.current().nextInt(1, 100000));
     }
-
 }

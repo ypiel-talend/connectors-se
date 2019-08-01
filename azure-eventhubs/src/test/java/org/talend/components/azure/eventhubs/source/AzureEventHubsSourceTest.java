@@ -14,27 +14,26 @@
 
 package org.talend.components.azure.eventhubs.source;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.talend.components.azure.eventhubs.common.AzureEventHubsConstant.DEFAULT_CONSUMER_GROUP;
 import static org.talend.components.azure.eventhubs.common.AzureEventHubsConstant.PAYLOAD_COLUMN;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.rules.ExpectedException;
 import org.talend.components.azure.eventhubs.AzureEventHubsTestBase;
 import org.talend.components.azure.eventhubs.dataset.AzureEventHubsDataSet;
 import org.talend.components.azure.eventhubs.output.AzureEventHubsOutputConfiguration;
+import org.talend.components.azure.eventhubs.service.ClientService;
 import org.talend.components.azure.eventhubs.service.Messages;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
@@ -48,34 +47,34 @@ import lombok.extern.slf4j.Slf4j;
  * Note: as event data can't be deleted by API, so need drop this event hub and recreate before start the unit test
  */
 @Slf4j
-@Disabled("Run manually follow the comment")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WithComponents("org.talend.components.azure.eventhubs")
 class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
 
-    protected static final String EVENTHUB_NAME = "eh-source-test";
+    private static final String EVENTHUB_NAME = "eh-source-test";
 
-    protected static final String DEFAULT_PARTITION_ID = "1";
-
-    private static final String UNIQUE_ID;
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
+    private static final String DEFAULT_PARTITION_ID = "1";
 
     @Service
     private Messages messages;
 
-    static {
-        UNIQUE_ID = Integer.toString(ThreadLocalRandom.current().nextInt(1, 100000));
-    }
+    @Service
+    private RecordBuilderFactory factory;
+
+    @Service
+    private ClientService clientService;
 
     @BeforeAll
-    void prepareData() {
+    static void prepareData() {
         log.warn("a) Eventhub \"" + EVENTHUB_NAME + "\" was created ? ");
         log.warn("b) Partition count is 6 ? ");
         log.warn("c) Consume group \"" + CONSUME_GROUP + "\" ?");
-        for (int index = 0; index < 6; index++) {
-            AzureEventHubsOutputConfiguration outputConfiguration = new AzureEventHubsOutputConfiguration();
+    }
+
+    @BeforeEach
+    void init() {
+        for (int index = 0; index < Integer.getInteger("talend.components.azure.event-hubs.partitions", 6); index++) {
+            final AzureEventHubsOutputConfiguration outputConfiguration = new AzureEventHubsOutputConfiguration();
             final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
             dataSet.setEventHubName(EVENTHUB_NAME);
             outputConfiguration.setPartitionType(AzureEventHubsOutputConfiguration.PartitionType.SPECIFY_PARTITION_ID);
@@ -84,12 +83,10 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
 
             outputConfiguration.setDataset(dataSet);
 
-            RecordBuilderFactory factory = getComponentsHandler().findService(RecordBuilderFactory.class);
-            List<Record> records = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
-                records.add(factory.newRecordBuilder().withString("pk", "talend_pk_1")
-                        .withString("Name", "TestName_" + i + "_" + UNIQUE_ID).build());
-            }
+            final List<Record> records = IntStream.range(0, 100)
+                    .mapToObj(i -> factory.newRecordBuilder().withString("pk", "talend_pk_1")
+                            .withString("Name", "TestName_" + i + "_" + getUniqueID()).build())
+                    .collect(toList());
 
             final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
             getComponentsHandler().setInputData(records);
@@ -122,7 +119,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assert.assertNotNull(records);
         List<Record> filteredRecords = records.stream()
-                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(UNIQUE_ID)))
+                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(getUniqueID())))
                 .collect(Collectors.toList());
         Assert.assertEquals(100, filteredRecords.size());
     }
@@ -150,7 +147,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assert.assertNotNull(records);
         List<Record> filteredRecords = records.stream()
-                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(UNIQUE_ID)))
+                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(getUniqueID())))
                 .collect(Collectors.toList());
         Assert.assertEquals(100, filteredRecords.size());
     }
@@ -178,7 +175,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assert.assertNotNull(records);
         List<Record> filteredRecords = records.stream()
-                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(UNIQUE_ID)))
+                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(getUniqueID())))
                 .collect(Collectors.toList());
         Assert.assertEquals(100, filteredRecords.size());
     }
@@ -186,7 +183,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
     @Test
     @DisplayName("Read by empty datatime from specified partition")
     void testReadByDateTimeNotSet() {
-        AzureEventHubsInputConfiguration inputConfiguration = new AzureEventHubsInputConfiguration();
+        final AzureEventHubsInputConfiguration inputConfiguration = new AzureEventHubsInputConfiguration();
         final AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
         dataSet.setConnection(getDataStore());
         dataSet.setEventHubName(EVENTHUB_NAME);
@@ -205,7 +202,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assert.assertNotNull(records);
         List<Record> filteredRecords = records.stream()
-                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(UNIQUE_ID)))
+                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(getUniqueID())))
                 .collect(Collectors.toList());
         Assert.assertEquals(0, filteredRecords.size());
     }
@@ -233,7 +230,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assert.assertNotNull(records);
         List<Record> filteredRecords = records.stream()
-                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(UNIQUE_ID)))
+                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(getUniqueID())))
                 .collect(Collectors.toList());
         Assert.assertEquals(100, filteredRecords.size());
     }
@@ -286,7 +283,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assert.assertNotNull(records);
         List<Record> filteredRecords = records.stream()
-                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(UNIQUE_ID)))
+                .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(getUniqueID())))
                 .collect(Collectors.toList());
         Assert.assertEquals(600, filteredRecords.size());
     }
@@ -306,7 +303,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
         inputConfiguration.setReceiveTimeout(20L);
         inputConfiguration.setDataset(dataSet);
 
-        assertThrows(IllegalStateException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
             Job.components().component("azureeventhubs-input", "AzureEventHubs://AzureEventHubsInputMapper?" + config)
                     .component("collector", "test://collector").connections().from("azureeventhubs-input").to("collector").build()
@@ -314,7 +311,7 @@ class AzureEventHubsSourceTest extends AzureEventHubsTestBase {
             final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
             Assert.assertNotNull(records);
             List<Record> filteredRecords = records.stream()
-                    .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(UNIQUE_ID)))
+                    .filter(e -> (e.getString(PAYLOAD_COLUMN) != null && e.getString(PAYLOAD_COLUMN).contains(getUniqueID())))
                     .collect(Collectors.toList());
             Assert.assertEquals(0, filteredRecords.size());
         }, messages.errorNoAvailableReceiver());

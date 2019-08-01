@@ -14,146 +14,82 @@
 
 package org.talend.components.azure.eventhubs.output;
 
-import java.io.IOException;
+import static org.talend.components.azure.eventhubs.common.AzureEventHubsConstant.DEFAULT_CHARSET;
+
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Collector;
 
-import javax.annotation.PreDestroy;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-
+import com.microsoft.azure.eventhubs.BatchOptions;
+import com.microsoft.azure.eventhubs.EventData;
+import com.microsoft.azure.eventhubs.EventDataBatch;
+import com.microsoft.azure.eventhubs.EventHubException;
+import org.talend.components.azure.eventhubs.service.ClientService;
 import org.talend.components.azure.eventhubs.service.Messages;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
-import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.AfterGroup;
-import org.talend.sdk.component.api.processor.BeforeGroup;
-import org.talend.sdk.component.api.processor.ElementListener;
-import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 
-import com.microsoft.azure.eventhubs.BatchOptions;
-import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
-import com.microsoft.azure.eventhubs.EventData;
-import com.microsoft.azure.eventhubs.EventDataBatch;
-import com.microsoft.azure.eventhubs.EventHubClient;
-import com.microsoft.azure.eventhubs.EventHubException;
-import com.microsoft.azure.eventhubs.PartitionSender;
-
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.talend.components.azure.eventhubs.common.AzureEventHubsConstant.DEFAULT_CHARSET;
 
 @Slf4j
 @Version
+@RequiredArgsConstructor
 @Icon(Icon.IconType.DEFAULT)
 @Processor(name = "AzureEventHubsOutput")
 @Documentation("AzureEventHubs output")
 public class AzureEventHubsOutput implements Serializable {
-
     private final AzureEventHubsOutputConfiguration configuration;
-
-    private final LocalConfiguration localConfiguration;
-
-    private transient List<Record> records;
-
-    private Messages messages;
-
-    private boolean init;
-
-    private ScheduledExecutorService executorService;
-
-    private EventHubClient eventHubClient;
-
-    private PartitionSender partitionSender;
-
-    private Jsonb jsonb;
-
-    public AzureEventHubsOutput(@Option("configuration") final AzureEventHubsOutputConfiguration outputConfig,
-            final LocalConfiguration localConfiguration, final Messages messages) {
-        this.configuration = outputConfig;
-        this.localConfiguration = localConfiguration;
-        this.messages = messages;
-    }
-
-    @BeforeGroup
-    public void beforeGroup() {
-        this.records = new ArrayList<>();
-    }
-
-    @ElementListener
-    public void elementListener(@Input final Record record) throws URISyntaxException, IOException, EventHubException {
-        if (!init) {
-            // prevent creating db connection if no records
-            // it's mostly useful for streaming scenario
-            lazyInit();
-        }
-        records.add(record);
-    }
-
-    private void lazyInit() throws URISyntaxException, IOException, EventHubException {
-        this.init = true;
-        executorService = Executors.newScheduledThreadPool(1);
-        final ConnectionStringBuilder connStr = new ConnectionStringBuilder()//
-                .setEndpoint(new URI(configuration.getDataset().getConnection().getEndpoint()));
-        connStr.setSasKeyName(configuration.getDataset().getConnection().getSasKeyName());
-        connStr.setSasKey(configuration.getDataset().getConnection().getSasKey());
-        connStr.setEventHubName(configuration.getDataset().getEventHubName());
-
-        eventHubClient = EventHubClient.createSync(connStr.toString(), executorService);
-        if (AzureEventHubsOutputConfiguration.PartitionType.SPECIFY_PARTITION_ID.equals(configuration.getPartitionType())) {
-            partitionSender = eventHubClient.createPartitionSenderSync(configuration.getPartitionId());
-        }
-        jsonb = JsonbBuilder.create();
-
-    }
+    private final ClientService clientService;
+    private final Messages messages;
 
     @AfterGroup
-    public void afterGroup() {
-
-        try {
-            BatchOptions options = new BatchOptions();
+    public void onRecords(final List<Record> records) {
+        if (records.isEmpty()) {
+            return;
+        }
+        try (final ClientService.AzClient client = clientService.create(configuration.getDataset(), 1)) {
+            final BatchOptions options = new BatchOptions();
             if (AzureEventHubsOutputConfiguration.PartitionType.COLUMN.equals(configuration.getPartitionType())) {
                 options.partitionKey = configuration.getKeyColumn();
             }
-            final EventDataBatch events = eventHubClient.createBatch(options);
-            for (Record record : records) {
-                byte[] payloadBytes = recordToCsvByteArray(record);
-                events.tryAdd(EventData.create(payloadBytes));
-            }
+            final EventDataBatch events = records.stream()
+                    .map(this::recordToCsvByteArray)
+                    .map(EventData::create)
+                    .collect(Collector.of(
+                            () -> {
+                                try {
+                                    return client.unwrap().createBatch(options);
+                                } catch (final EventHubException e) {
+                                    throw new IllegalStateException(e);
+                                }
+                            },
+                            (b, it) -> {
+                                try {
+                                    b.tryAdd(it); // todo: what in case of error?
+                                } catch (final EventHubException e) {
+                                    throw new IllegalStateException(e);
+                                }
+                            },
+                            (b1, b2) -> {
+                                throw new IllegalStateException("merge not supported");
+                            }));
             if (AzureEventHubsOutputConfiguration.PartitionType.SPECIFY_PARTITION_ID.equals(configuration.getPartitionType())) {
-                partitionSender.sendSync(events);
+                client.unwrap().createPartitionSenderSync(configuration.getPartitionId()).sendSync(events);
             } else {
-                eventHubClient.sendSync(events);
+                client.unwrap().sendSync(events);
             }
         } catch (final Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
-    @PreDestroy
-    public void preDestroy() {
-        try {
-            if (partitionSender != null) {
-                partitionSender.closeSync();
-            }
-            eventHubClient.closeSync();
-            executorService.shutdown();
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
-    private byte[] recordToCsvByteArray(Record record) throws IOException {
+    private byte[] recordToCsvByteArray(Record record) {
         // TODO make delimited configurable
         StringBuilder sb = new StringBuilder();
         Schema schema = record.getSchema();
@@ -172,7 +108,7 @@ public class AzureEventHubsOutput implements Serializable {
         return bytes;
     }
 
-    private String getStringValue(Record record, Schema.Entry field) throws IOException {
+    private String getStringValue(Record record, Schema.Entry field) {
         Object value = null;
         switch (field.getType()) {
         case STRING:
