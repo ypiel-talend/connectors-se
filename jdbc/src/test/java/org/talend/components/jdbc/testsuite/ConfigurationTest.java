@@ -12,29 +12,20 @@
  */
 package org.talend.components.jdbc.testsuite;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.talend.components.jdbc.configuration.OutputConfig;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.talend.components.jdbc.configuration.OutputConfig.ActionOnData.BULK_LOAD;
-import static org.talend.components.jdbc.configuration.OutputConfig.ActionOnData.DELETE;
-import static org.talend.components.jdbc.configuration.OutputConfig.ActionOnData.INSERT;
-import static org.talend.components.jdbc.configuration.OutputConfig.ActionOnData.UPDATE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConfigurationTest {
 
-    @Test
-    void createTableActivation() {
+    @ParameterizedTest
+    @CsvSource({ "DELETE,false", "UPDATE,false", "INSERT,true", "BULK_LOAD,true" })
+    void createTableActivation(final OutputConfig.ActionOnData action, final boolean isTableCreationAllowed) {
         final OutputConfig config = new OutputConfig();
         config.setCreateTableIfNotExists(true);
-        config.setActionOnData(DELETE.name());
-        assertFalse(config.isCreateTableIfNotExists());
-        config.setActionOnData(UPDATE.name());
-        assertFalse(config.isCreateTableIfNotExists());
-        config.setActionOnData(INSERT.name());
-        assertTrue(config.isCreateTableIfNotExists());
-        config.setActionOnData(BULK_LOAD.name());
-        assertTrue(config.isCreateTableIfNotExists());
+        config.setActionOnData(action.name());
+        assertEquals(isTableCreationAllowed, config.isCreateTableIfNotExists());
     }
 }

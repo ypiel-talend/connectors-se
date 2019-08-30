@@ -26,10 +26,11 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import static java.util.Collections.unmodifiableList;
 import static org.talend.components.jdbc.configuration.OutputConfig.ActionOnData.ALLOW_TABLE_CREATION;
 import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_ACTION_ON_DATA;
 import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_TABLE_COLUMNS_NAMES;
@@ -135,14 +136,8 @@ public class OutputConfig implements Serializable {
 
         private final Function<I18nMessage, String> labelExtractor;
 
-        protected static final List<String> ALLOW_TABLE_CREATION = Collections.unmodifiableList(new ArrayList<String>() {
-
-            {
-                add(INSERT.name());
-                add(UPSERT.name());
-                add(BULK_LOAD.name());
-            }
-        });
+        protected static final List<String> ALLOW_TABLE_CREATION = unmodifiableList(
+                Arrays.asList(INSERT.name(), UPSERT.name(), BULK_LOAD.name()));
 
         public String label(final I18nMessage messages) {
             return labelExtractor.apply(messages);
