@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ConfigurationTest {
 
     @ParameterizedTest
-    @CsvSource({ "DELETE,false", "UPDATE,false", "INSERT,true", "BULK_LOAD,true" })
+    @CsvSource({ "DELETE,false", "UPDATE,false", "INSERT,true", "BULK_LOAD,true", "UPSERT,true" })
     void createTableActivation(final OutputConfig.ActionOnData action, final boolean isTableCreationAllowed) {
         final OutputConfig config = new OutputConfig();
         config.setCreateTableIfNotExists(true);

@@ -13,6 +13,7 @@
 package org.talend.components.jdbc.configuration;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.talend.components.jdbc.dataset.TableNameDataset;
 import org.talend.components.jdbc.service.I18nMessage;
@@ -26,12 +27,9 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import static java.util.Collections.unmodifiableList;
-import static org.talend.components.jdbc.configuration.OutputConfig.ActionOnData.ALLOW_TABLE_CREATION;
 import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_ACTION_ON_DATA;
 import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_TABLE_COLUMNS_NAMES;
 import static org.talend.sdk.component.api.configuration.condition.ActiveIf.EvaluationStrategy.CONTAINS;
@@ -128,16 +126,16 @@ public class OutputConfig implements Serializable {
 
     @RequiredArgsConstructor
     public enum ActionOnData {
-        BULK_LOAD(I18nMessage::actionOnDataBulkLoad),
-        INSERT(I18nMessage::actionOnDataInsert),
-        UPDATE(I18nMessage::actionOnDataUpdate),
-        DELETE(I18nMessage::actionOnDataDelete),
-        UPSERT(I18nMessage::actionOnDataUpsert);
+        BULK_LOAD(I18nMessage::actionOnDataBulkLoad, true),
+        INSERT(I18nMessage::actionOnDataInsert, true),
+        UPDATE(I18nMessage::actionOnDataUpdate, false),
+        DELETE(I18nMessage::actionOnDataDelete, false),
+        UPSERT(I18nMessage::actionOnDataUpsert, true);
 
         private final Function<I18nMessage, String> labelExtractor;
 
-        protected static final List<String> ALLOW_TABLE_CREATION = unmodifiableList(
-                Arrays.asList(INSERT.name(), UPSERT.name(), BULK_LOAD.name()));
+        @Getter
+        private final boolean allowTableCreation;
 
         public String label(final I18nMessage messages) {
             return labelExtractor.apply(messages);
@@ -145,6 +143,6 @@ public class OutputConfig implements Serializable {
     }
 
     public boolean isCreateTableIfNotExists() {
-        return createTableIfNotExists && ALLOW_TABLE_CREATION.contains(actionOnData);
+        return createTableIfNotExists && getActionOnData().isAllowTableCreation();
     }
 }
