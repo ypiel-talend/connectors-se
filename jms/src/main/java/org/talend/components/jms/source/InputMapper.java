@@ -35,7 +35,7 @@ import org.talend.sdk.component.api.service.Service;
 
 @Version(1)
 @Icon(value = Icon.IconType.JMS)
-@PartitionMapper(name = "JMSInput", infinite = true)
+@PartitionMapper(name = "JMSInput")
 @Documentation("Purpose of this class is to create an actual worker")
 public class InputMapper implements Serializable {
 
