@@ -32,9 +32,7 @@ import static org.talend.components.jms.testutils.JmsTestConstants.DESTINATION;
 import static org.talend.components.jms.testutils.JmsTestConstants.DURABLE_SUBSCRIPTION;
 import static org.talend.components.jms.testutils.JmsTestConstants.JMS_PROVIDER;
 import static org.talend.components.jms.testutils.JmsTestConstants.MISSING_PROVIDER;
-import static org.talend.components.jms.testutils.JmsTestConstants.NO_MESSAGES;
 import static org.talend.components.jms.testutils.JmsTestConstants.SUBSCRIBER_NAME;
-import static org.talend.components.jms.testutils.JmsTestConstants.TEN_MESSAGES;
 import static org.talend.components.jms.testutils.JmsTestConstants.TEST_MESSAGE;
 import static org.talend.components.jms.testutils.JmsTestConstants.TEST_MESSAGE2;
 import static org.talend.components.jms.testutils.JmsTestConstants.TIMEOUT;
@@ -144,14 +142,14 @@ public class JMSTestIT {
         // Send Persistent message
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE2).build()));
         OutputConfiguration outputConfiguration = getOutputConfiguration();
-        outputConfiguration.setDeliveryMode(OutputConfiguration.DeliveryMode.PERSISTENT);
+        outputConfiguration.setDeliveryMode(OutputConfiguration.DeliveryMode.NOT_PERSISTENT);
         final String outputConfig2 = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         Job.components().component("jms-output", "JMS://Output?" + outputConfig2).component("emitter", "test://emitter")
                 .connections().from("emitter").to("jms-output").build().run();
 
         // Add filter query to receive only PERSISTENT message
         InputMapperConfiguration inputMapperConfiguration = getInputConfiguration();
-        inputMapperConfiguration.setMessageSelector("JMSDeliveryMode = 'PERSISTENT'");
+        inputMapperConfiguration.setMessageSelector("JMSDeliveryMode = 'NON_PERSISTENT'");
         final String inputConfig = configurationByExample().forInstance(inputMapperConfiguration).configured().toQueryString();
 
         Job.components().component("jms-input", "JMS://Input?" + inputConfig).component("collector", "test://collector")
@@ -162,38 +160,6 @@ public class JMSTestIT {
         assertTrue(optional.isPresent(), "Message was not received");
         assertEquals(TEST_MESSAGE2, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
                 "Sent and received messages should be equal");
-
-    }
-
-    @Test
-    public void testMaximumMessages() {
-        // Send message to QUEUE
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
-
-        final String outputConfig2 = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
-        Job.components().component("jms-output", "JMS://Output?" + outputConfig2).component("emitter", "test://emitter")
-                .connections().from("emitter").to("jms-output").build().run();
-
-        // Forbid message receiving
-        InputMapperConfiguration inputMapperConfiguration = getInputConfiguration();
-        final String inputConfig = configurationByExample().forInstance(inputMapperConfiguration).configured().toQueryString();
-
-        Job.components().component("jms-input", "JMS://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("jms-input").to("collector").build().run();
-
-        final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
-        assertTrue(res.isEmpty(), "Component should not process data");
-
-        // Allow message receiving
-        InputMapperConfiguration inputMapperConfiguration2 = getInputConfiguration();
-        final String inputConfig2 = configurationByExample().forInstance(inputMapperConfiguration2).configured().toQueryString();
-
-        Job.components().component("jms-input", "JMS://Input?" + inputConfig2).component("collector", "test://collector")
-                .connections().from("jms-input").to("collector").build().run();
-
-        final List<JsonObject> res2 = componentsHandler.getCollectedData(JsonObject.class);
-        Optional optional = res2.stream().findFirst();
-        assertTrue(optional.isPresent(), "Message was not received");
 
     }
 
