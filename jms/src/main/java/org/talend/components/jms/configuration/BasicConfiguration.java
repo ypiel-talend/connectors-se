@@ -24,7 +24,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 
-
 @DataSet("JMSDataSet")
 @Data
 @GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "messageType" }), @GridLayout.Row({ "destination" }),
