@@ -24,6 +24,10 @@ public class JmsTestConstants {
 
     public static final String JMS_PROVIDER = "ACTIVEMQ";
 
+    public static final String USERNAME = "user";
+
+    public static final String PASSWORD = "password";
+
     public static final boolean DURABLE_SUBSCRIPTION = false;
 
     public static final String CLIENT_ID = "testClientId";
@@ -33,9 +37,5 @@ public class JmsTestConstants {
     public static final int TIMEOUT = 1;
 
     public static final String MISSING_PROVIDER = "missingProvider";
-
-    public static final int NO_MESSAGES = 0;
-
-    public static final int TEN_MESSAGES = 10;
 
 }

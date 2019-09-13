@@ -44,10 +44,12 @@ import static org.talend.components.jms.testutils.JmsTestConstants.DESTINATION;
 import static org.talend.components.jms.testutils.JmsTestConstants.DURABLE_SUBSCRIPTION;
 import static org.talend.components.jms.testutils.JmsTestConstants.JMS_PROVIDER;
 import static org.talend.components.jms.testutils.JmsTestConstants.MISSING_PROVIDER;
+import static org.talend.components.jms.testutils.JmsTestConstants.PASSWORD;
 import static org.talend.components.jms.testutils.JmsTestConstants.SUBSCRIBER_NAME;
 import static org.talend.components.jms.testutils.JmsTestConstants.TEST_MESSAGE;
 import static org.talend.components.jms.testutils.JmsTestConstants.TEST_MESSAGE2;
 import static org.talend.components.jms.testutils.JmsTestConstants.TIMEOUT;
+import static org.talend.components.jms.testutils.JmsTestConstants.USERNAME;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.jms") // component package
@@ -181,6 +183,9 @@ public class JMSTestIT {
         JmsDataStore dataStore = new JmsDataStore();
         dataStore.setModuleList(JMS_PROVIDER);
         dataStore.setUrl(testContext.getURL());
+        dataStore.setUserIdentity(true);
+        dataStore.setUserName(USERNAME);
+        dataStore.setPassword(PASSWORD);
         basicConfiguration.setDestination(DESTINATION);
         basicConfiguration.setMessageType(MessageType.QUEUE);
         basicConfiguration.setConnection(dataStore);
@@ -194,6 +199,9 @@ public class JMSTestIT {
         JmsDataStore dataStore = new JmsDataStore();
         dataStore.setModuleList(JMS_PROVIDER);
         dataStore.setUrl(testContext.getURL());
+        dataStore.setUserIdentity(true);
+        dataStore.setUserName(USERNAME);
+        dataStore.setPassword(PASSWORD);
         basicConfiguration.setDestination(DESTINATION);
         basicConfiguration.setMessageType(MessageType.QUEUE);
         DurableSubscriptionConfiguration subsConfig = new DurableSubscriptionConfiguration();

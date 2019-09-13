@@ -24,6 +24,8 @@ import org.talend.sdk.component.junit5.WithComponents;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.talend.components.jms.testutils.JmsTestConstants.JMS_PROVIDER;
+import static org.talend.components.jms.testutils.JmsTestConstants.PASSWORD;
+import static org.talend.components.jms.testutils.JmsTestConstants.USERNAME;
 
 @WithComponents("org.talend.components.jms") // component package
 @ExtendWith(JMSTestExtention.class)
@@ -45,7 +47,10 @@ class ActionServiceTestIT {
 
         JmsDataStore dataStore = new JmsDataStore();
         dataStore.setModuleList(JMS_PROVIDER);
+        dataStore.setUserIdentity(true);
         dataStore.setUrl(testContext.getURL());
+        dataStore.setUserName(USERNAME);
+        dataStore.setPassword(PASSWORD);
         HealthCheckStatus status = actionService.validateBasicDatastore(dataStore);
 
         assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
