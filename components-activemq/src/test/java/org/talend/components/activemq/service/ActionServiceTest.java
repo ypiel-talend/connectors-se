@@ -47,14 +47,4 @@ class ActionServiceTest {
         assertTrue(status.getComment().contains("Could not connect to broker"));
     }
 
-    @Test
-    public void testGuessSchema() {
-        Schema schema = actionService.guessSchema(new BasicConfiguration());
-        assertNotNull(schema, "Guess Schema should not be null");
-        Optional<Schema.Entry> optional = schema.getEntries().stream().findFirst();
-        assertTrue(optional.isPresent(), "Guess Schema Entry was not set");
-        assertEquals(MESSAGE_CONTENT, optional.get().getName());
-        assertEquals(Schema.Type.STRING, optional.get().getType());
-    }
-
 }

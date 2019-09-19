@@ -30,7 +30,6 @@ import static org.talend.components.activemq.service.ActionService.DISCOVER_SCHE
 @Data
 @GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "messageType" }),
         @GridLayout.Row({ "destination" }) }, names = GridLayout.FormType.MAIN)
-@GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = GridLayout.FormType.ADVANCED)
 public class BasicConfiguration implements Serializable {
 
     @Option
@@ -46,8 +45,4 @@ public class BasicConfiguration implements Serializable {
     @Documentation("Input for TOPIC/QUEUE Name")
     private String destination;
 
-    @Option
-    @Structure(type = Structure.Type.OUT, discoverSchema = DISCOVER_SCHEMA)
-    @Documentation("Guess schema")
-    private List<String> schema;
 }
