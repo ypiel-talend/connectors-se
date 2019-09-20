@@ -1,15 +1,15 @@
-// ============================================================================
-//
-// Copyright (C) 2006-2018 Talend Inc. - www.talend.com
-//
-// This source code is available under agreement available at
-// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
-//
-// You should have received a copy of the agreement
-// along with this program; if not, write to Talend SA
-// 9 rue Pages 92150 Suresnes, France
-//
-// ============================================================================
+/*
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.rabbitmq.configuration;
 
 import lombok.Data;
@@ -19,19 +19,16 @@ import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
-import java.util.List;
 
-import static org.talend.components.rabbitmq.service.ActionService.DISCOVER_SCHEMA;
 
 @DataSet("RabbitMQDataSet")
 @Data
 @GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "receiverType" }), @GridLayout.Row({ "queue" }),
-        @GridLayout.Row({ "exchangeType" }), @GridLayout.Row({ "exchange" }), @GridLayout.Row({ "routingKey" }),
-        @GridLayout.Row({ "schema" }) }, names = GridLayout.FormType.MAIN)
+        @GridLayout.Row({ "exchangeType" }), @GridLayout.Row({ "exchange" }),
+        @GridLayout.Row({ "routingKey" }) }, names = GridLayout.FormType.MAIN)
 @GridLayout(value = { @GridLayout.Row({ "durable" }), @GridLayout.Row({ "autoDelete" }) }, names = GridLayout.FormType.ADVANCED)
 public class BasicConfiguration implements Serializable {
 
@@ -71,11 +68,6 @@ public class BasicConfiguration implements Serializable {
     @Option
     @Documentation("true if we are declaring an autodelete queue (server will delete it when no longer in use)")
     private Boolean autoDelete = false;
-
-    @Option
-    @Structure(type = Structure.Type.OUT, discoverSchema = DISCOVER_SCHEMA)
-    @Documentation("Describes record structure")
-    private List<String> schema;
 
     public String getRoutingKey() {
         return (ExchangeType.DIRECT == exchangeType || ExchangeType.TOPIC == exchangeType)
