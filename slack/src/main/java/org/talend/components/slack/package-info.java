@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 @Components(family = "Slack", categories = { "Business", "Cloud" })
-@Icon(value = Icon.IconType.MARKETO)
+@Icon(value = Icon.IconType.CUSTOM, custom = "Slack")
 package org.talend.components.slack;
 
 import org.talend.sdk.component.api.component.Components;

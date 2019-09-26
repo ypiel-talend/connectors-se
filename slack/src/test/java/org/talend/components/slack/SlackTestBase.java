@@ -10,17 +10,26 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.slack.service;
+package org.talend.components.slack;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import org.talend.sdk.component.maven.MavenDecrypter;
+import org.talend.sdk.component.maven.Server;
 
-@Internationalized
-public interface I18nMessage {
+public abstract class SlackTestBase {
 
-    String connectionSuccessful();
+    /**
+     * .m2/setting.xml
+     * <server>
+     * <id>slack</id>
+     * <username></username>
+     * <password>encrypt token</password>
+     * </server>
+     */
+    public static String TOKEN;
 
-    String invalidOperation();
-
-    String connectionFailed();
-
+    static {
+        final MavenDecrypter decrypter = new MavenDecrypter();
+        final Server token = decrypter.find("slack");
+        TOKEN = token.getPassword();
+    }
 }

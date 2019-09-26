@@ -12,9 +12,14 @@
  */
 package org.talend.components.slack.service;
 
+import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.slack.SlackApiConstants;
+import org.talend.components.slack.SlackRuntimeException;
 import org.talend.components.slack.connection.SlackConnection;
 import org.talend.components.slack.dataset.SlackDataset;
 import org.talend.components.slack.input.SlackInputConfiguration;
@@ -29,12 +34,11 @@ import javax.json.*;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static org.talend.components.slack.SlackApiConstants.*;
 
 @Accessors
@@ -70,16 +74,118 @@ public class SlackService {
         messagesClient.base(connection.getEndpoint());
     }
 
-    /**
-     * Retrieve and set an access token for using API
-     */
-    public String retrieveAccessToken(@Configuration("configuration") final SlackDataset dataset) {
-        initClients(dataset.getConnection());
-        String token = " Bearer " + dataset.getConnection().getToken();
-        log.debug("[retrieveAccessToken] [{}] :.", token);
-        return token;
+    @Data
+    public static class StartingPoint {
+
+        @Setter(AccessLevel.NONE)
+        private String oldest = "0"; // default is 0, means from beginning
+
+        public void setOldest(String value) {
+            try {
+                if (Double.parseDouble(value) > Double.parseDouble(oldest)) {
+                    this.oldest = value;
+                }
+            } catch (Exception e) {
+                //
+            }
+        }
+
+        private Boolean nextPage = false;
+
+        private String nextCursor;
+
+        public String toRequestBody() {
+            if (nextPage) {
+                return "cursor=" + nextCursor;
+            } else {
+                return "oldest=" + oldest;
+            }
+        }
+
     }
 
+    private final int limit = 100;
+
+    public Iterator<JsonValue> getMessages(@Configuration("connection") final SlackConnection connection, String channelName,
+            StartingPoint startingPoint) {
+        initClients(connection);
+        log.debug("Starting point: {}", startingPoint);
+        Response<JsonObject> messages = messagesClient.getMessages(
+                SlackApiConstants.HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED, encodedToken(connection.getToken()),
+                channelName, limit, startingPoint.toRequestBody());
+        JsonObject result = handleResponse(messages);
+        updateStartingPointByPaging(startingPoint, result);
+        JsonArray requestResult = result.getJsonArray("messages");
+        if (requestResult != null && requestResult.size() > 0) {
+            return requestResult.iterator();
+        }
+        return null;
+    }
+
+    public Map<String, String> listChannels(@Configuration("connection") final SlackConnection connection,
+            SlackDataset.ChannelType type) {
+        initClients(connection);
+        Map<String, String> channels = new HashMap<>();
+        StartingPoint startingPoint = new StartingPoint();
+        do {
+            log.debug("Starting point: {}", startingPoint);
+            Response<JsonObject> jsonObjectResponse = messagesClient.listChannels(
+                    HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED, encodedToken(connection.getToken()), type.getValue(),
+                    1000, startingPoint.toRequestBody());
+            JsonObject result = handleResponse(jsonObjectResponse);
+            updateStartingPointByCursor(startingPoint, result);
+            JsonArray requestResult = result.getJsonArray("channels");
+            if (requestResult != null && requestResult.size() > 0) {
+                requestResult.iterator().forEachRemaining(
+                        r -> channels.put(r.asJsonObject().getString("id"), r.asJsonObject().getString("name")));
+            }
+        } while (startingPoint.getNextPage());
+        return channels;
+    }
+
+    public Boolean checkAuth(@Configuration("connection") final SlackConnection connection) {
+        initClients(connection);
+        Response<JsonObject> jsonObjectResponse = messagesClient.checkAuth(HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
+                encodedToken(connection.getToken()));
+        JsonObject result = handleResponse(jsonObjectResponse);
+        return result.getBoolean("ok");
+    }
+
+    private void updateStartingPointByCursor(StartingPoint startingPoint, JsonObject result) {
+        try {
+            JsonObject responseMetadata = result.getJsonObject("response_metadata");
+            String nextCursor = responseMetadata.getString("next_cursor");
+            if (nextCursor != null && !"".equals(nextCursor)) {
+                startingPoint.setNextPage(true);
+                startingPoint.setNextCursor(nextCursor);
+            }
+        } catch (NullPointerException npe) {
+            startingPoint.setNextPage(false);
+            startingPoint.setNextCursor("");
+        }
+    }
+
+    private void updateStartingPointByPaging(StartingPoint startingPoint, JsonObject result) {
+        boolean hasMore = result.getBoolean("has_more");
+        startingPoint.setNextPage(hasMore);
+        if (hasMore) {
+            String nextCursor = result.getJsonObject("response_metadata").getString("next_cursor");
+            startingPoint.setNextCursor(nextCursor);
+        } else {
+            startingPoint.setNextCursor("");
+        }
+    }
+
+    public void updateStartingPointByMessageTS(StartingPoint startingPoint, JsonObject message) {
+        String ts = message.getString("ts");
+        startingPoint.setOldest(ts);
+    }
+
+    private String encodedToken(String token) {
+        String encodedToken = " Bearer " + token;
+        log.debug("[retrieveAccessToken] [{}] :.", encodedToken);
+        return encodedToken;
+    }
 
     private Schema getMessagesSchema() {
         return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
@@ -216,6 +322,20 @@ public class SlackService {
         Record record = b.build();
         log.debug("[convertToRecord] returning : {}.", record);
         return record;
+    }
+
+    /**
+     * Handle a typical Marketo response's payload to API call.
+     *
+     * @param response the http response
+     * @return Marketo API result
+     */
+    public JsonObject handleResponse(final Response<JsonObject> response) {
+        log.trace("[handleResponse] [{}] body: {}.", response.status(), response.body());
+        if (response.status() == SlackApiConstants.HTTP_STATUS_OK) {
+            return response.body();
+        }
+        throw new SlackRuntimeException(response.error(String.class));
     }
 
 }

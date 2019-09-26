@@ -29,8 +29,8 @@ import java.util.List;
 
 @Slf4j
 @Version
-@Icon(value = IconType.MARKETO)
-@PartitionMapper(family = "Slack", name = "Input")
+@Icon(value = IconType.CUSTOM, custom = "SlackInput")
+@PartitionMapper(family = "Slack", name = "SlackInput", infinite = true)
 @Documentation("Slack Input Component")
 public class SlackInputMapper implements Serializable {
 

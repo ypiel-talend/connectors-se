@@ -13,26 +13,21 @@
 package org.talend.components.slack.input;
 
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.slack.SlackApiConstants;
 import org.talend.components.slack.dataset.SlackDataset;
-import org.talend.components.slack.service.MessagesClient;
+import org.talend.components.slack.service.I18nMessage;
 import org.talend.components.slack.service.SlackService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.http.Response;
 
 import javax.annotation.PostConstruct;
+import javax.json.*;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import javax.json.*;
-
-import org.talend.components.slack.service.I18nMessage;
-import org.talend.components.slack.SlackRuntimeException;
 
 import static org.talend.components.slack.SlackApiConstants.ATTR_CODE;
 import static org.talend.components.slack.SlackApiConstants.ATTR_MESSAGE;
@@ -50,19 +45,15 @@ public class SlackSource implements Serializable {
 
     protected final JsonWriterFactory jsonWriter;
 
-    protected transient String nextPageToken;
-
-    protected transient String accessToken;
-
     private SlackDataset dataset;
 
     protected final SlackInputConfiguration configuration;
 
-    protected Map<String, Schema.Entry> schema;
+    protected transient Map<String, Schema.Entry> schema;
 
-    protected Iterator<JsonValue> resultIterator;
+    protected transient Iterator<JsonValue> resultIterator;
 
-    private final MessagesClient messagesClient;
+    private transient SlackService.StartingPoint startingPoint;
 
     public SlackSource(@Option("configuration") final SlackInputConfiguration configuration, final SlackService service) {
         this.configuration = configuration;
@@ -72,27 +63,41 @@ public class SlackSource implements Serializable {
         this.jsonReader = service.getJsonReader();
         this.jsonWriter = service.getJsonWriter();
         this.slackService = service;
-
-        this.messagesClient = service.getMessagesClient();
     }
 
     @PostConstruct
     public void init() {
-        accessToken = slackService.retrieveAccessToken(dataset);
         schema = buildSchemaMap(slackService.getEntitySchema(configuration));
-        processBatch();
+        startingPoint = new SlackService.StartingPoint(); // Starting Point in memory not reliable filesystem, which will be lost
+                                                          // after restart, need recovery offset function for product
+        switch (configuration.getStartingPoint()) {
+        case NOW:
+            startingPoint.setOldest(String.valueOf(Instant.now().getEpochSecond()));
+        case OLDEST:
+        default:
+            return;
+        }
     }
 
     @Producer
     public Record next() {
-        JsonValue next = null;
-        log.info("Slack Source next");
+        JsonValue next;
+        log.debug("Slack Source next");
         if (resultIterator == null) {
-            return null;
+            resultIterator = slackService.getMessages(dataset.getConnection(), dataset.getChannel(), startingPoint);
+            if (resultIterator == null) {
+                log.debug("retrieve nothing");
+                return null;
+            }
         }
         boolean hasNext = resultIterator.hasNext();
         if (hasNext) {
             next = resultIterator.next();
+            slackService.updateStartingPointByMessageTS(startingPoint, next.asJsonObject());
+            log.debug("retrieve record: {}", next);
+        } else {
+            next = null;
+            resultIterator = null;
         }
         return next == null ? null : slackService.convertToRecord(next.asJsonObject(), schema);
     }
@@ -121,41 +126,6 @@ public class SlackSource implements Serializable {
         }
 
         return error.toString();
-    }
-
-    /**
-     * Handle a typical Marketo response's payload to API call.
-     *
-     * @param response the http response
-     * @return Marketo API result
-     */
-    public JsonObject handleResponse(final Response<JsonObject> response) {
-        log.debug("[handleResponse] [{}] body: {}.", response.status(), response.body());
-        if (response.status() == SlackApiConstants.HTTP_STATUS_OK) {
-            return response.body();
-        }
-        throw new SlackRuntimeException(response.error(String.class));
-    }
-
-    public void processBatch() {
-        JsonObject result = getMessages();
-        log.info("Slack process batch");
-        JsonArray requestResult = result.getJsonArray("messages");
-        if (requestResult != null) {
-            resultIterator = requestResult.iterator();
-        }
-    }
-
-    /**
-     * Returns a list of activities from after a datetime given by the nextPageToken parameter. Also allows for
-     * filtering by lead
-     * static list membership, or by a list of up to 30 lead ids.
-     *
-     * @return
-     */
-    private JsonObject getMessages() {
-        return handleResponse(messagesClient.getMessages(SlackApiConstants.HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
-                this.slackService.retrieveAccessToken(this.dataset), this.dataset.getChannel(), ""));
     }
 
 }

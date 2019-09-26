@@ -18,7 +18,7 @@ public class SlackApiConstants {
 
     public static final String ATTR_CHANNEL_ID = "channel";
 
-    public static final String ATTR_USERNAME = "username";
+    public static final String ATTR_USERNAME = "user";
 
     public static final String ATTR_TIMESTAMP = "ts";
 

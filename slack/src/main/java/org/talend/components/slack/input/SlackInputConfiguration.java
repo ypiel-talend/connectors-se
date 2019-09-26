@@ -24,7 +24,7 @@ import java.io.Serializable;
 @Data
 @GridLayout({ //
         @GridLayout.Row({ "dataset" }), //
-}) //
+        @GridLayout.Row({ "startingPoint" }) }) //
 @Documentation("Slack Source Configuration")
 @ToString(callSuper = true)
 public class SlackInputConfiguration implements Serializable {
@@ -38,4 +38,12 @@ public class SlackInputConfiguration implements Serializable {
     @Documentation("Slack Dataset")
     private SlackDataset dataset;
 
+    @Option
+    @Documentation("Starting point")
+    private StartingPoint startingPoint = StartingPoint.OLDEST;
+
+    public enum StartingPoint {
+        OLDEST,
+        NOW
+    };
 }

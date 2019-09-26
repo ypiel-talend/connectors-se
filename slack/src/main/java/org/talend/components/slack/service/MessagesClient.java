@@ -16,10 +16,7 @@ import org.talend.sdk.component.api.service.http.*;
 
 import javax.json.JsonObject;
 
-import static org.talend.components.slack.SlackApiConstants.ATTR_ACCESS_TOKEN;
-import static org.talend.components.slack.SlackApiConstants.ATTR_CHANNEL_ID;
-import static org.talend.components.slack.SlackApiConstants.HEADER_CONTENT_TYPE;
-import static org.talend.components.slack.SlackApiConstants.METHOD_POST;
+import static org.talend.components.slack.SlackApiConstants.*;
 
 public interface MessagesClient extends HttpClient {
 
@@ -30,13 +27,25 @@ public interface MessagesClient extends HttpClient {
      * @param contentType content type, e.g., application/x-www-form-urlencoded
      * @param channelName Slack Channel name
      */
-
     @Request(path = "/api/conversations.history", method = METHOD_POST)
     Response<JsonObject> getMessages( //
             @Header(HEADER_CONTENT_TYPE) String contentType, //
             @Header(ATTR_ACCESS_TOKEN) String accessToken, //
             @Query(ATTR_CHANNEL_ID) String channelName, //
-            String payload //
-    );
+            @Query("limit") int limit, //
+            String body);
+
+    @Request(path = "/api/conversations.list", method = METHOD_POST)
+    Response<JsonObject> listChannels( //
+            @Header(HEADER_CONTENT_TYPE) String contentType, //
+            @Header(ATTR_ACCESS_TOKEN) String accessToken, //
+            @Query("types") String type, //
+            @Query("limit") int limit, //
+            String body);
+
+    @Request(path = "/api/auth.test", method = METHOD_POST)
+    Response<JsonObject> checkAuth( //
+            @Header(HEADER_CONTENT_TYPE) String contentType, //
+            @Header(ATTR_ACCESS_TOKEN) String accessToken);
 
 }

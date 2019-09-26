@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.ToString;
 import org.talend.components.slack.connection.SlackConnection;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -25,10 +26,11 @@ import java.io.Serializable;
 import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.AND;
 
 @Data
-@DataSet
+@DataSet("SlackDataset")
 @Documentation("Slack Dataset")
 @ToString
 @GridLayout({ @GridLayout.Row("connection"), //
+        @GridLayout.Row("channelType"), //
         @GridLayout.Row("channel"), //
 })
 public class SlackDataset implements Serializable {
@@ -38,7 +40,29 @@ public class SlackDataset implements Serializable {
     private SlackConnection connection;
 
     @Option
+    @Documentation("Channel type")
+    private ChannelType channelType = ChannelType.PRIVATE_CHANNEL;
+
+    @Option
+    @Suggestable(value = "listChannelNames", parameters = { "connection", "channelType" })
     @Documentation("Channel")
-    private String channel = "";
+    private String channel;
+
+    public enum ChannelType {
+        PUBLIC_CHANNEL("public_channel"),
+        PRIVATE_CHANNEL("private_channel");
+        // MULTIPLE_PERSON_IM("mpim"),
+        // IM("im");
+
+        ChannelType(String value) {
+            this.value = value;
+        }
+
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+    }
 
 }
