@@ -15,8 +15,8 @@ package org.talend.components.slack;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.slack.connection.SlackConnection;
-import org.talend.components.slack.dataset.SlackDataset;
-import org.talend.components.slack.input.SlackInputConfiguration;
+import org.talend.components.slack.dataset.SlackUnboundedMessageDataset;
+import org.talend.components.slack.input.SlackUnboundedMessageInputConfiguration;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.SimpleFactory;
 import org.talend.sdk.component.junit5.Injected;
@@ -25,7 +25,7 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 @Disabled("Streaming manually run")
 @WithComponents("org.talend.components.slack")
-public class SlackSourceTest extends SlackTestBase {
+public class SlackUnboundedMessageSourceTest extends SlackTestBase {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -35,11 +35,11 @@ public class SlackSourceTest extends SlackTestBase {
         final SlackConnection connection = new SlackConnection();
         connection.setToken(TOKEN);
 
-        final SlackDataset dataset = new SlackDataset();
+        final SlackUnboundedMessageDataset dataset = new SlackUnboundedMessageDataset();
         dataset.setConnection(connection);
         // dataset.setChannel("GMTL6QVD1");
         dataset.setChannel("GNCSSN7EX");
-        final SlackInputConfiguration inputConfiguration = new SlackInputConfiguration();
+        final SlackUnboundedMessageInputConfiguration inputConfiguration = new SlackUnboundedMessageInputConfiguration();
         inputConfiguration.setDataset(dataset);
 
         final String uriConfig = SimpleFactory.configurationByExample().forInstance(inputConfiguration).configured()

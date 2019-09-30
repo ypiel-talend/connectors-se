@@ -14,7 +14,7 @@ package org.talend.components.slack.input;
 
 import lombok.Data;
 import lombok.ToString;
-import org.talend.components.slack.dataset.SlackDataset;
+import org.talend.components.slack.dataset.SlackUnboundedMessageDataset;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -23,27 +23,14 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({ //
-        @GridLayout.Row({ "dataset" }), //
-        @GridLayout.Row({ "startingPoint" }) }) //
+        @GridLayout.Row({ "dataset" }) //
+})
 @Documentation("Slack Source Configuration")
 @ToString(callSuper = true)
-public class SlackInputConfiguration implements Serializable {
-
-    public static final String NAME = "SlackInputConfiguration";
-
-    /*
-     * Dataset
-     */
-    @Option
-    @Documentation("Slack Dataset")
-    private SlackDataset dataset;
+public class SlackUnboundedMessageInputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Starting point")
-    private StartingPoint startingPoint = StartingPoint.OLDEST;
+    @Documentation("Slack Unbounded Dataset")
+    private SlackUnboundedMessageDataset dataset;
 
-    public enum StartingPoint {
-        OLDEST,
-        NOW
-    };
 }

@@ -12,11 +12,23 @@
  */
 package org.talend.components.slack.dataset;
 
+import lombok.Data;
+import lombok.ToString;
 import org.talend.components.slack.connection.SlackConnection;
+import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.meta.Documentation;
 
-import java.io.Serializable;
+@Data
+@DataSet("SlackUserDataset")
+@Documentation("Slack User Dataset")
+@ToString
+@GridLayout({ @GridLayout.Row("connection") })
+public class SlackUserDataset implements SlackDataset {
 
-public interface SlackDataset extends Serializable {
+    @Option
+    @Documentation("Connection")
+    private SlackConnection connection;
 
-    SlackConnection getConnection();
 }

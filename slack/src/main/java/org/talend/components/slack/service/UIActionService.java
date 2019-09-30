@@ -14,7 +14,7 @@ package org.talend.components.slack.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.slack.connection.SlackConnection;
-import org.talend.components.slack.dataset.SlackDataset;
+import org.talend.components.slack.dataset.SlackUnboundedMessageDataset;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -47,7 +47,7 @@ public class UIActionService extends SlackService {
 
     @Suggestions("listChannelNames")
     public SuggestionValues listChannelNames(@Option(SlackConnection.NAME) final SlackConnection connection,
-            @Option("channelType") final SlackDataset.ChannelType channelType) {
+            @Option("channelType") final SlackUnboundedMessageDataset.ChannelType channelType) {
         List<SuggestionValues.Item> items = new ArrayList<>();
         Map<String, String> channelsResponse = slackService.listChannels(connection, channelType);
         channelsResponse.forEach((k, v) -> items.add(new SuggestionValues.Item(k, v)));

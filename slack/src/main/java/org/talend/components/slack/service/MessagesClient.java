@@ -12,6 +12,7 @@
  */
 package org.talend.components.slack.service;
 
+import org.omg.PortableServer.POA;
 import org.talend.sdk.component.api.service.http.*;
 
 import javax.json.JsonObject;
@@ -47,5 +48,11 @@ public interface MessagesClient extends HttpClient {
     Response<JsonObject> checkAuth( //
             @Header(HEADER_CONTENT_TYPE) String contentType, //
             @Header(ATTR_ACCESS_TOKEN) String accessToken);
+
+    @Request(path = "/api/user.info", method = METHOD_POST)
+    Response<JsonObject> getUsers( //
+            @Header(HEADER_CONTENT_TYPE) String contentType, //
+            @Header(ATTR_ACCESS_TOKEN) String accessToken, //
+            String body);
 
 }

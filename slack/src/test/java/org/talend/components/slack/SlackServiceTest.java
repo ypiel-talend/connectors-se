@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.slack.connection.SlackConnection;
-import org.talend.components.slack.dataset.SlackDataset;
+import org.talend.components.slack.dataset.SlackUnboundedMessageDataset;
 import org.talend.components.slack.service.SlackService;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -50,7 +50,7 @@ public class SlackServiceTest extends SlackTestBase {
     void testListChannels() {
         SlackConnection connection = new SlackConnection();
         connection.setToken(TOKEN);
-        Map<String, String> results = service.listChannels(connection, SlackDataset.ChannelType.PRIVATE_CHANNEL);
+        Map<String, String> results = service.listChannels(connection, SlackUnboundedMessageDataset.ChannelType.PRIVATE_CHANNEL);
         assertTrue(results.size() > 0);
 
         // too much response, and easy to get rate limitation of slack api

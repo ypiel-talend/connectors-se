@@ -13,7 +13,6 @@
 package org.talend.components.slack.input;
 
 import lombok.extern.slf4j.Slf4j;
-
 import org.talend.components.slack.service.SlackService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Icon.IconType;
@@ -30,19 +29,19 @@ import java.util.List;
 @Slf4j
 @Version
 @Icon(value = IconType.CUSTOM, custom = "SlackInput")
-@PartitionMapper(family = "Slack", name = "SlackInput", infinite = true)
+@PartitionMapper(family = "Slack", name = "SlackUserInput", infinite = true)
 @Documentation("Slack Input Component")
-public class SlackInputMapper implements Serializable {
+public class SlackUserInputMapper implements Serializable {
 
-    private SlackInputConfiguration configuration;
+    private SlackUserInputConfiguration configuration;
 
     private SlackService service;
 
-    public SlackInputMapper(@Option("configuration") final SlackInputConfiguration configuration, //
+    public SlackUserInputMapper(@Option("configuration") final SlackUserInputConfiguration configuration, //
             final SlackService service) {
         this.configuration = configuration;
         this.service = service;
-        log.debug("[SlackInputMapper] {}", configuration);
+        log.debug("[SlackUserInputMapper] {}", configuration);
     }
 
     @PostConstruct
@@ -56,13 +55,13 @@ public class SlackInputMapper implements Serializable {
     }
 
     @Split
-    public List<SlackInputMapper> split(@PartitionSize final long bundles) {
+    public List<SlackUserInputMapper> split(@PartitionSize final long bundles) {
         return Collections.singletonList(this);
     }
 
     @Emitter
-    public SlackSource createWorker() {
-        return new SlackSource(configuration, service);
+    public SlackUserSource createWorker() {
+        return new SlackUserSource(configuration, service);
     }
 
 }

@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.talend.components.slack.SlackApiConstants;
 import org.talend.components.slack.SlackRuntimeException;
 import org.talend.components.slack.connection.SlackConnection;
-import org.talend.components.slack.dataset.SlackDataset;
-import org.talend.components.slack.input.SlackInputConfiguration;
+import org.talend.components.slack.dataset.SlackUnboundedMessageDataset;
+import org.talend.components.slack.input.SlackUnboundedMessageInputConfiguration;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
@@ -106,6 +106,14 @@ public class SlackService {
 
     private final int limit = 100;
 
+    /**
+     * Retrieve slack message for one channel by starting point within paging
+     * 
+     * @param connection
+     * @param channelName
+     * @param startingPoint
+     * @return messages in one page from the starting point
+     */
     public Iterator<JsonValue> getMessages(@Configuration("connection") final SlackConnection connection, String channelName,
             StartingPoint startingPoint) {
         initClients(connection);
@@ -122,8 +130,29 @@ public class SlackService {
         return null;
     }
 
+    /**
+     * Retrieve slack users by starting point within paging
+     *
+     * @param connection
+     * @return
+     */
+    public Iterator<JsonValue> getUsers(@Configuration("connection") final SlackConnection connection,
+            StartingPoint startingPoint) {
+        initClients(connection);
+        log.debug("Starting point: {}", startingPoint);
+        Response<JsonObject> users = messagesClient.getUsers(HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
+                encodedToken(connection.getToken()), startingPoint.toRequestBody());
+        JsonObject result = handleResponse(users);
+        updateStartingPointByPaging(startingPoint, result);
+        JsonArray requestResult = result.getJsonArray("?"); // TODO(bchen) check the user's response metadata
+        if (requestResult != null && requestResult.size() > 0) {
+            return requestResult.iterator();
+        }
+        return null;
+    }
+
     public Map<String, String> listChannels(@Configuration("connection") final SlackConnection connection,
-            SlackDataset.ChannelType type) {
+            SlackUnboundedMessageDataset.ChannelType type) {
         initClients(connection);
         Map<String, String> channels = new HashMap<>();
         StartingPoint startingPoint = new StartingPoint();
@@ -131,7 +160,8 @@ public class SlackService {
             log.debug("Starting point: {}", startingPoint);
             Response<JsonObject> jsonObjectResponse = messagesClient.listChannels(
                     HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED, encodedToken(connection.getToken()), type.getValue(),
-                    1000, startingPoint.toRequestBody());
+                    1000, startingPoint.toRequestBody()); // limit 1000 is good for get public channels, else will get rate
+                                                          // restriction soon
             JsonObject result = handleResponse(jsonObjectResponse);
             updateStartingPointByCursor(startingPoint, result);
             JsonArray requestResult = result.getJsonArray("channels");
@@ -187,7 +217,46 @@ public class SlackService {
         return encodedToken;
     }
 
-    private Schema getMessagesSchema() {
+    /**
+     * TODO(bchen): check the schema, and the count in reactions
+     * {
+     * "text": "hello world",
+     * "ts": "1234567890.123456,
+     * "user": "userID",
+     * "team": "teamID",
+     * "reactions": [
+     * {
+     * "name": "smile",
+     * "users": [
+     * "userID"
+     * ],
+     * "count": 4 // what does count mean? users.length?
+     * }
+     * ]
+     * }
+     * 
+     * @return
+     */
+    public Schema getMessagesSchema() {
+        return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TEXT).withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TIMESTAMP).withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_USERNAME).withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName("type").withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName("team").withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName("reactions").withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
+                                .withEntry(recordBuilder.newEntryBuilder().withName("name").withType(Schema.Type.STRING).build())
+                                .withEntry(recordBuilder.newEntryBuilder().withName("users").withType(Schema.Type.ARRAY)
+                                        .withElementSchema(recordBuilder.newSchemaBuilder(Schema.Type.STRING).build()).build())
+                                .withEntry(recordBuilder.newEntryBuilder().withName("count").withType(Schema.Type.INT).build())
+                                .build())
+                        .build())
+                .build();
+    }
+
+    // TODO(bchen) change for user schema
+    public Schema getUserSchema() {
         return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TEXT).withType(Schema.Type.STRING).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TIMESTAMP).withType(Schema.Type.STRING).build())
@@ -201,15 +270,6 @@ public class SlackService {
         log.error("[parseResultFromResponse] Error: [{}] headers:{}; body: {}.", response.status(), response.headers(),
                 response.body());
         throw new IllegalArgumentException(i18n.invalidOperation());
-    }
-
-    public Schema getEntitySchema(final SlackInputConfiguration configuration) {
-        Schema s = null;
-        Schema.Builder b = recordBuilder.newSchemaBuilder(Schema.Type.RECORD);
-
-        Schema messagesSchema = getMessagesSchema();
-
-        return messagesSchema;
     }
 
     public JsonObject toJson(final Record record) {

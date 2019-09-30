@@ -13,7 +13,7 @@
 package org.talend.components.slack.input;
 
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.slack.dataset.SlackDataset;
+import org.talend.components.slack.dataset.SlackUserDataset;
 import org.talend.components.slack.service.I18nMessage;
 import org.talend.components.slack.service.SlackService;
 import org.talend.sdk.component.api.configuration.Option;
@@ -24,7 +24,6 @@ import org.talend.sdk.component.api.record.Schema;
 import javax.annotation.PostConstruct;
 import javax.json.*;
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,7 +32,7 @@ import static org.talend.components.slack.SlackApiConstants.ATTR_CODE;
 import static org.talend.components.slack.SlackApiConstants.ATTR_MESSAGE;
 
 @Slf4j
-public class SlackSource implements Serializable {
+public class SlackUserSource implements Serializable {
 
     protected final SlackService slackService;
 
@@ -45,9 +44,9 @@ public class SlackSource implements Serializable {
 
     protected final JsonWriterFactory jsonWriter;
 
-    private SlackDataset dataset;
+    private SlackUserDataset dataset;
 
-    protected final SlackInputConfiguration configuration;
+    protected final SlackUserInputConfiguration configuration;
 
     protected transient Map<String, Schema.Entry> schema;
 
@@ -55,7 +54,7 @@ public class SlackSource implements Serializable {
 
     private transient SlackService.StartingPoint startingPoint;
 
-    public SlackSource(@Option("configuration") final SlackInputConfiguration configuration, final SlackService service) {
+    public SlackUserSource(@Option("configuration") final SlackUserInputConfiguration configuration, final SlackService service) {
         this.configuration = configuration;
         this.dataset = configuration.getDataset();
         this.i18n = service.getI18n();
@@ -67,16 +66,8 @@ public class SlackSource implements Serializable {
 
     @PostConstruct
     public void init() {
-        schema = buildSchemaMap(slackService.getEntitySchema(configuration));
-        startingPoint = new SlackService.StartingPoint(); // Starting Point in memory not reliable filesystem, which will be lost
-                                                          // after restart, need recovery offset function for product
-        switch (configuration.getStartingPoint()) {
-        case NOW:
-            startingPoint.setOldest(String.valueOf(Instant.now().getEpochSecond()));
-        case OLDEST:
-        default:
-            return;
-        }
+        schema = buildSchemaMap(slackService.getUserSchema());
+        startingPoint = new SlackService.StartingPoint();
     }
 
     @Producer
@@ -84,7 +75,7 @@ public class SlackSource implements Serializable {
         JsonValue next;
         log.debug("Slack Source next");
         if (resultIterator == null) {
-            resultIterator = slackService.getMessages(dataset.getConnection(), dataset.getChannel(), startingPoint);
+            resultIterator = slackService.getUsers(dataset.getConnection(), startingPoint);
             if (resultIterator == null) {
                 log.debug("retrieve nothing");
                 return null;
@@ -93,13 +84,17 @@ public class SlackSource implements Serializable {
         boolean hasNext = resultIterator.hasNext();
         if (hasNext) {
             next = resultIterator.next();
-            slackService.updateStartingPointByMessageTS(startingPoint, next.asJsonObject());
             log.debug("retrieve record: {}", next);
+            return slackService.convertToRecord(next.asJsonObject(), schema);
         } else {
-            next = null;
             resultIterator = null;
+            if (startingPoint.getNextPage()) {
+                return next();
+            } else {
+                log.debug("retrieved all records");
+                return null;
+            }
         }
-        return next == null ? null : slackService.convertToRecord(next.asJsonObject(), schema);
     }
 
     private Map<String, Schema.Entry> buildSchemaMap(final Schema entitySchema) {
