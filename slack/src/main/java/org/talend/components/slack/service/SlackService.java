@@ -34,9 +34,9 @@ import javax.json.*;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static org.talend.components.slack.SlackApiConstants.*;
@@ -199,8 +199,10 @@ public class SlackService {
     private Schema getMessagesSchema() {
         Schema.Entry.Builder rb = recordBuilder.newEntryBuilder().withName("reactions").withType(Schema.Type.ARRAY)
                 .withElementSchema(recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
-                        .withEntry(recordBuilder.newEntryBuilder().withName("name").withType(Schema.Type.STRING).build())
-                        .withEntry(recordBuilder.newEntryBuilder().withName("count").withType(Schema.Type.STRING).build())
+                        .withEntry(
+                                recordBuilder.newEntryBuilder().withName(ATTR_REACTION_NAME).withType(Schema.Type.STRING).build())
+                        .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_REACTION_COUNT).withType(Schema.Type.STRING)
+                                .build())
                         .build());
 
         return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
@@ -226,6 +228,17 @@ public class SlackService {
         Schema messagesSchema = getMessagesSchema();
 
         return messagesSchema;
+    }
+
+    private Map<String, Schema.Entry> buildSchemaMap(final Schema entitySchema) {
+        log.debug("[buildSchemaMap] {}", entitySchema);
+        Map<String, Schema.Entry> s = new HashMap<>();
+        if (entitySchema != null) {
+            for (Schema.Entry entry : entitySchema.getEntries()) {
+                s.put(entry.getName(), entry);
+            }
+        }
+        return s;
     }
 
     public JsonObject toJson(final Record record) {
@@ -264,25 +277,120 @@ public class SlackService {
         return true;
     }
 
+    /*
+     * public Record convertToRecord(final JsonObject json, final Map<String, Schema.Entry> schema) {
+     * Record.Builder b = getRecordBuilder().newRecordBuilder();
+     * log.debug("[convertToRecord] json {} VS schema {}", json.entrySet().size(), schema.keySet().size());
+     * for (Schema.Entry entry : schema.values()) {
+     * String key = entry.getName();
+     * JsonValue val = json.get(key);
+     * switch (entry.getType()) {
+     * case ARRAY:
+     * String ary = "";
+     * if (val != null) {
+     * json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(","));
+     * // not in a sub array
+     * if (!ary.contains("{")) {
+     * ary = ary.replaceAll("\"", "").replaceAll("(\\[|\\])", "");
+     * }
+     * }
+     * b.withString(key, ary);
+     * break;
+     * case RECORD:
+     * case BYTES:
+     * case STRING:
+     * if (hasJsonValue(val)) {
+     * switch (val.getValueType()) {
+     * case ARRAY:
+     * b.withString(key, json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(",")));
+     * break;
+     * case OBJECT:
+     * b.withString(key, String.valueOf(json.getJsonObject(key).toString()));
+     * break;
+     * case STRING:
+     * b.withString(key, json.getString(key));
+     * break;
+     * case NUMBER:
+     * b.withString(key, String.valueOf(json.getJsonNumber(key)));
+     * break;
+     * case TRUE:
+     * case FALSE:
+     * b.withString(key, String.valueOf(json.getBoolean(key)));
+     * break;
+     * case NULL:
+     * b.withString(key, null);
+     * break;
+     * }
+     * } else {
+     * b.withString(key, null);
+     * }
+     * break;
+     * case INT:
+     * b.withInt(key, hasJsonValue(val) ? json.getInt(key) : 0);
+     * break;
+     * case LONG:
+     * b.withLong(key, hasJsonValue(val) ? json.getJsonNumber(key).longValue() : 0);
+     * break;
+     * case FLOAT:
+     * case DOUBLE:
+     * b.withDouble(key, hasJsonValue(val) ? json.getJsonNumber(key).doubleValue() : 0);
+     * break;
+     * case BOOLEAN:
+     * b.withBoolean(key, hasJsonValue(val) ? json.getBoolean(key) : null);
+     * break;
+     * case DATETIME:
+     * try {
+     * b.withDateTime(key,
+     * hasJsonValue(val) ? new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(json.getString(key))
+     * : null);
+     * } catch (ParseException e1) {
+     * log.error("[convertToRecord] Date parsing error: {}.", e1.getMessage());
+     * }
+     * break;
+     * }
+     * }
+     * Record record = b.build();
+     * log.debug("[convertToRecord] returning : {}.", record);
+     * return record;
+     * }
+     */
+
     public Record convertToRecord(final JsonObject json, final Map<String, Schema.Entry> schema) {
         Record.Builder b = getRecordBuilder().newRecordBuilder();
+        log.info("[convertToRecord] json full {} VS schema full {}", json, schema);
         log.debug("[convertToRecord] json {} VS schema {}", json.entrySet().size(), schema.keySet().size());
         for (Schema.Entry entry : schema.values()) {
             String key = entry.getName();
             JsonValue val = json.get(key);
             switch (entry.getType()) {
             case ARRAY:
-                String ary = "";
-                if (val != null) {
-                    json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(","));
-                    // not in a sub array
-                    if (!ary.contains("{")) {
-                        ary = ary.replaceAll("\"", "").replaceAll("(\\[|\\])", "");
+                switch (entry.getElementSchema().getType()) {
+                case RECORD:
+                    JsonArray jsonArray = json.getJsonArray(key);
+                    if (jsonArray != null && !jsonArray.isEmpty()) {
+                        Stream<Record> records = jsonArray.stream()
+                                .map(item -> convertToRecord(item.asJsonObject(), buildSchemaMap(entry.getElementSchema())));
+                        b.withArray(entry, records.collect(Collectors.toList()));
+                    } else
+                        b.withArray(entry, Collections.emptyList());
+                    break;
+                case STRING:
+                default:
+                    String ary = "";
+                    if (val != null) {
+                        json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(","));
+                        // not in a sub array
+                        if (!ary.contains("{")) {
+                            ary = ary.replaceAll("\"", "").replaceAll("(\\[|\\])", "");
+                        }
                     }
+                    b.withString(key, ary);
+                    break;
                 }
-                b.withString(key, ary);
                 break;
             case RECORD:
+                convertToRecord(json, buildSchemaMap(entry.getElementSchema()));
+                break;
             case BYTES:
             case STRING:
                 if (hasJsonValue(val)) {
