@@ -23,7 +23,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 
-
 @DataSet("RabbitMQDataSet")
 @Data
 @GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "receiverType" }), @GridLayout.Row({ "queue" }),
