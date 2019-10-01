@@ -186,12 +186,28 @@ public class SlackService {
         log.debug("[retrieveAccessToken] [{}] :.", encodedToken);
         return encodedToken;
     }
+    /*
+     * private Schema getMessagesSchema() {
+     * return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
+     * .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TEXT).withType(Schema.Type.STRING).build())
+     * .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TIMESTAMP).withType(Schema.Type.STRING).build())
+     * .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_USERNAME).withType(Schema.Type.STRING).build()).build();
+     * }
+     * 
+     */
 
     private Schema getMessagesSchema() {
+        Schema.Entry.Builder rb = recordBuilder.newEntryBuilder().withName("reactions").withType(Schema.Type.ARRAY)
+                .withElementSchema(recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
+                        .withEntry(recordBuilder.newEntryBuilder().withName("name").withType(Schema.Type.STRING).build())
+                        .withEntry(recordBuilder.newEntryBuilder().withName("count").withType(Schema.Type.STRING).build())
+                        .build());
+
         return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TEXT).withType(Schema.Type.STRING).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TIMESTAMP).withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_USERNAME).withType(Schema.Type.STRING).build()).build();
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_USERNAME).withType(Schema.Type.STRING).build())
+                .withEntry(rb.build()).build();
     }
 
     protected JsonArray parseResultFromResponse(Response<JsonObject> response) {
@@ -325,10 +341,10 @@ public class SlackService {
     }
 
     /**
-     * Handle a typical Marketo response's payload to API call.
+     * Handle a typical Slack response's payload to API call.
      *
      * @param response the http response
-     * @return Marketo API result
+     * @return Slack API result
      */
     public JsonObject handleResponse(final Response<JsonObject> response) {
         log.trace("[handleResponse] [{}] body: {}.", response.status(), response.body());
