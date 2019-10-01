@@ -143,8 +143,8 @@ public class SlackService {
         Response<JsonObject> users = messagesClient.getUsers(HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
                 encodedToken(connection.getToken()), startingPoint.toRequestBody());
         JsonObject result = handleResponse(users);
-        updateStartingPointByPaging(startingPoint, result);
-        JsonArray requestResult = result.getJsonArray("?"); // TODO(bchen) check the user's response metadata
+        updateStartingPointByCursor(startingPoint, result);
+        JsonArray requestResult = result.getJsonArray("members");
         if (requestResult != null && requestResult.size() > 0) {
             return requestResult.iterator();
         }
@@ -244,23 +244,25 @@ public class SlackService {
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_USERNAME).withType(Schema.Type.STRING).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName("type").withType(Schema.Type.STRING).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName("team").withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName("reactions").withType(Schema.Type.ARRAY)
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_REACTIONS).withType(Schema.Type.ARRAY)
                         .withElementSchema(recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
-                                .withEntry(recordBuilder.newEntryBuilder().withName("name").withType(Schema.Type.STRING).build())
-                                .withEntry(recordBuilder.newEntryBuilder().withName("users").withType(Schema.Type.ARRAY)
-                                        .withElementSchema(recordBuilder.newSchemaBuilder(Schema.Type.STRING).build()).build())
-                                .withEntry(recordBuilder.newEntryBuilder().withName("count").withType(Schema.Type.INT).build())
+                                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_REACTION_NAME)
+                                        .withType(Schema.Type.STRING).build())
+                                // .withEntry(recordBuilder.newEntryBuilder().withName("users").withType(Schema.Type.ARRAY)
+                                // .withElementSchema(recordBuilder.newSchemaBuilder(Schema.Type.STRING).build()).build())
+                                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_REACTION_COUNT)
+                                        .withType(Schema.Type.STRING).build())
                                 .build())
                         .build())
                 .build();
     }
 
-    // TODO(bchen) change for user schema
     public Schema getUserSchema() {
         return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TEXT).withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_TIMESTAMP).withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_USERNAME).withType(Schema.Type.STRING).build()).build();
+                .withEntry(recordBuilder.newEntryBuilder().withName("id").withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName("name").withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName("real_name").withType(Schema.Type.STRING).build()).build();
+        // TODO(bchen): need to check the different between name and real_name
     }
 
     protected JsonArray parseResultFromResponse(Response<JsonObject> response) {

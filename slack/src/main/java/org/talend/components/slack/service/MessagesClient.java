@@ -49,7 +49,7 @@ public interface MessagesClient extends HttpClient {
             @Header(HEADER_CONTENT_TYPE) String contentType, //
             @Header(ATTR_ACCESS_TOKEN) String accessToken);
 
-    @Request(path = "/api/user.info", method = METHOD_POST)
+    @Request(path = "/api/users.list", method = METHOD_POST)
     Response<JsonObject> getUsers( //
             @Header(HEADER_CONTENT_TYPE) String contentType, //
             @Header(ATTR_ACCESS_TOKEN) String accessToken, //
