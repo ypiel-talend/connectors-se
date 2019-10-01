@@ -29,7 +29,7 @@ import java.util.List;
 @Slf4j
 @Version
 @Icon(value = IconType.CUSTOM, custom = "SlackInput")
-@PartitionMapper(family = "Slack", name = "SlackUserInput", infinite = true)
+@PartitionMapper(family = "Slack", name = "SlackUserInput", infinite = false)
 @Documentation("Slack Input Component")
 public class SlackUserInputMapper implements Serializable {
 
