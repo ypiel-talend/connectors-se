@@ -71,7 +71,7 @@ public class SlackUnboundedMessageSource implements Serializable {
         schema = buildSchemaMap(slackService.getMessagesSchema());
         startingPoint = new SlackService.StartingPoint(); // Starting Point in memory not reliable filesystem, which will be lost
                                                           // after restart, need recovery offset function for product
-        switch (configuration.getDataset().getStartingPoint()) {
+        switch (configuration.getStartingPoint()) {
         case NOW:
             startingPoint.setOldest(String.valueOf(Instant.now().getEpochSecond()));
         case OLDEST:

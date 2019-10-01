@@ -27,8 +27,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 @ToString
 @GridLayout({ @GridLayout.Row("connection"), //
         @GridLayout.Row("channelType"), //
-        @GridLayout.Row("channel"), //
-        @GridLayout.Row("startingPoint") //
+        @GridLayout.Row("channel") //
 })
 public class SlackUnboundedMessageDataset implements SlackDataset {
 
@@ -61,14 +60,5 @@ public class SlackUnboundedMessageDataset implements SlackDataset {
             return value;
         }
     }
-
-    @Option
-    @Documentation("Starting point")
-    private StartingPoint startingPoint = StartingPoint.OLDEST;
-
-    public enum StartingPoint {
-        OLDEST,
-        NOW
-    };
 
 }
