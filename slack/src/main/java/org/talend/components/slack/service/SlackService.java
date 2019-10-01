@@ -34,9 +34,9 @@ import javax.json.*;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static org.talend.components.slack.SlackApiConstants.*;
@@ -108,7 +108,7 @@ public class SlackService {
 
     /**
      * Retrieve slack message for one channel by starting point within paging
-     * 
+     *
      * @param connection
      * @param channelName
      * @param startingPoint
@@ -234,7 +234,7 @@ public class SlackService {
      * }
      * ]
      * }
-     * 
+     *
      * @return
      */
     public Schema getMessagesSchema() {
@@ -270,6 +270,17 @@ public class SlackService {
         log.error("[parseResultFromResponse] Error: [{}] headers:{}; body: {}.", response.status(), response.headers(),
                 response.body());
         throw new IllegalArgumentException(i18n.invalidOperation());
+    }
+
+    private Map<String, Schema.Entry> buildSchemaMap(final Schema entitySchema) {
+        log.debug("[buildSchemaMap] {}", entitySchema);
+        Map<String, Schema.Entry> s = new HashMap<>();
+        if (entitySchema != null) {
+            for (Schema.Entry entry : entitySchema.getEntries()) {
+                s.put(entry.getName(), entry);
+            }
+        }
+        return s;
     }
 
     public JsonObject toJson(final Record record) {
@@ -310,23 +321,40 @@ public class SlackService {
 
     public Record convertToRecord(final JsonObject json, final Map<String, Schema.Entry> schema) {
         Record.Builder b = getRecordBuilder().newRecordBuilder();
+        log.info("[convertToRecord] json full {} VS schema full {}", json, schema);
         log.debug("[convertToRecord] json {} VS schema {}", json.entrySet().size(), schema.keySet().size());
         for (Schema.Entry entry : schema.values()) {
             String key = entry.getName();
             JsonValue val = json.get(key);
             switch (entry.getType()) {
             case ARRAY:
-                String ary = "";
-                if (val != null) {
-                    json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(","));
-                    // not in a sub array
-                    if (!ary.contains("{")) {
-                        ary = ary.replaceAll("\"", "").replaceAll("(\\[|\\])", "");
+                switch (entry.getElementSchema().getType()) {
+                case RECORD:
+                    JsonArray jsonArray = json.getJsonArray(key);
+                    if (jsonArray != null && !jsonArray.isEmpty()) {
+                        Stream<Record> records = jsonArray.stream()
+                                .map(item -> convertToRecord(item.asJsonObject(), buildSchemaMap(entry.getElementSchema())));
+                        b.withArray(entry, records.collect(Collectors.toList()));
+                    } else
+                        b.withArray(entry, Collections.emptyList());
+                    break;
+                case STRING:
+                default:
+                    String ary = "";
+                    if (val != null) {
+                        json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(","));
+                        // not in a sub array
+                        if (!ary.contains("{")) {
+                            ary = ary.replaceAll("\"", "").replaceAll("(\\[|\\])", "");
+                        }
                     }
+                    b.withString(key, ary);
+                    break;
                 }
-                b.withString(key, ary);
                 break;
             case RECORD:
+                convertToRecord(json, buildSchemaMap(entry.getElementSchema()));
+                break;
             case BYTES:
             case STRING:
                 if (hasJsonValue(val)) {
@@ -385,10 +413,10 @@ public class SlackService {
     }
 
     /**
-     * Handle a typical Marketo response's payload to API call.
+     * Handle a typical Slack response's payload to API call.
      *
      * @param response the http response
-     * @return Marketo API result
+     * @return Slack API result
      */
     public JsonObject handleResponse(final Response<JsonObject> response) {
         log.trace("[handleResponse] [{}] body: {}.", response.status(), response.body());

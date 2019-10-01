@@ -34,6 +34,12 @@ public class SlackApiConstants {
 
     public static final String ATTR_RESULT = "result";
 
+    public static final String ATTR_REACTION_COUNT = "count";
+
+    public static final String ATTR_REACTIONS = "reactions";
+
+    public static final String ATTR_REACTION_NAME = "name";
+
     public static final String HEADER_ACCEPT_APPLICATION_JSON = "application/json";
 
     public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
