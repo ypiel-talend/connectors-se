@@ -69,7 +69,7 @@ public class JdbcConfiguration implements Serializable {
 
         @Option
         @Documentation("Jdbc driver and driver dependencies jar locations in mvn format")
-        private final List<String> paths = new ArrayList<>();
+        private List<String> paths = new ArrayList<>();
 
         public String getDisplayName() {
             return ofNullable(displayName).filter(d -> !d.isEmpty()).orElse(id);
