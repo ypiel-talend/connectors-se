@@ -87,8 +87,8 @@ spec:
                     // for next concurrent builds
                     sh 'for i in ci_documentation ci_nexus ci_site; do rm -Rf $i; rsync -av . $i; done'
                     // real task
-                    withCredentials([nexusCredentials]) {
-                        sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -e ${talendOssRepositoryArg}"
+                    configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
+                        sh "mvn -U -B -s ${MAVEN_SETTINGS} clean install -PITs -e ${talendOssRepositoryArg}"
                     }
                 }
             }
@@ -114,12 +114,14 @@ spec:
                 stage('Documentation') {
                     steps {
                         container('main') {
-                            withCredentials([dockerCredentials]) {
-                                sh """
-			                     |cd ci_documentation
-			                     |mvn -U -B -s .jenkins/settings.xml clean install -DskipTests
-			                     |chmod +x .jenkins/generate-doc.sh && .jenkins/generate-doc.sh
-			                     |""".stripMargin()
+                            configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
+                                withCredentials([dockerCredentials]) {
+                                    sh """
+                                     |cd ci_documentation
+                                     |mvn -U -B -s ${MAVEN_SETTINGS} clean install -DskipTests
+                                     |chmod +x .jenkins/generate-doc.sh && .jenkins/generate-doc.sh
+                                     |""".stripMargin()
+                                }
                             }
                         }
                     }
@@ -135,7 +137,9 @@ spec:
                 stage('Site') {
                     steps {
                         container('main') {
-                            sh 'cd ci_site && mvn -U -B -s .jenkins/settings.xml clean site site:stage -Dmaven.test.failure.ignore=true'
+                            configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
+                                sh 'cd ci_site && mvn -U -B -s ${MAVEN_SETTINGS}  clean site site:stage -Dmaven.test.failure.ignore=true'
+                            }
                         }
                     }
                     post {
@@ -150,8 +154,8 @@ spec:
                 stage('Nexus') {
                     steps {
                         container('main') {
-                            withCredentials([nexusCredentials]) {
-                                sh "cd ci_nexus && mvn -U -B -s .jenkins/settings.xml clean deploy -e -Pdocker -DskipTests ${talendOssRepositoryArg}"
+                            configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
+                                sh "cd ci_nexus && mvn -U -B -s ${MAVEN_SETTINGS}  clean deploy -e -Pdocker -DskipTests ${talendOssRepositoryArg}"
                             }
                         }
                     }
@@ -181,8 +185,8 @@ spec:
                                     credentialsId: 'xtm-token',
                                     variable: 'XTM_TOKEN')
                     ]) {
-                        script {
-                            sh "mvn -e -B -s .jenkins/settings.xml clean package -pl . -Pi18n-export"
+                        configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
+                            sh "mvn -e -B -s ${MAVEN_SETTINGS} clean package -pl . -Pi18n-export"
                         }
                     }
                 }
@@ -203,9 +207,9 @@ spec:
                                     credentialsId: 'xtm-token',
                                     variable: 'XTM_TOKEN'),
                             gitCredentials ]) {
-                        script {
-                            sh "mvn -e -B -s .jenkins/settings.xml clean package -pl . -Pi18n-deploy"
-                            sh "cd tmp/repository && mvn -s ../../.jenkins/settings.xml clean deploy"
+                        configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
+                            sh "mvn -e -B -s ${MAVEN_SETTINGS} clean package -pl . -Pi18n-deploy"
+                            sh "cd tmp/repository && mvn -s ${MAVEN_SETTINGS} clean deploy"
                         }
                     }
                 }
@@ -222,17 +226,17 @@ spec:
             steps {
             	withCredentials([gitCredentials, nexusCredentials]) {
 					container('main') {
-                		
-						sh """
-						    mvn -B -s .jenkins/settings.xml release:clean release:prepare
-						    if [[ \$? -eq 0 ]] ; then
-						        PROJECT_VERSION=\$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
-						    	mvn -B -s .jenkins/settings.xml -Darguments='-Dmaven.javadoc.skip=true' release:perform
-						    	git push origin release/\${PROJECT_VERSION}
-						    	git push
-						    fi
-						"""
-						
+                        configFileProvider([configFile(fileId: 'maven-settings-nexus-zl', variable: 'MAVEN_SETTINGS')]) {
+                            sh """
+                                mvn -B -s ${MAVEN_SETTINGS} release:clean release:prepare
+                                if [[ \$? -eq 0 ]] ; then
+                                    PROJECT_VERSION=\$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
+                                    mvn -B -s ${MAVEN_SETTINGS} -Darguments='-Dmaven.javadoc.skip=true' release:perform
+                                    git push origin release/\${PROJECT_VERSION}
+                                    git push
+                                fi
+                            """
+                        }
               		}
             	}
             }
