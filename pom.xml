@@ -492,7 +492,7 @@
                 </executions>
                 <configuration>
                     <java>
-                    <encoding>UTF-8</encoding>
+                        <encoding>UTF-8</encoding>
                         <licenseHeader>
                             <content><![CDATA[/*
  * Copyright (C) 2006-2019 Talend Inc. - www.talend.com

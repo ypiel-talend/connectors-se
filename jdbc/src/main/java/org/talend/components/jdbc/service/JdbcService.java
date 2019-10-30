@@ -15,6 +15,7 @@ package org.talend.components.jdbc.service;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.ErrorFactory;
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.output.platforms.PlatformFactory;
@@ -45,6 +46,7 @@ import java.util.regex.Pattern;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
+import static org.talend.components.jdbc.ErrorFactory.toIllegalStateException;
 
 @Slf4j
 @Service
@@ -74,6 +76,8 @@ public class JdbcService {
     }
 
     /**
+     *
+     * @param query the query to check
      * @return return false if the sql query is not a read only query, true otherwise
      */
     public boolean isNotReadOnlySQLQuery(final String query) {
@@ -115,6 +119,12 @@ public class JdbcService {
 
     public JdbcDatasource createDataSource(final JdbcConnection connection, final boolean rewriteBatchedStatements) {
         return new JdbcDatasource(i18n, resolver, connection, getDriver(connection), false, rewriteBatchedStatements);
+    }
+
+    public JdbcDatasource createDataSource(final JdbcConnection connection, boolean isAutoCommit,
+            final boolean rewriteBatchedStatements) {
+        final JdbcConfiguration.Driver driver = getDriver(connection);
+        return new JdbcDatasource(i18n, resolver, connection, driver, isAutoCommit, rewriteBatchedStatements);
     }
 
     public static class JdbcDatasource implements AutoCloseable {
