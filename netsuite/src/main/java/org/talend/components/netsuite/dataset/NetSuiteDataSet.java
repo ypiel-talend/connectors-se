@@ -25,7 +25,6 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @DataSet
@@ -44,9 +43,4 @@ public class NetSuiteDataSet implements Serializable {
     @Suggestable(value = UIActionService.LOAD_RECORD_TYPES, parameters = { "dataStore" })
     @Documentation("Record Type to be used")
     private String recordType;
-
-    @Option
-    // @Structure(discoverSchema = UIActionService.GUESS_SCHEMA, type = Type.OUT)
-    @Documentation("Design Schema")
-    private List<String> schema;
 }

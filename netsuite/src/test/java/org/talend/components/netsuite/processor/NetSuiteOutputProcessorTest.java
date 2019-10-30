@@ -70,7 +70,6 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
         outputProperties.setAction(DataAction.ADD);
         List<String> schemaFields = Arrays.asList("SubsidiaryList", "Description", "AcctName", "AcctType", "InternalId",
                 "ExternalId");
-        dataSet.setSchema(schemaFields);
         inputTransducer = new NsObjectInputTransducer(clientService, messages, factory, service.getSchema(dataSet, schemaFields),
                 "Account", "2018.2");
         Record record = inputTransducer.read(() -> this.prepareAccountRecord(null));
@@ -112,7 +111,6 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
         clientService.getMetaDataSource().setCustomizationEnabled(true);
         dataSet.setRecordType("customrecordqacomp_custom_recordtype");
         List<String> schemaFields = Arrays.asList("Name", "Custrecord79", "Custrecord80", "InternalId", "ExternalId");
-        dataSet.setSchema(schemaFields);
         outputProperties.setUseNativeUpsert(isNativeUpsert);
         inputTransducer = new NsObjectInputTransducer(clientService, messages, factory, service.getSchema(dataSet, schemaFields),
                 "customrecordqacomp_custom_recordtype", "2018.2");
@@ -130,7 +128,6 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
             inputDataSet.setSearchCondition(Collections.singletonList(
                     new SearchConditionConfiguration("Custrecord79", "String.is", preparedCustomField79Value, "")));
             Record finalRecord = buildAndRunEmitterJob(inputDataSet).stream()
-                    // .filter(r -> preparedCustomField79Value.equals(r.getString("Custrecord79")))
                     .findFirst().orElseThrow(IllegalStateException::new);
             updateRecord = inputTransducer.read(() -> this.prepareCustomRecord(finalRecord));
             record = finalRecord;
@@ -145,7 +142,6 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
         inputDataSet.setSearchCondition(Collections
                 .singletonList(new SearchConditionConfiguration("Custrecord80", "String.is", preparedCustomField80Value, "")));
         Record resultUpdatedRecord = buildAndRunEmitterJob(inputDataSet).stream()
-                // .filter(r -> preparedCustomField80Value.equals(r.getString("Custrecord80")))
                 .findFirst().orElseThrow(IllegalStateException::new);
 
         assertEquals(updateRecord.getString("Name"), resultUpdatedRecord.getString("Name"));
@@ -156,12 +152,6 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
         }
 
         buildAndRunCollectorJob(outputProperties, resultUpdatedRecord);
-
-        // Test Search Custom Records.
-        // Job.components().component("nsEmitter", "NetSuite://Input?" + inputConfig)
-        // .component("collector", "NetSuiteTest://TestCollector").connections().from("nsEmitter").to("collector").build()
-        // .run();
-        // assertTrue(TestCollector.getData().isEmpty());
     }
 
     @Test
@@ -171,7 +161,6 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
         dataSet.setRecordType("PurchaseOrder");
         List<String> schemaFields = Arrays.asList("Custbody_clarivates_custom", "Custbody111", "Subsidiary", "ItemList",
                 "Message", "CustomForm", "Entity", "ExchangeRate", "SupervisorApproval", "InternalId", "ExternalId");
-        dataSet.setSchema(schemaFields);
 
         inputTransducer = new NsObjectInputTransducer(clientService, messages, factory, service.getSchema(dataSet, schemaFields),
                 "PurchaseOrder", "2018.2");

@@ -70,7 +70,7 @@ public class NetSuiteInputSource implements Serializable {
     @PostConstruct
     public void init() {
         clientService = service.getClientService(configuration.getDataSet().getDataStore());
-        runtimeSchema = service.getSchema(configuration.getDataSet(), configuration.getDataSet().getSchema());
+        runtimeSchema = service.getSchema(configuration.getDataSet(), null);
         rs = search();
     }
 
