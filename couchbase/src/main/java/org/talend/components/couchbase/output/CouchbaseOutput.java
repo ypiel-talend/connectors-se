@@ -13,11 +13,12 @@
 
 package org.talend.components.couchbase.output;
 
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.document.json.JsonObject;
+import java.io.Serializable;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.couchbase.service.CouchbaseService;
@@ -32,11 +33,11 @@ import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.List;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.document.json.JsonArray;
+import com.couchbase.client.java.document.json.JsonObject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -84,64 +85,59 @@ public class CouchbaseOutput implements Serializable {
         service.closeConnection();
     }
 
-    private JsonDocument toJsonDocument(String idFieldName, Record record) {
-        List<Schema.Entry> entries = record.getSchema().getEntries();
-        JsonObject jsonObject = JsonObject.create();
-        for (Schema.Entry entry : entries) {
-            String entryName = entry.getName();
-
-            if (idFieldName.equals(entryName)) {
-                continue;
-            }
-
-            Object value = null;
-
-            switch (entry.getType()) {
-            case INT:
-                value = record.getInt(entryName);
-                break;
-            case LONG:
-                value = record.getLong(entryName);
-                break;
-            case BYTES:
-                throw new IllegalArgumentException("BYTES is unsupported");
-            case FLOAT:
-                value = record.getFloat(entryName);
-                break;
-            case DOUBLE:
-                value = record.getDouble(entryName);
-                break;
-            case STRING:
-                value = createJsonFromString(record.getString(entryName));
-                break;
-            case BOOLEAN:
-                value = record.getBoolean(entryName);
-                break;
-            case ARRAY:
-                value = record.getArray(List.class, entryName);
-                break;
-            case DATETIME:
-                value = record.getDateTime(entryName);
-                break;
-            case RECORD:
-                value = record.getRecord(entryName);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown Type " + entry.getType());
-            }
-
-            if (value instanceof Float) {
-                jsonObject.put(entryName, Double.parseDouble(value.toString()));
-            } else if (value instanceof ZonedDateTime) {
-                jsonObject.put(entryName, value.toString());
-            } else if (value instanceof List) {
-                JsonArray jsonArray = JsonArray.from((List<?>) value);
-                jsonObject.put(entryName, jsonArray);
-            } else {
-                jsonObject.put(entryName, value);
-            }
+    private Object jsonValueFromRecordValue(Schema.Entry entry, Record record) {
+        String entryName = entry.getName();
+        Object value = record.get(Object.class, entryName);
+        if (null == value) {
+            return JsonObject.NULL;
         }
-        return JsonDocument.create(record.getString(idFieldName), jsonObject);
+        switch (entry.getType()) {
+        case INT:
+            return record.getInt(entryName);
+        case LONG:
+            return record.getLong(entryName);
+        case BYTES:
+            throw new IllegalArgumentException("BYTES is unsupported");
+        case FLOAT:
+            return Double.parseDouble(String.valueOf(record.getFloat(entryName)));
+        case DOUBLE:
+            return record.getDouble(entryName);
+        case STRING:
+            return createJsonFromString(record.getString(entryName));
+        case BOOLEAN:
+            return record.getBoolean(entryName);
+        case ARRAY:
+            return JsonArray.from((List<?>) record.getArray(List.class, entryName));
+        case DATETIME:
+            return record.getDateTime(entryName).toString();
+        case RECORD:
+            return record.getRecord(entryName);
+        default:
+            throw new IllegalArgumentException("Unknown Type " + entry.getType());
+        }
+    }
+
+    private JsonObject buildJsonObject(Record record) {
+        JsonObject jsonObject = JsonObject.create();
+        record.getSchema().getEntries().stream().forEach(entry -> {
+            Object value = jsonValueFromRecordValue(entry, record);
+            jsonObject.put(entry.getName(), value);
+        });
+        return jsonObject;
+    }
+
+    /**
+     * Calls {@link #buildJsonObject(Record)} and then removes the KEY(idFieldName) from it
+     *
+     * @param record
+     * @return JsonObject
+     */
+    private JsonObject buildJsonObjectWithoutId(Record record) {
+        return buildJsonObject(record).removeKey(idFieldName);
+    }
+
+    public JsonDocument toJsonDocument(String idFieldName, Record record) {
+        return JsonDocument.create(record.getString(idFieldName), buildJsonObjectWithoutId(record));
     }
 
     private Object createJsonFromString(String str) {
@@ -162,4 +158,5 @@ public class CouchbaseOutput implements Serializable {
         }
         return value;
     }
+
 }
