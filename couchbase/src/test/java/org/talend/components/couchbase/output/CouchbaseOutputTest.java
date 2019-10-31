@@ -13,14 +13,9 @@
 
 package org.talend.components.couchbase.output;
 
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.CouchbaseCluster;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.env.CouchbaseEnvironment;
-import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
-import com.couchbase.client.java.query.N1qlQuery;
-import com.couchbase.client.java.query.N1qlQueryResult;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,14 +24,20 @@ import org.talend.components.couchbase.CouchbaseUtilTest;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.CouchbaseCluster;
+import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.env.CouchbaseEnvironment;
+import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
+import com.couchbase.client.java.query.N1qlQuery;
+import com.couchbase.client.java.query.N1qlQueryResult;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,6 +50,9 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
+
+    @Service
+    private org.talend.sdk.component.api.service.record.RecordBuilderFactory recordBuilderFactory;
 
     private List<Record> records;
 
@@ -128,4 +132,20 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
         configuration.setDataSet(couchbaseDataSet);
         return configuration;
     }
+
+    @Test
+    void toJsonDocumentWithBytesType() {
+        byte[] bytes = "aloha".getBytes(java.nio.charset.Charset.defaultCharset());
+        String idValue = "fixBytes";
+        Record test = recordBuilderFactory.newRecordBuilder().withString("ID", idValue).withInt("id", 101)
+                .withString("name", "kamikaze").withBytes("byties", bytes).build();
+        CouchbaseOutput couch = new CouchbaseOutput(getOutputConfiguration(), null, null);
+        JsonDocument jsonDoc = couch.toJsonDocument("ID", test);
+        assertEquals(idValue, jsonDoc.id());
+        com.couchbase.client.java.document.json.JsonObject jsonObject = jsonDoc.content();
+        byte[] rbytes = com.couchbase.client.core.utils.Base64.decode(jsonObject.getString("byties"));
+        assertEquals(bytes.length, rbytes.length);
+        assertEquals("aloha", new String(rbytes, java.nio.charset.Charset.defaultCharset()));
+    }
+
 }

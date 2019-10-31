@@ -97,7 +97,7 @@ public class CouchbaseOutput implements Serializable {
         case LONG:
             return record.getLong(entryName);
         case BYTES:
-            throw new IllegalArgumentException("BYTES is unsupported");
+            return com.couchbase.client.core.utils.Base64.encode(record.getBytes(entryName));
         case FLOAT:
             return Double.parseDouble(String.valueOf(record.getFloat(entryName)));
         case DOUBLE:
