@@ -32,7 +32,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 @Version(1)
-@Icon(value = Icon.IconType.CUSTOM, custom = "NetSuiteInput")
+@Icon(value = Icon.IconType.NETSUITE)
 @PartitionMapper(name = "Input")
 @Documentation("Creates worker emitter with specified configurations")
 public class NetSuiteInputMapper implements Serializable {

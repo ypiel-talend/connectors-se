@@ -48,7 +48,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @Version(1)
-@Icon(value = Icon.IconType.CUSTOM, custom = "NetSuiteOutput")
+@Icon(value = Icon.IconType.NETSUITE)
 @Processor(name = "Output")
 @Documentation("Output component processor")
 public class NetSuiteOutputProcessor implements Serializable {
