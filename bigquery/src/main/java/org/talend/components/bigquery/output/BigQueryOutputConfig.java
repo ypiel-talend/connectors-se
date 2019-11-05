@@ -30,7 +30,7 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 @Data
 @Icon(BIGQUERY)
 @Documentation("Dataset of a BigQuery component.")
-@OptionsOrder({ "dataSet", "tableOperation", "tableSchemaFields", "writeOperation" })
+@OptionsOrder({ "dataSet", "tableOperation", "tableSchemaFields" })
 public class BigQueryOutputConfig implements Serializable {
 
     @Option
@@ -41,11 +41,6 @@ public class BigQueryOutputConfig implements Serializable {
     @Documentation("The BigQuery table operation")
     @DefaultValue("NONE")
     private TableOperation tableOperation;
-
-    @Option
-    @Documentation("The BigQuery write operation")
-    @DefaultValue("APPEND")
-    private WriteOperation writeOperation;
 
     @Option
     @Documentation("Specify table schema for creation table")
@@ -96,23 +91,4 @@ public class BigQueryOutputConfig implements Serializable {
          */
     }
 
-    public enum WriteOperation {
-        /**
-         * Specifies that rows may be appended to an existing table.
-         */
-        APPEND,
-        /**
-         * Specifies that the output table must be empty. This is the default behavior.
-         *
-         * <p>
-         * If the output table is not empty, the write fails at runtime.
-         *
-         * <p>
-         * This check may occur long before data is written, and does not guarantee exclusive access to the table. If
-         * two programs are run concurrently, each specifying the same output table and a
-         * {@link BigQueryOutputProperties.WriteOperation} of
-         * {@link BigQueryOutputProperties.WriteOperation#WRITE_TO_EMPTY}, it is possible for both to succeed.
-         */
-        WRITE_TO_EMPTY
-    }
 }
