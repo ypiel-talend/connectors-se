@@ -46,7 +46,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
-
 @WithComponents(value = "org.talend.components.bigquery")
 public class BigQueryOutputTest {
 
@@ -112,7 +111,7 @@ public class BigQueryOutputTest {
 
     }
 
-     @Test
+    @Test
     public void run() {
 
         String jsonCredentials = "";

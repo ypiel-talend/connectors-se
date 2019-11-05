@@ -69,6 +69,8 @@ public class BigQueryTableExtractInput implements Serializable {
 
     private transient DatumReader<GenericRecord> datumReader;
 
+    private transient BigQueryTableInput delegateInput;
+
     public BigQueryTableExtractInput(BigQueryTableExtractInputConfig configuration, final BigQueryService service,
             final I18nMessage i18n, final RecordBuilderFactory builderFactory, final String gsBlob) {
         this.bucket = configuration.getTableDataset().getGsBucket();
@@ -77,7 +79,14 @@ public class BigQueryTableExtractInput implements Serializable {
         this.i18n = i18n;
         this.builderFactory = builderFactory;
         this.gsBlob = gsBlob;
-        System.out.println(gsBlob);
+
+        if (gsBlob == null) {
+            // Call from Data inventory for a sample : use BigQueryTableInput
+            // Remove this whenever the sampling mechanism changes to something better...
+            BigQueryTableInputConfig delegateCfg = new BigQueryTableInputConfig();
+            delegateCfg.setTableDataset(configuration.getTableDataset());
+            delegateInput = new BigQueryTableInput(delegateCfg, service, i18n, builderFactory);
+        }
     }
 
     @PostConstruct
@@ -87,6 +96,10 @@ public class BigQueryTableExtractInput implements Serializable {
 
     @Producer
     public Record next() {
+        if (delegateInput != null) {
+            return delegateInput.next();
+        }
+
         if (!loaded) {
             try {
                 BigQuery bigQuery = BigQueryService.createClient(connection);
