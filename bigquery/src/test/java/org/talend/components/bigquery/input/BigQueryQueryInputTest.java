@@ -12,56 +12,44 @@
  */
 package org.talend.components.bigquery.input;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.talend.components.bigquery.dataset.QueryDataSet;
 import org.talend.components.bigquery.dataset.TableDataSet;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
-import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnvironment;
+import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
-import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.OptionalDouble;
-import java.util.stream.IntStream;
-
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @Environment(SparkRunnerEnvironment.class)
 @WithComponents(value = "org.talend.components.bigquery")
-public class BigQueryTableInputTest {
+public class BigQueryQueryInputTest {
+
+    @Injected
+    private BaseComponentsHandler handler;
 
     @Rule
-    public final SimpleComponentRule COMPONENTS = new SimpleComponentRule("org.talend.components.bigquery");
+    public final SimpleComponentRule COMPONENTS = new SimpleComponentRule("org.talend.sdk.component.mycomponent");
 
-    // @EnvironmentalTest
-    public void justLoop() {
-        OptionalDouble avg = IntStream.range(0, 1).mapToLong(i -> {
-            try {
-                return run();
-            } catch (Exception e) {
-                e.printStackTrace();
-                ;
-                return 0l;
-            }
-        }).average();
+    @BeforeEach
+    void buildConfig() throws IOException {
+        // Inject needed services
+        handler.injectServices(this);
 
-        avg.ifPresent(System.out::println);
     }
 
-    // @Test
-    public long run() {
-
+    @EnvironmentalTest
+    public void justTest() {
         String jsonCredentials = "";
         try (FileInputStream in = new FileInputStream("C:\\Users\\rlecomte\\Documents\\Engineering-4e7ac6cf93f4.json");
                 BufferedInputStream bIn = new BufferedInputStream(in)) {
@@ -79,33 +67,14 @@ public class BigQueryTableInputTest {
         connection.setProjectName("engineering-152721");
         connection.setJSonCredentials(jsonCredentials);
 
-        TableDataSet dataset = new TableDataSet();
+        QueryDataSet dataset = new QueryDataSet();
         dataset.setConnection(connection);
-        dataset.setBqDataset("dataset_rlecomte");
-        dataset.setTableName("TableWithData");
+        dataset.setUseLegacySql(true);
+        dataset.setQuery("");
 
-        BigQueryTableInputConfig config = new BigQueryTableInputConfig();
-        config.setTableDataset(dataset);
+        BigQueryQueryInputConfig config = new BigQueryQueryInputConfig();
+        config.setQueryDataset(dataset);
 
-        String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-        // System.out.println(configURI);
-
-        long start = System.currentTimeMillis();
-
-        Job.components().component("source", "BigQuery://BigQueryTableInput?" + configURI).component("output", "test://collector")
-                .connections().from("source").to("output").build().run();
-
-        List<Record> records = COMPONENTS.getCollectedData(Record.class);
-
-        long end = System.currentTimeMillis();
-
-        // System.out.println(records);
-
-        // Assertions.assertNotNull(records);
-        // System.out.println(records.size() + " in " + (end - start) + "ms");
-        // Assertions.assertNotEquals(0, records.size());
-
-        return end - start;
-
+        // TODO : finish it !!
     }
 }

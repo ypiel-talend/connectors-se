@@ -71,7 +71,7 @@ public class BigQueryTableExtractInput implements Serializable {
 
     public BigQueryTableExtractInput(BigQueryTableExtractInputConfig configuration, final BigQueryService service,
             final I18nMessage i18n, final RecordBuilderFactory builderFactory, final String gsBlob) {
-        this.bucket = configuration.getGsBucket();
+        this.bucket = configuration.getTableDataset().getGsBucket();
         this.connection = configuration.getDataStore();
         this.service = service;
         this.i18n = i18n;

@@ -12,17 +12,22 @@
  */
 package org.talend.components.bigquery.output;
 
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.bigquery.dataset.TableDataSet;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.EnvironmentConfiguration;
+import org.talend.sdk.component.junit.environment.Environments;
 import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnvironment;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -41,21 +46,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
-@Environment(SparkRunnerEnvironment.class)
-// @Environment(DirectRunnerEnvironment.class)
-// @Environment(ContextualEnvironment.class)
+
 @WithComponents(value = "org.talend.components.bigquery")
 public class BigQueryOutputTest {
 
     @Service
     public RecordBuilderFactory rbf;
 
+    @Injected
+    private BaseComponentsHandler handler;
+
     @Rule
-    public final SimpleComponentRule COMPONENTS = new SimpleComponentRule("nimportequoi");
+    public final SimpleComponentRule COMPONENTS = new SimpleComponentRule("org.talend.sdk.component.mycomponent");
 
-    @EnvironmentalTest
+    @BeforeEach
+    void buildConfig() throws IOException {
+        // Inject needed services
+        handler.injectServices(this);
+
+    }
+
+    @Test
     public void fillData() {
-
         String jsonCredentials = "";
         try (FileInputStream in = new FileInputStream("C:\\Users\\rlecomte\\Documents\\Engineering-4e7ac6cf93f4.json");
                 BufferedInputStream bIn = new BufferedInputStream(in)) {
@@ -83,7 +95,7 @@ public class BigQueryOutputTest {
 
         String configURI = configurationByExample().forInstance(config).configured().toQueryString();
 
-        final int nbrecords = 250000;
+        final int nbrecords = 1_000;
 
         Iterable<Record> inputData = new RandomDataGenerator(nbrecords, rbf);
 
@@ -100,7 +112,7 @@ public class BigQueryOutputTest {
 
     }
 
-    // @Test
+     @Test
     public void run() {
 
         String jsonCredentials = "";
