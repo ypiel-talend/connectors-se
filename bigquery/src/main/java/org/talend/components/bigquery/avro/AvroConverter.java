@@ -276,7 +276,7 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
             case DATETIME:
                 builder = org.apache.avro.Schema.create(org.apache.avro.Schema.Type.LONG);
                 LogicalTypes.timestampMillis().addToSchema(builder);
-                builder.addProp(AVRO_PROP_TALEND_FIELD_PATTERN, ""); // mainly for studio
+                builder.addProp(AVRO_PROP_TALEND_FIELD_PATTERN, (Object) ""); // mainly for studio
                 builder.addProp(AVRO_PROP_JAVA_CLASS, Date.class.getCanonicalName()); // mainly for studio
                 break;
             default:

@@ -27,16 +27,12 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 @Data
 @Icon(BIGQUERY)
 @Documentation("Dataset of a BigQuery for Input.")
-@GridLayout({ @GridLayout.Row("tableDataset"), @GridLayout.Row("gsBucket") })
+@GridLayout({ @GridLayout.Row("tableDataset") })
 public class BigQueryTableExtractInputConfig implements Serializable {
 
     @Option
     @Documentation("BigQuery Table Dataset")
     private TableDataSet tableDataset;
-
-    @Option
-    @Documentation("Google Storage bucket for temporary files")
-    private String gsBucket;
 
     public BigQueryConnection getDataStore() {
         return tableDataset.getConnection();
