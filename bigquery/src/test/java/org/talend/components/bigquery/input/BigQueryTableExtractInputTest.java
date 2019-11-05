@@ -13,9 +13,10 @@
 package org.talend.components.bigquery.input;
 
 import org.apache.beam.sdk.Pipeline;
-import org.junit.Ignore;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.talend.components.bigquery.dataset.TableDataSet;
@@ -25,15 +26,14 @@ import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.EnvironmentConfiguration;
-import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
-import org.talend.sdk.component.junit.environment.builtin.beam.DirectRunnerEnvironment;
+import org.talend.sdk.component.junit.environment.EnvironmentConfigurations;
+import org.talend.sdk.component.junit.environment.Environments;
 import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnvironment;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.beam.TalendIO;
-import org.talend.sdk.component.runtime.manager.chain.Job;
-import org.talend.sdk.component.runtime.testing.spark.junit5.WithSpark;
+import org.talend.sdk.component.runtime.input.Mapper;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -41,15 +41,32 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.OptionalDouble;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
-
-@Environment(SparkRunnerEnvironment.class)
-// @Environment(DirectRunnerEnvironment.class)
-// @Environment(ContextualEnvironment.class)
-@WithComponents(value = "org.talend.components.bigquery")
+@Environments({ @Environment(SparkRunnerEnvironment.class) })
+@WithComponents("org.talend.components.bigquery")
 public class BigQueryTableExtractInputTest {
+
+    public static class Counter extends DoFn<Record, Record> {
+
+        private static AtomicLong counter = new AtomicLong();
+
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+            if (counter.incrementAndGet() % 10000 == 0) {
+                System.out.println(counter.get());
+            }
+        }
+
+        public static long getCounter() {
+            return counter.get();
+        }
+
+        public static void reset() {
+            counter.set(0l);
+        }
+    }
 
     @Injected
     private BaseComponentsHandler handler;
@@ -67,8 +84,9 @@ public class BigQueryTableExtractInputTest {
     @EnvironmentalTest
     // @Test
     public void justLoop() {
-        OptionalDouble avg = IntStream.range(0, 50).mapToLong(i -> {
+        OptionalDouble avg = IntStream.range(0, 1).mapToLong(i -> {
             try {
+                Counter.reset();
                 return run();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -106,17 +124,21 @@ public class BigQueryTableExtractInputTest {
         dataset.setConnection(connection);
         dataset.setBqDataset("dataset_rlecomte");
         dataset.setTableName("TableWithData");
+        dataset.setGsBucket("tdi_rlecomte");
 
         BigQueryTableExtractInputConfig config = new BigQueryTableExtractInputConfig();
-        config.setGsBucket("tdi_rlecomte");
         config.setTableDataset(dataset);
 
         // String configURI = configurationByExample().forInstance(config).configured().toQueryString();
         // System.out.println(configURI);
 
+        Counter counter = new Counter();
+
         long start = System.currentTimeMillis();
-        Pipeline.create().apply(TalendIO.read(handler.createMapper(BigQueryTableExtractMapper.class, config))).getPipeline().run()
-                .waitUntilFinish();
+        Mapper mapper = handler.createMapper(BigQueryTableExtractMapper.class, config);
+        Pipeline.create(
+                PipelineOptionsFactory.fromArgs("--runner=org.apache.beam.runners.spark.SparkRunner", "--filesToStage=").create())
+                .apply(TalendIO.read(mapper)).apply(ParDo.of(counter)).getPipeline().run().waitUntilFinish();
 
         long end = System.currentTimeMillis();
 
@@ -125,7 +147,7 @@ public class BigQueryTableExtractInputTest {
         // records.stream().limit(1000).forEach(System.out::println);
 
         // Assertions.assertNotNull(records);
-        System.out.println(records.size() + " in " + (end - start) + "ms");
+        System.out.println(counter.getCounter() + " in " + (end - start) + "ms");
         // Assertions.assertNotEquals(0, records.size());
 
         return end - start;

@@ -95,7 +95,7 @@ public class BigQueryTableExtractMapper implements Serializable {
         try {
             // extract table to Google Storage
             String uuid = UUID.randomUUID().toString();
-            String blobGenericName = "gs://" + configuration.getGsBucket() + "/tmp/" + uuid + "/f_*.avro";
+            String blobGenericName = "gs://" + configuration.getTableDataset().getGsBucket() + "/tmp/" + uuid + "/f_*.avro";
 
             ExtractJobConfiguration jobConfig = ExtractJobConfiguration.newBuilder(table.getTableId(), blobGenericName)
                     .setFormat("Avro")
@@ -112,7 +112,7 @@ public class BigQueryTableExtractMapper implements Serializable {
             Storage storage = new StorageOptions.DefaultStorageFactory().create(storageOptions);
             String prefix = "tmp/" + uuid + "/f_";
             log.info("Blobs prefix : {}", prefix);
-            Page<Blob> blobs = storage.list(configuration.getGsBucket(), Storage.BlobListOption.prefix(prefix));
+            Page<Blob> blobs = storage.list(configuration.getTableDataset().getGsBucket(), Storage.BlobListOption.prefix(prefix));
 
             // Create and return mapper
             List<BigQueryTableExtractMapper> mappers = new ArrayList<>();
