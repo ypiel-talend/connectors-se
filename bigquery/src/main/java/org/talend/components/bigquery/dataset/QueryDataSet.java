@@ -27,8 +27,7 @@ import java.io.Serializable;
 @Data
 @DataSet("BigQueryDataSetQueryType")
 @Documentation("Dataset of a BigQuery component with query type.")
-@GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row({ "query", "useLegacySql" }),
-        @GridLayout.Row({ "useSpecificLocation", "location" }) })
+@GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row({ "query", "useLegacySql" }) })
 public class QueryDataSet implements Serializable {
 
     @Option
@@ -44,45 +43,4 @@ public class QueryDataSet implements Serializable {
     @Documentation("Should the query use legacy SQL")
     private boolean useLegacySql;
 
-    @Option
-    @Documentation("Location must be specified for queries not executed in US or EU")
-    @DefaultValue("false")
-    private boolean useSpecificLocation;
-
-    @Option
-    @Documentation("Regional locations")
-    @DefaultValue("US")
-    @ActiveIf(target = "useSpecificLocation", value = "true")
-    private Location location;
-
-    /**
-     * BigQuery geographic location where the query <a
-     * href="https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs">job</a> will be
-     * executed. If not specified, Beam tries to determine the location by examining the tables
-     * referenced by the query. Location must be specified for queries not executed in US or EU. See
-     * <a href="https://cloud.google.com/bigquery/docs/locations">Dataset locations</a>.
-     */
-    public enum Location {
-        US("US"),
-        EU("EU"),
-        NORTH_AMERICA_NORTHEAST("northamerica-northeast1"),
-        US_EAST("us-east4"),
-        EU_NORTH("europe-north1"),
-        EU_WEST("europe-west2"),
-        ASIA_SOUTH("asia-south1"),
-        ASIA_EAST("asia-east1"),
-        ASIA_NORTHEAST("asia-northeast1"),
-        ASIA_SOUTHEAST("asia-southeast1"),
-        AUSTRALIA_SOUTHEAST("australia-southeast1");
-
-        private final String regionName;
-
-        private Location(String regionName) {
-            this.regionName = regionName;
-        }
-
-        public String getRegionName() {
-            return regionName;
-        }
-    }
 }
