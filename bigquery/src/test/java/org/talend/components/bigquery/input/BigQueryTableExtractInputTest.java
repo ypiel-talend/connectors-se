@@ -142,7 +142,7 @@ public class BigQueryTableExtractInputTest {
 
         long end = System.currentTimeMillis();
 
-        List<Record> records = COMPONENTS.getCollectedData(Record.class);
+        // List<Record> records = COMPONENTS.getCollectedData(Record.class);
 
         // records.stream().limit(1000).forEach(System.out::println);
 

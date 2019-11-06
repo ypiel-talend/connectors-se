@@ -72,7 +72,8 @@ public class BigQueryQueryInput implements Serializable {
 
         if (!loaded) {
             try {
-                QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(dataSet.getQuery()).build();
+                QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(dataSet.getQuery())
+                        .setUseLegacySql(dataSet.isUseLegacySql()).build();
                 TableResult tableResult = bigQuery.query(queryConfig);
                 tableSchema = tableResult.getSchema();
                 queryResult = tableResult.iterateAll().iterator();

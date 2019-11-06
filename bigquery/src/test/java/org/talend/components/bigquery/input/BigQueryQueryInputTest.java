@@ -12,6 +12,9 @@
  */
 package org.talend.components.bigquery.input;
 
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +28,8 @@ import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnviro
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
+import org.talend.sdk.component.runtime.beam.TalendIO;
+import org.talend.sdk.component.runtime.input.Mapper;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -70,11 +75,29 @@ public class BigQueryQueryInputTest {
         QueryDataSet dataset = new QueryDataSet();
         dataset.setConnection(connection);
         dataset.setUseLegacySql(true);
-        dataset.setQuery("");
+        dataset.setQuery("SELECT COUNT(ID) FROM dataset_rlecomte.TableWithData WHERE IS_TRUE = true");
 
         BigQueryQueryInputConfig config = new BigQueryQueryInputConfig();
         config.setQueryDataset(dataset);
 
-        // TODO : finish it !!
+        BigQueryTableExtractInputTest.Counter counter = new BigQueryTableExtractInputTest.Counter();
+
+        BigQueryTableExtractInputTest.Counter.reset();
+
+        long start = System.currentTimeMillis();
+        Mapper mapper = handler.createMapper(BigQueryQueryInput.class, config);
+        Pipeline.create(
+                PipelineOptionsFactory.fromArgs("--runner=org.apache.beam.runners.spark.SparkRunner", "--filesToStage=").create())
+                .apply(TalendIO.read(mapper)).apply(ParDo.of(counter)).getPipeline().run().waitUntilFinish();
+
+        long end = System.currentTimeMillis();
+
+        // List<Record> records = COMPONENTS.getCollectedData(Record.class);
+
+        // records.stream().limit(1000).forEach(System.out::println);
+
+        // Assertions.assertNotNull(records);
+        System.out.println(counter.getCounter() + " in " + (end - start) + "ms");
+        // Assertions.assertNotEquals(0, records.size());
     }
 }
