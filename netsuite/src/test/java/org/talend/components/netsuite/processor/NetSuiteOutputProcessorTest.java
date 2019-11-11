@@ -127,8 +127,7 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
 
             inputDataSet.setSearchCondition(Collections.singletonList(
                     new SearchConditionConfiguration("Custrecord79", "String.is", preparedCustomField79Value, "")));
-            Record finalRecord = buildAndRunEmitterJob(inputDataSet).stream()
-                    .findFirst().orElseThrow(IllegalStateException::new);
+            Record finalRecord = buildAndRunEmitterJob(inputDataSet).stream().findFirst().orElseThrow(IllegalStateException::new);
             updateRecord = inputTransducer.read(() -> this.prepareCustomRecord(finalRecord));
             record = finalRecord;
         } else {
@@ -141,8 +140,8 @@ public class NetSuiteOutputProcessorTest extends NetSuiteBaseTest {
         final String preparedCustomField80Value = updateRecord.getString("Custrecord80");
         inputDataSet.setSearchCondition(Collections
                 .singletonList(new SearchConditionConfiguration("Custrecord80", "String.is", preparedCustomField80Value, "")));
-        Record resultUpdatedRecord = buildAndRunEmitterJob(inputDataSet).stream()
-                .findFirst().orElseThrow(IllegalStateException::new);
+        Record resultUpdatedRecord = buildAndRunEmitterJob(inputDataSet).stream().findFirst()
+                .orElseThrow(IllegalStateException::new);
 
         assertEquals(updateRecord.getString("Name"), resultUpdatedRecord.getString("Name"));
 

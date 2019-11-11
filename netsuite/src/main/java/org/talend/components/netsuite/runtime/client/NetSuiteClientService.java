@@ -59,7 +59,7 @@ public abstract class NetSuiteClientService<PortT> {
 
     private static final String JAXB_CONTEXT = "com.sun.xml.internal.bind.v2.runtime.JAXBContextImpl";
 
-    protected Messages i18n;
+    public Messages i18n;
 
     private boolean isLoggedIn = false;
 
