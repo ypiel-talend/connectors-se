@@ -12,7 +12,9 @@
  */
 package org.talend.components.bigquery.input;
 
+
 import com.google.cloud.bigquery.*;
+import lombok.extern.slf4j.Slf4j;
 import org.talend.components.bigquery.dataset.QueryDataSet;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryService;
@@ -35,6 +37,7 @@ import java.util.Iterator;
 @Icon(Icon.IconType.BIGQUERY)
 @Emitter(name = "BigQueryQueryInput")
 @Documentation("This component reads a query from BigQuery.")
+@Slf4j
 public class BigQueryQueryInput implements Serializable {
 
     protected final BigQueryConnection connection;
@@ -78,7 +81,7 @@ public class BigQueryQueryInput implements Serializable {
                 tableSchema = tableResult.getSchema();
                 queryResult = tableResult.iterateAll().iterator();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error("Error during query execution", e);
             } finally {
                 loaded = true;
             }

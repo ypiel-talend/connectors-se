@@ -106,8 +106,8 @@ public class BigQueryService {
 
         BigQuery client = null;
 
-        if (connection.getJSonCredentials() != null && !"".equals(connection.getJSonCredentials().trim())) {
-            GoogleCredentials credentials = getCredentials(connection.getJSonCredentials());
+        if (connection.getJsonCredentials() != null && !"".equals(connection.getJsonCredentials().trim())) {
+            GoogleCredentials credentials = getCredentials(connection.getJsonCredentials());
 
             client = BigQueryOptions.newBuilder().setCredentials(credentials).setProjectId(connection.getProjectName()).build()
                     .getService();

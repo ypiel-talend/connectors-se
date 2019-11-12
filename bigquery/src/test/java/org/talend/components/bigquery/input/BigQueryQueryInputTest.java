@@ -70,7 +70,7 @@ public class BigQueryQueryInputTest {
 
         BigQueryConnection connection = new BigQueryConnection();
         connection.setProjectName("engineering-152721");
-        connection.setJSonCredentials(jsonCredentials);
+        connection.setJsonCredentials(jsonCredentials);
 
         QueryDataSet dataset = new QueryDataSet();
         dataset.setConnection(connection);
