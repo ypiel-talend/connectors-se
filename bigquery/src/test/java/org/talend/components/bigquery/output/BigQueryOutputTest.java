@@ -82,7 +82,7 @@ public class BigQueryOutputTest {
 
         BigQueryConnection connection = new BigQueryConnection();
         connection.setProjectName("engineering-152721");
-        connection.setJSonCredentials(jsonCredentials);
+        connection.setJsonCredentials(jsonCredentials);
 
         TableDataSet dataset = new TableDataSet();
         dataset.setConnection(connection);
@@ -129,7 +129,7 @@ public class BigQueryOutputTest {
 
         BigQueryConnection connection = new BigQueryConnection();
         connection.setProjectName("engineering-152721");
-        connection.setJSonCredentials(jsonCredentials);
+        connection.setJsonCredentials(jsonCredentials);
 
         TableDataSet dataset = new TableDataSet();
         dataset.setConnection(connection);
