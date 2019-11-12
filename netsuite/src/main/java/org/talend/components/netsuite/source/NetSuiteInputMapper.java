@@ -79,7 +79,7 @@ public class NetSuiteInputMapper implements Serializable {
 
     @Split
     public List<NetSuiteInputMapper> split(@PartitionSize final long bundles) {
-        if (bundles < 2)
+        if (bundles == 0)
             return Collections.singletonList(this);
 
         int threads = (int) (rs.getTotalPages() / bundles);
@@ -87,13 +87,13 @@ public class NetSuiteInputMapper implements Serializable {
         for (int i = 0; i < threads; i++) {
             NetSuiteInputMapper mapper = new NetSuiteInputMapper(configuration, service, recordBuilderFactory, i18n);
             mapper.setRs(rs);
-            mapper.setPageSelection(new PageSelection((int) (bundles * i), (int) bundles));
+            mapper.setPageSelection(new PageSelection((int) (bundles * i) + 1, (int) bundles));
             res.add(mapper);
         }
         if (threads * bundles < rs.getTotalPages()) {
             NetSuiteInputMapper mapper = new NetSuiteInputMapper(configuration, service, recordBuilderFactory, i18n);
             mapper.setRs(rs);
-            mapper.setPageSelection(new PageSelection((int) bundles * threads, rs.getTotalPages() - (int) bundles * threads));
+            mapper.setPageSelection(new PageSelection((int) bundles * threads + 1, rs.getTotalPages() - (int) bundles * threads));
             res.add(mapper);
         }
         return res;

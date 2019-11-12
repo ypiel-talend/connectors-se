@@ -15,6 +15,7 @@ package org.talend.components.netsuite.source;
 import com.netsuite.webservices.v2018_2.lists.accounting.types.AccountType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.netsuite.NetSuiteBaseTest;
 import org.talend.components.netsuite.dataset.NetSuiteDataSet;
@@ -22,10 +23,15 @@ import org.talend.components.netsuite.dataset.NetSuiteInputProperties;
 import org.talend.components.netsuite.dataset.SearchConditionConfiguration;
 import org.talend.components.netsuite.test.TestCollector;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.junit.BaseComponentsHandler;
+import org.talend.sdk.component.junit.SimpleFactory;
+import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
+import org.talend.sdk.component.runtime.input.Mapper;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,6 +43,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class NetSuiteSourceTest extends NetSuiteBaseTest {
 
     NetSuiteInputProperties inputProperties;
+
+    @Injected
+    private BaseComponentsHandler componentsHandler;
 
     @BeforeEach
     public void setup() {
@@ -116,5 +125,18 @@ public class NetSuiteSourceTest extends NetSuiteBaseTest {
         List<Record> records = buildAndRunEmitterJob(inputProperties);
         assertEquals(1, records.size());
         assertTrue("FirstRecord".equals(records.get(0).get(String.class, "Name")));
+    }
+
+    @Test
+    @DisplayName("Partition input data")
+    void partitionInputDataTest() {
+        componentsHandler.resetState();
+        dataSet.setRecordType("Account");
+        Mapper mapper = componentsHandler.asManager()
+                .findMapper("NetSuite", "Input", 1, SimpleFactory.configurationByExample(inputProperties)).get();
+        final List<Record> res = componentsHandler.collect(Record.class, mapper, Integer.MAX_VALUE, 3)
+                .collect(Collectors.toList());
+        assertNotNull(res);
+        assertEquals(87, res.size());
     }
 }

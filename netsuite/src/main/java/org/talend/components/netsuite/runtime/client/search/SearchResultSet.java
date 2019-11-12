@@ -85,6 +85,7 @@ public class SearchResultSet<R> implements ResultSet<R> {
     public SearchResultSet(NetSuiteClientService<?> clientService, String recordTypeName, NsSearchResult<R> result,
             PageSelection pageSelection) {
         this.clientService = clientService;
+        this.pageSelection = pageSelection;
         recordTypeDesc = clientService.getMetaDataSource().getRecordType(recordTypeName);
         searchRecordTypeDesc = clientService.getMetaDataSource().getSearchRecordType(recordTypeName);
         // search not found or not supported
@@ -97,8 +98,6 @@ public class SearchResultSet<R> implements ResultSet<R> {
 
         recordList = prepareRecordList();
         recordIterator = recordList.iterator();
-
-        this.pageSelection = pageSelection;
     }
 
     @Override
@@ -128,11 +127,7 @@ public class SearchResultSet<R> implements ResultSet<R> {
         if (result == null || result.getPageIndex() == null || result.getTotalPages() == null) {
             return false;
         }
-        if (pageSelection != null) {
-            return result.getPageIndex() < pageSelection.getPageOffset() + pageSelection.getPageCount() - 1;
-        } else {
-            return result.getPageIndex() < result.getTotalPages();
-        }
+        return result.getPageIndex() < pageSelection.getPageOffset() + pageSelection.getPageCount() - 1;
     }
 
     /**
@@ -144,12 +139,10 @@ public class SearchResultSet<R> implements ResultSet<R> {
         String searchId = result.getSearchId();
         if (searchId != null) {
             int nextPageIndex = result.getPageIndex() + 1;
-            if (pageSelection != null) {
-                if (result.getPageIndex() < pageSelection.getPageOffset()) {
-                    nextPageIndex = pageSelection.getPageOffset();
-                } else if (result.getPageIndex() >= pageSelection.getPageOffset() + pageSelection.getPageCount()) {
-                    return Collections.emptyList();
-                }
+            if (result.getPageIndex() < pageSelection.getPageOffset()) {
+                nextPageIndex = pageSelection.getPageOffset();
+            } else if (result.getPageIndex() >= pageSelection.getPageOffset() + pageSelection.getPageCount()) {
+                return Collections.emptyList();
             }
             NsSearchResult<R> nextPageResult = clientService.searchMoreWithId(searchId, nextPageIndex);
             if (!nextPageResult.isSuccess()) {
@@ -168,9 +161,8 @@ public class SearchResultSet<R> implements ResultSet<R> {
      */
     protected List<R> prepareRecordList() {
         List<R> recordList = result.getRecordList();
-        if (recordList == null || recordList.isEmpty()
-                || pageSelection != null && (result.getPageIndex() < pageSelection.getPageOffset()
-                        || result.getPageIndex() > pageSelection.getPageOffset() + pageSelection.getPageCount() - 1)) {
+        if (recordList == null || recordList.isEmpty() || result.getPageIndex() < pageSelection.getPageOffset()
+                || result.getPageIndex() > pageSelection.getPageOffset() + pageSelection.getPageCount() - 1) {
             return Collections.emptyList();
         }
         Predicate<R> checkRecordTypeClass = r -> r.getClass() == recordTypeDesc.getRecordType().getRecordClass();

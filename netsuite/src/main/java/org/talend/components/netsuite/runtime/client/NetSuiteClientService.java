@@ -222,7 +222,6 @@ public abstract class NetSuiteClientService<PortT> {
      *
      * @param records list of record data objects to be sent to NetSuite
      * @param <RecT> type of record data object
-     * @param <RefT> type of record ref data object
      * @return list of write response wrapper objects
      * @throws NetSuiteException if an error occurs during performing of operation
      */
@@ -236,7 +235,6 @@ public abstract class NetSuiteClientService<PortT> {
      *
      * @param records list of record data objects to be sent to NetSuite
      * @param <RecT> type of record data object
-     * @param <RefT> type of record ref data object
      * @return list of write response wrapper objects
      */
     public <RecT> List<NsWriteResponse<?>> updateList(final List<RecT> records) {
