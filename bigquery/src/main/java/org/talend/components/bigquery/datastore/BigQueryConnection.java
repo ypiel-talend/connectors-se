@@ -32,7 +32,7 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 @DataStore("BigQueryConnection")
 @Checkable(BigQueryService.ACTION_HEALTH_CHECK)
 @Documentation("Connection of a BigQuery component.")
-@GridLayout({ @GridLayout.Row({ "projectName" }), @GridLayout.Row({ "jSonCredentials" }) })
+@GridLayout({ @GridLayout.Row({ "projectName" }), @GridLayout.Row({ "jsonCredentials" }) })
 public class BigQueryConnection implements Serializable {
 
     @Option
@@ -43,6 +43,6 @@ public class BigQueryConnection implements Serializable {
     @Option
     @Credential
     @Documentation("Google credential (JSON)")
-    private String jSonCredentials;
+    private String jsonCredentials;
 
 }
