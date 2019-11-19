@@ -57,23 +57,18 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
 
     public static final String RECORD_NAMESPACE = "org.talend.components.adlsgen2";
 
-    private final AvroConfiguration configuration;
-
     private RecordBuilderFactory recordBuilderFactory;
 
     private Schema recordSchema;
 
     private org.apache.avro.Schema avroSchema;
 
-    public static AvroConverter of(final RecordBuilderFactory factory,
-            final @Configuration("avroConfiguration") AvroConfiguration configuration) {
-        return new AvroConverter(factory, configuration);
+    public static AvroConverter of(final RecordBuilderFactory factory) {
+        return new AvroConverter(factory);
     }
 
-    protected AvroConverter(final RecordBuilderFactory factory,
-            final @Configuration("avroConfiguration") AvroConfiguration configuration) {
+    protected AvroConverter(final RecordBuilderFactory factory) {
         recordBuilderFactory = factory;
-        this.configuration = configuration;
     }
 
     @Override

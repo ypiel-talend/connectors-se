@@ -69,11 +69,9 @@ public class BigQueryTableInput implements Serializable {
 
     @Producer
     public Record next() {
-
-        BigQuery bigQuery = BigQueryService.createClient(connection);
-
         if (!loaded) {
             try {
+                BigQuery bigQuery = BigQueryService.createClient(connection);
                 TableId tableId = TableId.of(connection.getProjectName(), dataSet.getBqDataset(), dataSet.getTableName());
                 Table table = bigQuery.getTable(tableId);
                 tableSchema = table.getDefinition().getSchema();

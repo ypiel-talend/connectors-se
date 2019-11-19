@@ -23,7 +23,6 @@ import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
-import org.talend.components.bigquery.avro.AvroConfiguration;
 import org.talend.components.bigquery.avro.AvroConverter;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryService;
@@ -110,19 +109,14 @@ public class BigQueryTableExtractInput implements Serializable {
                 log.info("Working with blob {}.", blob);
 
                 datumReader = new GenericDatumReader<>();
-                converter = AvroConverter.of(builderFactory, new AvroConfiguration());
+                converter = AvroConverter.of(builderFactory);
 
                 ReadChannel rc = blob.reader();
                 InputStream in = Channels.newInputStream(rc);
-                try {
-                    dataStream = new DataFileStream<GenericRecord>(in, datumReader);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-
+                dataStream = new DataFileStream<GenericRecord>(in, datumReader);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Error during blob reader initialisation", e);
+                throw new RuntimeException(e);
             } finally {
                 loaded = true;
             }

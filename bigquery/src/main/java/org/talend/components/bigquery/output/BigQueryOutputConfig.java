@@ -45,7 +45,6 @@ public class BigQueryOutputConfig implements Serializable {
     @Option
     @Documentation("Specify table schema for creation table")
     @ActiveIf(target = "tableOperation", value = "CREATE_IF_NOT_EXISTS")
-    @TextArea
     @Code("json")
     private String tableSchemaFields;
 

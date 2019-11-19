@@ -12,7 +12,6 @@
  */
 package org.talend.components.bigquery.input;
 
-
 import com.google.cloud.bigquery.*;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.bigquery.dataset.QueryDataSet;
@@ -71,17 +70,18 @@ public class BigQueryQueryInput implements Serializable {
 
     @Producer
     public Record next() {
-        BigQuery bigQuery = BigQueryService.createClient(connection);
 
         if (!loaded) {
             try {
+                BigQuery bigQuery = BigQueryService.createClient(connection);
                 QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(dataSet.getQuery())
                         .setUseLegacySql(dataSet.isUseLegacySql()).build();
                 TableResult tableResult = bigQuery.query(queryConfig);
                 tableSchema = tableResult.getSchema();
                 queryResult = tableResult.iterateAll().iterator();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 log.error("Error during query execution", e);
+                throw new RuntimeException(e.getMessage());
             } finally {
                 loaded = true;
             }
@@ -97,32 +97,35 @@ public class BigQueryQueryInput implements Serializable {
             for (Field f : tableSchema.getFields()) {
                 String name = f.getName();
                 FieldValue value = fieldValueList.get(name);
-                LegacySQLTypeName type = f.getType();
 
-                switch (type.name()) {
-                case "BOOLEAN":
-                    rb.withBoolean(name, value.getBooleanValue());
-                    break;
-                case "BYTES":
-                    rb.withBytes(name, value.getBytesValue());
-                    break;
-                case "DATE":
-                    rb.withDateTime(name, new Date(value.getTimestampValue()));
-                    break;
-                case "DATETIME":
-                    rb.withDateTime(name, new Date(value.getTimestampValue()));
-                    break;
-                case "FLOAT":
-                    rb.withDouble(name, value.getDoubleValue());
-                    break;
-                case "INTEGER":
-                    rb.withLong(name, value.getLongValue());
-                    break;
-                case "TIME":
-                    rb.withLong(name, value.getLongValue());
-                    break;
-                default:
-                    rb.withString(name, value.getStringValue());
+                if (value != null) {
+                    LegacySQLTypeName type = f.getType();
+
+                    switch (type.name()) {
+                    case "BOOLEAN":
+                        rb.withBoolean(name, value.getBooleanValue());
+                        break;
+                    case "BYTES":
+                        rb.withBytes(name, value.getBytesValue());
+                        break;
+                    case "DATE":
+                        rb.withDateTime(name, new Date(value.getTimestampValue()));
+                        break;
+                    case "DATETIME":
+                        rb.withDateTime(name, new Date(value.getTimestampValue()));
+                        break;
+                    case "FLOAT":
+                        rb.withDouble(name, value.getDoubleValue());
+                        break;
+                    case "INTEGER":
+                        rb.withLong(name, value.getLongValue());
+                        break;
+                    case "TIME":
+                        rb.withLong(name, value.getLongValue());
+                        break;
+                    default:
+                        rb.withString(name, value.getStringValue());
+                    }
                 }
 
             }
