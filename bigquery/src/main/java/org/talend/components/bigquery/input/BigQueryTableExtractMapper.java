@@ -123,7 +123,7 @@ public class BigQueryTableExtractMapper implements Serializable {
             return mappers;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error during split", e);
             throw new RuntimeException();
         }
     }

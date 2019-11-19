@@ -100,11 +100,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.talend.sdk.component</groupId>
-            <artifactId>component-runtime-beam</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.esotericsoftware.kryo</groupId>
             <artifactId>kryo</artifactId>
             <version>2.23.0</version>
@@ -202,4 +197,58 @@
             </extension>
         </extensions>
     </build>
+
+    <profiles>
+        <profile>
+            <id>failsafe</id>
+            <!-- mvn clean integration-test -Pfailsafe -DargLine="-DGOOGLE_APPLICATION_CREDENTIALS=C:\Users\rlecomte\Documents\Engineering-4e7ac6cf93f4.json -Dtalend.component.junit.handler.state=static" -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>3.0.0-M3</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*ITCase</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/*Test</exclude>
+                            </excludes>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${basedir}/target/classes</additionalClasspathElement>
+                                <additionalClasspathElement>${basedir}/target/test-classes</additionalClasspathElement>
+                            </additionalClasspathElements>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>add-integration-test-source</id>
+                                <phase>generate-test-sources</phase>
+                                <goals>
+                                    <goal>add-test-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/integration-test/java</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
