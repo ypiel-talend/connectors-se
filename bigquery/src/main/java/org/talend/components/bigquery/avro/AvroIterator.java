@@ -66,39 +66,4 @@ public class AvroIterator implements Iterator<Record>, Serializable {
         return current != null ? converter.toRecord(current) : null;
     }
 
-    /**
-     *
-     */
-    public static class Builder {
-
-        private AvroConverter converter;
-
-        private AvroConfiguration configuration;
-
-        private RecordBuilderFactory factory;
-
-        private Builder(final RecordBuilderFactory factory) {
-            this.factory = factory;
-        }
-
-        public static AvroIterator.Builder of(RecordBuilderFactory factory) {
-            return new AvroIterator.Builder(factory);
-        }
-
-        public AvroIterator.Builder withConfiguration(@Configuration("avroConfiguration") final AvroConfiguration configuration) {
-            this.configuration = configuration;
-            converter = AvroConverter.of(factory, configuration);
-
-            return this;
-        }
-
-        public AvroIterator parse(InputStream in) {
-            return new AvroIterator(converter, in);
-        }
-
-        public AvroIterator parse(String content) {
-            throw new UnsupportedOperationException("#parse(String content)");
-        }
-    }
-
 }
