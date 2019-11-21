@@ -102,7 +102,7 @@ public class BigQueryService {
                 .collect(toList()));
     }
 
-    public static BigQuery createClient(final BigQueryConnection connection) {
+    public BigQuery createClient(final BigQueryConnection connection) {
 
         BigQuery client = null;
 

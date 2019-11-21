@@ -12,13 +12,186 @@
  */
 package org.talend.components.bigquery.input;
 
-import org.talend.sdk.component.junit.environment.Environment;
-import org.talend.sdk.component.junit.environment.Environments;
-import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnvironment;
-import org.talend.sdk.component.junit5.WithComponents;
+import com.google.auth.Credentials;
+import com.google.cloud.ReadChannel;
+import com.google.cloud.bigquery.BigQuery;
+import com.google.cloud.bigquery.BigQueryOptions;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Storage;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.file.DataFileStream;
+import org.apache.avro.generic.GenericRecord;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.talend.components.bigquery.dataset.TableDataSet;
+import org.talend.components.bigquery.datastore.BigQueryConnection;
+import org.talend.components.bigquery.service.BigQueryService;
+import org.talend.components.bigquery.service.GoogleStorageService;
+import org.talend.components.bigquery.service.I18nMessage;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 
-@Environments({ @Environment(SparkRunnerEnvironment.class) })
-@WithComponents("org.talend.components.bigquery")
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
 public class BigQueryTableExtractInputTest {
+
+    public static class SimpleGenericRecord implements GenericRecord {
+
+        private final Map<String, Object> internalMap = new HashMap<>();
+
+        private Schema schema;
+
+        @Override
+        public void put(String key, Object v) {
+            internalMap.put(key, v);
+        }
+
+        @Override
+        public Object get(String key) {
+            return internalMap.get(key);
+        }
+
+        @Override
+        public void put(int i, Object v) {
+            internalMap.put(String.valueOf(i), v);
+        }
+
+        @Override
+        public Object get(int i) {
+            return internalMap.get(String.valueOf(i));
+        }
+
+        @Override
+        public Schema getSchema() {
+            if (schema == null) {
+                schema = SchemaBuilder
+                        .record("X")
+                        .fields()
+
+                        .name("f1")
+                        .type(Schema.create(Schema.Type.STRING))
+                        .noDefault()
+
+                        .name("f2")
+                        .type(Schema.create(Schema.Type.INT))
+                        .withDefault(0)
+
+                        .endRecord();
+            }
+
+            return schema;
+        }
+    }
+
+    private BigQueryTableExtractInputConfig configuration;
+
+    private BigQueryService service;
+
+    private GoogleStorageService storageService;
+
+    private I18nMessage i18n;
+
+    private RecordBuilderFactory builderFactory;
+
+    private BigQueryConnection connection;
+
+    private BigQuery bigQuery;
+
+    private Storage storage;
+
+    private DataFileStream<GenericRecord> dataStream;
+
+    @BeforeEach
+    public void reinit() throws Exception {
+        connection = new BigQueryConnection();
+        connection.setProjectName("projectName");
+        connection.setJsonCredentials("");
+
+        configuration = new BigQueryTableExtractInputConfig();
+        TableDataSet tableDataSet = new TableDataSet();
+        tableDataSet.setTableName("tableName");
+        tableDataSet.setGsBucket("gsBucket");
+        tableDataSet.setBqDataset("bqDataset");
+        tableDataSet.setConnection(connection);
+        configuration.setTableDataset(tableDataSet);
+
+        i18n = Mockito.mock(I18nMessage.class);
+        builderFactory = new RecordBuilderFactoryImpl(null);
+        service = Mockito.mock(BigQueryService.class);
+        storageService = Mockito.mock(GoogleStorageService.class);
+
+        bigQuery = Mockito.mock(BigQuery.class);
+        Mockito.when(service.createClient(connection)).thenReturn(bigQuery);
+        BigQueryOptions bqOptions = Mockito.mock(BigQueryOptions.class);
+        Mockito.when(bigQuery.getOptions()).thenReturn(bqOptions);
+        Credentials credentials = Mockito.mock(Credentials.class);
+        Mockito.when(bqOptions.getCredentials()).thenReturn(credentials);
+
+        storage = Mockito.mock(Storage.class);
+        Mockito.when(storageService.getStorage(credentials)).thenReturn(storage);
+        dataStream = Mockito.mock(DataFileStream.class);
+        Mockito.when(storageService.getDataFileStream(
+                Mockito.eq(storage),
+                Mockito.eq(tableDataSet.getGsBucket()), Mockito.anyString()))
+                .thenReturn(dataStream);
+    }
+
+    @Test
+    public void justRun() throws Exception {
+
+        Mockito.when(dataStream.hasNext()).thenReturn(true, false);
+        Mockito.when(dataStream.next()).thenReturn(getGenericRecord(), null);
+
+        String gsBlob = "aBlob";
+        BigQueryTableExtractInput beanUnderTest = new BigQueryTableExtractInput(configuration, service, storageService, i18n,
+                builderFactory, gsBlob);
+        beanUnderTest.init();
+
+        Record record1 = beanUnderTest.next();
+        Assertions.assertNotNull(record1);
+        GenericRecord expected = getGenericRecord();
+        Assertions.assertEquals(expected.get("f1"), record1.getString("f1"));
+        Assertions.assertEquals(expected.get("f2"), record1.getInt("f2"));
+        Record record2 = beanUnderTest.next();
+        Assertions.assertNull(record2);
+
+        beanUnderTest.release();
+        Mockito.verify(storageService, Mockito.times(1))
+                .deleteBlob(storage, configuration.getTableDataset().getGsBucket(), gsBlob );
+    }
+
+    @Test
+    public void ifBlobNullCallDelegate() throws Exception {
+        BigQueryTableExtractInput beanUnderTest = new BigQueryTableExtractInput(configuration, service, storageService, i18n,
+                builderFactory, null);
+        beanUnderTest.init();
+
+        // Inject delegate mock
+        BigQueryTableInput mock = Mockito.mock(BigQueryTableInput.class);
+        Field field = BigQueryTableExtractInput.class.getDeclaredField("delegateInput");
+        field.setAccessible(true);
+        field.set(beanUnderTest, mock);
+
+        // Test
+        Record record1 = beanUnderTest.next();
+        Assertions.assertNull(record1);
+        Mockito.verify(mock, Mockito.times(1)).next();
+
+    }
+
+    private GenericRecord getGenericRecord() {
+        GenericRecord genericRecord = new SimpleGenericRecord();
+        genericRecord.put("f1", "A");
+        genericRecord.put("f2", 30);
+        return genericRecord;
+    }
 
 }
