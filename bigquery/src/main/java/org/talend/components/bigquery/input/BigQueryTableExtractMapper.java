@@ -20,6 +20,7 @@ import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryService;
+import org.talend.components.bigquery.service.GoogleStorageService;
 import org.talend.components.bigquery.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -44,6 +45,8 @@ public class BigQueryTableExtractMapper implements Serializable {
 
     protected final BigQueryService service;
 
+    protected final GoogleStorageService storageService;
+
     protected final I18nMessage i18n;
 
     protected final RecordBuilderFactory builderFactory;
@@ -57,19 +60,23 @@ public class BigQueryTableExtractMapper implements Serializable {
     private transient Table table;
 
     public BigQueryTableExtractMapper(@Option("configuration") final BigQueryTableExtractInputConfig configuration,
-            final BigQueryService service, final I18nMessage i18n, final RecordBuilderFactory builderFactory) {
+            final BigQueryService service, final GoogleStorageService storageService, final I18nMessage i18n,
+            final RecordBuilderFactory builderFactory) {
         this.i18n = i18n;
         this.builderFactory = builderFactory;
         this.service = service;
+        this.storageService = storageService;
         this.configuration = configuration;
         this.gsBlob = null;
     }
 
     protected BigQueryTableExtractMapper(BigQueryTableExtractInputConfig configuration, final BigQueryService service,
-            final I18nMessage i18n, final RecordBuilderFactory builderFactory, String gsBlob) {
+            final GoogleStorageService storageService, final I18nMessage i18n, final RecordBuilderFactory builderFactory,
+            String gsBlob) {
         this.i18n = i18n;
         this.builderFactory = builderFactory;
         this.service = service;
+        this.storageService = storageService;
         this.configuration = configuration;
         this.gsBlob = gsBlob;
     }
@@ -78,7 +85,7 @@ public class BigQueryTableExtractMapper implements Serializable {
     public void init() {
         // Connect and get table metadata
         BigQueryConnection connection = configuration.getDataStore();
-        bigQuery = BigQueryService.createClient(connection);
+        bigQuery = service.createClient(connection);
         TableId tableId = TableId.of(connection.getProjectName(), configuration.getTableDataset().getBqDataset(),
                 configuration.getTableDataset().getTableName());
         table = bigQuery.getTable(tableId);
@@ -107,17 +114,15 @@ public class BigQueryTableExtractMapper implements Serializable {
             Job extractJob = bigQuery.create(jobInfo);
             extractJob.waitFor();
 
-            StorageOptions storageOptions = StorageOptions.newBuilder().setCredentials(bigQuery.getOptions().getCredentials())
-                    .build();
-            Storage storage = new StorageOptions.DefaultStorageFactory().create(storageOptions);
+            Storage storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
             String prefix = "tmp/" + uuid + "/f_";
             log.info("Blobs prefix : {}", prefix);
             Page<Blob> blobs = storage.list(configuration.getTableDataset().getGsBucket(), Storage.BlobListOption.prefix(prefix));
 
             // Create and return mapper
             List<BigQueryTableExtractMapper> mappers = new ArrayList<>();
-            blobs.iterateAll().forEach(
-                    b -> mappers.add(new BigQueryTableExtractMapper(configuration, service, i18n, builderFactory, b.getName())));
+            blobs.iterateAll().forEach(b -> mappers.add(
+                    new BigQueryTableExtractMapper(configuration, service, storageService, i18n, builderFactory, b.getName())));
 
             log.info("nb mappers : {}", mappers.size());
             return mappers;
@@ -130,7 +135,7 @@ public class BigQueryTableExtractMapper implements Serializable {
 
     @Emitter
     public BigQueryTableExtractInput createSource() {
-        return new BigQueryTableExtractInput(configuration, service, i18n, builderFactory, gsBlob);
+        return new BigQueryTableExtractInput(configuration, service, storageService, i18n, builderFactory, gsBlob);
     }
 
     @PreDestroy
