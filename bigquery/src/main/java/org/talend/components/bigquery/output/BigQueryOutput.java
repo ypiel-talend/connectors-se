@@ -60,10 +60,13 @@ public class BigQueryOutput implements Serializable {
 
     private transient TableId tableId;
 
+    private BigQueryService service;
+
     public BigQueryOutput(@Option("configuration") final BigQueryOutputConfig configuration, BigQueryService bigQueryService) {
         this.configuration = configuration;
         this.connection = configuration.getDataSet().getConnection();
         this.tableSchema = bigQueryService.guessSchema(configuration);
+        this.service = bigQueryService;
     }
 
     @PostConstruct
@@ -81,7 +84,7 @@ public class BigQueryOutput implements Serializable {
 
     private void lazyInit() {
         init = true;
-        bigQuery = BigQueryService.createClient(connection);
+        bigQuery = service.createClient(connection);
         tableId = TableId.of(connection.getProjectName(), configuration.getDataSet().getBqDataset(),
                 configuration.getDataSet().getTableName());
         if (configuration.getTableOperation() == BigQueryOutputConfig.TableOperation.CREATE_IF_NOT_EXISTS) {
@@ -113,8 +116,9 @@ public class BigQueryOutput implements Serializable {
         InsertAllResponse response = bigQuery.insertAll(insertAllRequestBuilder.build());
 
         if (response.hasErrors()) {
-            response.getInsertErrors();
-            // TODO : rejected
+            // response.getInsertErrors();
+            // rejected no handled by TCK
+            log.warn(response.getInsertErrors().size() + " records could not be written");
         }
     }
 

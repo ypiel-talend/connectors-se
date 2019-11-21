@@ -26,6 +26,7 @@ import org.apache.avro.io.DatumReader;
 import org.talend.components.bigquery.avro.AvroConverter;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryService;
+import org.talend.components.bigquery.service.GoogleStorageService;
 import org.talend.components.bigquery.service.I18nMessage;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.record.Record;
@@ -46,6 +47,8 @@ public class BigQueryTableExtractInput implements Serializable {
 
     protected final BigQueryService service;
 
+    protected final GoogleStorageService storageService;
+
     protected final I18nMessage i18n;
 
     protected final RecordBuilderFactory builderFactory;
@@ -56,25 +59,21 @@ public class BigQueryTableExtractInput implements Serializable {
 
     private transient Storage storage;
 
-    private transient Iterator<Blob> blobsIterator;
-
-    private transient Blob blob;
-
     private transient DataFileStream<GenericRecord> dataStream;
 
     private transient boolean loaded = false;
 
-    private transient AvroConverter converter;
-
-    private transient DatumReader<GenericRecord> datumReader;
-
     private transient BigQueryTableInput delegateInput;
 
+    private transient AvroConverter converter;
+
     public BigQueryTableExtractInput(BigQueryTableExtractInputConfig configuration, final BigQueryService service,
-            final I18nMessage i18n, final RecordBuilderFactory builderFactory, final String gsBlob) {
+            final GoogleStorageService storageService, final I18nMessage i18n, final RecordBuilderFactory builderFactory,
+            final String gsBlob) {
         this.bucket = configuration.getTableDataset().getGsBucket();
         this.connection = configuration.getDataStore();
         this.service = service;
+        this.storageService = storageService;
         this.i18n = i18n;
         this.builderFactory = builderFactory;
         this.gsBlob = gsBlob;
@@ -101,19 +100,11 @@ public class BigQueryTableExtractInput implements Serializable {
 
         if (!loaded) {
             try {
-                BigQuery bigQuery = BigQueryService.createClient(connection);
-                StorageOptions storageOptions = StorageOptions.newBuilder().setCredentials(bigQuery.getOptions().getCredentials())
-                        .build();
-                storage = new StorageOptions.DefaultStorageFactory().create(storageOptions);
-                blob = storage.get(bucket, gsBlob);
-                log.info("Working with blob {}.", blob);
+                BigQuery bigQuery = service.createClient(connection);
 
-                datumReader = new GenericDatumReader<>();
                 converter = AvroConverter.of(builderFactory);
-
-                ReadChannel rc = blob.reader();
-                InputStream in = Channels.newInputStream(rc);
-                dataStream = new DataFileStream<GenericRecord>(in, datumReader);
+                storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
+                dataStream = storageService.getDataFileStream(storage, bucket, gsBlob);
             } catch (Exception e) {
                 log.error("Error during blob reader initialisation", e);
                 throw new RuntimeException(e);
@@ -124,33 +115,13 @@ public class BigQueryTableExtractInput implements Serializable {
 
         Record record = null;
 
-        if (blob == null || (dataStream != null && !dataStream.hasNext())) {
-
-            if (dataStream != null) {
-                try {
-                    dataStream.close();
-                } catch (Exception e) {
-                    log.warn("Cannot close stream", e);
-                }
-            }
-
-            if (blobsIterator != null && blobsIterator.hasNext()) {
-                blob = blobsIterator.next();
-            } else {
-                log.info("{} job done", Thread.currentThread().getName());
-                return null;
-            }
-            ReadChannel rc = blob.reader();
-            InputStream in = Channels.newInputStream(rc);
+        if (dataStream != null && !dataStream.hasNext()) {
             try {
-                dataStream = new DataFileStream<GenericRecord>(in, datumReader);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
+                dataStream.close();
+            } catch (Exception e) {
+                log.warn("Cannot close stream", e);
             }
-        }
-
-        if (dataStream != null && dataStream.hasNext()) {
+        } else if (dataStream != null) {
             GenericRecord rec = dataStream.next();
             record = converter.toRecord(rec);
         }
@@ -160,17 +131,9 @@ public class BigQueryTableExtractInput implements Serializable {
 
     @PreDestroy
     public void release() {
-        if (blob != null) {
-            blob.delete();
-        }
+        storageService.deleteBlob(storage, bucket, gsBlob);
     }
 
-    private Iterator<Blob> getBlobs() {
-        String prefix = gsBlob.substring(0, gsBlob.lastIndexOf('_') + 1);
-        prefix = prefix.substring(prefix.indexOf(bucket) + bucket.length() + 1);
-        log.info("Getting blobs with prefix {}", prefix);
-        Page<Blob> blobs = storage.list(bucket, Storage.BlobListOption.prefix(prefix));
-        return blobs.iterateAll().iterator();
-    }
+
 
 }
