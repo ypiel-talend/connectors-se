@@ -104,15 +104,7 @@ public class BigQueryTableExtractMapper implements Serializable {
             String uuid = UUID.randomUUID().toString();
             String blobGenericName = "gs://" + configuration.getTableDataset().getGsBucket() + "/tmp/" + uuid + "/f_*.avro";
 
-            ExtractJobConfiguration jobConfig = ExtractJobConfiguration.newBuilder(table.getTableId(), blobGenericName)
-                    .setFormat("Avro")
-                    // .setCompression("Snappy")
-                    .build();
-
-            JobInfo jobInfo = JobInfo.newBuilder(jobConfig).build();
-
-            Job extractJob = bigQuery.create(jobInfo);
-            extractJob.waitFor();
+            service.extractTable(bigQuery, table, blobGenericName);
 
             Storage storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
             String prefix = "tmp/" + uuid + "/f_";
@@ -129,6 +121,7 @@ public class BigQueryTableExtractMapper implements Serializable {
 
         } catch (Exception e) {
             log.error("Error during split", e);
+            e.printStackTrace();
             throw new RuntimeException();
         }
     }
