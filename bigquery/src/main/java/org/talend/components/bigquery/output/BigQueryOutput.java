@@ -92,13 +92,13 @@ public class BigQueryOutput implements Serializable {
             try {
                 Table table = bigQuery.getTable(tableId);
                 if (table == null) {
-                    log.info("Table %s does not exist. Create table needed", configuration.getDataSet().getTableName());
+                    log.info(i18n.infoTableNoExists(), configuration.getDataSet().getTableName());
                     TableInfo tableInfo = TableInfo.newBuilder(tableId, StandardTableDefinition.of(tableSchema)).build();
                     table = bigQuery.create(tableInfo);
-                    log.info("Table %s created", tableId.getTable());
+                    log.info(i18n.infoTableCreated(), tableId.getTable());
                 }
             } catch (BigQueryException e) {
-                log.error("Could not create table : " + e.getMessage(), e);
+                log.error(i18n.errorCreationTable() + e.getMessage(), e);
             }
         }
     }
@@ -118,7 +118,7 @@ public class BigQueryOutput implements Serializable {
         if (response.hasErrors()) {
             // response.getInsertErrors();
             // rejected no handled by TCK
-            log.warn(response.getInsertErrors().size() + " records could not be written");
+            log.warn(i18n.warnRejected(), response.getInsertErrors().size());
         }
     }
 

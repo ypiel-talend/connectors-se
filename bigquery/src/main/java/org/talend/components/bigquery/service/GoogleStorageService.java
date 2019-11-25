@@ -42,7 +42,6 @@ public class GoogleStorageService {
     public DataFileStream<GenericRecord> getDataFileStream(
             Storage storage, String bucket, String gsBlob) throws IOException  {
         Blob blob = storage.get(bucket, gsBlob);
-        log.info("Retrieved blob {}.", blob);
         DatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
         ReadChannel rc = blob.reader();
         InputStream in = Channels.newInputStream(rc);
