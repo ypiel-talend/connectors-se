@@ -207,7 +207,7 @@
     <profiles>
         <profile>
             <id>failsafe</id>
-            <!-- mvn clean integration-test -Pfailsafe -DargLine="-DGOOGLE_APPLICATION_CREDENTIALS=C:\Users\rlecomte\Documents\Engineering-4e7ac6cf93f4.json -Dtalend.component.junit.handler.state=static" -->
+            <!-- mvn clean integration-test -Pfailsafe -DargLine="-DGOOGLE_APPLICATION_CREDENTIALS=[path-to-json-credentials] -Dtalend.component.junit.handler.state=static" -->
             <build>
                 <plugins>
                     <plugin>
