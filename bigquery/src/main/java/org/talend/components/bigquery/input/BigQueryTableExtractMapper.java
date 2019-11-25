@@ -108,7 +108,7 @@ public class BigQueryTableExtractMapper implements Serializable {
 
             Storage storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
             String prefix = "tmp/" + uuid + "/f_";
-            log.info("Blobs prefix : {}", prefix);
+            log.info(i18n.blobsPrefix(), prefix);
             Page<Blob> blobs = storage.list(configuration.getTableDataset().getGsBucket(), Storage.BlobListOption.prefix(prefix));
 
             // Create and return mapper
@@ -116,11 +116,11 @@ public class BigQueryTableExtractMapper implements Serializable {
             blobs.iterateAll().forEach(b -> mappers.add(
                     new BigQueryTableExtractMapper(configuration, service, storageService, i18n, builderFactory, b.getName())));
 
-            log.info("nb mappers : {}", mappers.size());
+            log.info(i18n.nbMappers(), mappers.size());
             return mappers;
 
         } catch (Exception e) {
-            log.error("Error during split", e);
+            log.error(i18n.errorSplit(), e);
             e.printStackTrace();
             throw new RuntimeException();
         }

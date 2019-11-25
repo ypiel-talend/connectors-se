@@ -80,7 +80,7 @@ public class BigQueryQueryInput implements Serializable {
                 tableSchema = tableResult.getSchema();
                 queryResult = tableResult.iterateAll().iterator();
             } catch (Exception e) {
-                log.error("Error during query execution", e);
+                log.error(i18n.errorQueryExecution(), e);
                 throw new RuntimeException(e.getMessage());
             } finally {
                 loaded = true;
