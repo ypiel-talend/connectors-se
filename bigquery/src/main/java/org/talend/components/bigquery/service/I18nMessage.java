@@ -30,4 +30,22 @@ public interface I18nMessage {
     String tableOperationIsNotSupported(String message);
 
     String writeOperationIsNotSupported(String message);
+
+    String errorQueryExecution();
+
+    String errorBlobReaderInit();
+
+    String errorSplit();
+
+    String nbMappers();
+
+    String blobsPrefix();
+
+    String infoTableNoExists();
+
+    String errorCreationTable();
+
+    String infoTableCreated();
+
+    String warnRejected();
 }

@@ -106,7 +106,7 @@ public class BigQueryTableExtractInput implements Serializable {
                 storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
                 dataStream = storageService.getDataFileStream(storage, bucket, gsBlob);
             } catch (Exception e) {
-                log.error("Error during blob reader initialisation", e);
+                log.error(i18n.errorBlobReaderInit(), e);
                 throw new RuntimeException(e);
             } finally {
                 loaded = true;
