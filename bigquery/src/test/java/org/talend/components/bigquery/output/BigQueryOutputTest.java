@@ -33,18 +33,16 @@ import java.util.stream.IntStream;
 public class BigQueryOutputTest {
 
     private BigQueryOutputConfig configuration;
+
     private BigQueryService service;
 
     private BigQuery bigQuery;
-
-
 
     @BeforeEach
     public void reinit() throws Exception {
         BigQueryConnection connection = new BigQueryConnection();
         connection.setProjectName("projectName");
         connection.setJsonCredentials("");
-
 
         configuration = new BigQueryOutputConfig();
         TableDataSet tableDataSet = new TableDataSet();
@@ -75,21 +73,14 @@ public class BigQueryOutputTest {
         records.stream().forEach(beanUnderTest::onElement);
         beanUnderTest.afterGroup();
 
-
     }
 
     private List<Record> getRecordsToStore() {
         RecordBuilderFactory rbf = new RecordBuilderFactoryImpl(null);
         return IntStream.of(10).mapToObj(i -> {
-            return rbf.newRecordBuilder()
-                    .withString("f1", "A")
-                    .withFloat("f2", 42.5f)
-                    .withBoolean("f3", i %2 == 0)
-                    .withDateTime("f4", new Date())
-                    .withDateTime("f5", new Date())
-                    .withBytes("f6", new byte[] {0x01, 0x02})
-                    .withInt("f7", i)
-            .build();
+            return rbf.newRecordBuilder().withString("f1", "A").withFloat("f2", 42.5f).withBoolean("f3", i % 2 == 0)
+                    .withDateTime("f4", new Date()).withDateTime("f5", new Date()).withBytes("f6", new byte[] { 0x01, 0x02 })
+                    .withInt("f7", i).build();
         }).collect(Collectors.toList());
     }
 
@@ -104,6 +95,5 @@ public class BigQueryOutputTest {
                 com.google.cloud.bigquery.Field.of("f7", LegacySQLTypeName.INTEGER) };
         return fields;
     }
-
 
 }
