@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.magentocms;
 
 import lombok.Data;
@@ -38,22 +50,17 @@ public class MagentoTestExtension implements ExtensionContext.Store.CloseableRes
 
     private TestContext testContext = new TestContext();
 
-    private static final GenericContainer MAGENTO_CONTAINER = new GenericContainer(
-            // "registry.datapwn.com/sbovsunovskyi/components-integration-test-magentocms:1.0.0"
-            new ImageFromDockerfile()
-                    .withDockerfileFromBuilder(builder -> builder
-                            .from("registry.datapwn.com/sbovsunovskyi/components-integration-test-magentocms:1.0.0")
+    private static final GenericContainer MAGENTO_CONTAINER = new GenericContainer(new ImageFromDockerfile()
+            .withDockerfileFromBuilder(
+                    builder -> builder.from("registry.datapwn.com/sbovsunovskyi/components-integration-test-magentocms:1.0.0")
                             .copy("docker.cer", "/etc/ssl/certs/ssl-cert-snakeoil.pem")
                             .copy("docker.key", "/etc/ssl/private/ssl-cert-snakeoil.key").build())
-                    .withFileFromPath("docker.cer", Paths.get("docker/cert/test_docker.cer"))
-                    .withFileFromPath("docker.key", Paths.get("docker/cert/test_docker.key"))).withExposedPorts(80, 443)
-                            .withEnv("MAGENTO_BASE_URL", "http://192.168.99.100:30080")
-                            .withEnv("MAGENTO_BASE_URL_SECURE", "https://192.168.99.100:30443").withEnv("MAGENTO_USE_SECURE", "0")
-                            .withEnv("MAGENTO_USE_SECURE_ADMIN", "0")
-                            .waitingFor(Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(200)))
-    // .waitingFor(Wait.forHttp("/").forPort(80).forStatusCode(200).forStatusCode(401)
-    // .withStartupTimeout(Duration.ofSeconds(200)))
-    ;
+            .withFileFromPath("docker.cer", Paths.get("docker/cert/test_docker.cer"))
+            .withFileFromPath("docker.key", Paths.get("docker/cert/test_docker.key"))).withExposedPorts(80, 443)
+                    .withEnv("MAGENTO_BASE_URL", "http://192.168.99.100:30080")
+                    .withEnv("MAGENTO_BASE_URL_SECURE", "https://192.168.99.100:30443").withEnv("MAGENTO_USE_SECURE", "0")
+                    .withEnv("MAGENTO_USE_SECURE_ADMIN", "0")
+                    .waitingFor(Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(200)));
 
     private static boolean started = false;
 
@@ -67,9 +74,6 @@ public class MagentoTestExtension implements ExtensionContext.Store.CloseableRes
             extensionContext.getRoot().getStore(GLOBAL).put("any unique name", this);
         }
 
-        // testContext.dockerHostAddress = System.getProperty("dockerHostAddress", "192.168.99.100");
-        // testContext.magentoHttpPort = System.getProperty("magentoHttpPort", "80");
-        // testContext.magentoHttpPortSecure = System.getProperty("magentoHttpPortSecure", "443");
         testContext.dockerHostAddress = MAGENTO_CONTAINER.getContainerIpAddress();
         testContext.magentoHttpPort = String.valueOf(MAGENTO_CONTAINER.getMappedPort(80));
         testContext.magentoHttpPortSecure = String.valueOf(MAGENTO_CONTAINER.getMappedPort(443));
@@ -91,12 +95,6 @@ public class MagentoTestExtension implements ExtensionContext.Store.CloseableRes
         testContext.dataStoreOauth1 = new MagentoDataStore(getBaseUrl(), RestVersion.V1, AuthenticationType.OAUTH_1,
                 authenticationOauth1Settings, null, null);
     }
-
-    // @Override
-    // public void afterAll(ExtensionContext extensionContext) {
-    // log.info("extension after all call");
-    // MAGENTO_CONTAINER.stop();
-    // }
 
     @Override
     public void close() {

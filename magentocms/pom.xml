@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>magentocms</artifactId>
@@ -13,7 +13,7 @@
     <name>Components :: Magento CMS</name>
 
     <properties>
-        <testcontainers.version>1.10.3</testcontainers.version>
+        <testcontainers.version>1.12.3</testcontainers.version>
 
         <magento-admin-name>admin</magento-admin-name>
         <magento-admin-password>admin12</magento-admin-password>
@@ -266,14 +266,14 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <configuration combine.self="override">
-                    <encoding>UTF-8</encoding>
-                    <configFile>talend_java_eclipse_formatter.xml</configFile>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>net.revelc.code.formatter</groupId>-->
+<!--                <artifactId>formatter-maven-plugin</artifactId>-->
+<!--                <configuration combine.self="override">-->
+<!--                    <encoding>UTF-8</encoding>-->
+<!--                    <configFile>talend_java_eclipse_formatter.xml</configFile>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>

@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.magentocms;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +34,6 @@ import org.talend.components.magentocms.input.SelectionFilter;
 import org.talend.components.magentocms.input.SelectionFilterOperator;
 import org.talend.components.magentocms.input.SelectionType;
 import org.talend.components.magentocms.output.MagentoOutputConfiguration;
-import org.talend.components.magentocms.service.http.BadCredentialsException;
 import org.talend.components.magentocms.service.http.BadRequestException;
 import org.talend.components.magentocms.service.http.MagentoHttpClientService;
 import org.talend.sdk.component.api.service.Service;
@@ -30,6 +41,7 @@ import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.SimpleFactory;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
+import org.talend.sdk.component.runtime.base.lang.exception.InvocationExceptionWrapper;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import javax.json.JsonBuilderFactory;
@@ -54,9 +66,6 @@ class MagentoTestIT {
     @Service
     private JsonBuilderFactory jsonBuilderFactory;
 
-    // @Service
-    // private JsonReaderFactory jsonReaderFactory = null;
-
     @Service
     private MagentoHttpClientService magentoHttpClientService;
 
@@ -67,105 +76,6 @@ class MagentoTestIT {
         log.info("init: " + testContext.getMagentoAdminPassword());
         this.testContext = testContext;
     }
-
-    // @Test
-    // void changingSchema() throws Exception {
-    // try (final Jsonb jsonb = JsonbBuilder.create()) {
-    // final RecordBuilderFactory factory = new AvroRecordBuilderFactoryProvider().apply("test");
-    // final RecordConverters converters = new RecordConverters();
-    // final JsonBuilderFactory builderFactory = Json.createBuilderFactory(emptyMap());
-    //
-    // try {
-    // String js = "{\"extension_attributes\":{\"website_ids\":[]}}";
-    // JsonObject jsObj = jsonReaderFactory.createReader(new ByteArrayInputStream(js.getBytes("UTF-8"))).readObject();
-    // final Record record21 = converters.toRecord(jsObj, () -> jsonb, () -> factory);
-    // final ByteArrayOutputStream buffer2 = new ByteArrayOutputStream();
-    //
-    // final Record record = converters.toRecord(
-    // builderFactory.createObjectBuilder()
-    // .add("value",
-    // builderFactory.createObjectBuilder().add("somekey",
-    // builderFactory.createArrayBuilder().build()))
-    // .build(),
-    // () -> jsonb, () -> factory);
-    // final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    // SchemaRegistryCoder.of().encode(record, buffer);
-    //
-    // SchemaRegistryCoder.of().encode(record21, buffer2);
-    // } catch (Exception e) {
-    // String m = e.getMessage();
-    // System.out.println(m);
-    // Assertions.assertTrue(false);
-    // }
-    // }
-    // }
-    //
-    // @Test
-    // void changingSchema2() throws Exception {
-    // try (final Jsonb jsonb = JsonbBuilder.create()) {
-    // final RecordBuilderFactory factory = new AvroRecordBuilderFactoryProvider().apply("test");
-    // final RecordConverters converters = new RecordConverters();
-    // final JsonBuilderFactory builderFactory = Json.createBuilderFactory(emptyMap());
-    //
-    // try {
-    // String js = "{\"extension_attributes\":{\"website_ids\":[1]}}";
-    // JsonObject jsObj = jsonReaderFactory.createReader(new ByteArrayInputStream(js.getBytes("UTF-8"))).readObject();
-    // final Record record21 = converters.toRecord(jsObj, () -> jsonb, () -> factory);
-    // final ByteArrayOutputStream buffer2 = new ByteArrayOutputStream();
-    // SchemaRegistryCoder.of().encode(record21, buffer2);
-    // } catch (Exception e) {
-    // String m = e.getMessage();
-    // System.out.println(m);
-    // Assertions.assertTrue(false);
-    // }
-    //
-    // }
-    // }
-    //
-    // @Test
-    // void changingSchema3() throws Exception {
-    // try (final Jsonb jsonb = JsonbBuilder.create()) {
-    // final RecordBuilderFactory factory = new AvroRecordBuilderFactoryProvider().apply("test");
-    // final RecordConverters converters = new RecordConverters();
-    // final JsonBuilderFactory builderFactory = Json.createBuilderFactory(emptyMap());
-    //
-    // try {
-    // String js = "{\"custom_attributes\":[" + "{\"attribute_code\":\"color\",\"value\":[]},"
-    // + "{\"attribute_code\":\"category_ids\",\"value\":\"49\"}" + "]}";
-    // JsonObject jsObj = jsonReaderFactory.createReader(new ByteArrayInputStream(js.getBytes("UTF-8"))).readObject();
-    // final Record record21 = converters.toRecord(jsObj, () -> jsonb, () -> factory);
-    // final ByteArrayOutputStream buffer2 = new ByteArrayOutputStream();
-    // SchemaRegistryCoder.of().encode(record21, buffer2);
-    // Assertions.assertTrue(true);
-    // } catch (Exception e) {
-    // String m = e.getMessage();
-    // System.out.println(m);
-    // Assertions.assertTrue(false);
-    // }
-    // }
-    // }
-    //
-    // @Test
-    // // created to help with TCOMP-1208
-    // void avroRecordArrays() throws Exception {
-    // try (final Jsonb jsonb = JsonbBuilder.create()) {
-    // final RecordBuilderFactory factory = new AvroRecordBuilderFactoryProvider().apply("test");
-    // final RecordConverters converters = new RecordConverters();
-    // final JsonBuilderFactory builderFactory = Json.createBuilderFactory(emptyMap());
-    // final Record record = converters
-    // .toRecord(
-    // builderFactory.createObjectBuilder()
-    // .add("value",
-    // builderFactory.createObjectBuilder().add("somekey",
-    // builderFactory.createArrayBuilder().build()))
-    // .build(),
-    // () -> jsonb, () -> factory);
-    // final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    // SchemaRegistryCoder.of().encode(record, buffer);
-    // Assertions.assertTrue(SchemaRegistryCoder.of().decode(new ByteArrayInputStream(buffer.toByteArray()))
-    // .getRecord("value").getArray(Object.class, "somekey").isEmpty());
-    // }
-    // }
 
     @Test
     @DisplayName("Input. Get product by SKU")
@@ -245,7 +155,9 @@ class MagentoTestIT {
             Job.components().component("magento-input", "Magento://Input?" + config).component("collector", "test://collector")
                     .connections().from("magento-input").to("collector").build().run();
         } catch (Exception e) {
-            Assertions.assertTrue(e.getCause() instanceof BadCredentialsException);
+            Assertions.assertTrue(e.getCause() instanceof InvocationExceptionWrapper.ComponentException
+                    && "org.talend.components.magentocms.service.http.BadCredentialsException"
+                            .equals(((InvocationExceptionWrapper.ComponentException) e.getCause()).getOriginalType()));
         }
     }
 
