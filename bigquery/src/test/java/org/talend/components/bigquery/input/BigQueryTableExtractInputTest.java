@@ -72,17 +72,11 @@ public class BigQueryTableExtractInputTest {
         @Override
         public Schema getSchema() {
             if (schema == null) {
-                schema = SchemaBuilder
-                        .record("X")
-                        .fields()
+                schema = SchemaBuilder.record("X").fields()
 
-                        .name("f1")
-                        .type(Schema.create(Schema.Type.STRING))
-                        .noDefault()
+                        .name("f1").type(Schema.create(Schema.Type.STRING)).noDefault()
 
-                        .name("f2")
-                        .type(Schema.create(Schema.Type.INT))
-                        .withDefault(0)
+                        .name("f2").type(Schema.create(Schema.Type.INT)).withDefault(0)
 
                         .endRecord();
             }
@@ -138,10 +132,8 @@ public class BigQueryTableExtractInputTest {
         storage = Mockito.mock(Storage.class);
         Mockito.when(storageService.getStorage(credentials)).thenReturn(storage);
         dataStream = Mockito.mock(DataFileStream.class);
-        Mockito.when(storageService.getDataFileStream(
-                Mockito.eq(storage),
-                Mockito.eq(tableDataSet.getGsBucket()), Mockito.anyString()))
-                .thenReturn(dataStream);
+        Mockito.when(storageService.getDataFileStream(Mockito.eq(storage), Mockito.eq(tableDataSet.getGsBucket()),
+                Mockito.anyString())).thenReturn(dataStream);
     }
 
     @Test
@@ -164,8 +156,8 @@ public class BigQueryTableExtractInputTest {
         Assertions.assertNull(record2);
 
         beanUnderTest.release();
-        Mockito.verify(storageService, Mockito.times(1))
-                .deleteBlob(storage, configuration.getTableDataset().getGsBucket(), gsBlob );
+        Mockito.verify(storageService, Mockito.times(1)).deleteBlob(storage, configuration.getTableDataset().getGsBucket(),
+                gsBlob);
     }
 
     @Test

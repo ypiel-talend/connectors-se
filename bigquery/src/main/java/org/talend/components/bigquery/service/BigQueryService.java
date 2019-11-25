@@ -165,8 +165,7 @@ public class BigQueryService {
 
     public void extractTable(BigQuery bigQuery, Table table, String blobGenericName) {
         ExtractJobConfiguration jobConfig = ExtractJobConfiguration.newBuilder(table.getTableId(), blobGenericName)
-                .setFormat("Avro")
-                .build();
+                .setFormat("Avro").build();
 
         JobInfo jobInfo = JobInfo.newBuilder(jobConfig).build();
 

@@ -96,25 +96,22 @@ public class BigQueryTableExtractMapperTest {
 
     @Test
     public void testSplit() {
-        BigQueryTableExtractMapper beanUnderTest = new BigQueryTableExtractMapper(
-                configuration, service, storageService, i18n, builderFactory);
+        BigQueryTableExtractMapper beanUnderTest = new BigQueryTableExtractMapper(configuration, service, storageService, i18n,
+                builderFactory);
 
         Mockito.when(table.getNumBytes()).thenReturn(42L);
-        Mockito.when(storage.list(
-                Mockito.eq(configuration.getTableDataset().getGsBucket()),
-                Mockito.any(Storage.BlobListOption.class)))
-                .thenReturn(blobs);
+        Mockito.when(storage.list(Mockito.eq(configuration.getTableDataset().getGsBucket()),
+                Mockito.any(Storage.BlobListOption.class))).thenReturn(blobs);
 
-
-        Iterator<Blob> blobsIterator = Mockito.mock(Iterator .class);
+        Iterator<Blob> blobsIterator = Mockito.mock(Iterator.class);
         Iterable<Blob> blobsIterable = new Iterable<Blob>() {
+
             @Override
             public Iterator<Blob> iterator() {
                 return blobsIterator;
             }
         };
         Mockito.when(blobs.iterateAll()).thenReturn(blobsIterable);
-
 
         Blob blob1 = Mockito.mock(Blob.class);
         Blob blob2 = Mockito.mock(Blob.class);
@@ -129,8 +126,7 @@ public class BigQueryTableExtractMapperTest {
         Assertions.assertNotNull(mappers);
         Assertions.assertEquals(2, mappers.size());
 
-        List<BigQueryTableExtractInput> sources =
-            mappers.stream().map(BigQueryTableExtractMapper::createSource)
+        List<BigQueryTableExtractInput> sources = mappers.stream().map(BigQueryTableExtractMapper::createSource)
                 .collect(Collectors.toList());
 
         Assertions.assertNotNull(sources);
