@@ -131,7 +131,9 @@ public class BigQueryTableExtractInput implements Serializable {
 
     @PreDestroy
     public void release() {
-        storageService.deleteBlob(storage, bucket, gsBlob);
+        if (gsBlob != null) {
+            storageService.deleteBlob(storage, bucket, gsBlob);
+        }
     }
 
 }
