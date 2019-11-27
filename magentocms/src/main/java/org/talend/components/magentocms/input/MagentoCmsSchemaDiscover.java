@@ -42,11 +42,11 @@ public class MagentoCmsSchemaDiscover implements Serializable {
         allParameters.put("searchCriteria[pageSize]", "1");
         allParameters.put("searchCriteria[currentPage]", "1");
 
-        String magentoUrl = configuration.getMagentoUrl();
+        String magentoUrl = configuration.getMagentoDataSet().getMagentoUrl();
 
         try {
             Iterator<JsonObject> dataArrayIterator = magentoHttpClientService
-                    .getRecords(configuration.getMagentoDataStore(), magentoUrl, allParameters).iterator();
+                    .getRecords(configuration.getMagentoDataSet().getMagentoDataStore(), magentoUrl, allParameters).iterator();
             if (dataArrayIterator.hasNext()) {
                 JsonValue val = dataArrayIterator.next();
                 val.asJsonObject().forEach((columnName, value) -> result.add(columnName));

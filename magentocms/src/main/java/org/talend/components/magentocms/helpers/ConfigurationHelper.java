@@ -76,11 +76,11 @@ public class ConfigurationHelper {
 
     public static void setupServicesInput(MagentoInputConfiguration configuration,
             MagentoHttpClientService magentoHttpClientService) {
-        magentoHttpClientService.setBase(configuration.getMagentoDataStore().getMagentoWebServerUrl());
+        magentoHttpClientService.setBase(configuration.getMagentoDataSet().getMagentoDataStore().getMagentoWebServerUrl());
     }
 
     public static void setupServicesOutput(MagentoOutputConfiguration configuration,
             MagentoHttpClientService magentoHttpClientService) {
-        magentoHttpClientService.setBase(configuration.getMagentoDataStore().getMagentoWebServerUrl());
+        magentoHttpClientService.setBase(configuration.getMagentoDataSet().getMagentoDataStore().getMagentoWebServerUrl());
     }
 }

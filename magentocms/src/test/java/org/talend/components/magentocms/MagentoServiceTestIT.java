@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.talend.components.magentocms.common.MagentoDataSet;
 import org.talend.components.magentocms.input.MagentoInputConfiguration;
 import org.talend.components.magentocms.input.SelectionType;
 import org.talend.components.magentocms.service.MagentoCmsService;
@@ -52,7 +53,7 @@ class MagentoServiceTestIT {
     @DisplayName("Schema discovery")
     void schemaDiscoveryTest() {
         log.info("Integration test 'Schema discovery' start ");
-        MagentoInputConfiguration dataSet = new MagentoInputConfiguration();
+        MagentoDataSet dataSet = new MagentoDataSet();
         dataSet.setMagentoDataStore(testContext.getDataStoreSecure());
         dataSet.setSelectionType(SelectionType.PRODUCTS);
 

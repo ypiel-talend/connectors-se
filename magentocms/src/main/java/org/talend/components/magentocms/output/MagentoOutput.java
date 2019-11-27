@@ -113,7 +113,7 @@ public class MagentoOutput implements Serializable {
 
     private void processOutputElement(final JsonObject initialObject, OutputEmitter<Record> success, OutputEmitter<Reject> reject)
             throws UnknownAuthenticationTypeException, IOException {
-        Record record = magentoCmsService.jsonObjectToRecord(initialObject, configuration.getSelectionType());
+        Record record = magentoCmsService.jsonObjectToRecord(initialObject, configuration.getMagentoDataSet().getSelectionType());
 
         try {
             // JsonObject initialObject = magentoCmsService.recordToJsonObject(record);
@@ -130,7 +130,7 @@ public class MagentoOutput implements Serializable {
 
             // get element name
             String jsonElementName;
-            if (configuration.getSelectionType() == SelectionType.PRODUCTS) {
+            if (configuration.getMagentoDataSet().getSelectionType() == SelectionType.PRODUCTS) {
                 jsonElementName = "product";
             } else {
                 throw new RuntimeException("Selection type is not set");
@@ -138,11 +138,12 @@ public class MagentoOutput implements Serializable {
 
             final JsonObject copyWrapped = jsonBuilderFactory.createObjectBuilder().add(jsonElementName, copy).build();
 
-            String magentoUrl = configuration.getMagentoUrl();
-            JsonObject newJsonObject = magentoHttpClientService.postRecords(configuration.getMagentoDataStore(), magentoUrl,
-                    copyWrapped);
+            String magentoUrl = configuration.getMagentoDataSet().getMagentoUrl();
+            JsonObject newJsonObject = magentoHttpClientService
+                    .postRecords(configuration.getMagentoDataSet().getMagentoDataStore(), magentoUrl, copyWrapped);
 
-            Record newRecord = magentoCmsService.jsonObjectToRecord(newJsonObject, configuration.getSelectionType());
+            Record newRecord = magentoCmsService.jsonObjectToRecord(newJsonObject,
+                    configuration.getMagentoDataSet().getSelectionType());
             success.emit(newRecord);
         } catch (HttpException httpError) {
             int status = httpError.getResponse().status();

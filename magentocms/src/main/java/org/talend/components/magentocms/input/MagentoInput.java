@@ -70,10 +70,10 @@ public class MagentoInput implements Serializable {
             allParameters.putAll(advancedFilterParameters);
         }
 
-        String magentoUrl = configuration.getMagentoUrl();
+        String magentoUrl = configuration.getMagentoDataSet().getMagentoUrl();
 
         inputIterator = new InputIterator(magentoUrl, allParameters, magentoHttpClientService,
-                configuration.getMagentoDataStore());
+                configuration.getMagentoDataSet().getMagentoDataStore());
     }
 
     private String encodeValue(String filter) throws UnsupportedEncodingException {
@@ -93,7 +93,8 @@ public class MagentoInput implements Serializable {
     public Record next() {
         if (inputIterator != null && inputIterator.hasNext()) {
             JsonValue val = inputIterator.next();
-            Record record = magentoCmsService.jsonObjectToRecord(val.asJsonObject(), configuration.getSelectionType());
+            Record record = magentoCmsService.jsonObjectToRecord(val.asJsonObject(),
+                    configuration.getMagentoDataSet().getSelectionType());
             return record;
         }
         return null;

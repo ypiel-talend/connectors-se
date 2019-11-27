@@ -14,6 +14,7 @@ package org.talend.components.magentocms.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.magentocms.common.MagentoCmsHealthChecker;
+import org.talend.components.magentocms.common.MagentoDataSet;
 import org.talend.components.magentocms.common.MagentoDataStore;
 import org.talend.components.magentocms.helpers.ConfigurationHelper;
 import org.talend.components.magentocms.input.ConfigurationFilter;
@@ -62,9 +63,9 @@ public class MagentoCmsService {
     private RecordBuilderFactory recordBuilderFactory;
 
     @DiscoverSchema(ConfigurationHelper.DISCOVER_SCHEMA_INPUT_ID)
-    public Schema guessTableSchema(final MagentoInputConfiguration configuration) {
+    public Schema guessTableSchema(final MagentoDataSet dataSet) {
         log.debug("guess my schema");
-        return getSchema(configuration.getSelectionType());
+        return getSchema(dataSet.getSelectionType());
     }
 
     @Update(ConfigurationHelper.UPDATABLE_FILTER_ADVANCED_ID)
@@ -90,7 +91,7 @@ public class MagentoCmsService {
     public HealthCheckStatus validateBasicConnection(@Option final MagentoDataStore dataStore) {
         log.debug("start health check");
         MagentoInputConfiguration config = new MagentoInputConfiguration();
-        config.setMagentoDataStore(dataStore);
+        config.getMagentoDataSet().setMagentoDataStore(dataStore);
         ConfigurationHelper.setupServicesInput(config, magentoHttpClientService);
 
         try {

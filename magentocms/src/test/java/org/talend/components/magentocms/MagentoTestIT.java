@@ -81,15 +81,15 @@ class MagentoTestIT {
     @DisplayName("Input. Get product by SKU")
     void inputComponentProductBySku() {
         log.info("Integration test 'Input. Get product by SKU' start ");
-        MagentoInputConfiguration dataSet = new MagentoInputConfiguration();
-        dataSet.setMagentoDataStore(testContext.getDataStoreSecure());
-        dataSet.setSelectionType(SelectionType.PRODUCTS);
+        MagentoInputConfiguration inputConfiguration = new MagentoInputConfiguration();
+        inputConfiguration.getMagentoDataSet().setMagentoDataStore(testContext.getDataStoreSecure());
+        inputConfiguration.getMagentoDataSet().setSelectionType(SelectionType.PRODUCTS);
         List<SelectionFilter> filterList = new ArrayList<>();
         SelectionFilter filter = new SelectionFilter("sku", "eq", "24-MB01");
         filterList.add(filter);
-        dataSet.setSelectionFilter(new ConfigurationFilter(SelectionFilterOperator.OR, filterList, null));
+        inputConfiguration.setSelectionFilter(new ConfigurationFilter(SelectionFilterOperator.OR, filterList, null));
 
-        final String config = SimpleFactory.configurationByExample().forInstance(dataSet).configured().toQueryString();
+        final String config = SimpleFactory.configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
         Job.components().component("magento-input", "Magento://Input?" + config).component("collector", "test://collector")
                 .connections().from("magento-input").to("collector").build().run();
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
@@ -101,15 +101,16 @@ class MagentoTestIT {
     @DisplayName("Input. Get product by SKU. Non secure")
     void inputComponentProductBySkuNonSecure() {
         log.info("Integration test 'Input. Get product by SKU. Non secure' start ");
-        MagentoInputConfiguration dataSet = new MagentoInputConfiguration();
-        dataSet.setMagentoDataStore(testContext.getDataStore());
-        dataSet.setSelectionType(SelectionType.PRODUCTS);
+        MagentoInputConfiguration inputConfiguration = new MagentoInputConfiguration();
+
+        inputConfiguration.getMagentoDataSet().setMagentoDataStore(testContext.getDataStore());
+        inputConfiguration.getMagentoDataSet().setSelectionType(SelectionType.PRODUCTS);
         List<SelectionFilter> filterList = new ArrayList<>();
         SelectionFilter filter = new SelectionFilter("sku", "eq", "24-MB01");
         filterList.add(filter);
-        dataSet.setSelectionFilter(new ConfigurationFilter(SelectionFilterOperator.OR, filterList, null));
+        inputConfiguration.setSelectionFilter(new ConfigurationFilter(SelectionFilterOperator.OR, filterList, null));
 
-        final String config = SimpleFactory.configurationByExample().forInstance(dataSet).configured().toQueryString();
+        final String config = SimpleFactory.configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
         Job.components().component("magento-input", "Magento://Input?" + config).component("collector", "test://collector")
                 .connections().from("magento-input").to("collector").build().run();
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
@@ -121,15 +122,15 @@ class MagentoTestIT {
     @DisplayName("Input. Get product by SKU. Non secure")
     void inputComponentProductBySkuNonSecureOauth1() {
         log.info("Integration test 'Input. Get product by SKU. Non secure' start ");
-        MagentoInputConfiguration dataSet = new MagentoInputConfiguration();
-        dataSet.setMagentoDataStore(testContext.getDataStoreOauth1());
-        dataSet.setSelectionType(SelectionType.PRODUCTS);
+        MagentoInputConfiguration inputConfiguration = new MagentoInputConfiguration();
+        inputConfiguration.getMagentoDataSet().setMagentoDataStore(testContext.getDataStoreOauth1());
+        inputConfiguration.getMagentoDataSet().setSelectionType(SelectionType.PRODUCTS);
         List<SelectionFilter> filterList = new ArrayList<>();
         SelectionFilter filter = new SelectionFilter("sku", "eq", "24-MB01");
         filterList.add(filter);
-        dataSet.setSelectionFilter(new ConfigurationFilter(SelectionFilterOperator.OR, filterList, null));
+        inputConfiguration.setSelectionFilter(new ConfigurationFilter(SelectionFilterOperator.OR, filterList, null));
 
-        final String config = SimpleFactory.configurationByExample().forInstance(dataSet).configured().toQueryString();
+        final String config = SimpleFactory.configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
         Job.components().component("magento-input", "Magento://Input?" + config).component("collector", "test://collector")
                 .connections().from("magento-input").to("collector").build().run();
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
@@ -147,10 +148,10 @@ class MagentoTestIT {
                 "http://" + testContext.getDockerHostAddress() + ":" + testContext.getMagentoHttpPort(), RestVersion.V1,
                 AuthenticationType.LOGIN_PASSWORD, null, null, authSettingsBad);
 
-        MagentoInputConfiguration dataSet = new MagentoInputConfiguration();
-        dataSet.setMagentoDataStore(dataStoreBad);
-        dataSet.setSelectionType(SelectionType.PRODUCTS);
-        final String config = SimpleFactory.configurationByExample().forInstance(dataSet).configured().toQueryString();
+        MagentoInputConfiguration inputConfiguration = new MagentoInputConfiguration();
+        inputConfiguration.getMagentoDataSet().setMagentoDataStore(dataStoreBad);
+        inputConfiguration.getMagentoDataSet().setSelectionType(SelectionType.PRODUCTS);
+        final String config = SimpleFactory.configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
         try {
             Job.components().component("magento-input", "Magento://Input?" + config).component("collector", "test://collector")
                     .connections().from("magento-input").to("collector").build().run();
@@ -166,10 +167,11 @@ class MagentoTestIT {
     @DisplayName("Output. Write custom product")
     void outputComponent(MagentoDataStore dataStoreCustom) {
         log.info("Integration test 'Output. Write custom product' start. " + dataStoreCustom);
-        MagentoOutputConfiguration dataSet = new MagentoOutputConfiguration();
-        dataSet.setMagentoDataStore(dataStoreCustom);
-        dataSet.setSelectionType(SelectionType.PRODUCTS);
-        final String config = SimpleFactory.configurationByExample().forInstance(dataSet).configured().toQueryString();
+        MagentoOutputConfiguration outputConfiguration = new MagentoOutputConfiguration();
+        outputConfiguration.getMagentoDataSet().setMagentoDataStore(dataStoreCustom);
+        outputConfiguration.getMagentoDataSet().setSelectionType(SelectionType.PRODUCTS);
+        final String config = SimpleFactory.configurationByExample().forInstance(outputConfiguration).configured()
+                .toQueryString();
 
         JsonObject jsonObject = jsonBuilderFactory.createObjectBuilder().add("sku", "24-MB01_" + UUID.randomUUID().toString())
                 .add("name", "Joust Duffle Bag_" + UUID.randomUUID().toString()).add("attribute_set_id", 15).add("price", 34)
@@ -194,14 +196,14 @@ class MagentoTestIT {
     @DisplayName("Input. Bad request")
     void inputBadRequestNoParameters() {
         log.info("Integration test 'Input. Bad request' start");
-        MagentoInputConfiguration dataSet = new MagentoInputConfiguration();
-        dataSet.setMagentoDataStore(testContext.getDataStore());
-        dataSet.setSelectionType(SelectionType.PRODUCTS);
+        MagentoInputConfiguration inputConfiguration = new MagentoInputConfiguration();
+        inputConfiguration.getMagentoDataSet().setMagentoDataStore(testContext.getDataStore());
+        inputConfiguration.getMagentoDataSet().setSelectionType(SelectionType.PRODUCTS);
 
-        ConfigurationHelper.setupServicesInput(dataSet, magentoHttpClientService);
+        ConfigurationHelper.setupServicesInput(inputConfiguration, magentoHttpClientService);
 
-        Executable exec = () -> magentoHttpClientService.getRecords(dataSet.getMagentoDataStore(), dataSet.getMagentoUrl(),
-                new TreeMap<>());
+        Executable exec = () -> magentoHttpClientService.getRecords(inputConfiguration.getMagentoDataSet().getMagentoDataStore(),
+                inputConfiguration.getMagentoDataSet().getMagentoUrl(), new TreeMap<>());
         Assertions.assertThrows(BadRequestException.class, exec);
     }
 
@@ -209,13 +211,14 @@ class MagentoTestIT {
     @DisplayName("Output. Bad request")
     void outputBadRequestNoParameters() {
         log.info("Integration test 'Output. Bad request' start");
-        MagentoOutputConfiguration dataSet = new MagentoOutputConfiguration();
-        dataSet.setMagentoDataStore(testContext.getDataStore());
-        dataSet.setSelectionType(SelectionType.PRODUCTS);
-        ConfigurationHelper.setupServicesOutput(dataSet, magentoHttpClientService);
+        MagentoOutputConfiguration outputConfiguration = new MagentoOutputConfiguration();
+        outputConfiguration.getMagentoDataSet().setMagentoDataStore(testContext.getDataStore());
+        outputConfiguration.getMagentoDataSet().setSelectionType(SelectionType.PRODUCTS);
+        ConfigurationHelper.setupServicesOutput(outputConfiguration, magentoHttpClientService);
         JsonObject dataList = jsonBuilderFactory.createObjectBuilder().add("bad_field", "").build();
-        Executable exec = () -> magentoHttpClientService.postRecords(dataSet.getMagentoDataStore(), dataSet.getMagentoUrl(),
-                dataList);
+        Executable exec = () -> magentoHttpClientService.postRecords(
+                outputConfiguration.getMagentoDataSet().getMagentoDataStore(),
+                outputConfiguration.getMagentoDataSet().getMagentoUrl(), dataList);
         Assertions.assertThrows(BadRequestException.class, exec);
     }
 }
