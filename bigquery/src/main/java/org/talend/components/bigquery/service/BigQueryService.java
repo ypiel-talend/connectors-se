@@ -67,6 +67,14 @@ public class BigQueryService {
 
     @HealthCheck(ACTION_HEALTH_CHECK)
     public HealthCheckStatus healthCheck(@Option BigQueryConnection connection) {
+
+        if (connection.getProjectName() == null || "".equals(connection.getProjectName().trim())) {
+            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.projectNameRequired());
+        }
+        if (connection.getJsonCredentials() == null || "".equals(connection.getJsonCredentials().trim())) {
+            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.credentialsRequired());
+        }
+
         try {
             BigQuery client = createClient(connection);
             client.listDatasets(DatasetListOption.pageSize(1));
