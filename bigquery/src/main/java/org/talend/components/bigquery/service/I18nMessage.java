@@ -48,4 +48,8 @@ public interface I18nMessage {
     String infoTableCreated();
 
     String warnRejected();
+
+    String projectNameRequired();
+
+    String credentialsRequired();
 }
