@@ -8,7 +8,7 @@
   },
   "load": {
     "project": "Connectors-se",
-    "fixQuote": true
+    "fixQuote": false
   },
   "github": {
     "url": "https://github.com/Talend/i18n-product.git"
