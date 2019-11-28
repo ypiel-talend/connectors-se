@@ -49,6 +49,8 @@ public class BigQueryTableInput implements Serializable {
 
     private transient Schema tableSchema;
 
+    private transient org.talend.sdk.component.api.record.Schema tckSchema;
+
     private transient Iterator<FieldValueList> queryResult;
 
     private transient boolean loaded = false;
@@ -75,6 +77,7 @@ public class BigQueryTableInput implements Serializable {
                 TableId tableId = TableId.of(connection.getProjectName(), dataSet.getBqDataset(), dataSet.getTableName());
                 Table table = bigQuery.getTable(tableId);
                 tableSchema = table.getDefinition().getSchema();
+                tckSchema = service.convertToTckSchema(tableSchema);
                 TableResult tableResult = bigQuery.listTableData(tableId, tableSchema);
                 queryResult = tableResult.iterateAll().iterator();
             } catch (Exception e) {
@@ -89,37 +92,40 @@ public class BigQueryTableInput implements Serializable {
         if (queryResult != null && queryResult.hasNext()) {
             FieldValueList fieldValueList = queryResult.next();
 
-            Record.Builder rb = builderFactory.newRecordBuilder();
+            Record.Builder rb = builderFactory.newRecordBuilder(tckSchema);
 
             for (Field f : tableSchema.getFields()) {
                 String name = f.getName();
                 FieldValue value = fieldValueList.get(name);
-                LegacySQLTypeName type = f.getType();
 
-                switch (type.name()) {
-                case "BOOLEAN":
-                    rb.withBoolean(name, value.getBooleanValue());
-                    break;
-                case "BYTES":
-                    rb.withBytes(name, value.getBytesValue());
-                    break;
-                case "TIMESTAMP":
-                    rb.withTimestamp(name, value.getTimestampValue());
-                    break;
-                case "DATETIME":
-                    rb.withDateTime(name, new Date(value.getTimestampValue()));
-                    break;
-                case "FLOAT":
-                    rb.withDouble(name, value.getDoubleValue());
-                    break;
-                case "INTEGER":
-                    rb.withLong(name, value.getLongValue());
-                    break;
-                case "TIME":
-                    rb.withLong(name, value.getLongValue());
-                    break;
-                default:
-                    rb.withString(name, value.getStringValue());
+                if (value != null && !value.isNull()) {
+                    LegacySQLTypeName type = f.getType();
+
+                    switch (type.name()) {
+                    case "BOOLEAN":
+                        rb.withBoolean(name, value.getBooleanValue());
+                        break;
+                    case "BYTES":
+                        rb.withBytes(name, value.getBytesValue());
+                        break;
+                    case "TIMESTAMP":
+                        rb.withTimestamp(name, value.getTimestampValue());
+                        break;
+                    case "DATETIME":
+                        rb.withDateTime(name, new Date(value.getTimestampValue()));
+                        break;
+                    case "FLOAT":
+                        rb.withDouble(name, value.getDoubleValue());
+                        break;
+                    case "INTEGER":
+                        rb.withLong(name, value.getLongValue());
+                        break;
+                    case "TIME":
+                        rb.withLong(name, value.getLongValue());
+                        break;
+                    default:
+                        rb.withString(name, value.getStringValue());
+                    }
                 }
 
             }
