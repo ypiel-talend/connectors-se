@@ -30,6 +30,7 @@ import org.talend.components.bigquery.service.GoogleStorageService;
 import org.talend.components.bigquery.service.I18nMessage;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PostConstruct;
@@ -57,6 +58,8 @@ public class BigQueryTableExtractInput implements Serializable {
 
     protected final String gsBlob;
 
+    private final Schema tckSchema;
+
     private transient Storage storage;
 
     private transient DataFileStream<GenericRecord> dataStream;
@@ -69,7 +72,7 @@ public class BigQueryTableExtractInput implements Serializable {
 
     public BigQueryTableExtractInput(BigQueryTableExtractInputConfig configuration, final BigQueryService service,
             final GoogleStorageService storageService, final I18nMessage i18n, final RecordBuilderFactory builderFactory,
-            final String gsBlob) {
+            final String gsBlob, Schema tckSchema) {
         this.bucket = configuration.getTableDataset().getGsBucket();
         this.connection = configuration.getDataStore();
         this.service = service;
@@ -77,6 +80,7 @@ public class BigQueryTableExtractInput implements Serializable {
         this.i18n = i18n;
         this.builderFactory = builderFactory;
         this.gsBlob = gsBlob;
+        this.tckSchema = tckSchema;
 
         if (gsBlob == null) {
             // Call from Data inventory for a sample : use BigQueryTableInput
@@ -102,7 +106,7 @@ public class BigQueryTableExtractInput implements Serializable {
             try {
                 BigQuery bigQuery = service.createClient(connection);
 
-                converter = AvroConverter.of(builderFactory);
+                converter = AvroConverter.of(builderFactory, tckSchema);
                 storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
                 dataStream = storageService.getDataFileStream(storage, bucket, gsBlob);
             } catch (Exception e) {

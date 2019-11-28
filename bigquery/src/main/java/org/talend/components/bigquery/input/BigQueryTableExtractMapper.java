@@ -59,6 +59,8 @@ public class BigQueryTableExtractMapper implements Serializable {
 
     private transient Table table;
 
+    private transient org.talend.sdk.component.api.record.Schema tckSchema;
+
     public BigQueryTableExtractMapper(@Option("configuration") final BigQueryTableExtractInputConfig configuration,
             final BigQueryService service, final GoogleStorageService storageService, final I18nMessage i18n,
             final RecordBuilderFactory builderFactory) {
@@ -89,6 +91,8 @@ public class BigQueryTableExtractMapper implements Serializable {
         TableId tableId = TableId.of(connection.getProjectName(), configuration.getTableDataset().getBqDataset(),
                 configuration.getTableDataset().getTableName());
         table = bigQuery.getTable(tableId);
+        Schema gSchema = table.getDefinition().getSchema();
+        tckSchema = service.convertToTckSchema(gSchema);
     }
 
     @Assessor
@@ -128,7 +132,7 @@ public class BigQueryTableExtractMapper implements Serializable {
 
     @Emitter
     public BigQueryTableExtractInput createSource() {
-        return new BigQueryTableExtractInput(configuration, service, storageService, i18n, builderFactory, gsBlob);
+        return new BigQueryTableExtractInput(configuration, service, storageService, i18n, builderFactory, gsBlob, tckSchema);
     }
 
     @PreDestroy

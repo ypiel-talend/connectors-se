@@ -109,6 +109,10 @@ public class BigQueryTableExtractMapperTest {
                 builderFactory);
 
         Mockito.when(table.getNumBytes()).thenReturn(42L);
+        TableDefinition td = Mockito.mock(TableDefinition.class);
+        Mockito.when(table.getDefinition()).thenReturn(td);
+        Schema gSchema = Schema.of(BigQueryQueryInputTest.getFields());
+        Mockito.when(td.getSchema()).thenReturn(gSchema);
         Mockito.when(storage.list(Mockito.eq(configuration.getTableDataset().getGsBucket()),
                 Mockito.any(Storage.BlobListOption.class))).thenReturn(blobs);
 
