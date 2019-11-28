@@ -125,7 +125,6 @@ public class BigQueryTableExtractMapper implements Serializable {
 
         } catch (Exception e) {
             log.error(i18n.errorSplit(), e);
-            e.printStackTrace();
             throw new RuntimeException();
         }
     }
