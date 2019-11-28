@@ -27,6 +27,7 @@ import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryService;
 import org.talend.components.bigquery.service.GoogleStorageService;
 import org.talend.components.bigquery.service.I18nMessage;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 
@@ -77,6 +78,14 @@ public class BigQueryTableExtractMapperTest {
         builderFactory = new RecordBuilderFactoryImpl(null);
         service = Mockito.mock(BigQueryService.class);
         storageService = Mockito.mock(GoogleStorageService.class);
+
+        Mockito.doCallRealMethod().when(service).convertToTckField(Mockito.any(FieldValueList.class),
+                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class));
+        Mockito.doCallRealMethod().when(service).convertToTckSchema(Mockito.any(Schema.class));
+        Mockito.doCallRealMethod().when(service).convertToTckType(Mockito.any(LegacySQLTypeName.class));
+        java.lang.reflect.Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
+        rbField.setAccessible(true);
+        rbField.set(service, builderFactory);
 
         bigQuery = Mockito.mock(BigQuery.class);
         Mockito.when(service.createClient(connection)).thenReturn(bigQuery);

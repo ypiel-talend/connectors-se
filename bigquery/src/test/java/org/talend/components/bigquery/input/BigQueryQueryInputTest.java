@@ -66,6 +66,8 @@ public class BigQueryQueryInputTest {
         config.setQueryDataset(queryDataSet);
         connection = new BigQueryConnection();
         queryDataSet.setConnection(connection);
+        queryDataSet.setUseLegacySql(true);
+        queryDataSet.setQuery("Select * from fake");
 
         i18nMessage = Mockito.mock(I18nMessage.class);
         builderFactory = new RecordBuilderFactoryImpl(null);
@@ -75,6 +77,14 @@ public class BigQueryQueryInputTest {
         tableResult = Mockito.mock(TableResult.class);
 
         Mockito.when(bigQueryService.createClient(connection)).thenReturn(bigQuery);
+        Mockito.doCallRealMethod().when(bigQueryService).convertToTckField(Mockito.any(FieldValueList.class),
+                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class));
+        Mockito.doCallRealMethod().when(bigQueryService).convertToTckSchema(Mockito.any(Schema.class));
+        Mockito.doCallRealMethod().when(bigQueryService).convertToTckType(Mockito.any(LegacySQLTypeName.class));
+        Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
+        rbField.setAccessible(true);
+        rbField.set(bigQueryService, builderFactory);
+
         Mockito.when(bigQuery.query(Mockito.any(QueryJobConfiguration.class))).thenReturn(tableResult);
 
         queryResult = Mockito.mock(Iterator.class);
@@ -89,6 +99,7 @@ public class BigQueryQueryInputTest {
     @Test
     public void justCrash() {
         try {
+            queryDataSet.setQuery(null);
             beanUnderTest = new BigQueryQueryInput(config, bigQueryService, i18nMessage, builderFactory);
             beanUnderTest.init();
             beanUnderTest.next();
@@ -100,9 +111,6 @@ public class BigQueryQueryInputTest {
 
     @Test
     public void justRun() throws Exception {
-        queryDataSet.setUseLegacySql(true);
-        queryDataSet.setQuery("SELECT * FROM MOCK");
-
         Mockito.when(queryResult.hasNext()).thenReturn(true, false);
         Mockito.when(queryResult.next()).thenReturn(getRecord(), null);
 

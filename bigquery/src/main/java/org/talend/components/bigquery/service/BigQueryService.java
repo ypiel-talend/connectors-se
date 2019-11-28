@@ -27,6 +27,7 @@ import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.output.BigQueryOutputConfig;
 import org.talend.components.bigquery.output.BigQueryOutputConfig.TableOperation;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
@@ -158,7 +159,7 @@ public class BigQueryService {
         return schemaBuilder.build();
     }
 
-    protected org.talend.sdk.component.api.record.Schema.Type convertToTckType(LegacySQLTypeName type) {
+    public org.talend.sdk.component.api.record.Schema.Type convertToTckType(LegacySQLTypeName type) {
         switch (type.name()) {
         case "BOOLEAN":
             return org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
@@ -176,6 +177,44 @@ public class BigQueryService {
             return org.talend.sdk.component.api.record.Schema.Type.LONG;
         default:
             return org.talend.sdk.component.api.record.Schema.Type.STRING;
+        }
+    }
+
+    public void convertToTckField(FieldValueList fieldValueList, Record.Builder rb, Field f) {
+        String name = f.getName();
+        FieldValue value = fieldValueList.get(name);
+
+        if (value != null && !value.isNull()) {
+            LegacySQLTypeName type = f.getType();
+
+            switch (type.name()) {
+            case "BOOLEAN":
+                rb.withBoolean(name, value.getBooleanValue());
+                break;
+            case "BYTES":
+                rb.withBytes(name, value.getBytesValue());
+                break;
+            case "TIMESTAMP":
+                rb.withTimestamp(name, value.getTimestampValue());
+                break;
+            case "DATE":
+                rb.withDateTime(name, new Date(value.getTimestampValue()));
+                break;
+            case "DATETIME":
+                rb.withDateTime(name, new Date(value.getTimestampValue()));
+                break;
+            case "FLOAT":
+                rb.withDouble(name, value.getDoubleValue());
+                break;
+            case "INTEGER":
+                rb.withLong(name, value.getLongValue());
+                break;
+            case "TIME":
+                rb.withLong(name, value.getLongValue());
+                break;
+            default:
+                rb.withString(name, value.getStringValue());
+            }
         }
     }
 
