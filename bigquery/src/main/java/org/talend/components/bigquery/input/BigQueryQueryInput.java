@@ -53,6 +53,8 @@ public class BigQueryQueryInput implements Serializable {
 
     private transient Schema tableSchema;
 
+    private transient org.talend.sdk.component.api.record.Schema tckSchema;
+
     private transient boolean loaded = false;
 
     public BigQueryQueryInput(@Option("configuration") final BigQueryQueryInputConfig configuration,
@@ -78,7 +80,9 @@ public class BigQueryQueryInput implements Serializable {
                         .setUseLegacySql(dataSet.isUseLegacySql()).build();
                 TableResult tableResult = bigQuery.query(queryConfig);
                 tableSchema = tableResult.getSchema();
+                tckSchema = service.convertToTckSchema(tableSchema);
                 queryResult = tableResult.iterateAll().iterator();
+
             } catch (Exception e) {
                 log.error(i18n.errorQueryExecution(), e);
                 throw new RuntimeException(e.getMessage());
@@ -91,14 +95,13 @@ public class BigQueryQueryInput implements Serializable {
 
         if (queryResult != null && queryResult.hasNext()) {
             FieldValueList fieldValueList = queryResult.next();
-
-            Record.Builder rb = builderFactory.newRecordBuilder();
+            Record.Builder rb = builderFactory.newRecordBuilder(tckSchema);
 
             for (Field f : tableSchema.getFields()) {
                 String name = f.getName();
                 FieldValue value = fieldValueList.get(name);
 
-                if (value != null) {
+                if (value != null && !value.isNull()) {
                     LegacySQLTypeName type = f.getType();
 
                     switch (type.name()) {
