@@ -34,15 +34,15 @@
 
     <modules>
         <module>jdbc</module>
-        <module>salesforce</module>
+        <!--module>salesforce</module>
         <module>couchbase</module>
         <module>azure</module>
-        <module>rest</module>
+        <module>rest</module -->
         <!-- disable eventhubs build before all ready
         <module>azure-eventhubs</module> 
         -->
-        <module>azure-dls-gen2</module>
-        <module>marketo</module>
+        <!-- module>azure-dls-gen2</module>
+        <module>marketo</module -->
         <module>common</module>
         <module>connectors-test-bom</module>
     </modules>
