@@ -155,7 +155,7 @@ public class BigQueryTableExtractInputTest {
 
         String gsBlob = "aBlob";
         BigQueryTableExtractInput beanUnderTest = new BigQueryTableExtractInput(configuration, service, storageService, i18n,
-                builderFactory, gsBlob);
+                builderFactory, gsBlob, getTckSchema());
         beanUnderTest.init();
 
         Record record1 = beanUnderTest.next();
@@ -171,10 +171,22 @@ public class BigQueryTableExtractInputTest {
                 gsBlob);
     }
 
+    private org.talend.sdk.component.api.record.Schema getTckSchema() {
+        org.talend.sdk.component.api.record.Schema.Builder schemaBuilder = builderFactory
+                .newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
+
+        schemaBuilder.withEntry(builderFactory.newEntryBuilder().withName("f1")
+                .withType(org.talend.sdk.component.api.record.Schema.Type.STRING).withNullable(true).build());
+        schemaBuilder.withEntry(builderFactory.newEntryBuilder().withName("f2")
+                .withType(org.talend.sdk.component.api.record.Schema.Type.INT).withNullable(true).build());
+
+        return schemaBuilder.build();
+    }
+
     @Test
     public void ifBlobNullCallDelegate() throws Exception {
         BigQueryTableExtractInput beanUnderTest = new BigQueryTableExtractInput(configuration, service, storageService, i18n,
-                builderFactory, null);
+                builderFactory, null, null);
         beanUnderTest.init();
 
         // Inject delegate mock

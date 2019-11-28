@@ -144,7 +144,7 @@ public class BigQueryQueryInputTest {
         return fvl;
     }
 
-    public com.google.cloud.bigquery.Field[] getFields() {
+    public static com.google.cloud.bigquery.Field[] getFields() {
         com.google.cloud.bigquery.Field[] fields = new com.google.cloud.bigquery.Field[] {
                 com.google.cloud.bigquery.Field.of("f1", LegacySQLTypeName.STRING),
                 com.google.cloud.bigquery.Field.of("f2", LegacySQLTypeName.FLOAT),
