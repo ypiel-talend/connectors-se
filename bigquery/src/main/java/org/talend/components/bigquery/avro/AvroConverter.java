@@ -67,8 +67,17 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         return new AvroConverter(factory);
     }
 
+    public static AvroConverter of(final RecordBuilderFactory factory, final Schema recordSchema) {
+        return new AvroConverter(factory, recordSchema);
+    }
+
     protected AvroConverter(final RecordBuilderFactory factory) {
         recordBuilderFactory = factory;
+    }
+
+    protected AvroConverter(final RecordBuilderFactory factory, Schema recordSchema) {
+        recordBuilderFactory = factory;
+        this.recordSchema = recordSchema;
     }
 
     @Override
