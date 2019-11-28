@@ -98,39 +98,7 @@ public class BigQueryQueryInput implements Serializable {
             Record.Builder rb = builderFactory.newRecordBuilder(tckSchema);
 
             for (Field f : tableSchema.getFields()) {
-                String name = f.getName();
-                FieldValue value = fieldValueList.get(name);
-
-                if (value != null && !value.isNull()) {
-                    LegacySQLTypeName type = f.getType();
-
-                    switch (type.name()) {
-                    case "BOOLEAN":
-                        rb.withBoolean(name, value.getBooleanValue());
-                        break;
-                    case "BYTES":
-                        rb.withBytes(name, value.getBytesValue());
-                        break;
-                    case "DATE":
-                        rb.withDateTime(name, new Date(value.getTimestampValue()));
-                        break;
-                    case "DATETIME":
-                        rb.withDateTime(name, new Date(value.getTimestampValue()));
-                        break;
-                    case "FLOAT":
-                        rb.withDouble(name, value.getDoubleValue());
-                        break;
-                    case "INTEGER":
-                        rb.withLong(name, value.getLongValue());
-                        break;
-                    case "TIME":
-                        rb.withLong(name, value.getLongValue());
-                        break;
-                    default:
-                        rb.withString(name, value.getStringValue());
-                    }
-                }
-
+                service.convertToTckField(fieldValueList, rb, f);
             }
 
             record = rb.build();
