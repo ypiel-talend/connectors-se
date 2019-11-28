@@ -36,6 +36,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.stream.StreamSupport;
 
 import static java.util.Optional.ofNullable;
@@ -144,6 +145,37 @@ public class BigQueryService {
             } else {
                 throw new RuntimeException(i18n.schemaNotDefined());
             }
+        }
+    }
+
+    public org.talend.sdk.component.api.record.Schema convertToTckSchema(Schema gSchema) {
+        org.talend.sdk.component.api.record.Schema.Builder schemaBuilder = recordBuilderFactoryService
+                .newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
+
+        gSchema.getFields().stream().forEach(f -> schemaBuilder.withEntry(recordBuilderFactoryService.newEntryBuilder()
+                .withName(f.getName()).withType(convertToTckType(f.getType())).withNullable(true).build()));
+
+        return schemaBuilder.build();
+    }
+
+    protected org.talend.sdk.component.api.record.Schema.Type convertToTckType(LegacySQLTypeName type) {
+        switch (type.name()) {
+        case "BOOLEAN":
+            return org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
+        case "BYTES":
+            return org.talend.sdk.component.api.record.Schema.Type.BYTES;
+        case "DATE":
+            // see below
+        case "DATETIME":
+            return org.talend.sdk.component.api.record.Schema.Type.DATETIME;
+        case "FLOAT":
+            return org.talend.sdk.component.api.record.Schema.Type.DOUBLE;
+        case "INTEGER":
+            return org.talend.sdk.component.api.record.Schema.Type.LONG;
+        case "TIME":
+            return org.talend.sdk.component.api.record.Schema.Type.LONG;
+        default:
+            return org.talend.sdk.component.api.record.Schema.Type.STRING;
         }
     }
 
