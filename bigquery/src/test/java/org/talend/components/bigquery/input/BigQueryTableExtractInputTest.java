@@ -16,6 +16,8 @@ import com.google.auth.Credentials;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
 import org.apache.avro.Schema;
@@ -121,6 +123,15 @@ public class BigQueryTableExtractInputTest {
         builderFactory = new RecordBuilderFactoryImpl(null);
         service = Mockito.mock(BigQueryService.class);
         storageService = Mockito.mock(GoogleStorageService.class);
+
+        Mockito.doCallRealMethod().when(service).convertToTckField(Mockito.any(FieldValueList.class),
+                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class));
+        Mockito.doCallRealMethod().when(service).convertToTckSchema(Mockito.any(com.google.cloud.bigquery.Schema.class));
+        Mockito.doCallRealMethod().when(service).convertToTckType(Mockito.any(LegacySQLTypeName.class));
+
+        Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
+        rbField.setAccessible(true);
+        rbField.set(service, builderFactory);
 
         bigQuery = Mockito.mock(BigQuery.class);
         Mockito.when(service.createClient(connection)).thenReturn(bigQuery);
