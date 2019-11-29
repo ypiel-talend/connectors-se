@@ -38,6 +38,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static java.util.Optional.ofNullable;
@@ -135,18 +136,18 @@ public class BigQueryService {
         if (table != null) {
             return table.getDefinition().getSchema();
         } else {
-            if (configuration.getTableOperation() == TableOperation.CREATE_IF_NOT_EXISTS
-                    && StringUtils.isNotBlank(configuration.getTableSchemaFields())) {
-                String test = configuration.getTableSchemaFields().replaceAll("\\s", StringUtils.EMPTY);
-                // Cut first \"fields\" occurrence and cut last 2 symbols.
-                String inputSchema = test.replaceFirst(FIELDS, StringUtils.EMPTY);
-                inputSchema = inputSchema.substring(0, inputSchema.length() - 1).substring(2);
-                Field[] fields = createGsonBuilder().fromJson(inputSchema.replaceAll(FIELDS, SUB_FIELDS), Field[].class);
-                return com.google.cloud.bigquery.Schema.of(fields);
-            } else {
-                throw new RuntimeException(i18n.schemaNotDefined());
-            }
+            log.warn(i18n.schemaNotDefined());
+            return null;
         }
+    }
+
+    public com.google.cloud.bigquery.Schema guessSchema(Record record) {
+
+        if (record.getSchema() != null) {
+            return convertToGoogleSchema(record.getSchema());
+        }
+
+        return null;
     }
 
     public org.talend.sdk.component.api.record.Schema convertToTckSchema(Schema gSchema) {
@@ -159,22 +160,45 @@ public class BigQueryService {
         return schemaBuilder.build();
     }
 
+    public Schema convertToGoogleSchema(org.talend.sdk.component.api.record.Schema tckSchema) {
+        return Schema.of(tckSchema.getEntries().stream().map(e -> Field.of(e.getName(), convertToGoogleType(e.getType())))
+                .collect(Collectors.toList()));
+    }
+
+    public LegacySQLTypeName convertToGoogleType(org.talend.sdk.component.api.record.Schema.Type type) {
+        switch (type) {
+        case BOOLEAN:
+            return LegacySQLTypeName.BOOLEAN;
+        case BYTES:
+            return LegacySQLTypeName.BYTES;
+        case DATETIME:
+            return LegacySQLTypeName.DATETIME;
+        case DOUBLE:
+            return LegacySQLTypeName.FLOAT;
+        case LONG:
+            return LegacySQLTypeName.INTEGER;
+        default:
+            return LegacySQLTypeName.STRING;
+        }
+    }
+
     public org.talend.sdk.component.api.record.Schema.Type convertToTckType(LegacySQLTypeName type) {
         switch (type.name()) {
         case "BOOLEAN":
             return org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
         case "BYTES":
             return org.talend.sdk.component.api.record.Schema.Type.BYTES;
-        case "DATE":
-            // see below
         case "DATETIME":
             return org.talend.sdk.component.api.record.Schema.Type.DATETIME;
         case "FLOAT":
             return org.talend.sdk.component.api.record.Schema.Type.DOUBLE;
         case "INTEGER":
             return org.talend.sdk.component.api.record.Schema.Type.LONG;
+        case "DATE":
+        case "TIMESTAMP":
         case "TIME":
             return org.talend.sdk.component.api.record.Schema.Type.LONG;
+
         default:
             return org.talend.sdk.component.api.record.Schema.Type.STRING;
         }
@@ -198,7 +222,7 @@ public class BigQueryService {
                 rb.withTimestamp(name, value.getTimestampValue());
                 break;
             case "DATE":
-                rb.withDateTime(name, new Date(value.getTimestampValue()));
+                rb.withLong(name, value.getLongValue());
                 break;
             case "DATETIME":
                 rb.withDateTime(name, new Date(value.getTimestampValue()));
