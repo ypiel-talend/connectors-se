@@ -1,5 +1,10 @@
 #! /bin/bash
 
+git config --global credential.username ${GITHUB_LOGIN}
+git config --global credential.helper   '!echo password=${GITHUB_TOKEN}; echo'
+git config --global credential.name     "jenkins-build"
+env
+
 pre_release_version=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
 release_version=$(echo ${pre_release_version}|cut -d- -f1)
 
