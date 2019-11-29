@@ -30,7 +30,7 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 @Data
 @Icon(BIGQUERY)
 @Documentation("Dataset of a BigQuery component.")
-@OptionsOrder({ "dataSet", "tableOperation", "tableSchemaFields" })
+@OptionsOrder({ "dataSet", "tableOperation" })
 public class BigQueryOutputConfig implements Serializable {
 
     @Option
@@ -40,13 +40,7 @@ public class BigQueryOutputConfig implements Serializable {
     @Option
     @Documentation("The BigQuery table operation")
     @DefaultValue("NONE")
-    private TableOperation tableOperation;
-
-    @Option
-    @Documentation("Specify table schema for creation table")
-    @ActiveIf(target = "tableOperation", value = "CREATE_IF_NOT_EXISTS")
-    @Code("json")
-    private String tableSchemaFields;
+    private TableOperation tableOperation = TableOperation.NONE;
 
     public enum TableOperation {
         /**
@@ -57,12 +51,7 @@ public class BigQueryOutputConfig implements Serializable {
          */
         NONE,
         /**
-         * Specifies that tables should be created if needed. This is the default behavior.
-         *
-         * <p>
-         * Requires that a table schema is provided via {@link org.talend.components.bigquery.BigQueryDatasetProperties#main}.
-         * This precondition is
-         * checked before starting a job. The schema is not required to match an existing table's schema.
+         * Specifies that tables should be created if needed.
          *
          * <p>
          * When this transformation is executed, if the output table does not exist, the table is created from the

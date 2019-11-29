@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.talend.components.bigquery.dataset.TableDataSet;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryService;
+import org.talend.components.bigquery.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -37,6 +38,8 @@ public class BigQueryOutputTest {
     private BigQueryService service;
 
     private BigQuery bigQuery;
+
+    private I18nMessage i18n;
 
     @BeforeEach
     public void reinit() throws Exception {
@@ -57,15 +60,17 @@ public class BigQueryOutputTest {
 
         bigQuery = Mockito.mock(BigQuery.class);
         Mockito.when(service.createClient(connection)).thenReturn(bigQuery);
+
+        i18n = Mockito.mock(I18nMessage.class);
     }
 
     @Test
-    public void runTest() {
+    public void runTest() throws Exception {
 
         InsertAllResponse response = Mockito.mock(InsertAllResponse.class);
         Mockito.when(bigQuery.insertAll(Mockito.any(InsertAllRequest.class))).thenReturn(response);
 
-        BigQueryOutput beanUnderTest = new BigQueryOutput(configuration, service);
+        BigQueryOutput beanUnderTest = new BigQueryOutput(configuration, service, i18n);
         beanUnderTest.init();
 
         beanUnderTest.beforeGroup();

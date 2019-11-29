@@ -22,6 +22,7 @@ import org.talend.components.bigquery.BigQueryTestUtil;
 import org.talend.components.bigquery.dataset.TableDataSet;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
@@ -79,19 +80,24 @@ public class BigQueryOutputITCase {
         BigQueryOutputConfig config = new BigQueryOutputConfig();
         config.setDataSet(dataset);
         config.setTableOperation(BigQueryOutputConfig.TableOperation.CREATE_IF_NOT_EXISTS);
-        String schema = "[\r\n{\"name\":\"k\", \"type\":\"STRING\"},\r\n{\"name\":\"v\", \"type\":\"STRING\"}\r\n]";
-        config.setTableSchemaFields(schema);
 
         String configURI = configurationByExample().forInstance(config).configured().toQueryString();
 
         List<Record> inputData = new ArrayList<>();
-        inputData.add(rbf.newRecordBuilder().withString("k", "entry1").withString("v", "value1").build());
-        inputData.add(rbf.newRecordBuilder().withString("k", "entry2").withString("v", "value2").build());
+
+        Schema schema = rbf.newSchemaBuilder(Schema.Type.RECORD)
+                .withEntry(rbf.newEntryBuilder().withName("k").withType(Schema.Type.STRING).build())
+                .withEntry(rbf.newEntryBuilder().withName("v").withType(Schema.Type.STRING).build())
+                .build();
+
+
+        inputData.add(rbf.newRecordBuilder(schema).withString("k", "entry1").withString("v", "value1").build());
+        inputData.add(rbf.newRecordBuilder(schema).withString("k", "entry2").withString("v", "value2").build());
 
         COMPONENTS.setInputData(inputData);
 
         Job.components().component("source", "test://emitter").component("output", "BigQuery://BigQueryOutput?" + configURI)
-                .connections().from("source").to("output").build().run();
+                    .connections().from("source").to("output").build().run();
 
     }
 }
