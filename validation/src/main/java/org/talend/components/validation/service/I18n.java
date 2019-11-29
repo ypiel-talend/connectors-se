@@ -19,6 +19,6 @@ public interface I18n {
 
     String failHealthCheck(String param);
 
-    String successHealthCheck(String param);
+    String successHealthCheck();
 
 }

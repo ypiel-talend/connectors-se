@@ -16,6 +16,7 @@ import lombok.Data;
 import org.talend.components.validation.service.Service;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -30,6 +31,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 public class Datastore {
 
     @Option
+    @Required
     @Documentation("")
     private String stringParam;
 

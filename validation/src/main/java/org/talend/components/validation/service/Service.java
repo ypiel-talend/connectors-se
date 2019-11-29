@@ -32,7 +32,7 @@ public class Service {
         if ("fail".equals(conf.getStringParam())) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.failHealthCheck(withQuotes));
         }
-        return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successHealthCheck(withQuotes));
+        return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successHealthCheck());
     }
 
 }
