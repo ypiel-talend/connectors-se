@@ -43,8 +43,7 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 @Documentation("This component writes into BigQuery.")
 public class BigQueryOutput implements Serializable {
 
-    @Service
-    private I18nMessage i18n;
+    private final I18nMessage i18n;
 
     private final BigQueryOutputConfig configuration;
 
@@ -62,11 +61,13 @@ public class BigQueryOutput implements Serializable {
 
     private BigQueryService service;
 
-    public BigQueryOutput(@Option("configuration") final BigQueryOutputConfig configuration, BigQueryService bigQueryService) {
+    public BigQueryOutput(@Option("configuration") final BigQueryOutputConfig configuration, BigQueryService bigQueryService,
+            I18nMessage i18n) {
         this.configuration = configuration;
         this.connection = configuration.getDataSet().getConnection();
         this.tableSchema = bigQueryService.guessSchema(configuration);
         this.service = bigQueryService;
+        this.i18n = i18n;
     }
 
     @PostConstruct
@@ -87,19 +88,9 @@ public class BigQueryOutput implements Serializable {
         bigQuery = service.createClient(connection);
         tableId = TableId.of(connection.getProjectName(), configuration.getDataSet().getBqDataset(),
                 configuration.getDataSet().getTableName());
-        if (configuration.getTableOperation() == BigQueryOutputConfig.TableOperation.CREATE_IF_NOT_EXISTS) {
-
-            try {
-                Table table = bigQuery.getTable(tableId);
-                if (table == null) {
-                    log.info(i18n.infoTableNoExists(), configuration.getDataSet().getTableName());
-                    TableInfo tableInfo = TableInfo.newBuilder(tableId, StandardTableDefinition.of(tableSchema)).build();
-                    table = bigQuery.create(tableInfo);
-                    log.info(i18n.infoTableCreated(), tableId.getTable());
-                }
-            } catch (BigQueryException e) {
-                log.error(i18n.errorCreationTable() + e.getMessage(), e);
-            }
+        Table table = bigQuery.getTable(tableId);
+        if (table != null) {
+            tableSchema = table.getDefinition().getSchema();
         }
     }
 
@@ -110,6 +101,26 @@ public class BigQueryOutput implements Serializable {
 
     @AfterGroup
     public void afterGroup() {
+
+        if (!records.isEmpty() && tableSchema == null
+                && configuration.getTableOperation() == BigQueryOutputConfig.TableOperation.CREATE_IF_NOT_EXISTS) {
+            tableSchema = service.guessSchema(records.get(0));
+
+            if (tableSchema != null) {
+                try {
+                    Table table = bigQuery.getTable(tableId);
+                    if (table == null) {
+                        log.info(i18n.infoTableNoExists(), configuration.getDataSet().getTableName());
+                        TableInfo tableInfo = TableInfo.newBuilder(tableId, StandardTableDefinition.of(tableSchema)).build();
+                        table = bigQuery.create(tableInfo);
+                        log.info(i18n.infoTableCreated(), tableId.getTable());
+                    }
+                } catch (BigQueryException e) {
+                    log.error(i18n.errorCreationTable() + e.getMessage(), e);
+                }
+            }
+        }
+
         TacoKitRecordToTableRowConverter converter = new TacoKitRecordToTableRowConverter(tableSchema, i18n);
         InsertAllRequest.Builder insertAllRequestBuilder = InsertAllRequest.newBuilder(tableId);
         records.stream().map(converter::apply).forEach(insertAllRequestBuilder::addRow);
