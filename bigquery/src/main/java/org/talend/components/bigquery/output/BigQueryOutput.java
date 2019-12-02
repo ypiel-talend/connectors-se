@@ -116,7 +116,14 @@ public class BigQueryOutput implements Serializable {
                         log.info(i18n.infoTableCreated(), tableId.getTable());
                     }
                 } catch (BigQueryException e) {
-                    log.error(i18n.errorCreationTable() + e.getMessage(), e);
+                    log.warn(i18n.errorCreationTable() + e.getMessage(), e);
+
+                }
+            } else {
+                // Retry reading table metadata, in case another worker created if meanwhile
+                Table table = bigQuery.getTable(tableId);
+                if (table != null) {
+                    tableSchema = table.getDefinition().getSchema();
                 }
             }
         }
