@@ -123,7 +123,6 @@ public class BigQueryQueryInputTest {
         boolean loaded = (Boolean) loadedField.get(beanUnderTest);
         Assertions.assertTrue(loaded, "Loading must have occured");
         Assertions.assertNotNull(record1, "Record should not be null");
-
         // next next() should be null
         Record record2 = beanUnderTest.next();
         Assertions.assertNull(record2, "2nd record should be null");
@@ -138,6 +137,7 @@ public class BigQueryQueryInputTest {
                         Base64.getEncoder().encodeToString("TALEND".getBytes(StandardCharsets.UTF_8))),
                 FieldValue.of(FieldValue.Attribute.PRIMITIVE, "42"),
                 FieldValue.of(FieldValue.Attribute.PRIMITIVE, "09:00:00.0100000") });
+
         FieldList schema = FieldList.of(getFields());
         FieldValueList fvl = FieldValueList.of(row, schema);
         return fvl;

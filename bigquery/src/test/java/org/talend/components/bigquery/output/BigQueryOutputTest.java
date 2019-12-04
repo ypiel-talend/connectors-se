@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@WithComponents(value = "org.talend.components.bigquery")
 public class BigQueryOutputTest {
 
     private BigQueryOutputConfig configuration;

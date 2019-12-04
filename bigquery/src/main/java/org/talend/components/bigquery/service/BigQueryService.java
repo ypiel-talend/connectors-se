@@ -191,16 +191,14 @@ public class BigQueryService {
         case "BYTES":
             return org.talend.sdk.component.api.record.Schema.Type.BYTES;
         case "DATETIME":
+        case "DATE":
+        case "TIMESTAMP":
+        case "TIME":
             return org.talend.sdk.component.api.record.Schema.Type.DATETIME;
         case "FLOAT":
             return org.talend.sdk.component.api.record.Schema.Type.DOUBLE;
         case "INTEGER":
             return org.talend.sdk.component.api.record.Schema.Type.LONG;
-        case "DATE":
-        case "TIMESTAMP":
-        case "TIME":
-            return org.talend.sdk.component.api.record.Schema.Type.DATETIME;
-
         default:
             return org.talend.sdk.component.api.record.Schema.Type.STRING;
         }
