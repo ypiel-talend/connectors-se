@@ -14,16 +14,12 @@ package org.talend.components.bigquery.avro;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.avro.LogicalTypes;
@@ -309,7 +305,8 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         }
         for (org.apache.avro.Schema.Field field : fields) {
             Object value = genericRecord.get(field.name());
-            Entry entry = inferAvroField(field);
+            Entry entry = recordSchema.getEntries().stream().filter(e -> e.getName().equals(field.name())).findFirst()
+                    .orElseGet(() -> inferAvroField(field));
             if (org.apache.avro.Schema.Type.ARRAY.equals(field.schema().getType())) {
                 buildArrayField(field, value, recordBuilder, entry);
             } else {
@@ -449,6 +446,7 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
     protected void buildField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder, Entry entry) {
         String logicalType = getAvroLogicalTypeName(field);
         org.apache.avro.Schema.Type fieldType = getFieldType(field);
+
         switch (fieldType) {
         case RECORD:
             recordBuilder.withRecord(entry, avroToRecord((GenericRecord) value, ((GenericRecord) value).getSchema().getFields(),
@@ -458,7 +456,31 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
             buildArrayField(field, value, recordBuilder, entry);
             break;
         case STRING:
-            recordBuilder.withString(entry, value != null ? value.toString() : null);
+            switch (entry.getType().name()) {
+            case "TIMESTAMP":
+                recordBuilder.withTimestamp(entry, Long.valueOf(value.toString()) / 1000);
+                break;
+            case "DATE":
+                try {
+                    recordBuilder.withDateTime(entry, new SimpleDateFormat("yyyy-MM-dd").parse(value.toString()));
+                } catch (ParseException e) {
+                    log.warn("Cannot parse date {}", value.toString());
+                }
+                break;
+            case "DATETIME":
+                try {
+                    recordBuilder.withDateTime(entry, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value.toString()));
+                } catch (ParseException e) {
+                    try {
+                        recordBuilder.withDateTime(entry, new SimpleDateFormat("HH:mm:ss").parse(value.toString()));
+                    } catch (ParseException ex) {
+                        log.warn("Cannot parse time {}", value.toString());
+                    }
+                }
+                break;
+            default:
+                recordBuilder.withString(entry, value != null ? value.toString() : null);
+            }
             break;
         case BYTES:
             byte[] bytes = value != null ? ((java.nio.ByteBuffer) value).array() : null;
@@ -483,9 +505,15 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
             break;
         case LONG:
             long lvalue = value != null ? (Long) value : 0;
-            if (AVRO_LOGICAL_TYPE_TIMESTAMP_MILLIS.equals(logicalType)) {
-                recordBuilder.withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(lvalue), ZoneOffset.UTC));
-            } else {
+            switch (entry.getType().name()) {
+            case "TIMESTAMP":
+                recordBuilder.withTimestamp(entry, lvalue / 1000);
+                break;
+            case "DATE":
+            case "DATETIME":
+                recordBuilder.withDateTime(entry, new Date(lvalue / 1000));
+                break;
+            default:
                 recordBuilder.withLong(entry, lvalue);
             }
             break;

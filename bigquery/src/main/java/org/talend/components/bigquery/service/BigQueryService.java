@@ -37,6 +37,8 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -197,7 +199,7 @@ public class BigQueryService {
         case "DATE":
         case "TIMESTAMP":
         case "TIME":
-            return org.talend.sdk.component.api.record.Schema.Type.LONG;
+            return org.talend.sdk.component.api.record.Schema.Type.DATETIME;
 
         default:
             return org.talend.sdk.component.api.record.Schema.Type.STRING;
@@ -219,13 +221,21 @@ public class BigQueryService {
                 rb.withBytes(name, value.getBytesValue());
                 break;
             case "TIMESTAMP":
-                rb.withTimestamp(name, value.getTimestampValue());
+                rb.withTimestamp(name, value.getTimestampValue() / 1000);
                 break;
             case "DATE":
-                rb.withLong(name, value.getLongValue());
+                try {
+                    rb.withDateTime(name, new SimpleDateFormat("yyyy-MM-dd").parse(value.getStringValue()));
+                } catch (ParseException e) {
+                    log.warn("Cannot parse date {}", value.getStringValue());
+                }
                 break;
             case "DATETIME":
-                rb.withDateTime(name, new Date(value.getTimestampValue()));
+                try {
+                    rb.withDateTime(name, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value.getStringValue()));
+                } catch (ParseException e) {
+                    log.warn("Cannot parse time {}", value.getStringValue());
+                }
                 break;
             case "FLOAT":
                 rb.withDouble(name, value.getDoubleValue());
@@ -234,7 +244,11 @@ public class BigQueryService {
                 rb.withLong(name, value.getLongValue());
                 break;
             case "TIME":
-                rb.withLong(name, value.getLongValue());
+                try {
+                    rb.withDateTime(name, new SimpleDateFormat("HH:mm:ss").parse(value.getStringValue()));
+                } catch (ParseException e) {
+                    log.warn("Cannot parse time {}", value.getStringValue());
+                }
                 break;
             default:
                 rb.withString(name, value.getStringValue());

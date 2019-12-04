@@ -123,7 +123,6 @@ public class BigQueryQueryInputTest {
         boolean loaded = (Boolean) loadedField.get(beanUnderTest);
         Assertions.assertTrue(loaded, "Loading must have occured");
         Assertions.assertNotNull(record1, "Record should not be null");
-        System.out.println(record1);
 
         // next next() should be null
         Record record2 = beanUnderTest.next();
@@ -133,12 +132,12 @@ public class BigQueryQueryInputTest {
     public FieldValueList getRecord() {
         List<FieldValue> row = Arrays.asList(new FieldValue[] { FieldValue.of(FieldValue.Attribute.PRIMITIVE, "A"),
                 FieldValue.of(FieldValue.Attribute.PRIMITIVE, "0.5"), FieldValue.of(FieldValue.Attribute.PRIMITIVE, "true"),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE, String.valueOf(System.currentTimeMillis() / 1_000_000)),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE, String.valueOf(System.currentTimeMillis() / 1_000_000)),
+                FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1978/12/08"),
+                FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2019-11-11T09:00:00"),
                 FieldValue.of(FieldValue.Attribute.PRIMITIVE,
                         Base64.getEncoder().encodeToString("TALEND".getBytes(StandardCharsets.UTF_8))),
                 FieldValue.of(FieldValue.Attribute.PRIMITIVE, "42"),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE, String.valueOf(System.currentTimeMillis() / 1_000_000)) });
+                FieldValue.of(FieldValue.Attribute.PRIMITIVE, "09:00:00.0100000") });
         FieldList schema = FieldList.of(getFields());
         FieldValueList fvl = FieldValueList.of(row, schema);
         return fvl;
