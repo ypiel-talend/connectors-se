@@ -66,23 +66,27 @@ public class BigQueryTableExtractInputITCase {
 
         TableDataSet dataset = new TableDataSet();
         dataset.setConnection(connection);
-        dataset.setBqDataset("dataset_rlecomte");
-        dataset.setTableName("TableWithData");
-        dataset.setGsBucket("tdi_rlecomte");
+        dataset.setBqDataset("dchmyga_test");
+        dataset.setTableName("types_test");
+        dataset.setGsBucket("tdi_rlecomte_eu");
 
         BigQueryTableExtractInputConfig config = new BigQueryTableExtractInputConfig();
         config.setTableDataset(dataset);
 
         String configURI = configurationByExample().forInstance(config).configured().toQueryString();
 
-        Job.components()
-                .component("input", "BigQuery://BigQueryTableExtractInput?" + configURI)
-                .component("output", "test://collector")
-                .connections()
-                .from("input")
-                .to("output")
-                .build()
-                .run();
+        try {
+            Job.components()
+                    .component("input", "BigQuery://BigQueryTableExtractInput?" + configURI)
+                    .component("output", "test://collector")
+                    .connections()
+                    .from("input")
+                    .to("output")
+                    .build()
+                    .run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         List<Record> records = COMPONENTS.getCollectedData(Record.class);
 
