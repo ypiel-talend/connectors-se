@@ -473,7 +473,11 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
                     try {
                         recordBuilder.withDateTime(entry, new SimpleDateFormat("HH:mm:ss").parse(value.toString()));
                     } catch (ParseException ex) {
-                        log.warn("Cannot parse time {}", value.toString());
+                        try {
+                            recordBuilder.withDateTime(entry, new SimpleDateFormat("yyyy-MM-dd").parse(value.toString()));
+                        } catch (ParseException ex2) {
+                            log.warn("Cannot parse datetime {}", value.toString());
+                        }
                     }
                 }
                 break;
