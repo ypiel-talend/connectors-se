@@ -13,8 +13,8 @@
 package org.talend.components.marketo.dataset;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Period;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -84,8 +84,7 @@ public class MarketoDataSet implements Serializable {
             @ActiveIf(target = "dateTimeMode", value = { "absolute" }) })
     @Validable(VALIDATION_DATETIME_PATTERN)
     @Documentation("Since absolute date time")
-    private String sinceDateTimeAbsolute = ZonedDateTime.now().minusMonths(2)
-            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    private String sinceDateTimeAbsolute;
 
     @Option
     @ActiveIf(target = "leadAction", value = "getLeadActivity")
