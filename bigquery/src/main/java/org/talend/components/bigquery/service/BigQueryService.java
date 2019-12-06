@@ -246,7 +246,6 @@ public class BigQueryService {
 
             switch (type.name()) {
             case "RECORD":
-                Record.Builder innerRecordBuilder = recordBuilderFactoryService.newRecordBuilder();
                 FieldValueList innerFieldsValue = value.getRecordValue();
                 FieldList innerFields = f.getSubFields();
 
@@ -255,6 +254,7 @@ public class BigQueryService {
                 final FieldValueList innerFieldsValueWithSchema = FieldValueList.of(
                         StreamSupport.stream(innerFieldsValue.spliterator(), false).collect(Collectors.toList()),
                         subSchema.getFields());
+                Record.Builder innerRecordBuilder = recordBuilderFactoryService.newRecordBuilder(convertToTckSchema(subSchema));
 
                 innerFields.stream().forEach(
                         innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder, innerField, subSchema));
