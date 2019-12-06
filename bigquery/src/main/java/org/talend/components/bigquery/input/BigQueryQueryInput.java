@@ -98,7 +98,7 @@ public class BigQueryQueryInput implements Serializable {
             Record.Builder rb = builderFactory.newRecordBuilder(tckSchema);
 
             for (Field f : tableSchema.getFields()) {
-                service.convertToTckField(fieldValueList, rb, f);
+                service.convertToTckField(fieldValueList, rb, f, tableSchema);
             }
 
             record = rb.build();

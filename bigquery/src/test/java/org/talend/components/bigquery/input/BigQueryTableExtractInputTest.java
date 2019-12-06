@@ -125,7 +125,8 @@ public class BigQueryTableExtractInputTest {
         storageService = Mockito.mock(GoogleStorageService.class);
 
         Mockito.doCallRealMethod().when(service).convertToTckField(Mockito.any(FieldValueList.class),
-                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class));
+                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class),
+                Mockito.any(com.google.cloud.bigquery.Schema.class));
         Mockito.doCallRealMethod().when(service).convertToTckSchema(Mockito.any(com.google.cloud.bigquery.Schema.class));
         Mockito.doCallRealMethod().when(service).convertToTckType(Mockito.any(LegacySQLTypeName.class));
 

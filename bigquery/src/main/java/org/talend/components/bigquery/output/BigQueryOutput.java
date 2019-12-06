@@ -113,13 +113,14 @@ public class BigQueryOutput implements Serializable {
                         log.info(i18n.infoTableNoExists(), configuration.getDataSet().getTableName());
                         TableInfo tableInfo = TableInfo.newBuilder(tableId, StandardTableDefinition.of(tableSchema)).build();
                         table = bigQuery.create(tableInfo);
-                        log.info(i18n.infoTableCreated(), tableId.getTable());
+                        log.info(i18n.infoTableCreated(tableId.getTable()));
                     }
                 } catch (BigQueryException e) {
                     log.warn(i18n.errorCreationTable() + e.getMessage(), e);
 
                 }
-            } else {
+            }
+            if (tableSchema == null) {
                 // Retry reading table metadata, in case another worker created if meanwhile
                 Table table = bigQuery.getTable(tableId);
                 if (table != null) {
@@ -136,7 +137,17 @@ public class BigQueryOutput implements Serializable {
         if (response.hasErrors()) {
             // response.getInsertErrors();
             // rejected no handled by TCK
-            log.warn(i18n.warnRejected(), response.getInsertErrors().size());
+            log.warn(i18n.warnRejected(response.getInsertErrors().size()));
+            // log errors for first row
+            response.getInsertErrors().values().iterator().next().stream().forEach(e -> log.warn(e.getMessage()));
+            if (response.getInsertErrors().size() == records.size()) {
+                // All rows were rejected : there's an issue with schema ?
+                log.warn(records.get(0).getSchema().toString());
+                log.warn(tableSchema.toString());
+                // Let's show how the first record was handled.
+                log.warn(records.get(0).toString());
+                log.warn(converter.apply(records.get(0)).toString());
+            }
         }
     }
 

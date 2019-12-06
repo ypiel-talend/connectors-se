@@ -12,6 +12,7 @@
  */
 package org.talend.components.bigquery.service;
 
+import com.google.api.client.util.Base64;
 import com.google.api.services.bigquery.BigqueryScopes;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.bigquery.*;
@@ -39,7 +40,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -156,19 +159,47 @@ public class BigQueryService {
         org.talend.sdk.component.api.record.Schema.Builder schemaBuilder = recordBuilderFactoryService
                 .newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
 
-        gSchema.getFields().stream().forEach(f -> schemaBuilder.withEntry(recordBuilderFactoryService.newEntryBuilder()
-                .withName(f.getName()).withType(convertToTckType(f.getType())).withNullable(true).build()));
+        gSchema.getFields().stream()
+                .forEach(f -> schemaBuilder.withEntry(recordBuilderFactoryService.newEntryBuilder().withName(f.getName())
+                        .withType(convertToTckType(f.getType())).withElementSchema(getSubSchema(f)).withNullable(true).build()));
+
+        return schemaBuilder.build();
+    }
+
+    public org.talend.sdk.component.api.record.Schema getSubSchema(Field f) {
+        if (!f.getType().equals(LegacySQLTypeName.RECORD)) {
+            return null;
+        }
+
+        org.talend.sdk.component.api.record.Schema.Builder schemaBuilder = recordBuilderFactoryService
+                .newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
+
+        f.getSubFields().stream()
+                .forEach(inner -> schemaBuilder.withEntry(recordBuilderFactoryService.newEntryBuilder().withName(inner.getName())
+                        .withType(convertToTckType(inner.getType())).withElementSchema(getSubSchema(inner)).withNullable(true)
+                        .build()));
 
         return schemaBuilder.build();
     }
 
     public Schema convertToGoogleSchema(org.talend.sdk.component.api.record.Schema tckSchema) {
-        return Schema.of(tckSchema.getEntries().stream().map(e -> Field.of(e.getName(), convertToGoogleType(e.getType())))
-                .collect(Collectors.toList()));
+        return Schema.of(tckSchema.getEntries().stream()
+                .map(e -> Field.of(e.getName(), convertToGoogleType(e.getType()), getSubFields(e))).collect(Collectors.toList()));
+    }
+
+    public Field[] getSubFields(org.talend.sdk.component.api.record.Schema.Entry entry) {
+        if (entry.getType() != org.talend.sdk.component.api.record.Schema.Type.RECORD) {
+            return new Field[] {};
+        }
+
+        List<Field> subFields = new ArrayList<>(convertToGoogleSchema(entry.getElementSchema()).getFields());
+        return subFields.toArray(new Field[subFields.size()]);
     }
 
     public LegacySQLTypeName convertToGoogleType(org.talend.sdk.component.api.record.Schema.Type type) {
         switch (type) {
+        case RECORD:
+            return LegacySQLTypeName.RECORD;
         case BOOLEAN:
             return LegacySQLTypeName.BOOLEAN;
         case BYTES:
@@ -186,6 +217,8 @@ public class BigQueryService {
 
     public org.talend.sdk.component.api.record.Schema.Type convertToTckType(LegacySQLTypeName type) {
         switch (type.name()) {
+        case "RECORD":
+            return org.talend.sdk.component.api.record.Schema.Type.RECORD;
         case "BOOLEAN":
             return org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
         case "BYTES":
@@ -204,7 +237,7 @@ public class BigQueryService {
         }
     }
 
-    public void convertToTckField(FieldValueList fieldValueList, Record.Builder rb, Field f) {
+    public void convertToTckField(FieldValueList fieldValueList, Record.Builder rb, Field f, Schema tableSchema) {
         String name = f.getName();
         FieldValue value = fieldValueList.get(name);
 
@@ -212,11 +245,27 @@ public class BigQueryService {
             LegacySQLTypeName type = f.getType();
 
             switch (type.name()) {
+            case "RECORD":
+                Record.Builder innerRecordBuilder = recordBuilderFactoryService.newRecordBuilder();
+                FieldValueList innerFieldsValue = value.getRecordValue();
+                FieldList innerFields = f.getSubFields();
+
+                Schema subSchema = tableSchema.getFields().stream().filter(field -> field.getName().equals(name))
+                        .map(field -> Schema.of(field.getSubFields())).findFirst().get();
+                final FieldValueList innerFieldsValueWithSchema = FieldValueList.of(
+                        StreamSupport.stream(innerFieldsValue.spliterator(), false).collect(Collectors.toList()),
+                        subSchema.getFields());
+
+                innerFields.stream().forEach(
+                        innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder, innerField, subSchema));
+
+                rb.withRecord(name, innerRecordBuilder.build());
+                break;
             case "BOOLEAN":
                 rb.withBoolean(name, value.getBooleanValue());
                 break;
             case "BYTES":
-                rb.withBytes(name, value.getBytesValue());
+                rb.withBytes(name, Base64.decodeBase64(value.getStringValue()));
                 break;
             case "TIMESTAMP":
                 rb.withTimestamp(name, value.getTimestampValue() / 1000);

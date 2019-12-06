@@ -80,7 +80,7 @@ public class BigQueryTableExtractMapperTest {
         storageService = Mockito.mock(GoogleStorageService.class);
 
         Mockito.doCallRealMethod().when(service).convertToTckField(Mockito.any(FieldValueList.class),
-                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class));
+                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class), Mockito.any(Schema.class));
         Mockito.doCallRealMethod().when(service).convertToTckSchema(Mockito.any(Schema.class));
         Mockito.doCallRealMethod().when(service).convertToTckType(Mockito.any(LegacySQLTypeName.class));
         java.lang.reflect.Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
