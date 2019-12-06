@@ -12,6 +12,7 @@
  */
 package org.talend.components.bigquery.output;
 
+import com.google.api.client.util.Base64;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
@@ -101,7 +102,7 @@ public class TacoKitRecordToTableRowConverter {
                 tableRow.put(fieldName, input.getString(fieldName));
                 break;
             case BYTES:
-                tableRow.put(fieldName, input.getBytes(fieldName));
+                tableRow.put(fieldName, Base64.encodeBase64String(input.getBytes(fieldName)));
                 break;
             case INT:
                 tableRow.put(fieldName, input.getInt(fieldName));

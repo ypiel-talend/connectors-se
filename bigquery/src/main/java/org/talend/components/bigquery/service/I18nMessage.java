@@ -45,9 +45,9 @@ public interface I18nMessage {
 
     String errorCreationTable();
 
-    String infoTableCreated();
+    String infoTableCreated(String tableName);
 
-    String warnRejected();
+    String warnRejected(int nbRecords);
 
     String projectNameRequired();
 

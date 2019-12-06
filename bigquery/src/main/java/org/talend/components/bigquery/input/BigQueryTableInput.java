@@ -13,6 +13,7 @@
 package org.talend.components.bigquery.input;
 
 import com.google.cloud.bigquery.*;
+import lombok.extern.slf4j.Slf4j;
 import org.talend.components.bigquery.dataset.TableDataSet;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryService;
@@ -35,6 +36,7 @@ import java.util.Iterator;
 @Icon(Icon.IconType.BIGQUERY)
 // @Emitter(name = "BigQueryTableInput")
 @Documentation("This component reads a table from BigQuery.")
+@Slf4j
 public class BigQueryTableInput implements Serializable {
 
     protected final BigQueryConnection connection;
@@ -77,7 +79,9 @@ public class BigQueryTableInput implements Serializable {
                 TableId tableId = TableId.of(connection.getProjectName(), dataSet.getBqDataset(), dataSet.getTableName());
                 Table table = bigQuery.getTable(tableId);
                 tableSchema = table.getDefinition().getSchema();
+
                 tckSchema = service.convertToTckSchema(tableSchema);
+
                 TableResult tableResult = bigQuery.listTableData(tableId, tableSchema);
                 queryResult = tableResult.iterateAll().iterator();
             } catch (Exception e) {
@@ -95,7 +99,7 @@ public class BigQueryTableInput implements Serializable {
             Record.Builder rb = builderFactory.newRecordBuilder(tckSchema);
 
             for (Field f : tableSchema.getFields()) {
-                service.convertToTckField(fieldValueList, rb, f);
+                service.convertToTckField(fieldValueList, rb, f, tableSchema);
 
             }
 
