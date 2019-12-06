@@ -18,7 +18,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.4.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Components</name>
@@ -69,8 +69,8 @@
     </distributionManagement>
 
     <properties>
-        <connectors-test-bom.version>1.4.0-SNAPSHOT</connectors-test-bom.version>
-        <common.version>1.4.0-SNAPSHOT</common.version>
+        <connectors-test-bom.version>1.4.1-SNAPSHOT</connectors-test-bom.version>
+        <common.version>1.4.1-SNAPSHOT</common.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -881,8 +881,8 @@
                                             ${maven.multiModuleProjectDirectory}/target/documentation_resources/resources/html
                                         </stylesdir>
                                         <stylesheet>talend.css</stylesheet>
-                                        <data-uri/>
-                                        <toc/>
+                                        <data-uri />
+                                        <toc />
                                     </attributes>
                                 </configuration>
                             </execution>
