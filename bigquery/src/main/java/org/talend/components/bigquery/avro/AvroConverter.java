@@ -317,6 +317,26 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         return recordBuilder.build();
     }
 
+    protected Record avroToRecord(GenericRecord genericRecord, List<org.apache.avro.Schema.Field> fields,
+            Record.Builder recordBuilder, Entry mainEntry) {
+        if (recordBuilder == null) {
+            recordBuilder = recordBuilderFactory.newRecordBuilder(mainEntry.getElementSchema());
+        }
+        for (org.apache.avro.Schema.Field field : fields) {
+            Object value = genericRecord.get(field.name());
+            Entry entry = mainEntry.getElementSchema().getEntries().stream().filter(e -> e.getName().equals(field.name()))
+                    .findFirst().orElseGet(() -> inferAvroField(field));
+            if (org.apache.avro.Schema.Type.ARRAY.equals(field.schema().getType())) {
+                buildArrayField(field, value, recordBuilder, entry);
+            } else {
+                if (!entry.isNullable() || value != null) {
+                    buildField(field, value, recordBuilder, entry);
+                }
+            }
+        }
+        return recordBuilder.build();
+    }
+
     protected Entry inferAvroField(org.apache.avro.Schema.Field field) {
         Entry.Builder builder = recordBuilderFactory.newEntryBuilder();
         builder.withName(field.name());
@@ -409,8 +429,9 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         org.apache.avro.Schema arraySchema = getUnionSchema(field.schema());
         switch (arraySchema.getElementType().getType()) {
         case RECORD:
-            Collection<Record> recs = ((Collection<GenericRecord>) value).stream()
-                    .map(record -> avroToRecord(record, record.getSchema().getFields(), recordBuilderFactory.newRecordBuilder()))
+
+            Collection<Record> recs = ((Collection<GenericRecord>) value).stream().map(record -> avroToRecord(record,
+                    record.getSchema().getFields(), recordBuilderFactory.newRecordBuilder(entry.getElementSchema())))
                     .collect(toList());
             recordBuilder.withArray(entry, recs);
             break;
@@ -449,7 +470,7 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         switch (fieldType) {
         case RECORD:
             recordBuilder.withRecord(entry, avroToRecord((GenericRecord) value, ((GenericRecord) value).getSchema().getFields(),
-                    recordBuilderFactory.newRecordBuilder()));
+                    recordBuilderFactory.newRecordBuilder(entry.getElementSchema()), entry));
             break;
         case ARRAY:
             buildArrayField(field, value, recordBuilder, entry);
