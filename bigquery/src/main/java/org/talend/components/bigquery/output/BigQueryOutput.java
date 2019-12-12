@@ -44,6 +44,9 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 @Documentation("This component writes into BigQuery.")
 public class BigQueryOutput implements Serializable {
 
+    /** Maximum records per request allowed by Google API */
+    private static final int MAX_BATCH_SIZE = 10_000;
+
     private final I18nMessage i18n;
 
     private final BigQueryOutputConfig configuration;
@@ -139,8 +142,7 @@ public class BigQueryOutput implements Serializable {
         while (nbRecordsSent < nbRecordsToSend) {
 
             recordsBuffer.clear();
-            records.stream().skip(nbRecordsSent).limit(configuration.getBatchSize()).map(converter::apply)
-                    .forEach(recordsBuffer::add);
+            records.stream().skip(nbRecordsSent).limit(MAX_BATCH_SIZE).map(converter::apply).forEach(recordsBuffer::add);
 
             InsertAllRequest.Builder insertAllRequestBuilder = InsertAllRequest.newBuilder(tableId);
             recordsBuffer.stream().forEach(insertAllRequestBuilder::addRow);
