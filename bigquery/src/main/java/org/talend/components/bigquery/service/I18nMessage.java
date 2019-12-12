@@ -41,7 +41,7 @@ public interface I18nMessage {
 
     String blobsPrefix();
 
-    String infoTableNoExists();
+    String infoTableNoExists(String tableName);
 
     String errorCreationTable();
 
