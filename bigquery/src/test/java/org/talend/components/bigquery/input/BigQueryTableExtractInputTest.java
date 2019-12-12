@@ -128,7 +128,8 @@ public class BigQueryTableExtractInputTest {
                 Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class),
                 Mockito.any(com.google.cloud.bigquery.Schema.class));
         Mockito.doCallRealMethod().when(service).convertToTckSchema(Mockito.any(com.google.cloud.bigquery.Schema.class));
-        Mockito.doCallRealMethod().when(service).convertToTckType(Mockito.any(LegacySQLTypeName.class));
+        Mockito.doCallRealMethod().when(service).convertToTckType(Mockito.any(LegacySQLTypeName.class),
+                Mockito.any(com.google.cloud.bigquery.Field.Mode.class));
 
         Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
         rbField.setAccessible(true);

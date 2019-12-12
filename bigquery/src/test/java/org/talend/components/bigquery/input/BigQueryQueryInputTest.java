@@ -80,7 +80,8 @@ public class BigQueryQueryInputTest {
         Mockito.doCallRealMethod().when(bigQueryService).convertToTckField(Mockito.any(FieldValueList.class),
                 Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class), Mockito.any(Schema.class));
         Mockito.doCallRealMethod().when(bigQueryService).convertToTckSchema(Mockito.any(Schema.class));
-        Mockito.doCallRealMethod().when(bigQueryService).convertToTckType(Mockito.any(LegacySQLTypeName.class));
+        Mockito.doCallRealMethod().when(bigQueryService).convertToTckType(Mockito.any(LegacySQLTypeName.class),
+                Mockito.any(com.google.cloud.bigquery.Field.Mode.class));
         Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
         rbField.setAccessible(true);
         rbField.set(bigQueryService, builderFactory);

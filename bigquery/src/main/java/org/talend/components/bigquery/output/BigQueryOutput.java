@@ -33,6 +33,7 @@ import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 
@@ -130,24 +131,38 @@ public class BigQueryOutput implements Serializable {
         }
 
         TacoKitRecordToTableRowConverter converter = new TacoKitRecordToTableRowConverter(tableSchema, i18n);
-        InsertAllRequest.Builder insertAllRequestBuilder = InsertAllRequest.newBuilder(tableId);
-        records.stream().map(converter::apply).forEach(insertAllRequestBuilder::addRow);
-        InsertAllResponse response = bigQuery.insertAll(insertAllRequestBuilder.build());
 
-        if (response.hasErrors()) {
-            // response.getInsertErrors();
-            // rejected no handled by TCK
-            log.warn(i18n.warnRejected(response.getInsertErrors().size()));
-            // log errors for first row
-            response.getInsertErrors().values().iterator().next().stream().forEach(e -> log.warn(e.getMessage()));
-            if (response.getInsertErrors().size() == records.size()) {
-                // All rows were rejected : there's an issue with schema ?
-                log.warn(records.get(0).getSchema().toString());
-                log.warn(tableSchema.toString());
-                // Let's show how the first record was handled.
-                log.warn(records.get(0).toString());
-                log.warn(converter.apply(records.get(0)).toString());
+        int nbRecordsToSend = records.size();
+        int nbRecordsSent = 0;
+        List<Map<String, ?>> recordsBuffer = new ArrayList<>();
+
+        while (nbRecordsSent < nbRecordsToSend) {
+
+            recordsBuffer.clear();
+            records.stream().skip(nbRecordsSent).limit(configuration.getBatchSize()).map(converter::apply)
+                    .forEach(recordsBuffer::add);
+
+            InsertAllRequest.Builder insertAllRequestBuilder = InsertAllRequest.newBuilder(tableId);
+            recordsBuffer.stream().forEach(insertAllRequestBuilder::addRow);
+            InsertAllResponse response = bigQuery.insertAll(insertAllRequestBuilder.build());
+
+            if (response.hasErrors()) {
+                // response.getInsertErrors();
+                // rejected no handled by TCK
+                log.warn(i18n.warnRejected(response.getInsertErrors().size()));
+                // log errors for first row
+                response.getInsertErrors().values().iterator().next().stream().forEach(e -> log.warn(e.getMessage()));
+                if (response.getInsertErrors().size() == recordsBuffer.size()) {
+                    // All rows were rejected : there's an issue with schema ?
+                    log.warn(records.get(0).getSchema().toString());
+                    log.warn(tableSchema.toString());
+                    // Let's show how the first record was handled.
+                    log.warn(records.get(nbRecordsSent).toString());
+                    log.warn(recordsBuffer.get(0).toString());
+                }
             }
+
+            nbRecordsSent += recordsBuffer.size();
         }
     }
 
