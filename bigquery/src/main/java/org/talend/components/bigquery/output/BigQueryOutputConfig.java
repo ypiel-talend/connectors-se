@@ -38,6 +38,10 @@ public class BigQueryOutputConfig implements Serializable {
     private TableDataSet dataSet;
 
     @Option
+    @Documentation("Batch size")
+    private int batchSize = 10_000;
+
+    @Option
     @Documentation("The BigQuery table operation")
     @DefaultValue("NONE")
     private TableOperation tableOperation = TableOperation.NONE;
