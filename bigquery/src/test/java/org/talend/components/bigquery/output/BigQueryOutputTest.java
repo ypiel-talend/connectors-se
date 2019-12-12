@@ -68,6 +68,11 @@ public class BigQueryOutputTest {
 
         InsertAllResponse response = Mockito.mock(InsertAllResponse.class);
         Mockito.when(bigQuery.insertAll(Mockito.any(InsertAllRequest.class))).thenReturn(response);
+        Table table = Mockito.mock(Table.class);
+        Mockito.when(bigQuery.getTable(Mockito.any(TableId.class))).thenReturn(table);
+        TableDefinition definition = Mockito.mock(TableDefinition.class);
+        Mockito.when(table.getDefinition()).thenReturn(definition);
+        Mockito.when(definition.getSchema()).thenReturn(Schema.of(getFields()));
 
         BigQueryOutput beanUnderTest = new BigQueryOutput(configuration, service, i18n);
         beanUnderTest.init();
