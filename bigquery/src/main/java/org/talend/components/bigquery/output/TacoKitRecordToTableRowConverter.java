@@ -16,11 +16,13 @@ import com.google.api.client.util.Base64;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
+import lombok.extern.slf4j.Slf4j;
 import org.talend.components.bigquery.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +31,7 @@ import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 public class TacoKitRecordToTableRowConverter {
 
     private com.google.cloud.bigquery.Schema tableSchema;
@@ -144,19 +147,19 @@ public class TacoKitRecordToTableRowConverter {
     }
 
     private String getTimeString(ZonedDateTime time) {
-        return time.toLocalTime().toString();
+        return time.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
     }
 
     private String getDateTimeString(ZonedDateTime time) {
-        return time.toLocalDateTime().toString();
+        return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 
     private String getDateString(ZonedDateTime time) {
-        return time.toLocalDate().toString();
+        return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     private String getTimestampString(ZonedDateTime time) {
-        return String.valueOf(time.toInstant().getEpochSecond());
+        return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 
 }

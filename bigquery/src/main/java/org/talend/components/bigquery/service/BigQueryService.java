@@ -190,20 +190,30 @@ public class BigQueryService {
 
     public Schema convertToGoogleSchema(org.talend.sdk.component.api.record.Schema tckSchema) {
         return Schema.of(tckSchema.getEntries().stream()
-                .map(e -> Field.of(e.getName(), convertToGoogleType(e.getType()), getSubFields(e))).collect(Collectors.toList()));
+                .map(e -> Field.newBuilder(e.getName(), convertToGoogleType(e.getType(), e.getElementSchema()), getSubFields(e))
+                        .setMode(e.getType() == org.talend.sdk.component.api.record.Schema.Type.ARRAY ? Field.Mode.REPEATED
+                                : Field.Mode.NULLABLE)
+                        .build())
+                .collect(Collectors.toList()));
     }
 
     public Field[] getSubFields(org.talend.sdk.component.api.record.Schema.Entry entry) {
-        if (entry.getType() != org.talend.sdk.component.api.record.Schema.Type.RECORD) {
-            return new Field[] {};
+        if (entry.getType() == org.talend.sdk.component.api.record.Schema.Type.RECORD
+                || entry.getType() == org.talend.sdk.component.api.record.Schema.Type.ARRAY) {
+            List<Field> subFields = new ArrayList<>(convertToGoogleSchema(entry.getElementSchema()).getFields());
+            return subFields.toArray(new Field[subFields.size()]);
+
         }
 
-        List<Field> subFields = new ArrayList<>(convertToGoogleSchema(entry.getElementSchema()).getFields());
-        return subFields.toArray(new Field[subFields.size()]);
+        return new Field[] {};
+
     }
 
-    public LegacySQLTypeName convertToGoogleType(org.talend.sdk.component.api.record.Schema.Type type) {
+    public LegacySQLTypeName convertToGoogleType(org.talend.sdk.component.api.record.Schema.Type type,
+            org.talend.sdk.component.api.record.Schema subSchema) {
         switch (type) {
+        case ARRAY:
+            return convertToGoogleType(subSchema.getType(), subSchema.getElementSchema());
         case RECORD:
             return LegacySQLTypeName.RECORD;
         case BOOLEAN:
