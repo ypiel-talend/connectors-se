@@ -28,7 +28,7 @@ import java.io.Serializable;
 import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 
 @Data
-@Icon(BIGQUERY)
+@Icon(value = Icon.IconType.CUSTOM, custom = "BigQuery")
 @DataStore("BigQueryConnection")
 @Checkable(BigQueryService.ACTION_HEALTH_CHECK)
 @Documentation("Connection of a BigQuery component.")

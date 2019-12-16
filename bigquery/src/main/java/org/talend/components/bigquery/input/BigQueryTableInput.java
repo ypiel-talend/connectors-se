@@ -33,8 +33,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 @Version(1)
-@Icon(Icon.IconType.BIGQUERY)
-// @Emitter(name = "BigQueryTableInput")
+@Icon(value = Icon.IconType.CUSTOM, custom = "BigQuery")
 @Documentation("This component reads a table from BigQuery.")
 @Slf4j
 public class BigQueryTableInput implements Serializable {

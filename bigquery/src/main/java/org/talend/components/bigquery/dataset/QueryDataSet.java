@@ -14,6 +14,7 @@ package org.talend.components.bigquery.dataset;
 
 import lombok.Data;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
+import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataSet;
@@ -25,6 +26,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
+@Icon(value = Icon.IconType.CUSTOM, custom = "BigQuery")
 @DataSet("BigQueryDataSetQueryType")
 @Documentation("Dataset of a BigQuery component with query type.")
 @GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row({ "query", "useLegacySql" }) })
