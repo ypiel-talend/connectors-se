@@ -27,7 +27,7 @@ import java.io.Serializable;
 import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 
 @Data
-@Icon(BIGQUERY)
+@Icon(value = Icon.IconType.CUSTOM, custom = "BigQuery")
 @DataSet("BigQueryDataSetTableType")
 @Documentation("Dataset of a BigQuery component for table type.")
 @GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row("bqDataset"), @GridLayout.Row("tableName"),

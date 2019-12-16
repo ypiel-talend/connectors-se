@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Version(1)
-@Icon(Icon.IconType.BIGQUERY)
+@Icon(value = Icon.IconType.CUSTOM, custom = "BigQuery")
 @PartitionMapper(name = "BigQueryTableExtractInput")
 @Documentation("This component reads a table from BigQuery (buffering with GS).")
 @Slf4j
