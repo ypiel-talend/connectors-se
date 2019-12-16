@@ -55,78 +55,83 @@ public class TacoKitRecordToTableRowConverter {
     }
 
     private Map<String, ?> convertRecordToTableRow(Record input, FieldList fieldList) {
+        if (input == null) {
+            return null;
+        }
         Map<String, Object> tableRow = new HashMap<>();
         final Schema schema = input.getSchema();
         for (Schema.Entry entry : schema.getEntries()) {
             String fieldName = entry.getName();
             Field field = fieldList.get(fieldName);
-            switch (entry.getType()) {
-            case RECORD:
-                Optional.ofNullable(input.getRecord(fieldName))
-                        .ifPresent(record -> tableRow.put(fieldName, convertRecordToTableRow(record, field.getSubFields())));
-                break;
-            case ARRAY:
-                switch (entry.getElementSchema().getType()) {
+            if (input.get(Object.class, fieldName) != null) {
+                switch (entry.getType()) {
                 case RECORD:
-                    Collection<Record> records = input.getArray(Record.class, fieldName);
-                    tableRow.put(fieldName, records.stream().map(record -> convertRecordToTableRow(record, field.getSubFields()))
-                            .collect(toList()));
+                    Optional.ofNullable(input.getRecord(fieldName))
+                            .ifPresent(record -> tableRow.put(fieldName, convertRecordToTableRow(record, field.getSubFields())));
+                    break;
+                case ARRAY:
+                    switch (entry.getElementSchema().getType()) {
+                    case RECORD:
+                        Collection<Record> records = input.getArray(Record.class, fieldName);
+                        tableRow.put(fieldName, records.stream()
+                                .map(record -> convertRecordToTableRow(record, field.getSubFields())).collect(toList()));
+                        break;
+                    case STRING:
+                        tableRow.put(fieldName, input.getArray(String.class, fieldName));
+                        break;
+                    case BYTES:
+                        tableRow.put(fieldName, input.getArray(byte[].class, fieldName));
+                        break;
+                    case INT:
+                        tableRow.put(fieldName, input.getArray(Integer.class, fieldName));
+                        break;
+                    case LONG:
+                        tableRow.put(fieldName, input.getArray(Long.class, fieldName));
+                        break;
+                    case FLOAT:
+                        tableRow.put(fieldName, input.getArray(Float.class, fieldName));
+                        break;
+                    case DOUBLE:
+                        tableRow.put(fieldName, input.getArray(Double.class, fieldName));
+                        break;
+                    case BOOLEAN:
+                        tableRow.put(fieldName, input.getArray(Boolean.class, fieldName));
+                        break;
+                    case DATETIME:
+                        tableRow.put(fieldName, input.getArray(ZonedDateTime.class, fieldName).stream()
+                                .map(getDateFunction(field.getType())).collect(toList()));
+                        break;
+                    default:
+                        throw new RuntimeException(i18n.entryTypeNotDefined(entry.getElementSchema().getType().name()));
+                    }
                     break;
                 case STRING:
-                    tableRow.put(fieldName, input.getArray(String.class, fieldName));
+                    tableRow.put(fieldName, input.getString(fieldName));
                     break;
                 case BYTES:
-                    tableRow.put(fieldName, input.getArray(byte[].class, fieldName));
+                    tableRow.put(fieldName, Base64.encodeBase64String(input.getBytes(fieldName)));
                     break;
                 case INT:
-                    tableRow.put(fieldName, input.getArray(Integer.class, fieldName));
+                    tableRow.put(fieldName, input.getInt(fieldName));
                     break;
                 case LONG:
-                    tableRow.put(fieldName, input.getArray(Long.class, fieldName));
+                    tableRow.put(fieldName, input.getLong(fieldName));
                     break;
                 case FLOAT:
-                    tableRow.put(fieldName, input.getArray(Float.class, fieldName));
+                    tableRow.put(fieldName, input.getFloat(fieldName));
                     break;
                 case DOUBLE:
-                    tableRow.put(fieldName, input.getArray(Double.class, fieldName));
+                    tableRow.put(fieldName, input.getDouble(fieldName));
                     break;
                 case BOOLEAN:
-                    tableRow.put(fieldName, input.getArray(Boolean.class, fieldName));
+                    tableRow.put(fieldName, input.getBoolean(fieldName));
                     break;
                 case DATETIME:
-                    tableRow.put(fieldName, input.getArray(ZonedDateTime.class, fieldName).stream()
-                            .map(getDateFunction(field.getType())).collect(toList()));
+                    tableRow.put(fieldName, getDateFunction(field.getType()).apply(input.getDateTime(fieldName)));
                     break;
                 default:
-                    throw new RuntimeException(i18n.entryTypeNotDefined(entry.getElementSchema().getType().name()));
+                    throw new RuntimeException(i18n.entryTypeNotDefined(entry.getType().name()));
                 }
-                break;
-            case STRING:
-                tableRow.put(fieldName, input.getString(fieldName));
-                break;
-            case BYTES:
-                tableRow.put(fieldName, Base64.encodeBase64String(input.getBytes(fieldName)));
-                break;
-            case INT:
-                tableRow.put(fieldName, input.getInt(fieldName));
-                break;
-            case LONG:
-                tableRow.put(fieldName, input.getLong(fieldName));
-                break;
-            case FLOAT:
-                tableRow.put(fieldName, input.getFloat(fieldName));
-                break;
-            case DOUBLE:
-                tableRow.put(fieldName, input.getDouble(fieldName));
-                break;
-            case BOOLEAN:
-                tableRow.put(fieldName, input.getBoolean(fieldName));
-                break;
-            case DATETIME:
-                tableRow.put(fieldName, getDateFunction(field.getType()).apply(input.getDateTime(fieldName)));
-                break;
-            default:
-                throw new RuntimeException(i18n.entryTypeNotDefined(entry.getType().name()));
             }
         }
         return tableRow;
