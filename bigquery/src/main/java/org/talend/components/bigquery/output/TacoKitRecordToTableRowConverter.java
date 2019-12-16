@@ -63,7 +63,9 @@ public class TacoKitRecordToTableRowConverter {
         for (Schema.Entry entry : schema.getEntries()) {
             String fieldName = entry.getName();
             Field field = fieldList.get(fieldName);
-            if (input.get(Object.class, fieldName) != null) {
+            if (input.get(Object.class, fieldName) == null) {
+                tableRow.put(fieldName, null);
+            } else {
                 switch (entry.getType()) {
                 case RECORD:
                     Optional.ofNullable(input.getRecord(fieldName))
