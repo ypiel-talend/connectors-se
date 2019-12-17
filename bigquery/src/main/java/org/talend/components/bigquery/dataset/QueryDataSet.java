@@ -26,7 +26,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@Icon(value = Icon.IconType.CUSTOM, custom = "BigQuery")
+@Icon(value = Icon.IconType.CUSTOM, custom = "bigquery")
 @DataSet("BigQueryDataSetQueryType")
 @Documentation("Dataset of a BigQuery component with query type.")
 @GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row({ "query", "useLegacySql" }) })
