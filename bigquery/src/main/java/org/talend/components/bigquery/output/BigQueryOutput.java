@@ -39,7 +39,7 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 
 @Slf4j
 @Version(1)
-@Icon(value = Icon.IconType.CUSTOM, custom = "BigQuery")
+@Icon(value = Icon.IconType.CUSTOM, custom = "bigquery")
 @Processor(name = "BigQueryOutput")
 @Documentation("This component writes into BigQuery.")
 public class BigQueryOutput implements Serializable {

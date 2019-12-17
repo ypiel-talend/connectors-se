@@ -10,7 +10,7 @@
 // 9 rue Pages 92150 Suresnes, France
 //
 // ============================================================================
-@Icon(value = Icon.IconType.CUSTOM, custom = "BigQuery")
+@Icon(value = Icon.IconType.CUSTOM, custom = "bigquery")
 @Components(family = "BigQuery")
 package org.talend.components.bigquery;
 
