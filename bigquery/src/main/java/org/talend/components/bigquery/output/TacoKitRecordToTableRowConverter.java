@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -82,7 +83,8 @@ public class TacoKitRecordToTableRowConverter {
                         tableRow.put(fieldName, input.getArray(String.class, fieldName));
                         break;
                     case BYTES:
-                        tableRow.put(fieldName, input.getArray(byte[].class, fieldName));
+                        tableRow.put(fieldName, input.getArray(byte[].class, fieldName).stream().map(Base64::encodeBase64String)
+                                .collect(Collectors.toList()));
                         break;
                     case INT:
                         tableRow.put(fieldName, input.getArray(Integer.class, fieldName));
