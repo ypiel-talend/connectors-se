@@ -94,26 +94,34 @@ public class BigQueryService {
     @Suggestions(ACTION_SUGGESTION_DATASET)
     public SuggestionValues findDataSets(@Option("connection") final BigQueryConnection connection) {
         final BigQuery client = createClient(connection);
-        return new SuggestionValues(true,
-                StreamSupport
-                        .stream(client.listDatasets(connection.getProjectName(), DatasetListOption.pageSize(100)).getValues()
-                                .spliterator(), false)
-                        .map(dataset -> new SuggestionValues.Item(dataset.getDatasetId().getDataset(),
-                                ofNullable(dataset.getFriendlyName()).orElseGet(() -> dataset.getDatasetId().getDataset())))
-                        .collect(toList()));
+        try {
+            return new SuggestionValues(true,
+                    StreamSupport
+                            .stream(client.listDatasets(connection.getProjectName(), DatasetListOption.pageSize(100)).getValues()
+                                    .spliterator(), false)
+                            .map(dataset -> new SuggestionValues.Item(dataset.getDatasetId().getDataset(),
+                                    ofNullable(dataset.getFriendlyName()).orElseGet(() -> dataset.getDatasetId().getDataset())))
+                            .collect(toList()));
+        } catch (Exception e) {
+            return new SuggestionValues(false, Collections.emptyList());
+        }
     }
 
     @Suggestions(ACTION_SUGGESTION_TABLES)
     public SuggestionValues findTables(@Option("connection") final BigQueryConnection connection,
             @Option("bqDataset") final String bqDataset) {
         final BigQuery client = createClient(connection);
-        return new SuggestionValues(true, StreamSupport
-                .stream(client
-                        .listTables(DatasetId.of(connection.getProjectName(), bqDataset), BigQuery.TableListOption.pageSize(100))
-                        .getValues().spliterator(), false)
-                .map(table -> new SuggestionValues.Item(table.getTableId().getTable(),
-                        ofNullable(table.getFriendlyName()).orElseGet(() -> table.getTableId().getTable())))
-                .collect(toList()));
+        try {
+            return new SuggestionValues(true,
+                    StreamSupport
+                            .stream(client.listTables(DatasetId.of(connection.getProjectName(), bqDataset),
+                                    BigQuery.TableListOption.pageSize(100)).getValues().spliterator(), false)
+                            .map(table -> new SuggestionValues.Item(table.getTableId().getTable(),
+                                    ofNullable(table.getFriendlyName()).orElseGet(() -> table.getTableId().getTable())))
+                            .collect(toList()));
+        } catch (Exception e) {
+            return new SuggestionValues(false, Collections.emptyList());
+        }
     }
 
     public BigQuery createClient(final BigQueryConnection connection) {
