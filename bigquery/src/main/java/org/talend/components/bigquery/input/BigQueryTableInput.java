@@ -78,7 +78,7 @@ public class BigQueryTableInput implements Serializable {
                 TableId tableId = TableId.of(connection.getProjectName(), dataSet.getBqDataset(), dataSet.getTableName());
                 Table table = bigQuery.getTable(tableId);
                 if (table == null) {
-                    throw new RuntimeException(i18n.infoTableNoExists(dataSet.getTableName()));
+                    throw new RuntimeException(i18n.infoTableNoExists(dataSet.getBqDataset() + "." + dataSet.getTableName()));
                 }
                 tableSchema = table.getDefinition().getSchema();
 
