@@ -91,6 +91,9 @@ public class BigQueryTableExtractMapper implements Serializable {
         TableId tableId = TableId.of(connection.getProjectName(), configuration.getTableDataset().getBqDataset(),
                 configuration.getTableDataset().getTableName());
         table = bigQuery.getTable(tableId);
+        if (table == null) {
+            throw new RuntimeException(i18n.infoTableNoExists(configuration.getTableDataset().getTableName()));
+        }
         Schema gSchema = table.getDefinition().getSchema();
         tckSchema = service.convertToTckSchema(gSchema);
     }
