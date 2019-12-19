@@ -96,7 +96,8 @@ public class BigQueryOutput implements Serializable {
         if (table != null) {
             tableSchema = table.getDefinition().getSchema();
         } else if (configuration.getTableOperation() != BigQueryOutputConfig.TableOperation.CREATE_IF_NOT_EXISTS) {
-            throw new RuntimeException(i18n.infoTableNoExists(configuration.getDataSet().getTableName()));
+            throw new RuntimeException(i18n.infoTableNoExists(
+                    configuration.getDataSet().getBqDataset() + "." + configuration.getDataSet().getTableName()));
         }
     }
 
@@ -116,7 +117,8 @@ public class BigQueryOutput implements Serializable {
                 try {
                     Table table = bigQuery.getTable(tableId);
                     if (table == null) {
-                        log.info(i18n.infoTableNoExists(configuration.getDataSet().getTableName()));
+                        log.info(i18n.infoTableNoExists(
+                                configuration.getDataSet().getBqDataset() + "." + configuration.getDataSet().getTableName()));
                         TableInfo tableInfo = TableInfo.newBuilder(tableId, StandardTableDefinition.of(tableSchema)).build();
                         table = bigQuery.create(tableInfo);
                         log.info(i18n.infoTableCreated(tableId.getTable()));
