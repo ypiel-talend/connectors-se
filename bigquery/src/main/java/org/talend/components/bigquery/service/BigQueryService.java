@@ -109,7 +109,7 @@ public class BigQueryService {
 
     @Suggestions(ACTION_SUGGESTION_TABLES)
     public SuggestionValues findTables(@Option("connection") final BigQueryConnection connection,
-                                       @Option("bqDataset") final String bqDataset) {
+            @Option("bqDataset") final String bqDataset) {
         final BigQuery client = createClient(connection);
         try {
             return new SuggestionValues(true,
@@ -214,24 +214,24 @@ public class BigQueryService {
     }
 
     public LegacySQLTypeName convertToGoogleType(org.talend.sdk.component.api.record.Schema.Type type,
-                                                 org.talend.sdk.component.api.record.Schema subSchema) {
+            org.talend.sdk.component.api.record.Schema subSchema) {
         switch (type) {
-            case ARRAY:
-                return convertToGoogleType(subSchema.getType(), subSchema.getElementSchema());
-            case RECORD:
-                return LegacySQLTypeName.RECORD;
-            case BOOLEAN:
-                return LegacySQLTypeName.BOOLEAN;
-            case BYTES:
-                return LegacySQLTypeName.BYTES;
-            case DATETIME:
-                return LegacySQLTypeName.DATETIME;
-            case DOUBLE:
-                return LegacySQLTypeName.FLOAT;
-            case LONG:
-                return LegacySQLTypeName.INTEGER;
-            default:
-                return LegacySQLTypeName.STRING;
+        case ARRAY:
+            return convertToGoogleType(subSchema.getType(), subSchema.getElementSchema());
+        case RECORD:
+            return LegacySQLTypeName.RECORD;
+        case BOOLEAN:
+            return LegacySQLTypeName.BOOLEAN;
+        case BYTES:
+            return LegacySQLTypeName.BYTES;
+        case DATETIME:
+            return LegacySQLTypeName.DATETIME;
+        case DOUBLE:
+            return LegacySQLTypeName.FLOAT;
+        case LONG:
+            return LegacySQLTypeName.INTEGER;
+        default:
+            return LegacySQLTypeName.STRING;
         }
     }
 
@@ -242,23 +242,23 @@ public class BigQueryService {
         }
 
         switch (type.name()) {
-            case "RECORD":
-                return org.talend.sdk.component.api.record.Schema.Type.RECORD;
-            case "BOOLEAN":
-                return org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
-            case "BYTES":
-                return org.talend.sdk.component.api.record.Schema.Type.BYTES;
-            case "DATETIME":
-            case "DATE":
-            case "TIMESTAMP":
-            case "TIME":
-                return org.talend.sdk.component.api.record.Schema.Type.DATETIME;
-            case "FLOAT":
-                return org.talend.sdk.component.api.record.Schema.Type.DOUBLE;
-            case "INTEGER":
-                return org.talend.sdk.component.api.record.Schema.Type.LONG;
-            default:
-                return org.talend.sdk.component.api.record.Schema.Type.STRING;
+        case "RECORD":
+            return org.talend.sdk.component.api.record.Schema.Type.RECORD;
+        case "BOOLEAN":
+            return org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
+        case "BYTES":
+            return org.talend.sdk.component.api.record.Schema.Type.BYTES;
+        case "DATETIME":
+        case "DATE":
+        case "TIMESTAMP":
+        case "TIME":
+            return org.talend.sdk.component.api.record.Schema.Type.DATETIME;
+        case "FLOAT":
+            return org.talend.sdk.component.api.record.Schema.Type.DOUBLE;
+        case "INTEGER":
+            return org.talend.sdk.component.api.record.Schema.Type.LONG;
+        default:
+            return org.talend.sdk.component.api.record.Schema.Type.STRING;
         }
     }
 
@@ -280,137 +280,137 @@ public class BigQueryService {
 
                 switch (type.name()) {
 
-                    case "RECORD":
+                case "RECORD":
 
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
-                            FieldValueList ifv = fv.getRecordValue();
-                            FieldList ifs = f.getSubFields();
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
+                        FieldValueList ifv = fv.getRecordValue();
+                        FieldList ifs = f.getSubFields();
 
-                            FieldValueList innerFieldsValueWithSchema = FieldValueList.of(
-                                    StreamSupport.stream(ifv.spliterator(), false).collect(Collectors.toList()),
-                                    subSchema.getFields());
-                            Record.Builder innerRecordBuilder = recordBuilderFactoryService
-                                    .newRecordBuilder(convertToTckSchema(subSchema));
-                            ifs.stream().forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
-                                    innerField, subSchema));
-                            return innerRecordBuilder.build();
+                        FieldValueList innerFieldsValueWithSchema = FieldValueList.of(
+                                StreamSupport.stream(ifv.spliterator(), false).collect(Collectors.toList()),
+                                subSchema.getFields());
+                        Record.Builder innerRecordBuilder = recordBuilderFactoryService
+                                .newRecordBuilder(convertToTckSchema(subSchema));
+                        ifs.stream().forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
+                                innerField, subSchema));
+                        return innerRecordBuilder.build();
 
-                        }).collect(Collectors.toList()));
-                        break;
-                    case "BOOLEAN":
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getBooleanValue())
-                                .collect(Collectors.toList()));
-                        break;
-                    case "BYTES":
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream()
-                                .map(fv -> Base64.decodeBase64(fv.getStringValue())).collect(Collectors.toList()));
-                        break;
-                    case "TIMESTAMP":
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getTimestampValue() / 1000)
-                                .collect(Collectors.toList()));
-                        break;
-                    case "DATE":
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
-                            try {
-                                return sdf.parse(fv.getStringValue());
-                            } catch (ParseException e) {
-                                log.warn("Cannot parse date {}", fv.getStringValue());
-                                return null;
-                            }
-                        }).collect(Collectors.toList()));
-                        break;
-                    case "DATETIME":
-                        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
-                            try {
-                                return sdf.parse(fv.getStringValue());
-                            } catch (ParseException e) {
-                                log.warn("Cannot parse datetime {}", fv.getStringValue());
-                                return null;
-                            }
-                        }).collect(Collectors.toList()));
-                        break;
-                    case "FLOAT":
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getDoubleValue())
-                                .collect(Collectors.toList()));
-                        break;
-                    case "INTEGER":
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getLongValue())
-                                .collect(Collectors.toList()));
-                        break;
-                    case "TIME":
-                        sdf = new SimpleDateFormat("HH:mm:ss");
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
-                            try {
-                                return sdf.parse(fv.getStringValue());
-                            } catch (ParseException e) {
-                                log.warn("Cannot parse time {}", fv.getStringValue());
-                                return null;
-                            }
-                        }).collect(Collectors.toList()));
-                        break;
-                    default:
-                        rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getStringValue())
-                                .collect(Collectors.toList()));
+                    }).collect(Collectors.toList()));
+                    break;
+                case "BOOLEAN":
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getBooleanValue())
+                            .collect(Collectors.toList()));
+                    break;
+                case "BYTES":
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream()
+                            .map(fv -> Base64.decodeBase64(fv.getStringValue())).collect(Collectors.toList()));
+                    break;
+                case "TIMESTAMP":
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getTimestampValue() / 1000)
+                            .collect(Collectors.toList()));
+                    break;
+                case "DATE":
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
+                        try {
+                            return sdf.parse(fv.getStringValue());
+                        } catch (ParseException e) {
+                            log.warn("Cannot parse date {}", fv.getStringValue());
+                            return null;
+                        }
+                    }).collect(Collectors.toList()));
+                    break;
+                case "DATETIME":
+                    sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
+                        try {
+                            return sdf.parse(fv.getStringValue());
+                        } catch (ParseException e) {
+                            log.warn("Cannot parse datetime {}", fv.getStringValue());
+                            return null;
+                        }
+                    }).collect(Collectors.toList()));
+                    break;
+                case "FLOAT":
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getDoubleValue())
+                            .collect(Collectors.toList()));
+                    break;
+                case "INTEGER":
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getLongValue())
+                            .collect(Collectors.toList()));
+                    break;
+                case "TIME":
+                    sdf = new SimpleDateFormat("HH:mm:ss");
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
+                        try {
+                            return sdf.parse(fv.getStringValue());
+                        } catch (ParseException e) {
+                            log.warn("Cannot parse time {}", fv.getStringValue());
+                            return null;
+                        }
+                    }).collect(Collectors.toList()));
+                    break;
+                default:
+                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getStringValue())
+                            .collect(Collectors.toList()));
                 }
             } else {
                 switch (type.name()) {
 
-                    case "RECORD":
-                        FieldValueList innerFieldsValue = value.getRecordValue();
-                        FieldList innerFields = f.getSubFields();
+                case "RECORD":
+                    FieldValueList innerFieldsValue = value.getRecordValue();
+                    FieldList innerFields = f.getSubFields();
 
-                        Schema subSchema = tableSchema.getFields().stream().filter(field -> field.getName().equals(name))
-                                .map(field -> Schema.of(field.getSubFields())).findFirst().get();
-                        final FieldValueList innerFieldsValueWithSchema = FieldValueList.of(
-                                StreamSupport.stream(innerFieldsValue.spliterator(), false).collect(Collectors.toList()),
-                                subSchema.getFields());
-                        Record.Builder innerRecordBuilder = recordBuilderFactoryService
-                                .newRecordBuilder(convertToTckSchema(subSchema));
+                    Schema subSchema = tableSchema.getFields().stream().filter(field -> field.getName().equals(name))
+                            .map(field -> Schema.of(field.getSubFields())).findFirst().get();
+                    final FieldValueList innerFieldsValueWithSchema = FieldValueList.of(
+                            StreamSupport.stream(innerFieldsValue.spliterator(), false).collect(Collectors.toList()),
+                            subSchema.getFields());
+                    Record.Builder innerRecordBuilder = recordBuilderFactoryService
+                            .newRecordBuilder(convertToTckSchema(subSchema));
 
-                        innerFields.stream().forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
-                                innerField, subSchema));
-                        rb.withRecord(name, innerRecordBuilder.build());
-                        break;
-                    case "BOOLEAN":
-                        rb.withBoolean(name, value.getBooleanValue());
-                        break;
-                    case "BYTES":
-                        rb.withBytes(name, Base64.decodeBase64(value.getStringValue()));
-                        break;
-                    case "TIMESTAMP":
-                        rb.withTimestamp(name, value.getTimestampValue() / 1000);
-                        break;
-                    case "DATE":
-                        try {
-                            rb.withDateTime(name, new SimpleDateFormat("yyyy-MM-dd").parse(value.getStringValue()));
-                        } catch (ParseException e) {
-                            log.warn("Cannot parse date {}", value.getStringValue());
-                        }
-                        break;
-                    case "DATETIME":
-                        try {
-                            rb.withDateTime(name, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value.getStringValue()));
-                        } catch (ParseException e) {
-                            log.warn("Cannot parse time {}", value.getStringValue());
-                        }
-                        break;
-                    case "FLOAT":
-                        rb.withDouble(name, value.getDoubleValue());
-                        break;
-                    case "INTEGER":
-                        rb.withLong(name, value.getLongValue());
-                        break;
-                    case "TIME":
-                        try {
-                            rb.withDateTime(name, new SimpleDateFormat("HH:mm:ss").parse(value.getStringValue()));
-                        } catch (ParseException e) {
-                            log.warn("Cannot parse time {}", value.getStringValue());
-                        }
-                        break;
-                    default:
-                        rb.withString(name, value.getStringValue());
+                    innerFields.stream().forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
+                            innerField, subSchema));
+                    rb.withRecord(name, innerRecordBuilder.build());
+                    break;
+                case "BOOLEAN":
+                    rb.withBoolean(name, value.getBooleanValue());
+                    break;
+                case "BYTES":
+                    rb.withBytes(name, Base64.decodeBase64(value.getStringValue()));
+                    break;
+                case "TIMESTAMP":
+                    rb.withTimestamp(name, value.getTimestampValue() / 1000);
+                    break;
+                case "DATE":
+                    try {
+                        rb.withDateTime(name, new SimpleDateFormat("yyyy-MM-dd").parse(value.getStringValue()));
+                    } catch (ParseException e) {
+                        log.warn("Cannot parse date {}", value.getStringValue());
+                    }
+                    break;
+                case "DATETIME":
+                    try {
+                        rb.withDateTime(name, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value.getStringValue()));
+                    } catch (ParseException e) {
+                        log.warn("Cannot parse time {}", value.getStringValue());
+                    }
+                    break;
+                case "FLOAT":
+                    rb.withDouble(name, value.getDoubleValue());
+                    break;
+                case "INTEGER":
+                    rb.withLong(name, value.getLongValue());
+                    break;
+                case "TIME":
+                    try {
+                        rb.withDateTime(name, new SimpleDateFormat("HH:mm:ss").parse(value.getStringValue()));
+                    } catch (ParseException e) {
+                        log.warn("Cannot parse time {}", value.getStringValue());
+                    }
+                    break;
+                default:
+                    rb.withString(name, value.getStringValue());
                 }
             }
         }
