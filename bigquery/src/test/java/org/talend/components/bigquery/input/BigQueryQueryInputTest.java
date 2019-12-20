@@ -124,7 +124,6 @@ public class BigQueryQueryInputTest {
         boolean loaded = (Boolean) loadedField.get(beanUnderTest);
         Assertions.assertTrue(loaded, "Loading must have occured");
         Assertions.assertNotNull(record1, "Record should not be null");
-
         // next next() should be null
         Record record2 = beanUnderTest.next();
         Assertions.assertNull(record2, "2nd record should be null");

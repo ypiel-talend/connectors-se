@@ -57,6 +57,7 @@ public class BigQueryQueryInputITCase {
         dataset.setConnection(BigQueryTestUtil.getConnection());
         dataset.setUseLegacySql(true);
         dataset.setQuery("select * from dchmyga_test.types_test");
+        dataset.setQuery("SELECT COUNT(ID) FROM dataset_rlecomte.TableWithData WHERE IS_TRUE = true");
 
         BigQueryQueryInputConfig config = new BigQueryQueryInputConfig();
         config.setQueryDataset(dataset);
