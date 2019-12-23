@@ -46,6 +46,7 @@
         <module>marketo</module>
         <module>common</module>
         <module>connectors-test-bom</module>
+        <module>bigquery</module>
         <module>workday</module>
     </modules>
 
