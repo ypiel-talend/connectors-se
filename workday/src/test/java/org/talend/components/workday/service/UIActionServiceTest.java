@@ -41,7 +41,6 @@ class UIActionServiceTest extends WorkdayBaseTest {
         Assertions.assertNotNull(healthCheckStatus);
         Assertions.assertEquals(HealthCheckStatus.Status.OK, healthCheckStatus.getStatus());
 
-
     }
 
     @Test

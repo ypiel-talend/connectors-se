@@ -19,6 +19,17 @@
     </properties>
 
     <dependencies>
+        <!-- traductions -->
+        <dependency>
+            <groupId>org.talend.components</groupId>
+            <artifactId>workday-locales</artifactId>
+            <version>${locales.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.talend.components</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.hamcrest</groupId>

@@ -21,6 +21,14 @@ public interface QueryHelper {
 
     String getServiceToCall();
 
-    Map<String, String> extractQueryParam();
+    Map<String, Object> extractQueryParam();
 
+    default boolean isPaginable() {
+        return false;
+    }
+
+    public interface QueryHelperProvider {
+
+        QueryHelper getQueryHelper();
+    }
 }

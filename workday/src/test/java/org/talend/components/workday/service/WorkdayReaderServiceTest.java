@@ -12,20 +12,30 @@
  */
 package org.talend.components.workday.service;
 
-import java.util.Iterator;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.talend.components.workday.WorkdayException;
+import org.talend.components.workday.dataset.WorkdayServiceDataSet;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.completion.SuggestionValues;
+import org.talend.sdk.component.api.service.completion.Values;
+import org.talend.sdk.component.junit5.WithComponents;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import java.util.Collection;
+import java.util.Iterator;
+
+@WithComponents("org.talend.components.workday")
 class WorkdayReaderServiceTest {
+
+    @Service
+    private WorkdayReaderService reader;
 
     @Test
     void extractIterator() {
-        WorkdayReaderService reader = new WorkdayReaderService();
+
         final Iterator<JsonObject> iter1 = reader.extractIterator(null, "hello");
         Assertions.assertNotNull(iter1);
         Assertions.assertFalse(iter1.hasNext());
@@ -45,5 +55,9 @@ class WorkdayReaderServiceTest {
         final Iterator<JsonObject> iterArray2 = reader.extractIterator(objOK2, "tabOK");
         Assertions.assertNotNull(iterArray2);
         Assertions.assertTrue(iterArray2.hasNext());
+        final JsonObject jsonObject = iterArray2.next();
+        final String value = jsonObject.getString("p");
+        Assertions.assertNotNull(value);
+        Assertions.assertEquals("Hello", value.toString());
     }
 }

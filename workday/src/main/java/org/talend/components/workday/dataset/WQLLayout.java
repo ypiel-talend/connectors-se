@@ -46,7 +46,7 @@ public class WQLLayout implements Serializable, QueryHelper {
     }
 
     @Override
-    public Map<String, String> extractQueryParam() {
+    public Map<String, Object> extractQueryParam() {
         try {
             final String encodedQuery = URLEncoder.encode(this.query, StandardCharsets.UTF_8.toString());
             return Collections.singletonMap("query", encodedQuery);

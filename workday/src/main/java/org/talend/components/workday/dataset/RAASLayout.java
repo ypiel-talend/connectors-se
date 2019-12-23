@@ -41,7 +41,7 @@ public class RAASLayout implements Serializable, QueryHelper {
     }
 
     @Override
-    public Map<String, String> extractQueryParam() {
+    public Map<String, Object> extractQueryParam() {
         return Collections.emptyMap();
     }
 }

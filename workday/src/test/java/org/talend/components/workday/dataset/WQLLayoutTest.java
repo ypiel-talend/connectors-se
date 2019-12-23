@@ -31,10 +31,10 @@ class WQLLayoutTest {
 
         Assertions.assertEquals("wql/v1/data", layout.getServiceToCall());
 
-        Map<String, String> params = layout.extractQueryParam();
+        Map<String, Object> params = layout.extractQueryParam();
         Assertions.assertNotNull(params);
         Assertions.assertEquals(1, params.size());
-        String param = params.get("query");
+        Object param = params.get("query");
         Assertions.assertEquals("SELECT+xx+FROM+zz", param);
     }
 

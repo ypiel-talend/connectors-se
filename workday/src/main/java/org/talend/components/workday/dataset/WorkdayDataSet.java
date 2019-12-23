@@ -75,7 +75,7 @@ public class WorkdayDataSet implements Serializable, QueryHelper {
     }
 
     @Override
-    public Map<String, String> extractQueryParam() {
+    public Map<String, Object> extractQueryParam() {
         final QueryHelper helper = this.selectedHelper();
         if (helper == null) {
             log.warn("No query param for mode {}", this.mode);

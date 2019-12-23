@@ -49,9 +49,9 @@ class WorkdayReaderTest extends WorkdayBaseTest {
 
         WorkdayReader reader = factory.create(WorkdayReader.class, WorkdayBaseTest.defaultServiceURL);
         String header = tk.getAuthorizationHeaderValue();
-        Map<String, String> params = new HashMap<>();
-        params.put("offset", "0");
-        params.put("limit", "50");
+        Map<String, Object> params = new HashMap<>();
+        params.put("offset", 0);
+        params.put("limit", 50);
         Response<JsonObject> rs = reader.search(header, "common/v1/workers", params);
 
         Assertions.assertNotNull(rs, "reponse null");

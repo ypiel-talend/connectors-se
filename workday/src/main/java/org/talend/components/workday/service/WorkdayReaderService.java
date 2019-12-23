@@ -12,6 +12,7 @@
  */
 package org.talend.components.workday.service;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.workday.WorkdayException;
 import org.talend.components.workday.dataset.QueryHelper;
@@ -20,12 +21,13 @@ import org.talend.components.workday.datastore.WorkdayDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.http.Response;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Version(1)
@@ -38,16 +40,31 @@ public class WorkdayReaderService {
     @Service
     private AccessTokenService accessToken;
 
-    public JsonObject find(WorkdayDataStore datastore, QueryHelper helper, Map<String, String> queryParams) {
+    @Getter
+    @Service
+    private RecordBuilderFactory factory;
+
+    // private final transient SwaggerLoader loader;
+
+    public WorkdayReaderService() {
+        final URL swaggersDirectory = WorkdayReaderService.class.getClassLoader().getResource("swaggers/");
+        // this.loader = new SwaggerLoader(swaggersDirectory.getPath());
+    }
+
+    public JsonObject find(WorkdayDataStore datastore, QueryHelper helper, Map<String, Object> queryParams) {
         final Token token = accessToken.findToken(datastore);
         final String authorizeHeader = token.getAuthorizationHeaderValue();
 
         this.reader.base(datastore.getEndpoint());
 
         final String serviceToCall = helper.getServiceToCall();
-        log.debug("calling service {}", serviceToCall);
+        // helper.
+        log.info("calling service {}", serviceToCall);
 
-        Response<JsonObject> result = reader.search(authorizeHeader, serviceToCall, queryParams);
+        Map<String, Object> queryParamsCompat = queryParams.entrySet().stream()
+                .filter((Map.Entry<String, Object> e) -> e.getValue() != null).collect(
+                        Collectors.toMap(Map.Entry::getKey, (Map.Entry<String, Object> e) -> buildQueryParamValue(e.getValue())));
+        final Response<JsonObject> result = reader.search(authorizeHeader, serviceToCall, queryParamsCompat);
 
         if (result.status() / 100 != 2) {
             String errorLib = result.error(String.class);
@@ -55,6 +72,31 @@ public class WorkdayReaderService {
             throw new WorkdayException(errorLib);
         }
         return result.body();
+    }
+
+    /**
+     * Make value type compatible with RequestParser.QueryParamsProvider (component runtime)
+     * (either collection, either String)
+     * 
+     * @param originalValue : value.
+     * @return compatible value.
+     */
+    private Object buildQueryParamValue(Object originalValue) {
+        if (Collection.class.isInstance(originalValue)) {
+            return originalValue;
+        }
+        return String.valueOf(originalValue);
+    }
+
+    public JsonObject findPage(WorkdayDataStore datastore, QueryHelper helper, int offset, int limit,
+            Map<String, Object> queryParams) {
+        final Map<String, Object> allQueryParams = new HashMap<>();
+        if (queryParams != null) {
+            allQueryParams.putAll(queryParams);
+        }
+        allQueryParams.put("offset", offset);
+        allQueryParams.put("limit", limit);
+        return this.find(datastore, helper, allQueryParams);
     }
 
     public Iterator<JsonObject> extractIterator(JsonObject result, String arrayName) {
@@ -72,4 +114,51 @@ public class WorkdayReaderService {
         }
         return data.stream().map(JsonObject.class::cast).iterator();
     }
+
+    /*
+     * @DynamicValues("workdayModules")
+     * public Values loadModules() {
+     * log.info("loadModules");
+     * return new Values(loader.getModules());
+     * }
+     */
+
+    /*
+     * @Suggestions("workdayServices")
+     * public SuggestionValues loadServices(String module) {
+     * log.info("loadServices for module {}", module);
+     * final List<SuggestionValues.Item> services = loader.findGetServices(module).keySet().stream()
+     * .map((String service) -> new SuggestionValues.Item(service, service))
+     * .sorted(Comparator.comparing(SuggestionValues.Item::getLabel)).collect(Collectors.toList());
+     * 
+     * return new SuggestionValues(false, services);
+     * }
+     */
+
+    /**
+     * @Update("workdayServicesParams")
+     * public WorkdayServiceDataSet.Parameters loadServiceParameter(String module, String service) {
+     * log.info("workdayServicesParams suggestion for {} {}", module, service);
+     * final WorkdayServiceDataSet.Parameters parameters = new WorkdayServiceDataSet.Parameters();
+     * parameters.setParametersList(Collections.emptyList());
+     * 
+     * final Map<String, Schema> responses = this.loader.findGetResponse(module, this.factory);
+     * Schema responseSchema = responses.get(service);
+     * parameters.setResponseSchema(responseSchema);
+     * 
+     * final Map<String, List<WorkdayServiceDataSet.Parameter>> moduleServices = this.loader.findGetServices(module);
+     * if (moduleServices == null) {
+     * log.warn("no module {}", module);
+     * return parameters;
+     * }
+     * final List<WorkdayServiceDataSet.Parameter> serviceParameters = moduleServices.get(service);
+     * if (serviceParameters == null) {
+     * return parameters;
+     * }
+     * log.info("workdayServicesParams : nombre params {}", serviceParameters.size());
+     * parameters.setParametersList(serviceParameters);
+     * 
+     * return parameters;
+     * }
+     */
 }
