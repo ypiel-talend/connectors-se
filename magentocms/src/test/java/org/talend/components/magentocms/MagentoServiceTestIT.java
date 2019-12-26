@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.talend.components.magentocms.common.MagentoDataSet;
-import org.talend.components.magentocms.input.MagentoInputConfiguration;
 import org.talend.components.magentocms.input.SelectionType;
 import org.talend.components.magentocms.service.MagentoCmsService;
 import org.talend.sdk.component.api.record.Schema;
@@ -45,7 +44,6 @@ class MagentoServiceTestIT {
 
     @BeforeAll
     private void init(MagentoTestExtension.TestContext testContext) {
-        log.info("init: " + testContext.getMagentoAdminPassword());
         this.testContext = testContext;
     }
 

@@ -22,9 +22,10 @@ import org.talend.components.magentocms.service.http.BadCredentialsException;
 import org.talend.sdk.component.api.service.Service;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 @Service
-public class AuthorizationHelper {
+public class AuthorizationHelper implements Serializable {
 
     @Service
     private AuthorizationHandlerAuthenticationToken authorizationHandlerAuthenticationToken;

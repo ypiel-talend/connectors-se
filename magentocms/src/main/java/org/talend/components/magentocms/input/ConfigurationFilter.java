@@ -28,8 +28,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@GridLayout({ @GridLayout.Row({ "filterOperator" }), @GridLayout.Row({ "filterLines" }),
-        @GridLayout.Row({ "filterAdvancedValueWrapper" }) })
+@GridLayout({ @GridLayout.Row({ "filterOperator" }), @GridLayout.Row({ "filterLines" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "filterAdvancedValueWrapper" }) })
 @Documentation("Selection filter, e.g. \"sku eq 'my sku 1' and name like '%test name%'\". "
         + "Use conditions (like, eq etc.). See Magento's 'Search using REST endpoints' article")
@@ -43,13 +42,7 @@ public class ConfigurationFilter implements Serializable {
     @Documentation("Basic filter values, contain column name, condition and value, eg. 'name like 123%'")
     private List<SelectionFilter> filterLines = new ArrayList<>();
 
-    // @Option
-    // @Documentation("Basic filter values, contain column name, condition and value, eg. 'name like 123%'")
-    // private List<String> filterLinesTest = new ArrayList<>();
-
     @Option
-    // @Suggestable(value = "SuggestFilterAdvanced", parameters = { "filterOperator", "filterLines" })
-    // @TextArea
     @Documentation("Full text of advanced filter. Use '&' to join conditions. See Magento's 'Search using REST endpoints' article")
     @Updatable(value = ConfigurationHelper.UPDATABLE_FILTER_ADVANCED_ID, parameters = { "filterOperator",
             "filterLines" }, after = "filterAdvancedValue")

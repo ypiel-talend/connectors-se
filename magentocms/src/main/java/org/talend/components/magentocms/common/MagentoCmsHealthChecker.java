@@ -37,7 +37,7 @@ public class MagentoCmsHealthChecker implements Serializable {
         allParameters.put("searchCriteria[pageSize]", "1");
         allParameters.put("searchCriteria[currentPage]", "1");
 
-        String magentoUrl = "index.php/rest/" + dataStore.getMagentoRestVersion() + "/" + "products";
+        String magentoUrl = MagentoDataStore.BASE_URL_PREFIX + dataStore.getMagentoRestVersion() + "/" + "products";
 
         magentoHttpClientService.getRecords(dataStore, magentoUrl, allParameters);
         return true;

@@ -42,5 +42,4 @@ public class AuthenticationLoginPasswordConfiguration implements Serializable, A
     @Credential
     @Documentation("authentication password for 'Login' authentication")
     private String authenticationPassword = "";
-
 }

@@ -17,8 +17,10 @@ import org.talend.components.magentocms.common.MagentoDataStore;
 import org.talend.components.magentocms.common.UnknownAuthenticationTypeException;
 import org.talend.sdk.component.api.service.Service;
 
+import java.io.Serializable;
+
 @Service
-public class AuthorizationHandlerAuthenticationToken implements AuthorizationHandler {
+public class AuthorizationHandlerAuthenticationToken implements AuthorizationHandler, Serializable {
 
     @Override
     public String getAuthorization(MagentoDataStore magentoDataStore) throws UnknownAuthenticationTypeException {

@@ -57,8 +57,6 @@ public class MagentoOutput implements Serializable {
 
     private MagentoCmsService magentoCmsService;
 
-    // private List<JsonObject> batchData = new ArrayList<>();
-
     public MagentoOutput(@Option("configuration") final MagentoOutputConfiguration configuration,
             final MagentoHttpClientService magentoHttpClientService, final JsonBuilderFactory jsonBuilderFactory,
             RecordBuilderFactory recordBuilderFactory, MagentoCmsService magentoCmsService) {
@@ -116,17 +114,11 @@ public class MagentoOutput implements Serializable {
         Record record = magentoCmsService.jsonObjectToRecord(initialObject, configuration.getMagentoDataSet().getSelectionType());
 
         try {
-            // JsonObject initialObject = magentoCmsService.recordToJsonObject(record);
-
             // delete 'id'
             final JsonObject copy = initialObject.entrySet().stream().filter(e -> !e.getKey().equals("id"))
                     .collect(jsonBuilderFactory::createObjectBuilder, (builder, a) -> builder.add(a.getKey(), a.getValue()),
                             JsonObjectBuilder::addAll)
                     .build();
-            // final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
-            // record.getSchema().getEntries().stream().filter(e -> !e.getName().equals("id")).forEach(item ->
-            // addItem(recordBuilder, item, record));
-            // final Record copy = recordBuilder.build();
 
             // get element name
             String jsonElementName;

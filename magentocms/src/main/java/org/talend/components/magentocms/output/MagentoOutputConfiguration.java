@@ -21,7 +21,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-// @DataSet(ConfigurationHelper.DATA_SET_OUTPUT_ID)
 @GridLayout({ @GridLayout.Row({ "magentoDataSet" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "magentoDataSet" }) })
 @Documentation("Output component configuration")
@@ -30,9 +29,4 @@ public class MagentoOutputConfiguration implements Serializable {
     @Option
     @Documentation("Data set")
     private MagentoDataSet magentoDataSet = new MagentoDataSet();
-
-    // @Option
-    // @Documentation("The type of information we want to put, e.g. 'Products'")
-    // private SelectionType selectionType = SelectionType.PRODUCTS;
-
 }

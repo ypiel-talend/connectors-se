@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,7 +47,7 @@ public class InputIterator implements Iterator<JsonObject> {
 
     private int pageSize = 200;
 
-    private HashSet<Integer> previousIds = new HashSet<>();
+    private Set<Integer> previousIds = new HashSet<>();
 
     @Override
     public boolean hasNext() {

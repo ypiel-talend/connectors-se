@@ -28,10 +28,6 @@ public class ConfigurationHelper {
 
     public static final String DATA_STORE_ID = "MagentoDataStore";
 
-    public static final String DATA_SET_INPUT_ID = "MagentoInput";
-
-    public static final String DATA_SET_OUTPUT_ID = "MagentoOutput";
-
     public static final String DATA_STORE_HEALTH_CHECK = "DataStoreHealthCheck";
 
     public static final String DISCOVER_SCHEMA_INPUT_ID = "guessTableSchema";

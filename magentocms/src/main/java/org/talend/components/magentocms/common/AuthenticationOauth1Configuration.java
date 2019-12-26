@@ -55,5 +55,4 @@ public class AuthenticationOauth1Configuration implements Serializable, Authenti
     @Documentation("authentication OAuth 1.0 access token secret")
     @Validable(ConfigurationHelper.VALIDATE_AUTH_OAUTH_PARAMETER_ID)
     private String authenticationOauth1AccessTokenSecret = "";
-
 }

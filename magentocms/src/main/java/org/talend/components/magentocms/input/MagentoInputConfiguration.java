@@ -21,10 +21,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-// @DataSet(ConfigurationHelper.DATA_SET_INPUT_ID)
-@GridLayout({ @GridLayout.Row({ "magentoDataSet" }),
-        // @GridLayout.Row({ "fields" }),
-        @GridLayout.Row({ "selectionFilter" }) })
+@GridLayout({ @GridLayout.Row({ "magentoDataSet" }), @GridLayout.Row({ "selectionFilter" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "magentoDataSet" }),
         @GridLayout.Row({ "selectionFilter" }) })
 @Documentation("Input component configuration")
@@ -34,19 +31,8 @@ public class MagentoInputConfiguration implements Serializable {
     @Documentation("Connection to Magento CMS")
     private MagentoDataSet magentoDataSet = new MagentoDataSet();
 
-    // @Option
-    // @Documentation("The type of information we want to get, e.g. 'Products'")
-    // private SelectionType selectionType = SelectionType.PRODUCTS;
-
     @Option
     @Documentation("Data filter")
     private ConfigurationFilter selectionFilter = new ConfigurationFilter();
-
-    // @Option
-    // @Structure(discoverSchema = "guessTableSchema", type = OUT)
-    // @Documentation("The schema of the component. Use 'Discover schema' button to fill it with sample data. "
-    // + "Schema is discovered by getting the first record from particular data table, "
-    // + "e.g. first product in case of 'Product' selection type")
-    // private List<String> fields = new ArrayList<>();
 
 }

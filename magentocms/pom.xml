@@ -5,18 +5,18 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.4.0-SNAPSHOT</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>magentocms</artifactId>
+    <artifactId>magento</artifactId>
 
-    <name>Components :: Magento CMS</name>
+    <name>Components :: Magento</name>
 
     <properties>
         <testcontainers.version>1.12.3</testcontainers.version>
 
         <magento-admin-name>admin</magento-admin-name>
-        <magento-admin-password>admin12</magento-admin-password>
+        <magento-admin-pword>admin12</magento-admin-pword>
         <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
         <magento.http.port>30080</magento.http.port>
         <magento.http.port.secure>30443</magento.http.port.secure>
@@ -230,7 +230,7 @@
                         <magentoHttpPort>${magento.http.port}</magentoHttpPort>
                         <magentoHttpPortSecure>${magento.http.port.secure}</magentoHttpPortSecure>
                         <magentoAdminName>${magento-admin-name}</magentoAdminName>
-                        <magentoAdminPassword>${magento-admin-password}</magentoAdminPassword>
+                        <magentoAdminPword>${magento-admin-pword}</magentoAdminPword>
 
                         <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
 

@@ -25,9 +25,10 @@ import org.talend.sdk.component.api.service.http.configurer.oauth1.OAuth1;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue;
+import java.io.Serializable;
 import java.util.Map;
 
-public interface MagentoHttpClient extends HttpClient {
+public interface MagentoHttpClient extends HttpClient, Serializable {
 
     String HEADER_Authorization = "Authorization";
 

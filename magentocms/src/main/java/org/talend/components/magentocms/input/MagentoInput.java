@@ -42,7 +42,7 @@ public class MagentoInput implements Serializable {
 
     private final MagentoCmsService magentoCmsService;
 
-    private InputIterator inputIterator;
+    private transient InputIterator inputIterator;
 
     public MagentoInput(@Option("configuration") final MagentoInputConfiguration configuration,
             final MagentoHttpClientService magentoHttpClientService, final MagentoCmsService magentoCmsService) {

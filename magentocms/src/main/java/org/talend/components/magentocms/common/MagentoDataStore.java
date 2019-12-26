@@ -41,6 +41,8 @@ import java.io.Serializable;
 @Documentation("Data store settings. Magento's server connection and authentication preferences")
 public class MagentoDataStore implements Serializable {
 
+    public static final String BASE_URL_PREFIX = "index.php/rest/";
+
     @Option
     @Required
     @Documentation("URL of web server (including port after ':'), e.g. 'http://mymagentoserver.com:1234'")
@@ -82,7 +84,7 @@ public class MagentoDataStore implements Serializable {
     }
 
     public String getMagentoBaseUrl() {
-        return "index.php/rest/" + magentoRestVersion;
+        return BASE_URL_PREFIX + magentoRestVersion;
     }
 
 }

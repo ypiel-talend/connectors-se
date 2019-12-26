@@ -22,12 +22,13 @@ import org.talend.components.magentocms.service.http.BadCredentialsException;
 import org.talend.components.magentocms.service.http.MagentoHttpClientService;
 import org.talend.sdk.component.api.service.Service;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
-public class AuthorizationHandlerLoginPassword implements AuthorizationHandler {
+public class AuthorizationHandlerLoginPassword implements AuthorizationHandler, Serializable {
 
     private Map<AuthenticationLoginPasswordConfiguration, String> cachedTokens = new ConcurrentHashMap<>();
 
@@ -80,8 +81,8 @@ public class AuthorizationHandlerLoginPassword implements AuthorizationHandler {
         String login = authSettings.getAuthenticationLogin();
         String password = authSettings.getAuthenticationPassword();
 
-        String magentoUrl = "index.php/rest/" + magentoDataStore.getMagentoRestVersion() + "/integration/" + userType.getName()
-                + "/token";
+        String magentoUrl = MagentoDataStore.BASE_URL_PREFIX + magentoDataStore.getMagentoRestVersion() + "/integration/"
+                + userType.getName() + "/token";
         String accessToken = magentoHttpClientService.getToken(magentoUrl, login, password);
         if (accessToken != null && accessToken.isEmpty()) {
             accessToken = null;

@@ -40,13 +40,13 @@ public class MagentoTestExtension implements ExtensionContext.Store.CloseableRes
      * get this variables from Magento's docker image.
      * http://MAGENTO_URL/admin -> system -> integrations -> TalendTest -> Edit -> Integration Details
      */
-    private static final String AUTHENTICATION_OAUTH1_CONSUMER_KEY = "7fqa5rplt4k9dubdbfea17mf3owyteqh";
+    private static final String OAUTH1_CONSUMER_KEY = "7fqa5rplt4k9dubdbfea17mf3owyteqh";
 
-    private static final String AUTHENTICATION_OAUTH1_CONSUMER_SECRET = "cpln0ehi2yh7tg5ho9bvlbyprfi0ukqk";
+    private static final String OAUTH1_CONSUMER_SECR = "cpln0ehi2yh7tg5ho9bvlbyprfi0ukqk";
 
-    private static final String AUTHENTICATION_OAUTH1_ACCESS_TOKEN = "j24y53g83te2fgye8fe8xondubqej4cl";
+    private static final String OAUTH1_ACC_TOK = "j24y53g83te2fgye8fe8xondubqej4cl";
 
-    private static final String AUTHENTICATION_OAUTH1_ACCESS_TOKEN_SECRET = "jxnbv58bc94dfsld1c9k7e6tvcqntrx2";
+    private static final String OAUTH1_ACC_TOK_SECR = "jxnbv58bc94dfsld1c9k7e6tvcqntrx2";
 
     private TestContext testContext = new TestContext();
 
@@ -78,7 +78,7 @@ public class MagentoTestExtension implements ExtensionContext.Store.CloseableRes
         testContext.magentoHttpPort = String.valueOf(MAGENTO_CONTAINER.getMappedPort(80));
         testContext.magentoHttpPortSecure = String.valueOf(MAGENTO_CONTAINER.getMappedPort(443));
         testContext.magentoAdminName = System.getProperty("magentoAdminName");
-        testContext.magentoAdminPassword = System.getProperty("magentoAdminPassword");
+        testContext.magentoAdminPassword = System.getProperty("magentoAdminPword");
 
         log.info("docker machine: " + testContext.dockerHostAddress + ":" + testContext.magentoHttpPort);
         log.info("docker machine secure: " + testContext.dockerHostAddress + ":" + testContext.magentoHttpPortSecure);
@@ -86,8 +86,7 @@ public class MagentoTestExtension implements ExtensionContext.Store.CloseableRes
         AuthenticationLoginPasswordConfiguration authenticationSettings = new AuthenticationLoginPasswordConfiguration(
                 testContext.magentoAdminName, testContext.magentoAdminPassword);
         AuthenticationOauth1Configuration authenticationOauth1Settings = new AuthenticationOauth1Configuration(
-                AUTHENTICATION_OAUTH1_CONSUMER_KEY, AUTHENTICATION_OAUTH1_CONSUMER_SECRET, AUTHENTICATION_OAUTH1_ACCESS_TOKEN,
-                AUTHENTICATION_OAUTH1_ACCESS_TOKEN_SECRET);
+                OAUTH1_CONSUMER_KEY, OAUTH1_CONSUMER_SECR, OAUTH1_ACC_TOK, OAUTH1_ACC_TOK_SECR);
         testContext.dataStore = new MagentoDataStore(getBaseUrl(), RestVersion.V1, AuthenticationType.LOGIN_PASSWORD, null, null,
                 authenticationSettings);
         testContext.dataStoreSecure = new MagentoDataStore(getBaseUrlSecure(), RestVersion.V1, AuthenticationType.LOGIN_PASSWORD,

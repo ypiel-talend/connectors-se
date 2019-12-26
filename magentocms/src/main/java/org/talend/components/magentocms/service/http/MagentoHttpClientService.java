@@ -28,6 +28,7 @@ import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class MagentoHttpClientService {
+public class MagentoHttpClientService implements Serializable {
 
     private static final int ERROR_CODE_OK = 200;
 

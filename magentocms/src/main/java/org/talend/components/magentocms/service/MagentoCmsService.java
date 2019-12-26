@@ -39,6 +39,7 @@ import org.talend.sdk.component.api.service.update.Update;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.List;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class MagentoCmsService {
+public class MagentoCmsService implements Serializable {
 
     @Service
     private Messages i18n;
