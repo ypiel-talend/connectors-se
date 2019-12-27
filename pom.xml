@@ -19,7 +19,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Components</name>
@@ -61,21 +61,24 @@
     </distributionManagement>
 
     <properties>
+        <connectors-test-bom.version>1.5.0-SNAPSHOT</connectors-test-bom.version>
+        <common.version>1.5.0-SNAPSHOT</common.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <component-api.version>1.1.4</component-api.version>
-        <component-runtime.version>1.1.6</component-runtime.version>
+        <locales.version>[1.5,)</locales.version>
+
+        <component-runtime.version>1.1.16-SNAPSHOT</component-runtime.version>
         <slf4j.version>1.7.25</slf4j.version>
 
-        <beam.version>2.8.0</beam.version>
-        <jackson.version>2.9.8</jackson.version>
+        <beam.version>2.12.0</beam.version>
+        <jackson.version>2.10.1</jackson.version>
         <jackson-codehaus.version>1.9.14-TALEND</jackson-codehaus.version>
 
         <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
         <daikon.version>0.31.0</daikon.version>
 
-        <junit5.version>5.3.1</junit5.version>
-
+        <junit5.version>5.5.1</junit5.version>
         <surefire.version>3.0.0-M3</surefire.version>
         <jacoco.version>0.8.2</jacoco.version>
 
@@ -85,6 +88,17 @@
         <validation.model>true</validation.model>
         <talend_oss_snapshots>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/
         </talend_oss_snapshots>
+
+        <frontend.version>1.7.5</frontend.version>
+        <node.version>v12.13.1</node.version>
+        <yarn.version>v1.15.2</yarn.version>
+        <spotbugs.version>3.1.12</spotbugs.version>
+
+        <spotless.version>1.24.0</spotless.version>
+
+        <!-- The XTM customer id that manage the translation of this project-->
+        <xtm.customer.id>12240076</xtm.customer.id>
+        <xtm.api.url>https://www.xtm-cloud.com/rest-api</xtm.api.url>
     </properties>
 
     <dependencyManagement>
@@ -168,29 +182,23 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.apache.beam</groupId>
-                <artifactId>beam-runners-direct-java</artifactId>
-                <version>${beam.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.talend.sdk.component</groupId>
-                <artifactId>component-runtime-beam</artifactId>
-                <version>${component-runtime.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.talend.sdk.component</groupId>
-                <artifactId>component-runtime-beam-junit</artifactId>
-                <version>${component-runtime.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.talend.daikon</groupId>
                 <artifactId>daikon</artifactId>
                 <version>${daikon.version}</version>
                 <classifier>tests</classifier>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.talend.components</groupId>
+                <artifactId>connectors-test-bom</artifactId>
+                <version>${connectors-test-bom.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.talend.components</groupId>
+                <artifactId>common</artifactId>
+                <version>${common.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -198,13 +206,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.20</version>
+            <version>1.18.10</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.talend.sdk.component</groupId>
             <artifactId>component-api</artifactId>
-            <version>${component-api.version}</version>
+            <version>${component-runtime.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -213,7 +221,12 @@
             <version>${slf4j.version}</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.talend.sdk.component</groupId>
             <artifactId>component-runtime-junit</artifactId>
@@ -222,20 +235,8 @@
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <artifactId>junit-jupiter</artifactId>
             <version>${junit5.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit5.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -390,6 +391,13 @@
                 <version>${component-runtime.version}</version>
                 <executions>
                     <execution>
+                        <id>talend-dita-documentation</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>dita</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <id>talend-dependencies</id>
                         <phase>process-classes</phase>
                         <goals>
@@ -404,6 +412,7 @@
                         </goals>
                         <configuration>
                             <validateModel>${validation.model}</validateModel>
+                            <validatePlaceholder>false</validatePlaceholder>
                         </configuration>
                     </execution>
                     <execution>
@@ -430,13 +439,14 @@
                             <goal>car</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>talend-scan-descriptor</id>
+                        <goals>
+                            <goal>scan-descriptor</goal>
+                        </goals>
+                    </execution>
                 </executions>
                 <dependencies>
-                    <dependency>
-                        <groupId>org.apache.geronimo.config</groupId>
-                        <artifactId>geronimo-config-impl</artifactId>
-                        <version>1.2</version>
-                    </dependency>
                     <dependency>
                         <groupId>org.apache.beam</groupId>
                         <artifactId>beam-sdks-java-core</artifactId>
@@ -462,20 +472,39 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.7.0</version>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
                 <executions>
                     <execution>
+                        <id>apply</id>
+                        <phase>process-classes</phase>
                         <goals>
-                            <goal>format</goal>
+                            <goal>apply</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <encoding>UTF-8</encoding>
-                    <configFile>talend_java_eclipse_formatter.xml</configFile>
-                    <lineEnding>LF</lineEnding>
+                    <java>
+                        <encoding>UTF-8</encoding>
+                        <licenseHeader>
+                            <content><![CDATA[/*
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+*/]]></content>
+                        </licenseHeader>
+                        <eclipse>
+                            <file>talend_java_eclipse_formatter.xml</file>
+                        </eclipse>
+                    </java>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -490,7 +519,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
-                    <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
                     <trimStackTrace>false</trimStackTrace>
                     <runOrder>alphabetical</runOrder>
@@ -576,6 +604,23 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs.version}</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <effort>Max</effort>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- to push to gihub pages if desired
             <plugin>
               <groupId>com.github.github</groupId>
@@ -628,10 +673,150 @@
                 <artifactId>maven-jxr-plugin</artifactId>
                 <version>2.1</version>
             </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs.version}</version>
+            </plugin>
         </plugins>
     </reporting>
 
     <profiles>
+        <profile>
+            <id>i18n-export</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${frontend.version}</version>
+                        <inherited>false</inherited> <!-- execute on root only -->
+                        <executions>
+                            <execution>
+                                <id>install-node-and-yarn</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>install-node-and-yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <nodeVersion>${node.version}</nodeVersion>
+                                    <yarnVersion>${yarn.version}</yarnVersion>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>install-i18n-scripts</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>install</arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>i18n-extract</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>talend-i18n extract</arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>i18n-upload</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>talend-i18n upload</arguments>
+                                    <environmentVariables>
+                                        <XTM_API_URL>${xtm.api.url}</XTM_API_URL>
+                                        <XTM_CUSTOMER_ID>${xtm.customer.id}</XTM_CUSTOMER_ID>
+                                        <XTM_TOKEN>${env.XTM_TOKEN}</XTM_TOKEN>
+                                    </environmentVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <installDirectory>${maven.multiModuleProjectDirectory}/.node</installDirectory>
+                            <workingDirectory>${project.basedir}/</workingDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>i18n-deploy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${frontend.version}</version>
+                        <inherited>false</inherited> <!-- execute on root only -->
+                        <executions>
+                            <execution>
+                                <id>install-node-and-yarn</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>install-node-and-yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <nodeVersion>${node.version}</nodeVersion>
+                                    <yarnVersion>${yarn.version}</yarnVersion>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>install-i18n-scripts</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>install</arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>i18n-download</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>talend-i18n download</arguments>
+                                    <environmentVariables>
+                                        <XTM_API_URL>${xtm.api.url}</XTM_API_URL>
+                                        <XTM_CUSTOMER_ID>${xtm.customer.id}</XTM_CUSTOMER_ID>
+                                        <XTM_TOKEN>${env.XTM_TOKEN}</XTM_TOKEN>
+                                    </environmentVariables>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <!-- This step only format the xtm resources to mvn project format. a mvn deploy is needed to publish the translation dependency to nexus -->
+                                <id>i18n-deploy</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>talend-i18n deploy</arguments>
+                                    <environmentVariables>
+                                        <GITHUB_LOGIN>${env.GITHUB_LOGIN}</GITHUB_LOGIN>
+                                        <GITHUB_TOKEN>${env.GITHUB_TOKEN}</GITHUB_TOKEN>
+                                    </environmentVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <installDirectory>${maven.multiModuleProjectDirectory}/.node</installDirectory>
+                            <workingDirectory>${project.basedir}/</workingDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>documentation-html</id>
             <build>
@@ -652,7 +837,7 @@
                                         <artifactItem>
                                             <groupId>org.talend.sdk.component</groupId>
                                             <artifactId>component-tools</artifactId>
-                                            <version>${component-api.version}</version>
+                                            <version>${component-runtime.version}</version>
                                             <type>jar</type>
                                             <overWrite>true</overWrite>
                                             <outputDirectory>
@@ -688,8 +873,8 @@
                                             ${maven.multiModuleProjectDirectory}/target/documentation_resources/resources/html
                                         </stylesdir>
                                         <stylesheet>talend.css</stylesheet>
-                                        <data-uri/>
-                                        <toc/>
+                                        <data-uri />
+                                        <toc />
                                     </attributes>
                                 </configuration>
                             </execution>

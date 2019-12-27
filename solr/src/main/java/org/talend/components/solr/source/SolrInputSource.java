@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.solr.source;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +26,6 @@ import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -34,11 +45,9 @@ public class SolrInputSource implements Serializable {
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
-    private SolrClient solr;
+    // private SolrClient solr;
 
-    private List<SolrDocument> resultList;
-
-    private Iterator<SolrDocument> iter;
+    private transient Iterator<SolrDocument> iter;
 
     public SolrInputSource(@Option("configuration") final SolrInputMapperConfiguration configuration,
             final JsonBuilderFactory jsonBuilderFactory, final SolrConnectorUtils util) {
@@ -49,13 +58,16 @@ public class SolrInputSource implements Serializable {
 
     @PostConstruct
     public void init() {
-        solr = new HttpSolrClient.Builder(configuration.getDataset().getFullUrl()).build();
-        SolrQuery query = util.generateQuery(configuration);
-        QueryRequest req = new QueryRequest(query);
-        req.setBasicAuthCredentials(configuration.getDataset().getDataStore().getLogin(),
-                configuration.getDataset().getDataStore().getPassword());
-        resultList = executeSolrQuery(solr, req);
-        iter = resultList.iterator();
+        try (SolrClient solr = new HttpSolrClient.Builder(configuration.getDataset().getFullUrl()).build()) {
+            SolrQuery query = util.generateQuery(configuration);
+            QueryRequest req = new QueryRequest(query);
+            req.setBasicAuthCredentials(configuration.getDataset().getDataStore().getLogin(),
+                    configuration.getDataset().getDataStore().getPassword());
+            List<SolrDocument> resultList = executeSolrQuery(solr, req);
+            iter = resultList.iterator();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private List<SolrDocument> executeSolrQuery(SolrClient solr, QueryRequest req) {
@@ -79,12 +91,12 @@ public class SolrInputSource implements Serializable {
         return null;
     }
 
-    @PreDestroy
-    public void release() {
-        try {
-            solr.close();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
+    // @PreDestroy
+    // public void release() {
+    // try {
+    // solr.close();
+    // } catch (IOException e) {
+    // log.error(e.getMessage(), e);
+    // }
+    // }
 }
