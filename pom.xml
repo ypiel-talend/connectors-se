@@ -453,6 +453,12 @@
                             <goal>scan-descriptor</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>talend-svg2png</id>
+                        <goals>
+                            <goal>svg2png</goal>
+                        </goals>
+                    </execution>
                 </executions>
                 <dependencies>
                     <dependency>
