@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Version
-@Icon(value = Icon.IconType.CUSTOM, custom = "file-salesforce")
+@Icon(value = Icon.IconType.CUSTOM, custom = "file-salesforce-out")
 @Processor(name = "SalesforceOutput", family = "Salesforce")
 @Documentation("Salesforce output")
 public class SalesforceOutput implements Serializable {
@@ -56,7 +56,7 @@ public class SalesforceOutput implements Serializable {
     private Messages messages;
 
     public SalesforceOutput(@Option("configuration") final OutputConfig outputConfig, final LocalConfiguration localConfiguration,
-                            final SalesforceService service, final Messages messages) {
+            final SalesforceService service, final Messages messages) {
         this.configuration = outputConfig;
         this.service = service;
         this.localConfiguration = localConfiguration;
