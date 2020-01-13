@@ -71,7 +71,7 @@ spec:
 
     triggers {
         cron(env.BRANCH_NAME == "master" ? "@daily" : "")
-        parametrizedCron(env.BRANCH_NAME == "master" ? "0 9 * * 0 %SCA_SCAN=true" : "") // Sunday at 9am. Only on master
+        parameterizedCron(env.BRANCH_NAME == "master" ? "0 9 * * 0 %SCA_SCAN=true" : "") // Sunday at 9am. Only on master
     }
 
     parameters {
