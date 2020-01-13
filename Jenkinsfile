@@ -40,7 +40,7 @@ spec:
     containers:
         -
             name: main
-            image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/jdk8-builder-base:1.12.0-20191022071355'
+            image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/jdk8-builder-base:1.16.0-20200106163950'
             command: [cat]
             tty: true
             volumeMounts: [{name: docker, mountPath: /var/run/docker.sock}, {name: m2main, mountPath: /root/.m2/repository}]
