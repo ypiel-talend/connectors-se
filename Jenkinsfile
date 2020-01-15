@@ -29,10 +29,12 @@ def talendOssRepositoryArg = (env.BRANCH_NAME == "master" || env.BRANCH_NAME.sta
 
 def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
 
+GString POD_LABEL = "connectors-se-${UUID.randomUUID().toString()}"
+
 pipeline {
     agent {
         kubernetes {
-            label 'connectors-se'
+            label POD_LABEL
             yaml """
 apiVersion: v1
 kind: Pod
