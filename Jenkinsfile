@@ -42,7 +42,7 @@ spec:
     containers:
         -
             name: main
-            image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/jdk8-svc-springboot-builder:1.14.0-2.1-20191203093421'
+            image: '${env.TSBI_IMAGE}'
             command: [cat]
             tty: true
             volumeMounts: [{name: docker, mountPath: /var/run/docker.sock}, {name: m2main, mountPath: /root/.m2/repository}]
