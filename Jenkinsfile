@@ -73,12 +73,11 @@ spec:
 
     triggers {
         cron(env.BRANCH_NAME == "master" ? "@daily" : "")
-        parameterizedCron(env.BRANCH_NAME == "master" ? "0 9 * * 2 %SCA_SCAN=true" : "") // Tuesday temporary at 9am. Only on master
     }
 
     parameters {
         choice(name: 'Action', 
-               choices: [ 'STANDARD', 'PUSH_TO_XTM', 'DEPLOY_FROM_XTM', 'SCAN', 'RELEASE' ],
+               choices: [ 'STANDARD', 'PUSH_TO_XTM', 'DEPLOY_FROM_XTM', 'RELEASE' ],
                description: 'Kind of running : \nSTANDARD (default), normal building\n PUSH_TO_XTM : Export the project i18n resources to Xtm to be translated. This action can be performed from master or maintenance branches only. \nDEPLOY_FROM_XTM: Download and deploy i18n resources from Xtm to nexus for this branch.\nRELEASE : build release')
     }
 
@@ -206,20 +205,6 @@ spec:
                             sh "mvn -e -B -s .jenkins/settings.xml clean package -pl . -Pi18n-deploy"
                             sh "cd tmp/repository && mvn -s ../../.jenkins/settings.xml clean deploy -DaltDeploymentRepository=talend_nexus_deployment::default::https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/"
                         }
-                    }
-                }
-            }
-        }
-        stage("SourceClear analysis") {
-            when {
-                expression { params.Action == 'SCAN' || ${SCA_SCAN} == true }
-            }
-            steps {
-                container('main') {
-                    withCredentials([string(credentialsId: 'veracode-token', variable: 'SRCCLR_API_TOKEN')]) {
-                        sh '''#!/bin/bash
-                          curl -sSL https://download.sourceclear.com/ci.sh | SRCCLR_API_TOKEN=${SRCCLR_API_TOKEN} DEBUG=1 sh -s -- scan --allow-dirty --recursive --skip-collectors npm;
-                        '''
                     }
                 }
             }
