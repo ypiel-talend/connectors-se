@@ -1,15 +1,5 @@
 def slackChannel = 'components-ci'
 
-def branchName = env.BRANCH_NAME
-if (BRANCH_NAME.startsWith("PR-")) {
-    branchName = env.CHANGE_BRANCH
-}
-
-def escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
-GString deploymentSuffix = (env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")) ? "${PRODUCTION_DEPLOYMENT_REPOSITORY}" : ("dev_branch_snapshots/branch_${escapedBranch}")
-
-GString m2 = "/tmp/jenkins/tdi/m2/${deploymentSuffix}"
-
 def podLabel = "connectors-se-scan-${UUID.randomUUID().toString()}".take(53)
 
 pipeline {
@@ -47,7 +37,7 @@ spec:
     }
 
     options {
-        buildDiscarder(logRotator(artifactNumToKeepStr: '5', numToKeepStr: (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('maintenance/')) ? '10' : '2'))
+        buildDiscarder(logRotator(artifactNumToKeepStr: '5', numToKeepStr: '5'))
         timeout(time: 60, unit: 'MINUTES')
         skipStagesAfterUnstable()
     }
