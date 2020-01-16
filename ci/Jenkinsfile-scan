@@ -24,7 +24,7 @@ spec:
             hostPath: {path: /var/run/docker.sock}
         -
             name: m2main
-            hostPath: { path: ${m2} }
+            hostPath: { path: /tmp/jenkins/tdi/m2/ }
     imagePullSecrets:
         - name: talend-registry
 """
