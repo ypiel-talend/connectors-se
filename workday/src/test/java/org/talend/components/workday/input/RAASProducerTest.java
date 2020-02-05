@@ -38,7 +38,7 @@ class RAASProducerTest extends WorkdayBaseTest {
     private WorkdayReaderService service;
 
     @BeforeEach
-    private void init() throws NoSuchFieldException, IllegalAccessException {
+    private void init() {
         RAASProducerTest.cfg = new WorkdayConfiguration();
         RAASProducerTest.dataset = new WorkdayDataSet();
         RAASProducerTest.dataset.setDatastore(this.buildDataStore());

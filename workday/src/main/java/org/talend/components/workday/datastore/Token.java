@@ -12,20 +12,25 @@
  */
 package org.talend.components.workday.datastore;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.time.Instant;
 
-@Getter
-@RequiredArgsConstructor
+import javax.json.bind.annotation.JsonbProperty;
+
+import lombok.Data;
+
+@Data
 public class Token {
 
-    private final String accessToken;
+    @JsonbProperty("access_token")
+    private String accessToken;
 
-    private final String tokenType;
+    @JsonbProperty("token_type")
+    private String tokenType;
 
-    private final Instant expireDate;
+    @JsonbProperty("expires_in")
+    private String expiresIn;
+
+    private Instant expireDate;
 
     public String getAuthorizationHeaderValue() {
         return tokenType + ' ' + accessToken;

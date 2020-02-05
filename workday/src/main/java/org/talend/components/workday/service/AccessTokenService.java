@@ -12,33 +12,38 @@
  */
 package org.talend.components.workday.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import org.slf4j.LoggerFactory;
+import org.talend.components.workday.WorkdayException;
 import org.talend.components.workday.datastore.Token;
 import org.talend.components.workday.datastore.WorkdayDataStore;
 import org.talend.sdk.component.api.service.Service;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import org.talend.sdk.component.api.service.cache.Cached;
+import org.talend.sdk.component.api.service.http.Response;
 
 @Service
 public class AccessTokenService {
 
-    @Service
-    private AccessTokenProvider service;
+    @Cached(timeout = 30000)
+    public Token getOrCreateToken(final WorkdayDataStore datastore, final AccessTokenProvider service) {
+        return getAccessToken(datastore, service);
+    }
 
-    private transient Token token = null;
+    public Token getAccessToken(final WorkdayDataStore ds, final AccessTokenProvider service) {
+        service.base(ds.getAuthEndpoint());
 
-    public Token findToken(WorkdayDataStore datastore) {
-        if (this.token == null || this.isTokenTooOld()) {
-            this.newToken(datastore);
+        final String payload = "tenant_alias=" + ds.getTenantAlias() + "&grant_type=client_credentials";
+        final Response<Token> result = service.getAuthorizationToken(ds.getAuthorizationHeader(), payload);
+        if (result.status() / 100 != 2) {
+            final String errorLib = result.error(String.class);
+            LoggerFactory.getLogger(AccessTokenProvider.class).error("Error while trying get token : HTTP {} : {}",
+                    result.status(), errorLib);
+            throw new WorkdayException(errorLib);
         }
-        return this.token;
-    }
-
-    private boolean isTokenTooOld() {
-        return token.getExpireDate().isAfter(Instant.now().minus(30, ChronoUnit.SECONDS));
-    }
-
-    private synchronized void newToken(WorkdayDataStore datastore) {
-        this.token = service.getAccessToken(datastore);
+        final Token json = result.body();
+        json.setExpireDate(Instant.now().plus(Integer.parseInt(json.getExpiresIn()), ChronoUnit.SECONDS));
+        return json;
     }
 }

@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.talend.sdk.component.api.service.http.Configurer;
 
 @Slf4j
-public class AccessTokenConfigurer implements Configurer {
+public class ContentTypeConfigurer implements Configurer {
 
     private static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 

@@ -12,8 +12,10 @@
  */
 package org.talend.components.workday.dataset;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
+
 import org.talend.components.workday.datastore.WorkdayDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -21,9 +23,9 @@ import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Map;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @DataSet("WorkdayDataSet")
@@ -39,15 +41,12 @@ public class WorkdayDataSet implements Serializable, QueryHelper {
     @Documentation("The connection to workday datastore")
     private WorkdayDataStore datastore;
 
+    @RequiredArgsConstructor
     public enum WorkdayMode {
         WQL("data"),
         RAAS("Report_Entry");
 
         public final String arrayName;
-
-        WorkdayMode(String arrayName) {
-            this.arrayName = arrayName;
-        }
     }
 
     @Option

@@ -23,6 +23,8 @@ import org.talend.sdk.component.api.service.http.Response;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -38,8 +40,11 @@ public class WorkdayReaderService {
     @Service
     private AccessTokenService accessToken;
 
+    @Service
+    private AccessTokenProvider accessTokenProvider;
+
     public JsonObject find(WorkdayDataStore datastore, QueryHelper helper, Map<String, String> queryParams) {
-        final Token token = accessToken.findToken(datastore);
+        final Token token = accessToken.getOrCreateToken(datastore, accessTokenProvider);
         final String authorizeHeader = token.getAuthorizationHeaderValue();
 
         this.reader.base(datastore.getEndpoint());
@@ -70,6 +75,6 @@ public class WorkdayReaderService {
         if (data == null || data.isEmpty()) {
             return Collections.emptyIterator();
         }
-        return data.stream().map(JsonObject.class::cast).iterator();
+        return data.stream().map(JsonValue::asJsonObject).iterator();
     }
 }

@@ -12,19 +12,20 @@
  */
 package org.talend.components.workday.datastore;
 
-import lombok.Data;
+import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.util.Base64;
+
 import org.talend.components.workday.service.UIActionService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
-import org.talend.sdk.component.api.configuration.action.Validable;
+import org.talend.sdk.component.api.configuration.constraint.Pattern;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import java.io.Serializable;
-import java.nio.charset.Charset;
-import java.util.Base64;
+import lombok.Data;
 
 @Data
 @DataStore(WorkdayDataStore.NAME)
@@ -42,7 +43,7 @@ public class WorkdayDataStore implements Serializable {
     public static final String NAME = "WorkdayDataStore";
 
     @Option
-    @Validable(UIActionService.VALIDATION_URL_PROPERTY)
+    @Pattern("^https?://.+$")
     @Documentation("Workday token Auth Endpoint (host only, ie: https://auth.api.workday.com/v1/token)")
     private String authEndpoint = "https://auth.api.workday.com";
 
@@ -70,5 +71,4 @@ public class WorkdayDataStore implements Serializable {
         final String idForHeader = Base64.getEncoder().encodeToString(idSecret.getBytes(Charset.defaultCharset()));
         return "Basic " + idForHeader;
     }
-
 }

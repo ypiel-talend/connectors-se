@@ -21,33 +21,44 @@ import javax.json.bind.JsonbBuilder;
 
 import org.apache.xbean.propertyeditor.PropertyEditorRegistry;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.workday.WorkdayBaseTest;
 import org.talend.components.workday.datastore.Token;
 import org.talend.components.workday.datastore.WorkdayDataStore;
+import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.http.HttpClientFactory;
 import org.talend.sdk.component.api.service.http.Response;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
+import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.reflect.ParameterModelService;
 import org.talend.sdk.component.runtime.manager.reflect.ReflectionService;
 import org.talend.sdk.component.runtime.manager.service.http.HttpClientFactoryImpl;
 
 @HttpApi(useSsl = true)
+@WithComponents("org.talend.components.workday.service")
 class WorkdayReaderTest extends WorkdayBaseTest {
+
+    @Service
+    private AccessTokenService service;
+
+    @Service
+    private AccessTokenProvider provider;
+
+    @Service
+    private WorkdayReader reader;
+
+    @BeforeEach
+    void before() {
+        provider.base(defaultAuthenticationURL);
+        reader.base(defaultServiceURL);
+    }
 
     @Test
     void search() {
-        final PropertyEditorRegistry propertyEditorRegistry = new PropertyEditorRegistry();
-        HttpClientFactory factory = new HttpClientFactoryImpl("test",
-                new ReflectionService(new ParameterModelService(propertyEditorRegistry), propertyEditorRegistry),
-                JsonbBuilder.create(), new HashMap<>());
-
-        AccessTokenProvider provider = factory.create(AccessTokenProvider.class, WorkdayBaseTest.defaultAuthenticationURL);
-
         WorkdayDataStore wds = this.buildDataStore();
-        Token tk = provider.getAccessToken(wds);
+        Token tk = service.getAccessToken(wds, provider);
 
-        WorkdayReader reader = factory.create(WorkdayReader.class, WorkdayBaseTest.defaultServiceURL);
         String header = tk.getAuthorizationHeaderValue();
         Map<String, String> params = new HashMap<>();
         params.put("offset", "0");
