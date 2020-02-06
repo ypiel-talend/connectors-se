@@ -21,6 +21,7 @@ import org.talend.components.workday.WorkdayBaseTest;
 import org.talend.components.workday.WorkdayException;
 import org.talend.components.workday.dataset.WQLLayout;
 import org.talend.components.workday.dataset.WorkdayDataSet;
+import org.talend.components.workday.service.AccessTokenProvider;
 import org.talend.components.workday.service.WorkdayReaderService;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
@@ -39,6 +40,9 @@ class WorkdayProducerTest extends WorkdayBaseTest {
     @Service
     private WorkdayReaderService service;
 
+    @Service
+    private AccessTokenProvider client;
+
     @BeforeEach
     private void init() {
         this.cfg = new WorkdayConfiguration();
@@ -54,7 +58,7 @@ class WorkdayProducerTest extends WorkdayBaseTest {
         String query = "SELECT accountCurrency, bankAccountSecuritySegment, priorDayAccountBalance " + "FROM financialAccounts";
         this.dataset.getWql().setQuery(query);
 
-        WorkdayProducer producer = new WorkdayProducer(cfg, service);
+        WorkdayProducer producer = new WorkdayProducer(cfg, service, client);
         JsonObject o = producer.next();
         Assertions.assertNotNull(o);
     }
@@ -64,7 +68,7 @@ class WorkdayProducerTest extends WorkdayBaseTest {
         String query = "SELECT accountCurrency, bankAccountSecuritySegment, priorDayAccountBalance "
                 + "FROM UnkownfinancialAccounts";
         this.dataset.getWql().setQuery(query);
-        WorkdayProducer producer = new WorkdayProducer(cfg, service);
+        WorkdayProducer producer = new WorkdayProducer(cfg, service, client);
 
         Assertions.assertThrows(WorkdayException.class, producer::next);
     }

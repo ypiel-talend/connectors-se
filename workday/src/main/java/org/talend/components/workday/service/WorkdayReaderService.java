@@ -12,25 +12,24 @@
  */
 package org.talend.components.workday.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.talend.components.workday.WorkdayException;
-import org.talend.components.workday.dataset.QueryHelper;
-import org.talend.components.workday.datastore.Token;
-import org.talend.components.workday.datastore.WorkdayDataStore;
-import org.talend.sdk.component.api.component.Version;
-import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.http.Response;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
+import org.talend.components.workday.WorkdayException;
+import org.talend.components.workday.dataset.QueryHelper;
+import org.talend.components.workday.datastore.Token;
+import org.talend.components.workday.datastore.WorkdayDataStore;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.http.Response;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Version(1)
 @Slf4j
 public class WorkdayReaderService {
 
@@ -40,11 +39,9 @@ public class WorkdayReaderService {
     @Service
     private AccessTokenService accessToken;
 
-    @Service
-    private AccessTokenProvider accessTokenProvider;
-
-    public JsonObject find(WorkdayDataStore datastore, QueryHelper helper, Map<String, String> queryParams) {
-        final Token token = accessToken.getOrCreateToken(datastore, accessTokenProvider);
+    public JsonObject find(WorkdayDataStore datastore, QueryHelper helper, Map<String, String> queryParams,
+            final AccessTokenProvider client) {
+        final Token token = accessToken.getOrCreateToken(datastore, client);
         final String authorizeHeader = token.getAuthorizationHeaderValue();
 
         this.reader.base(datastore.getEndpoint());

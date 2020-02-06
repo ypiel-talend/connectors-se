@@ -21,6 +21,7 @@ import org.talend.components.workday.WorkdayBaseTest;
 import org.talend.components.workday.WorkdayException;
 import org.talend.components.workday.dataset.RAASLayout;
 import org.talend.components.workday.dataset.WorkdayDataSet;
+import org.talend.components.workday.service.AccessTokenProvider;
 import org.talend.components.workday.service.WorkdayReaderService;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
@@ -36,6 +37,9 @@ class RAASProducerTest extends WorkdayBaseTest {
 
     @Service
     private WorkdayReaderService service;
+
+    @Service
+    private AccessTokenProvider client;
 
     @BeforeEach
     private void init() {
@@ -53,7 +57,7 @@ class RAASProducerTest extends WorkdayBaseTest {
         RAASProducerTest.dataset.getRaas().setUser("lmcneil");
         RAASProducerTest.dataset.getRaas().setReport("billingReport");
 
-        WorkdayProducer producer = new WorkdayProducer(cfg, service);
+        WorkdayProducer producer = new WorkdayProducer(cfg, service, client);
         JsonObject o = producer.next();
         Assertions.assertNotNull(o);
 
@@ -66,7 +70,7 @@ class RAASProducerTest extends WorkdayBaseTest {
         RAASProducerTest.dataset.getRaas().setUser("omcneil");
         RAASProducerTest.dataset.getRaas().setReport("falseReport");
 
-        WorkdayProducer producer = new WorkdayProducer(cfg, service);
+        WorkdayProducer producer = new WorkdayProducer(cfg, service, client);
 
         Assertions.assertThrows(WorkdayException.class, producer::next);
     }

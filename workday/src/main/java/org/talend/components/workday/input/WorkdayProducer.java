@@ -13,6 +13,7 @@
 package org.talend.components.workday.input;
 
 import org.talend.components.workday.dataset.WorkdayDataSet;
+import org.talend.components.workday.service.AccessTokenProvider;
 import org.talend.components.workday.service.WorkdayReaderService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -25,7 +26,10 @@ import javax.json.JsonObject;
 import java.io.Serializable;
 import java.util.Iterator;
 
-@Version(1)
+import lombok.RequiredArgsConstructor;
+
+@Version
+@RequiredArgsConstructor
 @Icon(value = Icon.IconType.CUSTOM, custom = "WorkdayInput")
 @Emitter(family = "Workday", name = "Input")
 @Documentation("Component to extract data from workday ERP via Workday Query Language or Report As A Service")
@@ -33,22 +37,19 @@ public class WorkdayProducer implements Serializable {
 
     private static final long serialVersionUID = 2693235150546844805L;
 
-    private final WorkdayConfiguration config;
+    private final WorkdayConfiguration configuration;
 
     private final WorkdayReaderService reader;
 
-    private transient Iterator<JsonObject> jsonIterator = null;
+    private final AccessTokenProvider client;
 
-    public WorkdayProducer(@Option("configuration") WorkdayConfiguration config, WorkdayReaderService reader) {
-        this.config = config;
-        this.reader = reader;
-    }
+    private transient Iterator<JsonObject> jsonIterator = null;
 
     @Producer
     public JsonObject next() {
         if (this.jsonIterator == null) {
-            final WorkdayDataSet workdayds = this.config.getDataSet();
-            JsonObject obj = reader.find(workdayds.getDatastore(), workdayds, workdayds.extractQueryParam());
+            final WorkdayDataSet workdayds = this.configuration.getDataSet();
+            JsonObject obj = reader.find(workdayds.getDatastore(), workdayds, workdayds.extractQueryParam(), client);
             this.jsonIterator = reader.extractIterator(obj, workdayds.getMode().arrayName);
         }
         if (this.jsonIterator == null || !this.jsonIterator.hasNext()) {

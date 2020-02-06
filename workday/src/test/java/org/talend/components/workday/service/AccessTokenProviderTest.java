@@ -30,13 +30,13 @@ class AccessTokenProviderTest extends WorkdayBaseTest {
     private AccessTokenService service;
 
     @Service
-    private AccessTokenProvider provider;
+    private AccessTokenProvider client;
 
     @Test
     void getAccessToken() {
         WorkdayDataStore wds = this.buildDataStore();
 
-        Token tk = service.getAccessToken(wds, provider);
+        Token tk = service.getAccessToken(wds, client);
         Assertions.assertNotNull(tk);
         Assertions.assertEquals("Bearer", tk.getTokenType());
     }
@@ -46,6 +46,6 @@ class AccessTokenProviderTest extends WorkdayBaseTest {
         WorkdayDataStore wds = this.buildDataStore();
         wds.setClientSecret("fautSecret");
 
-        Assertions.assertThrows(WorkdayException.class, () -> service.getAccessToken(wds, provider));
+        Assertions.assertThrows(WorkdayException.class, () -> service.getAccessToken(wds, client));
     }
 }

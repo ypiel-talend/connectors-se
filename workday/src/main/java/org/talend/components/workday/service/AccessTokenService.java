@@ -12,30 +12,72 @@
  */
 package org.talend.components.workday.service;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.toList;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PreDestroy;
 
 import org.slf4j.LoggerFactory;
 import org.talend.components.workday.WorkdayException;
 import org.talend.components.workday.datastore.Token;
 import org.talend.components.workday.datastore.WorkdayDataStore;
 import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.cache.Cached;
+import org.talend.sdk.component.api.service.cache.LocalCache;
 import org.talend.sdk.component.api.service.http.Response;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class AccessTokenService {
 
-    @Cached(timeout = 30000)
-    public Token getOrCreateToken(final WorkdayDataStore datastore, final AccessTokenProvider service) {
-        return getAccessToken(datastore, service);
+    @Service
+    private LocalCache cache;
+
+    private final ConcurrentMap<WorkdayDataStore, Token> tokens = new ConcurrentHashMap<>();
+
+    private volatile ScheduledExecutorService evictionThread;
+
+    private volatile ScheduledFuture<?> evictionTask;
+
+    private final AtomicInteger pendingRequests = new AtomicInteger();
+
+    @PreDestroy
+    public synchronized void release() {
+        stopEviction();
     }
 
-    public Token getAccessToken(final WorkdayDataStore ds, final AccessTokenProvider service) {
-        service.base(ds.getAuthEndpoint());
+    public Token getOrCreateToken(final WorkdayDataStore datastore, final AccessTokenProvider client) {
+        // todo add remove in LocaleCache in T.C.K. and drop that concurrent map
+        pendingRequests.incrementAndGet();
+        try {
+            final ConcurrentMap<WorkdayDataStore, Token> cache = getTokens();
+            final Token token = cache.computeIfAbsent(datastore, d -> getAccessToken(d, client));
+            if (token.getExpireDate().isBefore(Instant.now().minus(30, ChronoUnit.SECONDS))) { // is expired
+                cache.remove(datastore);
+                return getOrCreateToken(datastore, client);
+            }
+            return token;
+        } finally {
+            pendingRequests.decrementAndGet();
+        }
+    }
+
+    public Token getAccessToken(final WorkdayDataStore ds, final AccessTokenProvider client) {
+        client.base(ds.getAuthEndpoint());
 
         final String payload = "tenant_alias=" + ds.getTenantAlias() + "&grant_type=client_credentials";
-        final Response<Token> result = service.getAuthorizationToken(ds.getAuthorizationHeader(), payload);
+        final Response<Token> result = client.getAuthorizationToken(ds.getAuthorizationHeader(), payload);
         if (result.status() / 100 != 2) {
             final String errorLib = result.error(String.class);
             LoggerFactory.getLogger(AccessTokenProvider.class).error("Error while trying get token : HTTP {} : {}",
@@ -45,5 +87,47 @@ public class AccessTokenService {
         final Token json = result.body();
         json.setExpireDate(Instant.now().plus(Integer.parseInt(json.getExpiresIn()), ChronoUnit.SECONDS));
         return json;
+    }
+
+    private void stopEviction() {
+        if (evictionTask != null) {
+            evictionTask.cancel(true);
+            evictionThread.shutdownNow();
+            try {
+                evictionThread.awaitTermination(2, SECONDS); // not a big deal if it does not end completely here
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private ConcurrentMap<WorkdayDataStore, Token> getTokens() {
+        if (evictionTask == null) {
+            synchronized (this) {
+                if (evictionTask == null) {
+                    evictionThread = Executors.newSingleThreadScheduledExecutor(r -> {
+                        final Thread thread = new Thread(r, AccessTokenService.class.getName() + "-eviction-" + hashCode());
+                        thread.setPriority(Thread.NORM_PRIORITY);
+                        return thread;
+                    });
+                    evictionTask = evictionThread.schedule(this::evict, 30, SECONDS);
+                }
+            }
+        }
+        return tokens;
+    }
+
+    private void evict() {
+        final Instant now = Instant.now();
+        tokens.entrySet().stream().filter(it -> it.getValue().getExpireDate().isAfter(now)).map(Map.Entry::getKey)
+                .collect(toList()) // materialize before actually removing it
+                .forEach(tokens::remove);
+        if (tokens.isEmpty() && pendingRequests.get() == 0) { // try to stop the useless thread
+            synchronized (this) {
+                if (tokens.isEmpty() && pendingRequests.get() == 0) {
+                    stopEviction();
+                }
+            }
+        }
     }
 }

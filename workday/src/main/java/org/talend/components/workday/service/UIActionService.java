@@ -30,18 +30,15 @@ public class UIActionService {
     public static final String HEALTH_CHECK = "WORKDAY_HEALTH_CHECK";
 
     @Service
-    private AccessTokenProvider provider;
-
-    @Service
     private AccessTokenService service;
 
     @Service
     private I18n i18n;
 
     @HealthCheck(HEALTH_CHECK)
-    public HealthCheckStatus validateConnection(@Option final WorkdayDataStore dataStore) {
+    public HealthCheckStatus validateConnection(@Option final WorkdayDataStore dataStore, final AccessTokenProvider client) {
         try {
-            service.getAccessToken(dataStore, provider);
+            service.getAccessToken(dataStore, client);
             return new HealthCheckStatus(OK, i18n.healthCheckOk());
         } catch (Exception e) {
             return new HealthCheckStatus(KO, i18n.healthCheckFailed("msg", e.getMessage()));

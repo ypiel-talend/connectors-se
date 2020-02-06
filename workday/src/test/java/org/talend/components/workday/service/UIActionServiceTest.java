@@ -28,9 +28,12 @@ class UIActionServiceTest extends WorkdayBaseTest {
     @Service
     private UIActionService service;
 
+    @Service
+    private AccessTokenProvider client;
+
     @Test
     void validateConnection() {
-        final HealthCheckStatus healthCheckStatus = service.validateConnection(this.buildDataStore());
+        final HealthCheckStatus healthCheckStatus = service.validateConnection(this.buildDataStore(), client);
         Assertions.assertNotNull(healthCheckStatus);
         Assertions.assertEquals(HealthCheckStatus.Status.OK, healthCheckStatus.getStatus());
 
@@ -40,7 +43,7 @@ class UIActionServiceTest extends WorkdayBaseTest {
     void validateConnectionKO() {
         final WorkdayDataStore wds = this.buildDataStore();
         wds.setClientSecret("FAUX");
-        final HealthCheckStatus healthCheckStatusKO = service.validateConnection(wds);
+        final HealthCheckStatus healthCheckStatusKO = service.validateConnection(wds, client);
         Assertions.assertNotNull(healthCheckStatusKO);
         Assertions.assertEquals(HealthCheckStatus.Status.KO, healthCheckStatusKO.getStatus());
     }
