@@ -46,10 +46,13 @@ public class AccessTokenService {
 
     private final ConcurrentMap<WorkdayDataStore, Token> tokens = new ConcurrentHashMap<>();
 
+    // scheduler we use to evict tokens
     private volatile ScheduledExecutorService evictionThread;
 
+    // the eviction task if active
     private volatile ScheduledFuture<?> evictionTask;
 
+    // here to avoid to stop eviction while creating a token
     private final AtomicInteger pendingRequests = new AtomicInteger();
 
     @PreDestroy
