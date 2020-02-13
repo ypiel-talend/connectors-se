@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.rest.service;
+package org.talend.components.rest.service.client;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,6 @@ import org.talend.components.rest.configuration.RequestBody;
 import org.talend.components.rest.configuration.RequestConfig;
 
 import java.nio.charset.Charset;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class Body {
         this.conf = config.getDataset().getBody();
         this.substitutor = substitutor;
 
-        if (config.getDataset().getHasHeaders()) {
+        if (config.getDataset().isHasHeaders()) {
             Map<String, List<String>> headers = config.headers().entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> Collections.singletonList(e.getValue())));
             charsetName = ContentType.getCharsetName(headers);
