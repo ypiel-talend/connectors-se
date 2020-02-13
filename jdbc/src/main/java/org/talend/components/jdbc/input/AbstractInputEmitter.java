@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,18 +12,6 @@
  */
 package org.talend.components.jdbc.input;
 
-import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.ErrorFactory;
-import org.talend.components.jdbc.configuration.InputConfig;
-import org.talend.components.jdbc.service.I18nMessage;
-import org.talend.components.jdbc.service.JdbcService;
-import org.talend.sdk.component.api.input.Producer;
-import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -33,6 +21,19 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.Date;
 import java.util.stream.IntStream;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.talend.components.jdbc.configuration.InputConfig;
+import org.talend.components.jdbc.service.I18nMessage;
+import org.talend.components.jdbc.service.JdbcService;
+import org.talend.sdk.component.api.input.Producer;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static java.sql.ResultSetMetaData.columnNoNulls;
 import static org.talend.components.jdbc.ErrorFactory.toIllegalStateException;
@@ -144,6 +145,13 @@ public abstract class AbstractInputEmitter implements Serializable {
             case java.sql.Types.BOOLEAN:
                 builder.withEntry(entryBuilder.withType(BOOLEAN).build());
                 break;
+            case Types.BIT:
+                if (javaType.equals(Boolean.class.getName())) {
+                    builder.withEntry(entryBuilder.withType(BOOLEAN).build());
+                } else {
+                    builder.withEntry(entryBuilder.withType(INT).build());
+                }
+                break;
             case java.sql.Types.TIME:
             case java.sql.Types.DATE:
             case java.sql.Types.TIMESTAMP:
@@ -204,6 +212,15 @@ public abstract class AbstractInputEmitter implements Serializable {
             case java.sql.Types.BOOLEAN:
                 if (value != null) {
                     builder.withBoolean(entryBuilder.withType(BOOLEAN).build(), (Boolean) value);
+                }
+                break;
+            case Types.BIT:
+                if (value != null) {
+                    if (value instanceof Boolean) {
+                        builder.withBoolean(entryBuilder.withType(BOOLEAN).build(), (Boolean) value);
+                    } else {
+                        builder.withInt(entryBuilder.withType(INT).build(), (Integer) value);
+                    }
                 }
                 break;
             case java.sql.Types.DATE:
