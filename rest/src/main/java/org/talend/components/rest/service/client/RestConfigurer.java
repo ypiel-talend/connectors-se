@@ -10,13 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.rest.service;
+package org.talend.components.rest.service.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.common.service.http.basic.BasicAuthConfigurer;
 import org.talend.components.common.service.http.bearer.BearerAuthConfigurer;
 import org.talend.components.common.service.http.digest.DigestAuthConfigurer;
 import org.talend.components.rest.configuration.RequestConfig;
+import org.talend.components.rest.service.I18n;
 import org.talend.sdk.component.api.service.http.Configurer;
 
 @Slf4j
@@ -28,7 +29,11 @@ public class RestConfigurer implements Configurer {
         final I18n i18n = configuration.get("i18n", I18n.class);
 
         // Deactivate support of redirection of the underlying client
-        connection.withoutFollowRedirects();
+        try {
+            connection.withoutFollowRedirects();
+        } catch (NoSuchMethodError e) {
+            log.info(i18n.withoutFollowRedirectsDegradedMode());
+        }
 
         // Set timeout
         if (config.getDataset().getDatastore().getConnectionTimeout() != null) {
@@ -42,7 +47,7 @@ public class RestConfigurer implements Configurer {
 
         // Add Content-Type of body if none.
         if (config.getDataset().isHasBody()) {
-            if (config.getDataset().getHasHeaders()) {
+            if (config.getDataset().isHasHeaders()) {
                 final boolean contentTypeAlreadySet = config.headers().entrySet().stream()
                         .filter(h -> ContentType.HEADER_KEY.toLowerCase().equals(h.getKey().toLowerCase())).findFirst()
                         .orElse(null) != null;
