@@ -48,7 +48,6 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @Environment(ContextualEnvironment.class)
 @EnvironmentConfiguration(environment = "Contextual", systemProperties = {}) // EnvironmentConfiguration is necessary for each
-// @Environment
 
 /*
  * @Environment(DirectRunnerEnvironment.class) // Direct runner not necessary since already SparkRunner
@@ -67,7 +66,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @WithComponents(value = "org.talend.components.rest")
 @HttpApi(useSsl = true)
-public class ClientTestWithMockProxy {
+public class ClientTestWithMockProxyTest {
 
     @Injected
     private BaseComponentsHandler handler;
@@ -128,7 +127,7 @@ public class ClientTestWithMockProxy {
 
         assertEquals(1, records.size());
         Record record = records.get(0);
-        valideCompletePayloadSchema(record, Schema.Type.ARRAY);
+        valideCompletePayloadSchema(record, Schema.Type.RECORD);
     }
 
     @EnvironmentalTest
@@ -153,7 +152,7 @@ public class ClientTestWithMockProxy {
 
         assertEquals(1, records.size());
         Record record = records.get(0);
-        valideCompletePayloadSchema(record, Schema.Type.ARRAY);
+        valideCompletePayloadSchema(record, Schema.Type.RECORD);
     }
 
     @EnvironmentalTest
