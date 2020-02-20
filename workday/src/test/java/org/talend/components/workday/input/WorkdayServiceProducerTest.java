@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,30 +12,50 @@
  */
 package org.talend.components.workday.input;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.json.JsonObject;
+
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.talend.components.workday.WorkdayBaseTest;
+import org.talend.components.workday.dataset.WQLLayout;
+import org.talend.components.workday.dataset.WorkdayDataSet;
+import org.talend.components.workday.dataset.WorkdayDataSet.WorkdayMode;
 import org.talend.components.workday.dataset.WorkdayServiceDataSet;
-import org.talend.components.workday.dataset.service.input.*;
-import org.talend.components.workday.service.ConfigHelper;
-import org.talend.sdk.component.junit.http.junit5.HttpApi;
+import org.talend.components.workday.dataset.service.input.ExpensesSwagger;
+import org.talend.components.workday.dataset.service.input.HumanResourceManagementSwagger;
+import org.talend.components.workday.dataset.service.input.ModuleChoice;
+import org.talend.components.workday.dataset.service.input.UserInfoSwagger;
 import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.junit.SimpleFactory;
+import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.ComponentExtension;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import javax.json.JsonObject;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
 @HttpApi(useSsl = true)
 @ExtendWith(ComponentExtension.class)
 @WithComponents("org.talend.components.workday")
-class WorkdayServiceProducerTest {
+class WorkdayServiceProducerTest extends WorkdayBaseTest {
+
+    private WorkdayServiceDataSet dataset;
+
+    private InputConfiguration cfg;
+
+    @BeforeEach
+    private void init() {
+        this.cfg = new InputConfiguration();
+        this.dataset = new WorkdayServiceDataSet();
+        this.dataset.setDatastore(this.buildDataStore());
+
+        this.cfg.setDataSet(dataset);
+    }
 
     @Test
     public void producer() {
@@ -45,10 +65,7 @@ class WorkdayServiceProducerTest {
         mc.setModule(ModuleChoice.Modules.HumanResourceManagementSwagger);
         mc.getHumanResourceManagementSwagger()
                 .setService(HumanResourceManagementSwagger.HumanResourceManagementSwaggerServiceChoice.Workers);
-        WorkdayServiceDataSet ds = ConfigHelper.buildServiceDataSet(mc);
-
-        InputConfiguration cfg = new InputConfiguration();
-        cfg.setDataSet(ds);
+        this.dataset.setModule(mc);
 
         final String configStr = SimpleFactory.configurationByExample().forInstance(cfg).configured().toQueryString();
         System.setProperty("talend.beam.job.targetParallelism", "1"); // our code creates one hz lite instance per thread
@@ -72,10 +89,9 @@ class WorkdayServiceProducerTest {
         ModuleChoice mc = new ModuleChoice();
         mc.setModule(ModuleChoice.Modules.UserInfoSwagger);
         mc.getUserInfoSwagger().setService(UserInfoSwagger.UserInfoSwaggerServiceChoice.UserInfo);
-
-        WorkdayServiceDataSet ds = ConfigHelper.buildServiceDataSet(mc);
+        this.dataset.setModule(mc);
         InputConfiguration cfg = new InputConfiguration();
-        cfg.setDataSet(ds);
+        cfg.setDataSet(this.dataset);
 
         final String configStr = SimpleFactory.configurationByExample().forInstance(cfg).configured().toQueryString();
 
@@ -99,11 +115,11 @@ class WorkdayServiceProducerTest {
         mc.setModule(ModuleChoice.Modules.ExpensesSwagger);
 
         mc.getExpensesSwagger().setService(ExpensesSwagger.ExpensesSwaggerServiceChoice.Entries);
-        WorkdayServiceDataSet ds = ConfigHelper.buildServiceDataSet(mc);
         mc.getExpensesSwagger().getEntriesParameters().setExpenseEntryStatus("d5478541ee1b431ab34a28339b40caf5");
+        this.dataset.setModule(mc);
 
         InputConfiguration cfg = new InputConfiguration();
-        cfg.setDataSet(ds);
+        cfg.setDataSet(this.dataset);
 
         final String configStr = SimpleFactory.configurationByExample().forInstance(cfg).configured().toQueryString();
         System.setProperty("talend.beam.job.targetParallelism", "1"); // our code creates one hz lite instance per thread

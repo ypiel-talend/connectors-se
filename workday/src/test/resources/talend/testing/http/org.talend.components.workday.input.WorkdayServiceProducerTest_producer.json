@@ -2,9 +2,7 @@
   {
     "request":{
       "headers":{
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive",
-        "Content-Length":"54",
         "Content-Type":"application/x-www-form-urlencoded"
       },
       "method":"POST",
@@ -16,11 +14,8 @@
         "Referrer-Policy":"origin-when-cross-origin, strict-origin-when-cross-origin",
         "Request-Time":"42",
         "Strict-Transport-Security":"max-age=31536000; includeSubDomains",
-        "X-Content-Type-Options":"nosniff",
         "Content-Security-Policy":"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:",
         "Connection":"keep-alive",
-        "X-Permitted-Cross-Domain-Policies":"master-only",
-        "X-XSS-Protection":"1; mode=block",
         "Content-Length":"70",
         "Content-Type":"application/json"
       },
@@ -31,8 +26,6 @@
   {
     "request":{
       "headers":{
-        "content-length":"0",
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive"
       },
       "method":"GET",
@@ -55,8 +48,6 @@
   {
     "request":{
       "headers":{
-        "content-length":"0",
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive"
       },
       "method":"GET",

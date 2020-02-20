@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,39 +12,37 @@
  */
 package org.talend.components.workday.input;
 
+import javax.json.JsonObject;
+
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.talend.components.workday.WorkdayBaseTest;
 import org.talend.components.workday.dataset.WorkdayServiceDataSet;
 import org.talend.components.workday.dataset.service.input.HumanResourceManagementSwagger;
 import org.talend.components.workday.dataset.service.input.ModuleChoice;
-import org.talend.components.workday.service.ConfigHelper;
 import org.talend.components.workday.service.WorkdayReaderService;
+import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
-import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
-
-import javax.json.JsonObject;
+import org.talend.sdk.component.junit5.WithComponents;
 
 @HttpApi(useSsl = true)
-class WorkdayServiceProducerNextTest {
+@WithComponents("org.talend.components.workday")
+class WorkdayServiceProducerNextTest extends WorkdayBaseTest {
 
-    private static WorkdayServiceDataSet dataset;
+    private WorkdayServiceDataSet dataset;
 
-    private static InputConfiguration cfg;
+    private InputConfiguration cfg;
 
-    private static WorkdayReaderService service;
+    @Service
+    private WorkdayReaderService service;
 
-    @BeforeAll
-    private static void init() throws NoSuchFieldException, IllegalAccessException {
-        WorkdayServiceProducerNextTest.service = ConfigHelper.buildReader();
-
-        WorkdayServiceProducerNextTest.cfg = new InputConfiguration();
+    @BeforeEach
+    private void init() throws NoSuchFieldException, IllegalAccessException {
+        this.cfg = new InputConfiguration();
 
         WorkdayServiceDataSet ds = new WorkdayServiceDataSet();
-
-        ds.setDatastore(ConfigHelper.buildDataStore());
+        ds.setDatastore(this.buildDataStore());
         ModuleChoice mc = new ModuleChoice();
         ds.setModule(mc);
         mc.setModule(ModuleChoice.Modules.HumanResourceManagementSwagger);
@@ -63,16 +61,15 @@ class WorkdayServiceProducerNextTest {
          * ds.getParameters().setResponseSchema(schemaWorker);
          */
 
-        WorkdayServiceProducerNextTest.dataset = ds;
+        this.dataset = ds;
 
-        WorkdayServiceProducerNextTest.cfg.setDataSet(ds);
+        cfg.setDataSet(ds);
     }
 
     @Test
     void nextOK() {
 
-        WorkdayServiceProducer producer = new WorkdayServiceProducer(WorkdayServiceProducerNextTest.cfg,
-                WorkdayServiceProducerNextTest.service);
+        WorkdayServiceProducer producer = new WorkdayServiceProducer(this.cfg, this.service);
 
         JsonObject o = producer.next();
         Assertions.assertNotNull(o);

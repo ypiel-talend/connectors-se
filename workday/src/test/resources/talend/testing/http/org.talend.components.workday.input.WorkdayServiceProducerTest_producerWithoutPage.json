@@ -2,9 +2,7 @@
   {
     "request":{
       "headers":{
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive",
-        "Content-Length":"54",
         "Content-Type":"application/x-www-form-urlencoded"
       },
       "method":"POST",
@@ -16,11 +14,8 @@
         "Referrer-Policy":"origin-when-cross-origin, strict-origin-when-cross-origin",
         "Request-Time":"46",
         "Strict-Transport-Security":"max-age=31536000; includeSubDomains",
-        "X-Content-Type-Options":"nosniff",
         "Content-Security-Policy":"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:",
         "Connection":"keep-alive",
-        "X-Permitted-Cross-Domain-Policies":"master-only",
-        "X-XSS-Protection":"1; mode=block",
         "Content-Length":"70",
         "Content-Type":"application/json"
       },
@@ -32,7 +27,6 @@
     "request":{
       "headers":{
         "content-length":"0",
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive"
       },
       "method":"GET",
@@ -55,8 +49,6 @@
   {
     "request":{
       "headers":{
-        "content-length":"0",
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive"
       },
       "method":"GET",
@@ -67,9 +59,7 @@
         "Transfer-Encoding":"chunked",
         "oms-xo-version":"2019.33.1129.????",
         "Cache-Control":"no-cache",
-        "Instance":"11020 on 443",
         "Connection":"keep-alive",
-        "wd-common-request-id":"ROBOT|785FF340|16F32FF3",
         "Content-Type":"application/json"
       },
       "payload":"{\"total\":1,\"data\":[{\"email\":\"lmcneil@workday.net\",\"fullName\":\"Logan McNeil\",\"timezone\":\"US/Pacific\",\"enablePdfAndExcel\":true,\"instanceID\":\"39$4\",\"locale\":\"en_US\",\"language\":\"en_US\",\"workdayID\":\"3ebe69275f2a41979f43a04d5a61cab3\",\"imageLastUpdated\":\"2009-02-03T11:32:27.483Z\",\"workerID\":\"247$1\",\"currency\":\"USD\",\"userName\":\"lmcneil\"}]}",

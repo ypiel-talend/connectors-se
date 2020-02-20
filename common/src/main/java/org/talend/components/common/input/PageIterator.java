@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -35,6 +35,7 @@ public class PageIterator<T> {
 
     /**
      * function for getting page.
+     * 
      * @param <T> : objects type of pages.
      */
     @FunctionalInterface
@@ -42,6 +43,7 @@ public class PageIterator<T> {
 
         /**
          * Get Iterator for one page
+         * 
          * @param pageNumber : page number.
          * @return iterator for page {pageNumber}, null if over the last.
          */
@@ -95,11 +97,12 @@ public class PageIterator<T> {
 
     /**
      * Process to retrieve page.
+     * 
      * @param <T>
      */
     private static class PageRetriever<T> {
 
-        /**  iterator on current page */
+        /** iterator on current page */
         private Iterator<T> currentPage = null;
 
         private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -109,6 +112,7 @@ public class PageIterator<T> {
 
         /**
          * Build next page.
+         * 
          * @param exe : executor for threads.
          * @param getter : functionnal page getter.
          * @param pageNumber : page number to retrieve.

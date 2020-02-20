@@ -2,9 +2,7 @@
   {
     "request":{
       "headers":{
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive",
-        "Content-Length":"54",
         "Content-Type":"application/x-www-form-urlencoded"
       },
       "method":"POST",
@@ -12,12 +10,9 @@
     },
     "response":{
       "headers":{
-        "X-Frame-Options":"DENY",
         "Referrer-Policy":"origin-when-cross-origin, strict-origin-when-cross-origin",
         "Request-Time":"77",
         "Strict-Transport-Security":"max-age=31536000; includeSubDomains",
-        "X-Content-Type-Options":"nosniff",
-        "Content-Security-Policy":"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:",
         "Connection":"keep-alive",
         "X-Permitted-Cross-Domain-Policies":"master-only",
         "X-XSS-Protection":"1; mode=block",
@@ -32,7 +27,6 @@
     "request":{
       "headers":{
         "content-length":"0",
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive"
       },
       "method":"GET",
@@ -55,8 +49,6 @@
   {
     "request":{
       "headers":{
-        "content-length":"0",
-        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
         "Connection":"keep-alive"
       },
       "method":"GET",
@@ -65,11 +57,9 @@
     "response":{
       "headers":{
         "Transfer-Encoding":"chunked",
-        "oms-xo-version":"2019.33.1129.????",
         "Cache-Control":"no-cache",
         "Instance":"11020 on 443",
         "Connection":"keep-alive",
-        "wd-common-request-id":"ROBOT|958F63CF|16F32FF0",
         "Content-Type":"application/json"
       },
       "payload":"{\"total\":18,\"data\":[{\"expenseItem\":{\"descriptor\":\"Meals\",\"id\":\"6fa902beaa1d45e1be8f9d138bb18869\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"03/12/2012 Del Posto 235.50 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"235.5\"},\"id\":\"1b6452ad64e841aa896d827fc4d21270\",\"date\":\"2012-03-12\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Meals\",\"id\":\"6fa902beaa1d45e1be8f9d138bb18869\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"03/13/2012 Eataly NYC 155.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"155\"},\"id\":\"797da9a8a0334b27b281295f9b36e304\",\"date\":\"2012-03-13\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Lodging\",\"id\":\"3f0b94878d694f5fb8bf2c5d4cc61875\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"03/13/2012 Marriott 268.87 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"268.87\"},\"id\":\"6f6b42ae90114e7da266423d2114648c\",\"date\":\"2012-03-13\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"},\"memo\":\"HOTEL CHARGE DESCRIPTION\"},{\"expenseItem\":{\"descriptor\":\"Airfare\",\"id\":\"c887fe3890954034be2e59f83d6c3c05\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"03/03/2012 American Airlines 455.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"455\"},\"id\":\"76c3208b0a184a4080993e617f71ea1a\",\"date\":\"2012-03-03\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Taxis / Trains / Shuttles\",\"id\":\"959c712ff6e241be9bdd1862f4b46d19\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"03/12/2012 Red Cab 42.50 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"42.5\"},\"id\":\"46800d7d26074b038caf21ae1a417b65\",\"date\":\"2012-03-12\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Car Rental & Fuel\",\"id\":\"bbee73996548419da0926ea0ac708e14\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"02/05/2015 Hertz 104.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"104\"},\"id\":\"b4244982b705902d7c56536fc1e80e8b\",\"date\":\"2015-02-05\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Lodging\",\"id\":\"3f0b94878d694f5fb8bf2c5d4cc61875\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"02/05/2015 Marriott New York 919.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"919\"},\"id\":\"b4244982b705902d7c5652d19faf0e8a\",\"date\":\"2015-02-05\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Airfare\",\"id\":\"c887fe3890954034be2e59f83d6c3c05\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"02/05/2015 United Airlines 575.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"575\"},\"id\":\"b4244982b705902d7c56524ea8370e88\",\"date\":\"2015-02-05\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Meals\",\"id\":\"6fa902beaa1d45e1be8f9d138bb18869\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"10/11/2011 Del Posto 275.50 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"275.5\"},\"id\":\"5f3cbe4bf91546d889579e0c9bbf9849\",\"date\":\"2011-10-11\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Meals\",\"id\":\"6fa902beaa1d45e1be8f9d138bb18869\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"10/10/2011 Eataly NYC 205.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"205\"},\"id\":\"d9899a8f9fb34c06a44553f6fe5c8a3d\",\"date\":\"2011-10-10\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Lodging\",\"id\":\"3f0b94878d694f5fb8bf2c5d4cc61875\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"10/11/2011 Marriott 241.90 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"241.9\"},\"id\":\"dc757ec8e62544dfaa466ef9a53fce87\",\"date\":\"2011-10-11\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"},\"memo\":\"HOTEL CHARGE DESCRIPTION\"},{\"expenseItem\":{\"descriptor\":\"Airfare\",\"id\":\"c887fe3890954034be2e59f83d6c3c05\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"10/01/2011 American Airlines 425.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"425\"},\"id\":\"a64e3b7ad19b4ff2bdc930c28d4d09b6\",\"date\":\"2011-10-01\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Meals\",\"id\":\"6fa902beaa1d45e1be8f9d138bb18869\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"04/12/2012 Del Posto 235.50 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"235.5\"},\"id\":\"20398075fccc4ef59bd3ac628e99392a\",\"date\":\"2012-04-12\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Taxis / Trains / Shuttles\",\"id\":\"959c712ff6e241be9bdd1862f4b46d19\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"10/10/2011 Red Cab 32.50 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"32.5\"},\"id\":\"72d5bee0f294418d84d0d04adbc31da1\",\"date\":\"2011-10-10\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Meals\",\"id\":\"6fa902beaa1d45e1be8f9d138bb18869\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"04/13/2012 Eataly NYC 155.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"155\"},\"id\":\"4a50a7a3a19c4e7caf0d177f60253e42\",\"date\":\"2012-04-13\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Lodging\",\"id\":\"3f0b94878d694f5fb8bf2c5d4cc61875\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"04/13/2012 Marriott 268.87 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"268.87\"},\"id\":\"56e8e4f1846b409399b2fc01b03e802c\",\"date\":\"2012-04-13\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"},\"memo\":\"HOTEL CHARGE DESCRIPTION\"},{\"expenseItem\":{\"descriptor\":\"Airfare\",\"id\":\"c887fe3890954034be2e59f83d6c3c05\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"04/03/2012 American Airlines 455.00 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"455\"},\"id\":\"5480803ecc44408ba0805955b02a8482\",\"date\":\"2012-04-03\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}},{\"expenseItem\":{\"descriptor\":\"Taxis / Trains / Shuttles\",\"id\":\"959c712ff6e241be9bdd1862f4b46d19\"},\"expenseEntryStatus\":{\"descriptor\":\"Paid\",\"id\":\"d5478541ee1b431ab34a28339b40caf5\"},\"descriptor\":\"04/12/2012 Red Cab 42.50 USD\",\"amount\":{\"currency\":\"USD\",\"value\":\"42.5\"},\"id\":\"c40241a1d09240df9e43a3cb64bf056f\",\"date\":\"2012-04-12\",\"entryType\":{\"descriptor\":\"Credit Card Transaction\",\"id\":\"cd152f26446c11de98360015c5e6daf6\"}}]}",
