@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -42,12 +42,10 @@ public class JSonMessageConverter extends MessageConverter {
     }
 
     @Override
-    public Record convertMessage(PubsubMessage message) {
+    public JsonObject convertMessage(PubsubMessage message) {
         InputStream in = new ByteArrayInputStream(getMessageContentAsBytes(message));
         JsonParser parser = Json.createParser(in);
         JsonObject jsonObject = parser.getObject();
-        final Jsonb jsonb = JsonbProvider.provider().create().build();
-        return new RecordConverters().toRecord(new RecordConverters.MappingMetaRegistry(), jsonObject, () -> jsonb,
-                this::getRecordBuilderFactory);
+        return jsonObject;
     }
 }

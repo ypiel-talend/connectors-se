@@ -10,41 +10,35 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.pubsub.input.converter;
+package org.talend.components.pubsub.output.message;
 
 import com.google.pubsub.v1.PubsubMessage;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.talend.components.common.stream.api.RecordIORepository;
 import org.talend.components.pubsub.dataset.PubSubDataSet;
-import org.talend.components.pubsub.input.PubSubInputConfiguration;
 import org.talend.components.pubsub.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.api.service.record.RecordService;
 
-public abstract class MessageConverter {
-
-    @Setter
-    @Getter(value = AccessLevel.PROTECTED)
-    private RecordBuilderFactory recordBuilderFactory;
+public abstract class MessageGenerator {
 
     @Setter
     @Getter(value = AccessLevel.PROTECTED)
     private I18nMessage i18nMessage;
 
-    public void init(PubSubDataSet dataset) {
+    @Setter
+    @Getter(value = AccessLevel.PROTECTED)
+    private RecordService recordService;
 
-    }
+    @Setter
+    @Getter(value = AccessLevel.PROTECTED)
+    private RecordIORepository ioRepository;
+
+    public abstract void init(PubSubDataSet dataset);
+
+    public abstract PubsubMessage generateMessage(Record record);
 
     public abstract boolean acceptFormat(PubSubDataSet.ValueFormat format);
-
-    public abstract Object convertMessage(PubsubMessage message);
-
-    protected final String getMessageContentAsString(PubsubMessage message) {
-        return message == null ? "null" : message.getData().toStringUtf8();
-    }
-
-    protected final byte[] getMessageContentAsBytes(PubsubMessage message) {
-        return message == null ? new byte[] {} : message.getData().toByteArray();
-    }
 }
