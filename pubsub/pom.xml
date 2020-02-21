@@ -10,10 +10,13 @@
 
     <artifactId>pubsub</artifactId>
 
+    <name>Components :: Pub/Sub</name>
+
     <properties>
         <testcontainers.version>1.12.3</testcontainers.version>
         <!-- To run ITs test give the following option to mvn : -Dtest.excluded="" -->
         <test.excluded>IT</test.excluded>
+        <talend.scan.scannedDependencies>org.talend.components:stream-api</talend.scan.scannedDependencies>
     </properties>
 
     <dependencies>
@@ -53,6 +56,11 @@
             <artifactId>component-runtime-manager</artifactId>
             <version>${component-runtime.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.talend.components</groupId>
+            <artifactId>stream-avro</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!-- Testing -->
         <dependency>

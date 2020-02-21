@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -203,6 +203,57 @@ public class PubSubService {
         } catch (IOException e) {
             log.error(i18n.errorCreatePublisher(e.getMessage()), e);
             throw new PubSubConnectorException(i18n.errorCreatePublisher(e.getMessage()));
+        }
+    }
+
+    public boolean createTopicIfNeeded(PubSubDataStore dataStore, String topicId) {
+        try {
+            ProjectTopicName topicName = ProjectTopicName.of(dataStore.getProjectName(), topicId);
+            TopicAdminSettings adminSettings = TopicAdminSettings.newBuilder()
+                    .setCredentialsProvider(() -> createCredentials(dataStore)).build();
+            try (TopicAdminClient topicAdminClient = TopicAdminClient.create(adminSettings)) {
+                try {
+                    Topic topic = topicAdminClient.getTopic(topicName);
+                } catch (ApiException apiEx) {
+                    topicAdminClient.createTopic(topicName);
+                    return true;
+                }
+            }
+        } catch (Exception ioe) {
+            log.warn(i18n.errorCreateTopic(ioe.getMessage()));
+
+        }
+        return false;
+    }
+
+    public Topic loadTopic(PubSubDataStore dataStore, String topicId) {
+        try {
+            TopicAdminSettings adminSettings = TopicAdminSettings.newBuilder()
+                    .setCredentialsProvider(() -> createCredentials(dataStore)).build();
+            try (TopicAdminClient topicAdminClient = TopicAdminClient.create(adminSettings)) {
+                ProjectTopicName topicName = ProjectTopicName.of(dataStore.getProjectName(), topicId);
+                return topicAdminClient.getTopic(topicName);
+            }
+        } catch (Exception e) {
+            log.warn(i18n.errorLoadTopic(e.getMessage()));
+        }
+
+        return null;
+    }
+
+    public void removeTopicIfExists(PubSubDataStore dataStore, String topicId) {
+        try {
+            TopicAdminSettings adminSettings = TopicAdminSettings.newBuilder()
+                    .setCredentialsProvider(() -> createCredentials(dataStore)).build();
+            try (TopicAdminClient topicAdminClient = TopicAdminClient.create(adminSettings)) {
+                ProjectTopicName topicName = ProjectTopicName.of(dataStore.getProjectName(), topicId);
+                Topic topic = topicAdminClient.getTopic(topicName);
+                if (topic != null) {
+                    topicAdminClient.deleteTopic(topicName);
+                }
+            }
+        } catch (IOException ioe) {
+            log.warn(i18n.errorRemoveTopic(ioe.getMessage()));
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -15,12 +15,14 @@ package org.talend.components.pubsub.input.converter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.pubsub.dataset.PubSubDataSet;
 import org.talend.components.pubsub.service.I18nMessage;
+import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.util.Arrays;
 import java.util.Optional;
 
 @Slf4j
+@Service
 public class MessageConverterFactory {
 
     private static final Class<? extends MessageConverter>[] IMPLEMENTATIONS = new Class[] { CSVMessageConverter.class,
@@ -31,7 +33,7 @@ public class MessageConverterFactory {
 
         Optional<? extends MessageConverter> opt = Arrays.stream(IMPLEMENTATIONS).map(c -> {
             try {
-                return c.newInstance();
+                return c.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 return null;

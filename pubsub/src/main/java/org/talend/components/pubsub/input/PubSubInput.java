@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -21,6 +21,7 @@ import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.PullRequest;
 import com.google.pubsub.v1.PullResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.pubsub.input.converter.MessageConverter;
 import org.talend.components.pubsub.input.converter.MessageConverterFactory;
@@ -44,17 +45,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Slf4j
+@RequiredArgsConstructor
 public class PubSubInput implements MessageReceiver, Serializable {
 
     protected final PubSubInputConfiguration configuration;
 
     protected final PubSubService service;
 
-    private final AckMessageService ackMessageService;
+    protected final AckMessageService ackMessageService;
 
     protected final I18nMessage i18n;
 
     protected final RecordBuilderFactory builderFactory;
+
+    protected final MessageConverterFactory messageConverterFactory;
 
     private transient final Queue<PubsubMessage> inbox = new ConcurrentLinkedDeque<>();
 
@@ -66,18 +70,9 @@ public class PubSubInput implements MessageReceiver, Serializable {
 
     private transient MessageConverter messageConverter;
 
-    public PubSubInput(final PubSubInputConfiguration configuration, final PubSubService service,
-            final AckMessageService ackMessageService, final I18nMessage i18n, final RecordBuilderFactory builderFactory) {
-        this.configuration = configuration;
-        this.service = service;
-        this.ackMessageService = ackMessageService;
-        this.i18n = i18n;
-        this.builderFactory = builderFactory;
-    }
-
     @PostConstruct
     public void init() {
-        messageConverter = new MessageConverterFactory().getConverter(configuration.getDataSet(), builderFactory, i18n);
+        messageConverter = messageConverterFactory.getConverter(configuration.getDataSet(), builderFactory, i18n);
         if (configuration.getPullMode() == PubSubInputConfiguration.PullMode.ASYNCHRONOUS) {
             subscriber = service.createSubscriber(configuration.getDataSet().getDataStore(),
                     configuration.getDataSet().getTopic(), configuration.getDataSet().getSubscription(), this);
@@ -92,7 +87,7 @@ public class PubSubInput implements MessageReceiver, Serializable {
     @PreDestroy
     public void release() {
         if (!inbox.isEmpty()) {
-            log.info(i18n.inputReleaseWithMessageInbox(inbox.size()));
+            log.debug(i18n.inputReleaseWithMessageInbox(inbox.size()));
             inbox.stream().map(PubsubMessage::getMessageId).forEach(ackMessageService::removeMessage);
         }
         if (subscriber != null) {
@@ -104,14 +99,14 @@ public class PubSubInput implements MessageReceiver, Serializable {
     }
 
     @Producer
-    public Record next() {
+    public Object next() {
         if (inbox.isEmpty() && configuration.getPullMode() == PubSubInputConfiguration.PullMode.SYNCHRONOUS) {
             pull();
         }
 
         PubsubMessage message = inbox.poll();
 
-        Record record = null;
+        Object record = null;
         if (message != null && (!configuration.isConsumeMsg() || ackMessageService.messageExists(message.getMessageId()))) {
             try {
                 record = messageConverter == null ? null : messageConverter.convertMessage(message);
