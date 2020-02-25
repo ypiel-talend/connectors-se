@@ -22,6 +22,7 @@ import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.action.Validable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
+import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -31,9 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_ACTION_ON_DATA;
-import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_TABLE_COLUMNS_NAMES;
-import static org.talend.components.jdbc.service.UIActionService.ACTION_VALIDATE_SORT_KEYS;
+import static org.talend.components.jdbc.service.UIActionService.*;
 import static org.talend.sdk.component.api.configuration.condition.ActiveIf.EvaluationStrategy.CONTAINS;
 import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.AND;
 import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.OR;
@@ -43,7 +42,7 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
         @GridLayout.Row("varcharLength"), @GridLayout.Row("keys"), @GridLayout.Row("sortStrategy"), @GridLayout.Row("sortKeys"),
         @GridLayout.Row("distributionStrategy"), @GridLayout.Row("distributionKeys"), @GridLayout.Row("ignoreUpdate") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("dataset"),
-        @GridLayout.Row("rewriteBatchedStatements") })
+        @GridLayout.Row("rewriteBatchedStatements"), @GridLayout.Row("chunkSize") })
 @Documentation("Those properties define an output data set for the JDBC output component")
 public class OutputConfig implements Serializable {
 
@@ -119,6 +118,12 @@ public class OutputConfig implements Serializable {
             @ActiveIf(target = "../dataset.connection.handler", evaluationStrategy = CONTAINS, value = { "MySQL" }) })
     @Documentation("Rewrite batched statements, to execute one statement per batch combining values in the sql query")
     private boolean rewriteBatchedStatements = true;
+
+    @Option
+    @ActiveIf(target = "../dataset.connection.dbType", value = "Snowflake")
+    @Documentation("set the max temp file size(byte) for snowflake put and copy command, if meet it, will consume it at once and create new")
+    @Min(0)
+    private long chunkSize = 50 * 1024 * 1024;
 
     public ActionOnData getActionOnData() {
         if (actionOnData == null || actionOnData.isEmpty()) {
