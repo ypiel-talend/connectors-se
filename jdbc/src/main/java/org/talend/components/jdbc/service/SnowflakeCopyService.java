@@ -263,6 +263,7 @@ public class SnowflakeCopyService implements Serializable {
         void close() {
             if (writer != null) {
                 try {
+                    writer.flush();
                     writer.close();
                 } catch (IOException e) {
                     throw new IllegalStateException(e);
