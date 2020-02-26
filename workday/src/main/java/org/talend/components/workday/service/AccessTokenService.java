@@ -19,6 +19,7 @@ import org.talend.components.workday.datastore.Token;
 import org.talend.components.workday.datastore.WorkdayDataStore;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.cache.LocalCache;
+import java.util.Optional;
 
 @Service
 public class AccessTokenService {
