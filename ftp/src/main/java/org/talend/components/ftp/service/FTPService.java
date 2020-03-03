@@ -12,22 +12,18 @@
  */
 package org.talend.components.ftp.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.commons.net.util.TrustManagerUtils;
-import org.slf4j.LoggerFactory;
 import org.talend.components.ftp.datastore.FTPDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Service
