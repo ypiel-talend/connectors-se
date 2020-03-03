@@ -16,16 +16,24 @@ import lombok.Data;
 import org.talend.components.ftp.datastore.FTPDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 
 @Data
 @DataSet("FtpDataset")
-
+@GridLayout({
+        @GridLayout.Row("datastore"),
+        @GridLayout.Row({ "folder"})
+})
 public class FTPDataSet implements Serializable {
 
     @Option
     @Documentation("FTP datastore.")
     private FTPDataStore datastore;
+
+    @Option
+    @Documentation("Folder to work in.")
+    private String folder = "";
 }

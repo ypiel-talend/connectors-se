@@ -23,6 +23,7 @@ import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.PartitionMapper;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -40,6 +41,8 @@ public class FTPPartitionMapper implements Serializable {
 
     protected final FTPService ftpService;
 
+    protected final RecordBuilderFactory recordBuilderFactory;
+
     protected final I18nMessage i18n;
 
     @Assessor
@@ -54,7 +57,7 @@ public class FTPPartitionMapper implements Serializable {
 
     @Emitter
     public FTPInput createSource() {
-        return new FTPInput(configuration, ftpService, i18n);
+        return new FTPInput(configuration, ftpService, recordBuilderFactory, i18n);
     }
 
 }

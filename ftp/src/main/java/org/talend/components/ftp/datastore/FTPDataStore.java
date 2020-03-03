@@ -31,7 +31,11 @@ import java.io.Serializable;
 @Icon(value = Icon.IconType.CUSTOM, custom = "ftp")
 @Checkable(FTPService.ACTION_HEALTH_CHECK)
 @GridLayout({ //
-        @GridLayout.Row({ "host", "port" }), @GridLayout.Row("useCredentials"), @GridLayout.Row({ "username", "password" }) })
+        @GridLayout.Row({ "host", "port", "implicit"}),
+        @GridLayout.Row("useCredentials"),
+        @GridLayout.Row({ "username", "password" }),
+        @GridLayout.Row({ "secure", "trustType", "protocol" }),
+        @GridLayout.Row("active")})
 @Documentation("FTP connection Properties")
 public class FTPDataStore implements Serializable {
 
@@ -58,4 +62,30 @@ public class FTPDataStore implements Serializable {
     @Documentation("FTP password.")
     @Credential
     private String password;
+
+    @Option
+    @Documentation("Should the connection use FTPS.")
+    private boolean secure;
+
+    @Option
+    @Documentation("How to trust server certificates.")
+    @ActiveIf(target = "secure", value = "true")
+    private TrustType trustType = TrustType.VALID;
+
+    @Option
+    @Documentation("Is the connection implicit.")
+    private boolean implicit;
+
+    @Option
+    @Documentation("FTPS protocol.")
+    @ActiveIf(target = "secure", value = "true")
+    private String protocol = "TLS";
+
+    @Option
+    @Documentation("Activate active mode, if false passive mode is used.")
+    private boolean active;
+
+    public enum TrustType {
+        ALL, VALID, NONE
+    }
 }

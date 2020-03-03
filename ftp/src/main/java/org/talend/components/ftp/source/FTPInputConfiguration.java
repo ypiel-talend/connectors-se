@@ -21,12 +21,15 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("dataSet") })
+@GridLayout({ @GridLayout.Row("dataSet"), @GridLayout.Row("debug") })
 @Documentation("Configuration for FTP source")
 public class FTPInputConfiguration implements Serializable {
 
     @Option
     @Documentation("DataSet")
     private FTPDataSet dataSet;
+
+    @Option
+    private boolean debug;
 
 }
