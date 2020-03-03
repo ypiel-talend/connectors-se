@@ -12,20 +12,16 @@
  */
 package org.talend.components.ftp.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+
+import org.apache.commons.net.ftp.FTPClient;
 import org.talend.components.ftp.datastore.FTPDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-import sun.net.ftp.FtpClient;
-import sun.net.ftp.FtpProtocolException;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -41,13 +37,22 @@ public class FTPService {
         if (dataStore.getHost() == null || "".equals(dataStore.getHost().trim())) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.hostRequired());
         }
-
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(dataStore.getHost(), dataStore.getPort());
-        try (FtpClient client = FtpClient.create(inetSocketAddress)) {
-            client.login(dataStore.getUsername(), dataStore.getPassword().toCharArray());
-            client.getStatus(null);
+        FTPClient ftp = new FTPClient();
+        try {
+            ftp.connect(dataStore.getHost(), dataStore.getPort());
+            log.warn("after connect: {}.", ftp.getReplyString());
+            if (!ftp.login(dataStore.getUsername(), dataStore.getPassword())) {
+                log.error("after login: {}.", ftp.getReplyString());
+                return new HealthCheckStatus(HealthCheckStatus.Status.KO, ftp.getReplyString());
+            }
+            log.warn("after login: {}.", ftp.getReplyString());
+            ftp.logout();
+            log.warn("after logout: {}.", ftp.getReplyString());
+            ftp.disconnect();
+            log.warn("after disconnect: {}.", ftp.getReplyString());
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successConnection());
-        } catch (Exception e) {
+        } catch (IOException e) {
+            log.error("Connection failed: {}.", e.getMessage());
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         }
     }
