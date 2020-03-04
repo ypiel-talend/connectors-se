@@ -44,13 +44,6 @@ public class WorkdayReaderService {
     @Service
     private RecordBuilderFactory factory;
 
-    // private final transient SwaggerLoader loader;
-
-    public WorkdayReaderService() {
-        final URL swaggersDirectory = WorkdayReaderService.class.getClassLoader().getResource("swaggers/");
-        // this.loader = new SwaggerLoader(swaggersDirectory.getPath());
-    }
-
     public JsonObject find(WorkdayDataStore datastore, QueryHelper helper, Map<String, Object> queryParams) {
         final Token token = accessToken.findToken(datastore);
         final String authorizeHeader = token.getAuthorizationHeaderValue();
@@ -88,17 +81,6 @@ public class WorkdayReaderService {
         return String.valueOf(originalValue);
     }
 
-    public JsonObject findPage(WorkdayDataStore datastore, QueryHelper helper, int offset, int limit,
-            Map<String, Object> queryParams) {
-        final Map<String, Object> allQueryParams = new HashMap<>();
-        if (queryParams != null) {
-            allQueryParams.putAll(queryParams);
-        }
-        allQueryParams.put("offset", offset);
-        allQueryParams.put("limit", limit);
-        return this.find(datastore, helper, allQueryParams);
-    }
-
     public Iterator<JsonObject> extractIterator(JsonObject result, String arrayName) {
         if (result == null) {
             return Collections.emptyIterator();
@@ -115,50 +97,4 @@ public class WorkdayReaderService {
         return data.stream().map(JsonObject.class::cast).iterator();
     }
 
-    /*
-     * @DynamicValues("workdayModules")
-     * public Values loadModules() {
-     * log.info("loadModules");
-     * return new Values(loader.getModules());
-     * }
-     */
-
-    /*
-     * @Suggestions("workdayServices")
-     * public SuggestionValues loadServices(String module) {
-     * log.info("loadServices for module {}", module);
-     * final List<SuggestionValues.Item> services = loader.findGetServices(module).keySet().stream()
-     * .map((String service) -> new SuggestionValues.Item(service, service))
-     * .sorted(Comparator.comparing(SuggestionValues.Item::getLabel)).collect(Collectors.toList());
-     * 
-     * return new SuggestionValues(false, services);
-     * }
-     */
-
-    /**
-     * @Update("workdayServicesParams")
-     * public WorkdayServiceDataSet.Parameters loadServiceParameter(String module, String service) {
-     * log.info("workdayServicesParams suggestion for {} {}", module, service);
-     * final WorkdayServiceDataSet.Parameters parameters = new WorkdayServiceDataSet.Parameters();
-     * parameters.setParametersList(Collections.emptyList());
-     * 
-     * final Map<String, Schema> responses = this.loader.findGetResponse(module, this.factory);
-     * Schema responseSchema = responses.get(service);
-     * parameters.setResponseSchema(responseSchema);
-     * 
-     * final Map<String, List<WorkdayServiceDataSet.Parameter>> moduleServices = this.loader.findGetServices(module);
-     * if (moduleServices == null) {
-     * log.warn("no module {}", module);
-     * return parameters;
-     * }
-     * final List<WorkdayServiceDataSet.Parameter> serviceParameters = moduleServices.get(service);
-     * if (serviceParameters == null) {
-     * return parameters;
-     * }
-     * log.info("workdayServicesParams : nombre params {}", serviceParameters.size());
-     * parameters.setParametersList(serviceParameters);
-     * 
-     * return parameters;
-     * }
-     */
 }

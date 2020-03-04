@@ -80,6 +80,7 @@ public class PageIterator<T> {
         Iterator<T> c = this.getCurrent().getPageIterator();
         if (c == null) {
             log.info("No more page");
+            this.exe.shutdownNow();
             return null;
         }
         if (!c.hasNext()) {

@@ -31,7 +31,7 @@ import java.util.function.Function;
 @DataSet("WorkdayServiceDataSet")
 @GridLayout({ @GridLayout.Row("datastore"), @GridLayout.Row({ "module" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("datastore") })
-@Documentation("")
+@Documentation("Dataset for workday service")
 public class WorkdayServiceDataSet implements QueryHelper, Serializable {
 
     private static final long serialVersionUID = -9037128911796623682L;
@@ -42,17 +42,7 @@ public class WorkdayServiceDataSet implements QueryHelper, Serializable {
 
     @Option
     @Documentation("module choice")
-    private ModuleChoice module;
-
-    public Schema findResponseSchema(RecordBuilderFactory factory) {
-        /*
-         * final URL swaggersDirectory = WorkdayReaderService.class.getClassLoader().getResource("swaggers/" + this.module);
-         * SwaggerLoader loader = new SwaggerLoader(swaggersDirectory.getPath());
-         * Map<String, Schema> responses = loader.findGetResponse(module, factory);
-         * return responses.get(service);
-         */
-        return null;
-    }
+    private ModuleChoice module = new ModuleChoice();
 
     @Override
     public String getServiceToCall() {

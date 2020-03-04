@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.workday.dataset.WorkdayServiceDataSet;
 import org.talend.components.workday.datastore.Token;
 import org.talend.components.workday.datastore.WorkdayDataStore;
+import org.talend.components.workday.service.WorkdayReaderService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -47,7 +48,6 @@ class WorkdayServiceProducerSerializerTest {
         store.setToken(new Token("123", "auth", Instant.now()));
 
         WorkdayServiceProducer producer = new WorkdayServiceProducer(cfg, null);
-        producer.init();
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         ObjectOutputStream output = new ObjectOutputStream(bytes);

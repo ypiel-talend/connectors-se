@@ -1,0 +1,40 @@
+[
+  {
+    "request":{
+      "headers":{
+        "Connection":"keep-alive"
+      },
+      "method":"POST",
+      "uri":"https://auth.api.workday.com/v1/token"
+    },
+    "response":{
+      "headers":{
+        "Request-Time":"93",
+        "Connection":"keep-alive",
+        "X-Permitted-Cross-Domain-Policies":"master-only",
+        "Content-Type":"application/json"
+      },
+      "payload":"{\"access_token\":\"token.jwt\",\"token_type\":\"Bearer\",\"expires_in\":\"3600\"}",
+      "status":200
+    }
+  },
+  {
+    "request":{
+      "headers":{
+        "Connection":"keep-alive"
+      },
+      "method":"GET",
+      "uri":"https://api.workday.com/common/v1/workers/6dcb8106e8b74b5aabb1fc3ab8ef2b92"
+    },
+    "response":{
+      "headers":{
+        "Transfer-Encoding":"chunked",
+        "Cache-Control":"no-cache",
+        "Connection":"keep-alive",
+        "Content-Type":"application/json"
+      },
+      "payload":"{\"primarySupervisoryOrganization\":{\"descriptor\":\"Global Support - USA Group\",\"id\":\"dd2061e4fd644a95b4fe2df815462b6b\",\"href\":\"https://api.workday.com/common/v1/supervisoryOrganizations/dd2061e4fd644a95b4fe2df815462b6b\"},\"location\":{\"descriptor\":\"Chicago\",\"id\":\"bbe6fe31a26b44d49f42222ca99e0e83\"},\"descriptor\":\"Abby Brennan [C]\",\"dateOfBirth\":\"1982-04-23\",\"supervisoryOrganizationsManaged\":\"https://api.workday.com/api/v1/workers/6dcb8106e8b74b5aabb1fc3ab8ef2b92/supervisoryOrganizationsManaged\",\"primaryWorkAddressText\":\"200 East Randolph Street, Chicago, IL 60605\",\"id\":\"6dcb8106e8b74b5aabb1fc3ab8ef2b92\",\"primaryWorkEmail\":\"abrennan@workday.net\",\"businessTitle\":\"Senior Customer Services Representative\",\"isManager\":false,\"primaryWorkPhone\":\"+1 (773) 721-9821\",\"href\":\"https://api.workday.com/common/v1/workers/6dcb8106e8b74b5aabb1fc3ab8ef2b92\",\"yearsOfService\":\"6\"}",
+      "status":200
+    }
+  }
+]

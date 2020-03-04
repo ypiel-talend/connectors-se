@@ -1,0 +1,41 @@
+[
+  {
+    "request":{
+      "headers":{
+        "Connection":"keep-alive"
+      },
+      "method":"POST",
+      "uri":"https://auth.api.workday.com/v1/token"
+    },
+    "response":{
+      "headers":{
+        "Request-Time":"78",
+        "X-Content-Type-Options":"nosniff",
+        "Connection":"keep-alive",
+        "Content-Length":"70",
+        "Content-Type":"application/json"
+      },
+      "payload":"{\"access_token\":\"token.jwt\",\"token_type\":\"Bearer\",\"expires_in\":\"3600\"}",
+      "status":200
+    }
+  },
+  {
+    "request":{
+      "headers":{
+        "Connection":"keep-alive"
+      },
+      "method":"GET",
+      "uri":"https://api.workday.com/common/v1/userInfo"
+    },
+    "response":{
+      "headers":{
+        "Transfer-Encoding":"chunked",
+        "Cache-Control":"no-cache",
+        "Connection":"keep-alive",
+        "Content-Type":"application/json"
+      },
+      "payload":"{\"total\":1,\"data\":[{\"email\":\"lmcneil@workday.net\",\"fullName\":\"Logan McNeil\",\"timezone\":\"US/Pacific\",\"enablePdfAndExcel\":true,\"instanceID\":\"39$4\",\"locale\":\"en_US\",\"language\":\"en_US\",\"workdayID\":\"3ebe69275f2a41979f43a04d5a61cab3\",\"imageLastUpdated\":\"2009-02-03T11:32:27.483Z\",\"workerID\":\"247$1\",\"currency\":\"USD\",\"userName\":\"lmcneil\"}]}",
+      "status":200
+    }
+  }
+]

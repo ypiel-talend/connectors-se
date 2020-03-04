@@ -35,7 +35,7 @@ public class AccessTokenService {
     }
 
     private boolean isTokenTooOld() {
-        return token.getExpireDate().isAfter(Instant.now().minus(30, ChronoUnit.SECONDS));
+        return token.getExpireDate().isBefore(Instant.now().plus(30, ChronoUnit.SECONDS));
     }
 
     private synchronized void newToken(WorkdayDataStore datastore) {
