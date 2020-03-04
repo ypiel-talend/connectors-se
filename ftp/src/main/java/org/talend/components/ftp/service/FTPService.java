@@ -13,6 +13,7 @@
 package org.talend.components.ftp.service;
 
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.commons.net.util.TrustManagerUtils;
 import org.talend.components.ftp.datastore.FTPDataStore;
@@ -40,13 +41,13 @@ public class FTPService implements Serializable {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.hostRequired());
         }
 
-        FTPClient ftpClient = null;
+        FTPClient ftpClient = getClient(dataStore);
         try {
-            ftpClient = getClient(dataStore);
-            if (ftpClient.sendNoOp()) {
+            if (ftpClient.isConnected()) {
                 return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successConnection());
+            } else {
+                return new HealthCheckStatus(HealthCheckStatus.Status.KO, "Not connected");
             }
-            return new HealthCheckStatus(HealthCheckStatus.Status.KO, "NOOP");
         } catch (Exception e) {
             e.printStackTrace();
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
@@ -68,20 +69,32 @@ public class FTPService implements Serializable {
         } else {
             FTPSClient ftps = new FTPSClient(dataStore.getProtocol(), dataStore.isImplicit());
             switch (dataStore.getTrustType()) {
-                case ALL:
-                    ftps.setTrustManager(TrustManagerUtils.getAcceptAllTrustManager());
-                    break;
-                case VALID:
-                    ftps.setTrustManager(TrustManagerUtils.getValidateServerCertificateTrustManager());
-                    break;
-                case NONE:
-                    ftps.setTrustManager(null);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported trust type: " + dataStore.getTrustType());
+            case ALL:
+                ftps.setTrustManager(TrustManagerUtils.getAcceptAllTrustManager());
+                break;
+            case VALID:
+                ftps.setTrustManager(TrustManagerUtils.getValidateServerCertificateTrustManager());
+                break;
+            case NONE:
+                ftps.setTrustManager(null);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported trust type: " + dataStore.getTrustType());
             }
             ftpClient = ftps;
         }
+
+        if (dataStore.getDateFormat() != null && !"".equals(dataStore.getDateFormat().trim())
+                && dataStore.getRecentDateFormat() != null && !"".equals(dataStore.getRecentDateFormat().trim())) {
+            final FTPClientConfig config = new FTPClientConfig();
+            config.setDefaultDateFormatStr(dataStore.getDateFormat());
+            config.setDefaultDateFormatStr(dataStore.getRecentDateFormat());
+            ftpClient.configure(config);
+        }
+
+        ftpClient.setControlKeepAliveTimeout(dataStore.getKeepAliveTimeout());
+        ftpClient.setControlKeepAliveReplyTimeout(dataStore.getKeepAliveReplyTimeout());
+
         try {
             ftpClient.connect(dataStore.getHost(), dataStore.getPort());
             if (dataStore.isUseCredentials()) {
@@ -92,6 +105,7 @@ public class FTPService implements Serializable {
             } else {
                 ftpClient.enterLocalPassiveMode();
             }
+
             return ftpClient;
         } catch (Exception e) {
             e.printStackTrace();

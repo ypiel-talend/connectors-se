@@ -23,10 +23,10 @@ import java.io.Serializable;
 
 @Data
 @DataSet("FtpDataset")
-@GridLayout({
-        @GridLayout.Row("datastore"),
-        @GridLayout.Row({ "folder"})
-})
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("datastore"), @GridLayout.Row({ "folder" }),
+        @GridLayout.Row({ "filePrefix" }) })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("listHiddenFiles"), @GridLayout.Row("binary"),
+        @GridLayout.Row("encoding") })
 public class FTPDataSet implements Serializable {
 
     @Option
@@ -36,4 +36,20 @@ public class FTPDataSet implements Serializable {
     @Option
     @Documentation("Folder to work in.")
     private String folder = "";
+
+    @Option
+    @Documentation("File prefix filter")
+    private String filePrefix;
+
+    @Option
+    @Documentation("Should hidden files be listed.")
+    private boolean listHiddenFiles = false;
+
+    @Option
+    @Documentation("Activate binary mode, if false ascii mode is used.")
+    private boolean binary;
+
+    @Option
+    @Documentation("Control encoding.")
+    private String encoding = "ISO-8859-1";
 }

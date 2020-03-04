@@ -20,6 +20,7 @@ import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
+import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -30,12 +31,12 @@ import java.io.Serializable;
 @Data
 @Icon(value = Icon.IconType.CUSTOM, custom = "ftp")
 @Checkable(FTPService.ACTION_HEALTH_CHECK)
-@GridLayout({ //
-        @GridLayout.Row({ "host", "port", "implicit"}),
-        @GridLayout.Row("useCredentials"),
-        @GridLayout.Row({ "username", "password" }),
-        @GridLayout.Row({ "secure", "trustType", "protocol" }),
-        @GridLayout.Row("active")})
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "host", "port", "implicit" }),
+        @GridLayout.Row("useCredentials"), @GridLayout.Row({ "username", "password" }),
+        @GridLayout.Row({ "secure", "trustType", "protocol" }), @GridLayout.Row("active") })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("fileSystemSeparator"),
+        @GridLayout.Row("keepAliveTimeout"), @GridLayout.Row("keepAliveReplyTimeout"), @GridLayout.Row("dateFormat"),
+        @GridLayout.Row("recentDateFormat") })
 @Documentation("FTP connection Properties")
 public class FTPDataStore implements Serializable {
 
@@ -85,7 +86,32 @@ public class FTPDataStore implements Serializable {
     @Documentation("Activate active mode, if false passive mode is used.")
     private boolean active;
 
+    @Option
+    @Documentation("The file system separator.")
+    @DefaultValue("/")
+    private String fileSystemSeparator = "/";
+
+    @Option
+    @Documentation("How long to wait before sending another control keep-alive message.")
+    @DefaultValue("5000")
+    private int keepAliveTimeout = 5000;
+
+    @Option
+    @Documentation("How long to wait (ms) for keepalive message replies before continuing.")
+    @DefaultValue("1000")
+    private int keepAliveReplyTimeout = 1000;
+
+    @Option
+    @Documentation("Date format.")
+    private String dateFormat;
+
+    @Option
+    @Documentation("Recent date format.")
+    private String recentDateFormat;
+
     public enum TrustType {
-        ALL, VALID, NONE
+        ALL,
+        VALID,
+        NONE
     }
 }

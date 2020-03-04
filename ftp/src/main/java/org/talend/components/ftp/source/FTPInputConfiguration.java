@@ -30,6 +30,7 @@ public class FTPInputConfiguration implements Serializable {
     private FTPDataSet dataSet;
 
     @Option
+    @Documentation("Enable debug mode")
     private boolean debug;
 
 }

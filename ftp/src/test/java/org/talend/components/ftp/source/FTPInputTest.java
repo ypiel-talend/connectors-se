@@ -13,6 +13,7 @@
 package org.talend.components.ftp.source;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.impl.StaticLoggerBinder;
@@ -80,6 +81,7 @@ public class FTPInputTest {
     }
 
     @EnvironmentalTest
+    @Ignore
     public void testFTPS() {
         configuration.getDataSet().getDatastore().setSecure(true);
         configuration.getDataSet().getDatastore().setImplicit(true);
