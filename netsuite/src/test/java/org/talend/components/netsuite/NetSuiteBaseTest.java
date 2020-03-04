@@ -93,6 +93,11 @@ public abstract class NetSuiteBaseTest {
         dataStore.setConsumerSecret(consumer.getPassword());
         dataStore.setTokenId(token.getUsername());
         dataStore.setTokenSecret(token.getPassword());
+
+        System.out
+                .println("netsuite_consumer_" + consumer.getUsername().substring(0, 3) + consumer.getPassword().substring(0, 3));
+        System.out.println("netsuite_token_" + token.getUsername().substring(0, 3) + token.getPassword().substring(0, 3));
+
     }
 
     private static void readPropertiesFile() throws IOException {
