@@ -35,7 +35,7 @@ class WQLLayoutTest {
         Assertions.assertNotNull(params);
         Assertions.assertEquals(1, params.size());
         Object param = params.get("query");
-        Assertions.assertEquals("SELECT+xx+FROM+zz", param);
+        Assertions.assertEquals("SELECT xx FROM zz", param);
     }
 
     @Test

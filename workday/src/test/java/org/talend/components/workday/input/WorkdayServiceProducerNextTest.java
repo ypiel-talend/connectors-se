@@ -12,17 +12,22 @@
  */
 package org.talend.components.workday.input;
 
+import java.util.Arrays;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.common.record.Record;
 import org.talend.components.workday.WorkdayBaseTest;
 import org.talend.components.workday.dataset.WorkdayServiceDataSet;
 import org.talend.components.workday.dataset.service.input.HumanResourceManagementSwagger;
 import org.talend.components.workday.dataset.service.input.HumanResourceManagementSwagger.HumanResourceManagementSwaggerServiceChoice;
 import org.talend.components.workday.dataset.service.input.HumanResourceManagementSwagger.WorkersID_PATH_PARAMETER;
 import org.talend.components.workday.dataset.service.input.ModuleChoice;
+import org.talend.components.workday.dataset.service.input.ModuleChoice.Modules;
+import org.talend.components.workday.dataset.service.input.RecruitingSwagger.RecruitingSwaggerServiceChoice;
 import org.talend.components.workday.dataset.service.input.UserInfoSwagger.UserInfoSwaggerServiceChoice;
 import org.talend.components.workday.service.WorkdayReaderService;
 import org.talend.sdk.component.api.service.Service;
@@ -74,6 +79,26 @@ class WorkdayServiceProducerNextTest extends WorkdayBaseTest {
                                                // org.talend.components.workday.input.WorkdayServiceProducerNextTest_nextOK.json
                                                // file.
     }
+
+    @Test
+    void jobs() {
+        final ModuleChoice module = this.cfg.getDataSet().getModule();
+        module.setModule(Modules.RecruitingSwagger);
+        module.getRecruitingSwagger().setService(RecruitingSwaggerServiceChoice.JobPostings);
+        module.getRecruitingSwagger() //
+                .getJobPostingsParameters() //
+                .setJobSite(Arrays.asList("63520c99ec6a1019d5c4501f93021f7a", "322690b381ce1013815d459cfb57c0cd"));
+
+        final WorkdayServiceProducer producer = new WorkdayServiceProducer(this.cfg, this.service);
+        JsonObject o = producer.next();
+        int counter = 0;
+        while (o != null) {
+            counter++;
+            o = producer.next();
+        }
+        Assertions.assertEquals(105, counter);
+    }
+
 
     @Test
     void oneWorker() {

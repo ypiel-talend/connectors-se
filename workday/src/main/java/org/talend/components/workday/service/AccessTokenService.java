@@ -39,6 +39,8 @@ public class AccessTokenService {
     }
 
     private synchronized void newToken(WorkdayDataStore datastore) {
-        this.token = service.getAccessToken(datastore);
+        if (this.token == null || this.isTokenTooOld()) {
+            this.token = service.getAccessToken(datastore);
+        }
     }
 }

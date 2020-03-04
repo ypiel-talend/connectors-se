@@ -11,15 +11,6 @@
     },
     "response":{
       "headers":{
-        "X-Frame-Options":"DENY",
-        "Referrer-Policy":"origin-when-cross-origin, strict-origin-when-cross-origin",
-        "Request-Time":"85",
-        "Strict-Transport-Security":"max-age=31536000; includeSubDomains",
-        "X-Content-Type-Options":"nosniff",
-        "Content-Security-Policy":"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:",
-        "Connection":"keep-alive",
-        "X-Permitted-Cross-Domain-Policies":"master-only",
-        "X-XSS-Protection":"1; mode=block",
         "Content-Length":"69",
         "Content-Type":"application/json"
       },
