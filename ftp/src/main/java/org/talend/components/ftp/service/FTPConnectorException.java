@@ -12,33 +12,21 @@
  */
 package org.talend.components.ftp.service;
 
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
+public class FTPConnectorException extends RuntimeException {
 
-import java.io.Writer;
-
-@RequiredArgsConstructor
-public class LogWriter extends Writer {
-
-    private final Logger log;
-
-    private final StringBuilder buffer = new StringBuilder();
-
-    @Override
-    public void write(final char[] cbuf, final int off, final int len) {
-        buffer.append(cbuf, off, len);
+    public FTPConnectorException() {
+        super();
     }
 
-    @Override
-    public void flush() {
-        if (buffer.length() > 0) {
-            log.info(buffer.toString());
-            buffer.setLength(0);
-        }
+    public FTPConnectorException(String msg) {
+        super(msg);
     }
 
-    @Override
-    public void close() {
-        flush();
+    public FTPConnectorException(Throwable cause) {
+        super(cause);
+    }
+
+    public FTPConnectorException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

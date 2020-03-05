@@ -83,7 +83,6 @@ public class FTPInputTest {
     @EnvironmentalTest
     @Ignore
     public void testFTPS() {
-        configuration.getDataSet().getDatastore().setSecure(true);
         configuration.getDataSet().getDatastore().setImplicit(true);
         configuration.getDataSet().getDatastore().setProtocol("SSL");
         configuration.getDataSet().getDatastore().setTrustType(FTPDataStore.TrustType.ALL);

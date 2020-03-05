@@ -14,6 +14,7 @@ package org.talend.components.ftp.dataset;
 
 import lombok.Data;
 import org.talend.components.ftp.datastore.FTPDataStore;
+import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -23,6 +24,7 @@ import java.io.Serializable;
 
 @Data
 @DataSet("FtpDataset")
+@Icon(value = Icon.IconType.CUSTOM, custom = "ftp")
 @GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("datastore"), @GridLayout.Row({ "folder" }),
         @GridLayout.Row({ "filePrefix" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("listHiddenFiles"), @GridLayout.Row("binary"),

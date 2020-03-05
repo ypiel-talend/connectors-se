@@ -20,4 +20,12 @@ public interface I18nMessage {
     String hostRequired();
 
     String successConnection();
+
+    String warnCannotDisconnect(String message);
+
+    String statusNotConnected();
+
+    String errorConnection(String message);
+
+    String errorListFiles(String message);
 }

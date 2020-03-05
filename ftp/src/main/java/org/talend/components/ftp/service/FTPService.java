@@ -17,6 +17,8 @@ import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.commons.net.util.TrustManagerUtils;
 import org.talend.components.ftp.datastore.FTPDataStore;
+import org.talend.components.ftp.service.ftpclient.FTPClientFactory;
+import org.talend.components.ftp.service.ftpclient.GenericFTPClient;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
@@ -35,82 +37,38 @@ public class FTPService implements Serializable {
     @Service
     private I18nMessage i18n;
 
+    @Service
+    private FTPClientFactory ftpClientFactory;
+
     @HealthCheck(ACTION_HEALTH_CHECK)
     public HealthCheckStatus validateDataStore(@Option final FTPDataStore dataStore) {
         if (dataStore.getHost() == null || "".equals(dataStore.getHost().trim())) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.hostRequired());
         }
 
-        FTPClient ftpClient = getClient(dataStore);
+        GenericFTPClient ftpClient = getClient(dataStore);
         try {
             if (ftpClient.isConnected()) {
                 return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successConnection());
             } else {
-                return new HealthCheckStatus(HealthCheckStatus.Status.KO, "Not connected");
+                return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.statusNotConnected());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         } finally {
-            if (ftpClient != null) {
-                try {
-                    ftpClient.disconnect();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            ftpClient.disconnect();
         }
     }
 
-    public FTPClient getClient(FTPDataStore dataStore) {
-        FTPClient ftpClient = null;
-        if (!dataStore.isSecure()) {
-            ftpClient = new FTPClient();
-        } else {
-            FTPSClient ftps = new FTPSClient(dataStore.getProtocol(), dataStore.isImplicit());
-            switch (dataStore.getTrustType()) {
-            case ALL:
-                ftps.setTrustManager(TrustManagerUtils.getAcceptAllTrustManager());
-                break;
-            case VALID:
-                ftps.setTrustManager(TrustManagerUtils.getValidateServerCertificateTrustManager());
-                break;
-            case NONE:
-                ftps.setTrustManager(null);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unsupported trust type: " + dataStore.getTrustType());
-            }
-            ftpClient = ftps;
+    public GenericFTPClient getClient(FTPDataStore dataStore) {
+        GenericFTPClient ftpClient = ftpClientFactory.getClient(dataStore);
+        ftpClient.connect(dataStore.getHost(), dataStore.getPort());
+        if (dataStore.isUseCredentials()) {
+            ftpClient.auth(dataStore.getUsername(), dataStore.getPassword());
         }
-
-        if (dataStore.getDateFormat() != null && !"".equals(dataStore.getDateFormat().trim())
-                && dataStore.getRecentDateFormat() != null && !"".equals(dataStore.getRecentDateFormat().trim())) {
-            final FTPClientConfig config = new FTPClientConfig();
-            config.setDefaultDateFormatStr(dataStore.getDateFormat());
-            config.setDefaultDateFormatStr(dataStore.getRecentDateFormat());
-            ftpClient.configure(config);
-        }
-
-        ftpClient.setControlKeepAliveTimeout(dataStore.getKeepAliveTimeout());
-        ftpClient.setControlKeepAliveReplyTimeout(dataStore.getKeepAliveReplyTimeout());
-
-        try {
-            ftpClient.connect(dataStore.getHost(), dataStore.getPort());
-            if (dataStore.isUseCredentials()) {
-                ftpClient.login(dataStore.getUsername(), dataStore.getPassword());
-            }
-            if (dataStore.isActive()) {
-                ftpClient.enterLocalActiveMode();
-            } else {
-                ftpClient.enterLocalPassiveMode();
-            }
-
-            return ftpClient;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        ftpClient.afterAuth(dataStore);
+        return ftpClient;
     }
 
 }

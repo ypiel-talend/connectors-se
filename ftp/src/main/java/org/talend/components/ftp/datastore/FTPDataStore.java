@@ -31,14 +31,19 @@ import java.io.Serializable;
 @Data
 @Icon(value = Icon.IconType.CUSTOM, custom = "ftp")
 @Checkable(FTPService.ACTION_HEALTH_CHECK)
-@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "host", "port", "implicit" }),
-        @GridLayout.Row("useCredentials"), @GridLayout.Row({ "username", "password" }),
-        @GridLayout.Row({ "secure", "trustType", "protocol" }), @GridLayout.Row("active") })
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("fileProtocol"),
+        @GridLayout.Row({ "host", "port", "implicit" }), @GridLayout.Row("useCredentials"),
+        @GridLayout.Row({ "username", "password" }), @GridLayout.Row({ "trustType", "protocol" }), @GridLayout.Row("active") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("fileSystemSeparator"),
         @GridLayout.Row("keepAliveTimeout"), @GridLayout.Row("keepAliveReplyTimeout"), @GridLayout.Row("dateFormat"),
         @GridLayout.Row("recentDateFormat") })
 @Documentation("FTP connection Properties")
 public class FTPDataStore implements Serializable {
+
+    @Option
+    @Documentation("Type of protocol to use to connect")
+    @DefaultValue("FTP")
+    private FileProtocol fileProtocol = FileProtocol.FTP;
 
     @Option
     @Required
@@ -65,12 +70,8 @@ public class FTPDataStore implements Serializable {
     private String password;
 
     @Option
-    @Documentation("Should the connection use FTPS.")
-    private boolean secure;
-
-    @Option
     @Documentation("How to trust server certificates.")
-    @ActiveIf(target = "secure", value = "true")
+    @ActiveIf(target = "fileProtocol", value = "FTPS")
     private TrustType trustType = TrustType.VALID;
 
     @Option
@@ -79,7 +80,7 @@ public class FTPDataStore implements Serializable {
 
     @Option
     @Documentation("FTPS protocol.")
-    @ActiveIf(target = "secure", value = "true")
+    @ActiveIf(target = "fileProtocol", value = "FTPS")
     private String protocol = "TLS";
 
     @Option
@@ -113,5 +114,11 @@ public class FTPDataStore implements Serializable {
         ALL,
         VALID,
         NONE
+    }
+
+    public enum FileProtocol {
+        FTP,
+        FTPS,
+        SFTP
     }
 }

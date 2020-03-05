@@ -21,6 +21,7 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.input.Assessor;
 import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.PartitionMapper;
+import org.talend.sdk.component.api.input.PartitionSize;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -51,7 +52,7 @@ public class FTPPartitionMapper implements Serializable {
     }
 
     @Split
-    public List<FTPPartitionMapper> split() {
+    public List<FTPPartitionMapper> split(@PartitionSize final long bundleSize) {
         return Collections.singletonList(this);
     }
 

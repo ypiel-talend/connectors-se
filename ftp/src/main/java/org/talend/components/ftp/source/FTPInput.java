@@ -14,22 +14,19 @@ package org.talend.components.ftp.source;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.talend.components.ftp.service.FTPService;
 import org.talend.components.ftp.service.I18nMessage;
-import org.talend.components.ftp.service.LogWriter;
+import org.talend.components.ftp.service.ftpclient.GenericFTPClient;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PreDestroy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 
 @Slf4j
@@ -46,59 +43,53 @@ public class FTPInput implements Serializable {
 
     private transient Iterator<FTPFile> fileIterator;
 
-    private transient FTPClient ftpClient;
+    private transient GenericFTPClient ftpClient;
 
     @Producer
     public Object next() {
         if (fileIterator == null) {
-            ftpClient = getFtpClient();
-            if (configuration.isDebug()) {
-                ftpClient.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(new LogWriter(log)), true));
-            }
-            ftpClient.setControlEncoding(configuration.getDataSet().getEncoding());
-            ftpClient.setListHiddenFiles(configuration.getDataSet().isListHiddenFiles());
+            GenericFTPClient currentClient = getFtpClient();
             try {
                 String filePrefix = configuration.getDataSet().getFilePrefix() != null
                         ? configuration.getDataSet().getFilePrefix()
                         : "";
-                FTPFile[] files = ftpClient.listFiles(configuration.getDataSet().getFolder(),
-                        f -> f.isFile() && f.getName().startsWith(filePrefix));
+                FTPFile[] files = currentClient.listFiles(configuration.getDataSet().getFolder(),
+                        f -> ((FTPFile) f).isFile() && f.getName().startsWith(filePrefix));
                 fileIterator = Arrays.asList(files).iterator();
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             } finally {
-                try {
-                    ftpClient.disconnect();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                currentClient.disconnect();
             }
         }
 
         if (fileIterator.hasNext()) {
             FTPFile file = fileIterator.next();
             final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            try {
-                String path = configuration.getDataSet().getFolder() + (configuration.getDataSet().getFolder()
-                        .endsWith(configuration.getDataSet().getDatastore().getFileSystemSeparator()) ? ""
-                                : configuration.getDataSet().getDatastore().getFileSystemSeparator())
-                        + file.getName();
-                getFtpClient().retrieveFile(path, buffer);
-                return recordBuilderFactory.newRecordBuilder().withString("name", file.getName()).withLong("size", file.getSize())
-                        .withBytes("content", buffer.toByteArray()).build();
-            } catch (IOException ioe) {
-                log.error(ioe.getMessage(), ioe);
-            }
+
+            String path = configuration.getDataSet().getFolder() + (configuration.getDataSet().getFolder()
+                    .endsWith(configuration.getDataSet().getDatastore().getFileSystemSeparator()) ? ""
+                            : configuration.getDataSet().getDatastore().getFileSystemSeparator())
+                    + file.getName();
+            getFtpClient().retrieveFile(path, buffer);
+            return recordBuilderFactory.newRecordBuilder().withString("name", file.getName()).withLong("size", file.getSize())
+                    .withBytes("content", buffer.toByteArray()).build();
+
         }
 
         return null;
     }
 
-    private FTPClient getFtpClient() {
+    private GenericFTPClient getFtpClient() {
         if (ftpClient == null || !ftpClient.isConnected()) {
             log.debug("Creating new client");
             ftpClient = ftpService.getClient(configuration.getDataSet().getDatastore());
+            if (configuration.isDebug()) {
+                ftpClient.enableDebug(log);
+            }
+
+            ftpClient.configure(configuration);
         }
 
         return ftpClient;
@@ -107,11 +98,7 @@ public class FTPInput implements Serializable {
     @PreDestroy
     public void release() {
         if (ftpClient != null) {
-            try {
-                ftpClient.disconnect();
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
+            ftpClient.disconnect();
         }
     }
 
