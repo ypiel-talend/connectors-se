@@ -18,7 +18,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.6.2-SNAPSHOT</version>
+    <version>1.6.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Components</name>
@@ -74,8 +74,8 @@
     </distributionManagement>
 
     <properties>
-        <connectors-test-bom.version>1.6.2-SNAPSHOT</connectors-test-bom.version>
-        <common.version>1.6.2-SNAPSHOT</common.version>
+        <connectors-test-bom.version>1.6.3-SNAPSHOT</connectors-test-bom.version>
+        <common.version>1.6.3-SNAPSHOT</common.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
