@@ -25,6 +25,7 @@ import org.talend.components.ftp.source.FTPInputConfiguration;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.function.Predicate;
 
 public abstract class GenericFTPClient {
@@ -45,7 +46,7 @@ public abstract class GenericFTPClient {
 
     public abstract void enableDebug(Logger log);
 
-    public abstract FTPFile[] listFiles(String path, Predicate<FTPFile> filter);
+    public abstract List<GenericFTPFile> listFiles(String path, Predicate<GenericFTPFile> filter);
 
     public abstract void retrieveFile(String path, OutputStream out);
 

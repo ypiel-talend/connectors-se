@@ -29,16 +29,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
 /**
  * FTP client for FTP and FTPS
  */
 public class ApacheFTPClient extends GenericFTPClient {
 
     private FTPClient ftpClient;
+
+    private ApacheFTPClient() {
+
+    }
 
     public static ApacheFTPClient createFTP(FTPDataStore dataStore) {
         FTPClient ftpClient = ftpClient = new FTPClient();
@@ -124,7 +130,7 @@ public class ApacheFTPClient extends GenericFTPClient {
 
     @Override
     public boolean isConnected() {
-        return ftpClient == null ? false : ftpClient.isConnected();
+        return ftpClient != null && ftpClient.isConnected();
     }
 
     @Override
@@ -144,13 +150,24 @@ public class ApacheFTPClient extends GenericFTPClient {
     }
 
     @Override
-    public FTPFile[] listFiles(String path, Predicate<FTPFile> filter) {
+    public List<GenericFTPFile> listFiles(String path, Predicate<GenericFTPFile> filter) {
         try {
-            return ftpClient.listFiles(path, f -> filter.test(f));
+            FTPFile[] files = ftpClient.listFiles(path);
+            return Arrays.stream(files).map(this::toGenericFTPFile).filter(filter::test).collect(Collectors.toList());
         } catch (IOException ioe) {
             log.error(getI18n().errorListFiles(ioe.getMessage()));
             return null;
         }
+    }
+
+    private <R> GenericFTPFile toGenericFTPFile(FTPFile ftpFile) {
+        GenericFTPFile genericFTPFile = new GenericFTPFile();
+
+        genericFTPFile.setName(ftpFile.getName());
+        genericFTPFile.setDirectory(ftpFile.isDirectory());
+        genericFTPFile.setSize(ftpFile.getSize());
+
+        return genericFTPFile;
     }
 
     @Override

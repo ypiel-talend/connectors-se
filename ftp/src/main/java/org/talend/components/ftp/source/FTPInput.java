@@ -19,6 +19,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.talend.components.ftp.service.FTPService;
 import org.talend.components.ftp.service.I18nMessage;
 import org.talend.components.ftp.service.ftpclient.GenericFTPClient;
+import org.talend.components.ftp.service.ftpclient.GenericFTPFile;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class FTPInput implements Serializable {
 
     protected final I18nMessage i18n;
 
-    private transient Iterator<FTPFile> fileIterator;
+    private transient Iterator<GenericFTPFile> fileIterator;
 
     private transient GenericFTPClient ftpClient;
 
@@ -53,9 +55,9 @@ public class FTPInput implements Serializable {
                 String filePrefix = configuration.getDataSet().getFilePrefix() != null
                         ? configuration.getDataSet().getFilePrefix()
                         : "";
-                FTPFile[] files = currentClient.listFiles(configuration.getDataSet().getFolder(),
-                        f -> ((FTPFile) f).isFile() && f.getName().startsWith(filePrefix));
-                fileIterator = Arrays.asList(files).iterator();
+                List<GenericFTPFile> files = currentClient.listFiles(configuration.getDataSet().getFolder(),
+                        f -> !(((GenericFTPFile) f).isDirectory()) && f.getName().startsWith(filePrefix));
+                fileIterator = files.iterator();
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -65,7 +67,7 @@ public class FTPInput implements Serializable {
         }
 
         if (fileIterator.hasNext()) {
-            FTPFile file = fileIterator.next();
+            GenericFTPFile file = fileIterator.next();
             final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
             String path = configuration.getDataSet().getFolder() + (configuration.getDataSet().getFolder()

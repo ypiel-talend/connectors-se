@@ -33,7 +33,7 @@ public class FTPClientFactory {
             ftpClient = ApacheFTPClient.createFTPS(datastore);
             break;
         case SFTP:
-            ftpClient = JschFTPClient.create(datastore);
+            ftpClient = JschFTPSClient.create(datastore);
             break;
         default:
             throw new FTPConnectorException("Unknown File protocol : " + datastore.getFileProtocol());

@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.slf4j.impl.StaticLoggerBinder;
 import org.talend.components.ftp.dataset.FTPDataSet;
 import org.talend.components.ftp.datastore.FTPDataStore;
@@ -81,12 +82,31 @@ public class FTPInputTest {
     }
 
     @EnvironmentalTest
-    @Ignore
+    @Disabled // Need fixing
     public void testFTPS() {
+        configuration.getDataSet().getDatastore().setFileProtocol(FTPDataStore.FileProtocol.FTPS);
         configuration.getDataSet().getDatastore().setImplicit(true);
         configuration.getDataSet().getDatastore().setProtocol("SSL");
         configuration.getDataSet().getDatastore().setTrustType(FTPDataStore.TrustType.ALL);
         configuration.getDataSet().getDatastore().setPort(990);
+        configuration.getDataSet().getDatastore().setActive(false);
+        final String configStr = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
+
+        Job.components().component("source", "FTP://FTPInput?" + configStr).component("target", "test://collector").connections()
+                .from("source").to("target").build().run();
+
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
+
+        Assertions.assertNotNull(records);
+        Assertions.assertNotEquals(0, records.size(), "No record in result");
+        log.info(records.toString());
+    }
+
+    @EnvironmentalTest
+    public void testSFTP() {
+        configuration.getDataSet().getDatastore().setFileProtocol(FTPDataStore.FileProtocol.SFTP);
+        configuration.getDataSet().getDatastore().setTrustType(FTPDataStore.TrustType.ALL);
+        configuration.getDataSet().getDatastore().setPort(22);
         configuration.getDataSet().getDatastore().setActive(false);
         final String configStr = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
