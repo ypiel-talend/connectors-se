@@ -85,7 +85,6 @@ public class FTPInputTest {
     @Disabled // Need fixing
     public void testFTPS() {
         configuration.getDataSet().getDatastore().setFileProtocol(FTPDataStore.FileProtocol.FTPS);
-        configuration.getDataSet().getDatastore().setImplicit(true);
         configuration.getDataSet().getDatastore().setProtocol("SSL");
         configuration.getDataSet().getDatastore().setTrustType(FTPDataStore.TrustType.ALL);
         configuration.getDataSet().getDatastore().setPort(990);
