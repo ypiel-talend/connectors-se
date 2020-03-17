@@ -107,7 +107,7 @@ public class JschFTPSClient extends GenericFTPClient {
     @Override
     public void connect(String host, int port) {
         this.host = host;
-        this.port = port <=0 ? DEFAULT_SFTP_PORT : port;
+        this.port = port <= 0 ? DEFAULT_SFTP_PORT : port;
     }
 
     @Override

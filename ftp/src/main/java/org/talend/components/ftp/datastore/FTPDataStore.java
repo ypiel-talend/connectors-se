@@ -32,9 +32,9 @@ import java.io.Serializable;
 @Data
 @Icon(value = Icon.IconType.CUSTOM, custom = "ftp")
 @Checkable(FTPService.ACTION_HEALTH_CHECK)
-@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("fileProtocol"),
-        @GridLayout.Row({ "host", "port", "implicit" }), @GridLayout.Row("useCredentials"),
-        @GridLayout.Row({ "username", "password" }), @GridLayout.Row({ "trustType", "protocol" }), @GridLayout.Row("active") })
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("fileProtocol"), @GridLayout.Row({ "host", "port" }),
+        @GridLayout.Row("useCredentials"), @GridLayout.Row({ "username", "password" }),
+        @GridLayout.Row({ "trustType", "protocol" }), @GridLayout.Row("active") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("fileSystemSeparator"),
         @GridLayout.Row("keepAliveTimeout"), @GridLayout.Row("keepAliveReplyTimeout"), @GridLayout.Row("dateFormat"),
         @GridLayout.Row("recentDateFormat") })
