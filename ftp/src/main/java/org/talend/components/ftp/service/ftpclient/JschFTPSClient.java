@@ -38,6 +38,8 @@ import java.util.stream.Collectors;
  */
 public class JschFTPSClient extends GenericFTPClient {
 
+    public static final int DEFAULT_SFTP_PORT = 22;
+
     public static class LoggerWrapper implements com.jcraft.jsch.Logger {
 
         @Setter
@@ -105,7 +107,7 @@ public class JschFTPSClient extends GenericFTPClient {
     @Override
     public void connect(String host, int port) {
         this.host = host;
-        this.port = port;
+        this.port = port <=0 ? DEFAULT_SFTP_PORT : port;
     }
 
     @Override
@@ -148,6 +150,9 @@ public class JschFTPSClient extends GenericFTPClient {
         if (session != null) {
             session.disconnect();
         }
+
+        channel = null;
+        session = null;
     }
 
     @Override

@@ -40,7 +40,13 @@ import java.util.stream.Collectors;
  */
 public class ApacheFTPClient extends GenericFTPClient {
 
+    public static final int DEFAULT_FTP_PORT = 21;
+
+    public static final int DEFAULT_FTPS_PORT = 990;
+
     private FTPClient ftpClient;
+
+    private boolean isFTPS;
 
     private ApacheFTPClient() {
 
@@ -67,7 +73,7 @@ public class ApacheFTPClient extends GenericFTPClient {
 
     public static ApacheFTPClient createFTPS(FTPDataStore dataStore) {
 
-        FTPSClient ftps = new FTPSClient(dataStore.getProtocol(), dataStore.isImplicit());
+        FTPSClient ftps = new FTPSClient(dataStore.getProtocol(), dataStore.getPort() <= 0);
         switch (dataStore.getTrustType()) {
         case ALL:
             ftps.setTrustManager(TrustManagerUtils.getAcceptAllTrustManager());
@@ -96,12 +102,14 @@ public class ApacheFTPClient extends GenericFTPClient {
 
         ApacheFTPClient result = new ApacheFTPClient();
         result.ftpClient = ftpClient;
+        result.isFTPS = true;
 
         return result;
     }
 
     @Override
     public void connect(String host, int port) {
+        port = port <= 0 ? (isFTPS ? DEFAULT_FTPS_PORT : DEFAULT_FTP_PORT) : port;
         try {
             ftpClient.connect(host, port);
         } catch (Exception e) {
@@ -142,6 +150,7 @@ public class ApacheFTPClient extends GenericFTPClient {
                 log.warn(getI18n().warnCannotDisconnect(e.getMessage()));
             }
         }
+        ftpClient = null;
     }
 
     @Override

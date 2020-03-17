@@ -14,6 +14,7 @@ package org.talend.components.ftp.datastore;
 
 import lombok.Data;
 import org.talend.components.ftp.service.FTPService;
+import org.talend.components.ftp.service.ftpclient.ApacheFTPClient;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
@@ -52,7 +53,7 @@ public class FTPDataStore implements Serializable {
 
     @Option
     @Documentation("FTP port.")
-    private int port = 21;
+    private int port = ApacheFTPClient.DEFAULT_FTP_PORT;
 
     @Option
     @Documentation("Does FTP requires credentials.")
@@ -73,10 +74,6 @@ public class FTPDataStore implements Serializable {
     @Documentation("How to trust server certificates.")
     @ActiveIf(target = "fileProtocol", value = "FTPS")
     private TrustType trustType = TrustType.VALID;
-
-    @Option
-    @Documentation("Is the connection implicit.")
-    private boolean implicit;
 
     @Option
     @Documentation("FTPS protocol.")
