@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPClient;
+import org.talend.components.common.stream.api.RecordIORepository;
 import org.talend.components.ftp.service.FTPService;
 import org.talend.components.ftp.service.ftpclient.GenericFTPClient;
 import org.talend.components.ftp.service.ftpclient.LogWriter;
@@ -48,13 +49,16 @@ public class FTPOutput implements Serializable {
 
     private final FTPService ftpService;
 
+    private final RecordIORepository ioRepository;
+
     private transient GenericFTPClient ftpClient;
 
     private Charset charset;
 
     @PostConstruct
     public void init() {
-        charset = Charset.forName(configuration.getDataSet().getEncoding());
+
+        // charset = Charset.forName(configuration.getDataSet().getEncoding());
     }
 
     @ElementListener
@@ -76,7 +80,7 @@ public class FTPOutput implements Serializable {
         GenericFTPClient currentClient = getFtpClient();
 
         try (final InputStream stream = new ByteArrayInputStream(content)) {
-            String path = configuration.getDataSet().getFolder() + (configuration.getDataSet().getFolder()
+            String path = configuration.getDataSet().getPath() + (configuration.getDataSet().getPath()
                     .endsWith(configuration.getDataSet().getDatastore().getFileSystemSeparator()) ? ""
                             : configuration.getDataSet().getDatastore().getFileSystemSeparator())
                     + name;

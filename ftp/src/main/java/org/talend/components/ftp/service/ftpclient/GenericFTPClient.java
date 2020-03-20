@@ -28,7 +28,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.function.Predicate;
 
-public abstract class GenericFTPClient {
+public abstract class GenericFTPClient implements AutoCloseable {
 
     @Setter
     @Getter(AccessLevel.PROTECTED)
@@ -48,6 +48,10 @@ public abstract class GenericFTPClient {
 
     public abstract List<GenericFTPFile> listFiles(String path, Predicate<GenericFTPFile> filter);
 
+    public final List<GenericFTPFile> listFiles(String path) {
+        return listFiles(path, null);
+    }
+
     public abstract void retrieveFile(String path, OutputStream out);
 
     public abstract void configure(FTPInputConfiguration configuration);
@@ -55,4 +59,9 @@ public abstract class GenericFTPClient {
     public abstract void configure(FTPOutputConfiguration configuration);
 
     public abstract boolean storeFile(String path, InputStream stream);
+
+    @Override
+    public final void close() {
+        disconnect();
+    }
 }

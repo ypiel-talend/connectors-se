@@ -164,7 +164,8 @@ public class JschFTPSClient extends GenericFTPClient {
     public List<GenericFTPFile> listFiles(String path, Predicate<GenericFTPFile> filter) {
         try {
             Vector<ChannelSftp.LsEntry> entries = channel.ls(path);
-            return entries.stream().map(this::toGenericFTPFile).filter(filter::test).collect(Collectors.toList());
+            return entries.stream().map(this::toGenericFTPFile).filter(f -> filter == null ? true : filter.test(f))
+                    .collect(Collectors.toList());
         } catch (SftpException e) {
             getI18n().errorListFiles(e.getMessage());
             return null;

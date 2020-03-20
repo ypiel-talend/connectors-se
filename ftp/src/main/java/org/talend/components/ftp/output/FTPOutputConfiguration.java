@@ -15,13 +15,18 @@ package org.talend.components.ftp.output;
 import lombok.Data;
 import org.talend.components.ftp.dataset.FTPDataSet;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
+import org.talend.sdk.component.api.configuration.constraint.Required;
+import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 
 @Data
-@GridLayout({ @GridLayout.Row("dataSet"), @GridLayout.Row("debug") })
+@GridLayout({ @GridLayout.Row("dataSet"), @GridLayout.Row("limitBy"), @GridLayout.Row("recordsLimit"),
+        @GridLayout.Row({ "sizeLimit", "sizeUnit" }), @GridLayout.Row("debug") })
 @Documentation("Configuration for FTP sink")
 public class FTPOutputConfiguration implements Serializable {
 
@@ -32,4 +37,53 @@ public class FTPOutputConfiguration implements Serializable {
     @Option
     @Documentation("Enable debug mode")
     private boolean debug;
+
+    @Option
+    @Required
+    @Documentation("How to limit remote file size.")
+    private LimitBy limitBy = LimitBy.RECORDS;
+
+    @Option
+    @DefaultValue("1000")
+    @ActiveIfs(operator = ActiveIfs.Operator.OR, value = { @ActiveIf(target = "limitBy", value = "RECORDS"),
+            @ActiveIf(target = "limitBy", value = "BOTH") })
+    @Documentation("Max number of records per file.")
+    private int recordsLimit = 1000;
+
+    @Option
+    @DefaultValue("1000")
+    @ActiveIfs(operator = ActiveIfs.Operator.OR, value = { @ActiveIf(target = "limitBy", value = "SIZE"),
+            @ActiveIf(target = "limitBy", value = "BOTH") })
+    @Documentation("Max file size.")
+    private int sizeLimit = 10;
+
+    @Option
+    @DefaultValue("MB")
+    @ActiveIfs(operator = ActiveIfs.Operator.OR, value = { @ActiveIf(target = "limitBy", value = "SIZE"),
+            @ActiveIf(target = "limitBy", value = "BOTH") })
+    @Documentation("File size unit")
+    private SizeUnit sizeUnit;
+
+    public enum LimitBy {
+        SIZE,
+        RECORDS,
+        BOTH
+    }
+
+    public enum SizeUnit {
+        B(1),
+        KB(1 << 10),
+        MB(1 << 20),
+        GB(1 << 30);
+
+        private long multiplier;
+
+        private SizeUnit(long m) {
+            multiplier = m;
+        };
+
+        private long apply(long base) {
+            return base * multiplier;
+        }
+    }
 }

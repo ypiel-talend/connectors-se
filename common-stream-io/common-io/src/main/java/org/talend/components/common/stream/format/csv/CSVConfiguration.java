@@ -30,7 +30,7 @@ public class CSVConfiguration implements ContentFormat {
 
     @Option
     @Documentation("Line delimiter.")
-    private LineConfiguration lineConfiguration;
+    private LineConfiguration lineConfiguration = new LineConfiguration();
 
     @Option
     @Documentation("Field delimiter.")

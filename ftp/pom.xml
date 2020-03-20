@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.7.0-SNAPSHOT</version>
+        <version>1.8.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ftp</artifactId>
@@ -30,6 +30,11 @@
             <artifactId>jsch</artifactId>
             <version>0.1.55</version>
         </dependency>
+        <dependency>
+            <groupId>org.talend.components</groupId>
+            <artifactId>stream-csv</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Testing -->
         <dependency>
             <groupId>org.talend.components</groupId>
@@ -40,6 +45,12 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockftpserver</groupId>
+            <artifactId>MockFtpServer</artifactId>
+            <version>2.7.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

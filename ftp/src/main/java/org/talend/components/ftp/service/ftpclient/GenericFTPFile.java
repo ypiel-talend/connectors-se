@@ -15,9 +15,31 @@ package org.talend.components.ftp.service.ftpclient;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 @Data
 public class GenericFTPFile implements Serializable {
+
+    /**
+     * Comparator to sort files based on size. Bigger is first
+     */
+    public static class GenericFTPFileSizeComparator implements Comparator<GenericFTPFile> {
+
+        @Override
+        public int compare(GenericFTPFile f1, GenericFTPFile f2) {
+            if (f1 == f2) {
+                return 0;
+            }
+            if (f1 == null) {
+                return -1;
+            }
+            if (f2 == null) {
+                return 1;
+            }
+
+            return Long.compare(f2.getSize(), f1.getSize());
+        }
+    }
 
     private String name;
 

@@ -1,0 +1,6 @@
+{
+  "org.talend.components.ftp.dataset.TextConfiguration": {
+    "reader": "org.talend.components.ftp.service.text.TextRecordReaderSupplier",
+    "writer": "org.talend.components.ftp.service.text.TextRecordWriterSupplier"
+  }
+}

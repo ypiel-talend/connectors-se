@@ -31,6 +31,7 @@ import org.talend.components.common.stream.api.input.RecordReaderSupplier;
 import org.talend.components.common.stream.api.output.RecordWriterSupplier;
 import org.talend.components.common.stream.format.ContentFormat;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.injector.Injector;
 
 /**
  * Service to group record reader and writer suppliers (one reader/writer for each configuration).
@@ -43,6 +44,9 @@ public class RecordIORepository {
 
     @Service
     private Messages i18n;
+
+    @Service
+    private Injector injector;
 
     /** all readers suppliers */
     private final ConcurrentMap<Class<? extends ContentFormat>, RecordReaderSupplier> readers = new ConcurrentHashMap<>();
@@ -101,12 +105,14 @@ public class RecordIORepository {
         if (jsonObject.containsKey("reader")) {
             final String readerClassName = jsonObject.getString("reader");
             final RecordReaderSupplier reader = this.newInstance(RecordReaderSupplier.class, loader, readerClassName);
+            injector.inject(reader);
             this.readers.put(contentFormatClass, reader);
         }
 
         if (jsonObject.containsKey("writer")) {
             final String writerClassName = jsonObject.getString("writer");
             final RecordWriterSupplier writer = this.newInstance(RecordWriterSupplier.class, loader, writerClassName);
+            injector.inject(writer);
             this.writers.put(contentFormatClass, writer);
         }
     }

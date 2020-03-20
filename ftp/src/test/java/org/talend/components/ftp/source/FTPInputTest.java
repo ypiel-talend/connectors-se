@@ -13,14 +13,24 @@
 package org.talend.components.ftp.source;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.mockftpserver.fake.FakeFtpServer;
+import org.mockftpserver.fake.UserAccount;
+import org.mockftpserver.fake.filesystem.FileEntry;
+import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 import org.slf4j.impl.StaticLoggerBinder;
+import org.talend.components.common.stream.format.csv.FieldSeparator;
 import org.talend.components.ftp.dataset.FTPDataSet;
 import org.talend.components.ftp.datastore.FTPDataStore;
+import org.talend.components.ftp.jupiter.FtpFile;
+import org.talend.components.ftp.jupiter.FtpServer;
+import org.talend.components.ftp.service.FTPService;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.SimpleFactory;
 import org.talend.sdk.component.junit.environment.Environment;
@@ -31,12 +41,14 @@ import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
+import java.io.File;
 import java.util.List;
 
 @Slf4j
 @Environment(ContextualEnvironment.class)
 @EnvironmentConfiguration(environment = "Contextual", systemProperties = {})
 @WithComponents(value = "org.talend.components.ftp")
+@FtpFile(base = "fakeFTP/")
 public class FTPInputTest {
 
     @Injected
@@ -52,14 +64,14 @@ public class FTPInputTest {
         componentsHandler.injectServices(this);
 
         FTPDataStore datastore = new FTPDataStore();
-        datastore.setHost("test.rebex.net");
+        datastore.setHost("localhost");
         datastore.setUseCredentials(true);
-        datastore.setUsername("demo");
-        datastore.setPassword("password");
+        datastore.setUsername(FtpServer.USER);
+        datastore.setPassword(FtpServer.PASSWD);
 
         FTPDataSet dataset = new FTPDataSet();
         dataset.setDatastore(datastore);
-        dataset.setFolder("/pub/example");
+        dataset.setPath("/communes");
 
         configuration = new FTPInputConfiguration();
         configuration.setDataSet(dataset);
@@ -67,55 +79,35 @@ public class FTPInputTest {
     }
 
     @EnvironmentalTest
-    public void testFTP() {
-        configuration.getDataSet().getDatastore().setPort(21);
-        final String configStr = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
+    public void csvTest() {
+        configuration.getDataSet().setPath("/communes");
+        configuration.getDataSet().setFormat(FTPDataSet.Format.CSV);
+        FieldSeparator fieldSeparator = new FieldSeparator();
+        fieldSeparator.setFieldSeparatorType(FieldSeparator.Type.SEMICOLON);
+        configuration.getDataSet().getCsvConfiguration().setFieldSeparator(fieldSeparator);
 
-        Job.components().component("source", "FTP://FTPInput?" + configStr).component("target", "test://collector").connections()
-                .from("source").to("target").build().run();
+        String configURI = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
-        List<Record> records = componentsHandler.getCollectedData(Record.class);
-
-        Assertions.assertNotNull(records);
-        Assertions.assertNotEquals(0, records.size(), "No record in result");
-        log.info(records.toString());
-    }
-
-    @EnvironmentalTest
-    @Disabled // Need fixing
-    public void testFTPS() {
-        configuration.getDataSet().getDatastore().setFileProtocol(FTPDataStore.FileProtocol.FTPS);
-        configuration.getDataSet().getDatastore().setProtocol("SSL");
-        configuration.getDataSet().getDatastore().setTrustType(FTPDataStore.TrustType.ALL);
-        configuration.getDataSet().getDatastore().setPort(990);
-        configuration.getDataSet().getDatastore().setActive(false);
-        final String configStr = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
-
-        Job.components().component("source", "FTP://FTPInput?" + configStr).component("target", "test://collector").connections()
-                .from("source").to("target").build().run();
+        try {
+            Job.components()
+                    .component("input", "FTP://FTPInput?" + configURI)
+                    .component("output", "test://collector")
+                    .connections()
+                    .from("input")
+                    .to("output")
+                    .build()
+                    .run();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+        }
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertNotNull(records);
-        Assertions.assertNotEquals(0, records.size(), "No record in result");
-        log.info(records.toString());
+        Assertions.assertEquals(207, records.size());
+        log.debug(records.get(0).toString());
     }
 
-    @EnvironmentalTest
-    public void testSFTP() {
-        configuration.getDataSet().getDatastore().setFileProtocol(FTPDataStore.FileProtocol.SFTP);
-        configuration.getDataSet().getDatastore().setTrustType(FTPDataStore.TrustType.ALL);
-        configuration.getDataSet().getDatastore().setPort(22);
-        configuration.getDataSet().getDatastore().setActive(false);
-        final String configStr = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
-        Job.components().component("source", "FTP://FTPInput?" + configStr).component("target", "test://collector").connections()
-                .from("source").to("target").build().run();
-
-        List<Record> records = componentsHandler.getCollectedData(Record.class);
-
-        Assertions.assertNotNull(records);
-        Assertions.assertNotEquals(0, records.size(), "No record in result");
-        log.info(records.toString());
-    }
 }

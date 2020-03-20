@@ -162,7 +162,8 @@ public class ApacheFTPClient extends GenericFTPClient {
     public List<GenericFTPFile> listFiles(String path, Predicate<GenericFTPFile> filter) {
         try {
             FTPFile[] files = ftpClient.listFiles(path);
-            return Arrays.stream(files).map(this::toGenericFTPFile).filter(filter::test).collect(Collectors.toList());
+            return Arrays.stream(files).map(this::toGenericFTPFile).filter(f -> filter == null ? true : filter.test(f))
+                    .collect(Collectors.toList());
         } catch (IOException ioe) {
             log.error(getI18n().errorListFiles(ioe.getMessage()));
             return null;
@@ -190,8 +191,7 @@ public class ApacheFTPClient extends GenericFTPClient {
 
     @Override
     public void configure(FTPInputConfiguration configuration) {
-        ftpClient.setControlEncoding(configuration.getDataSet().getEncoding());
-        ftpClient.setListHiddenFiles(configuration.getDataSet().isListHiddenFiles());
+
     }
 
     @Override

@@ -17,8 +17,10 @@ import org.talend.components.ftp.service.FTPConnectorException;
 import org.talend.components.ftp.service.I18nMessage;
 import org.talend.sdk.component.api.service.Service;
 
+import java.io.Serializable;
+
 @Service
-public class FTPClientFactory {
+public class FTPClientFactory implements Serializable {
 
     @Service
     private I18nMessage i18n;

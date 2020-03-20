@@ -13,6 +13,7 @@
 package org.talend.components.ftp.datastore;
 
 import lombok.Data;
+import org.apache.beam.sdk.options.Hidden;
 import org.talend.components.ftp.service.FTPService;
 import org.talend.components.ftp.service.ftpclient.ApacheFTPClient;
 import org.talend.sdk.component.api.component.Icon;
