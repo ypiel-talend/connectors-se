@@ -74,8 +74,10 @@ public class FTPInput implements Serializable {
         this.recordBuilderFactory = recordBuilderFactory;
         this.i18n = i18n;
         this.recordIORepository = recordIORepository;
-        this.filesToRead = new ArrayList<>();
-        this.filesToRead.addAll(filesToRead);
+        if (filesToRead != null) {
+            this.filesToRead = new ArrayList<>();
+            this.filesToRead.addAll(filesToRead);
+        }
     }
 
     @Producer
@@ -86,8 +88,7 @@ public class FTPInput implements Serializable {
                 GenericFTPClient currentClient = getFtpClient();
                 try {
 
-                    filesToRead = currentClient.listFiles(configuration.getDataSet().getPath(),
-                            f -> !(f.isDirectory()));
+                    filesToRead = currentClient.listFiles(configuration.getDataSet().getPath(), f -> !(f.isDirectory()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -106,7 +107,7 @@ public class FTPInput implements Serializable {
 
                 String path = configuration.getDataSet().getPath() + (configuration.getDataSet().getPath()
                         .endsWith(configuration.getDataSet().getDatastore().getFileSystemSeparator()) ? ""
-                        : configuration.getDataSet().getDatastore().getFileSystemSeparator())
+                                : configuration.getDataSet().getDatastore().getFileSystemSeparator())
                         + file.getName();
                 getFtpClient().retrieveFile(path, buffer);
                 recordIterator = recordReader.read(new ByteArrayInputStream(buffer.toByteArray()));

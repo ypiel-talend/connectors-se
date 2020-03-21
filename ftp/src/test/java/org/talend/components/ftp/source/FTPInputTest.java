@@ -89,14 +89,8 @@ public class FTPInputTest {
         String configURI = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
         try {
-            Job.components()
-                    .component("input", "FTP://FTPInput?" + configURI)
-                    .component("output", "test://collector")
-                    .connections()
-                    .from("input")
-                    .to("output")
-                    .build()
-                    .run();
+            Job.components().component("input", "FTP://FTPInput?" + configURI).component("output", "test://collector")
+                    .connections().from("input").to("output").build().run();
         } catch (Exception e) {
             e.printStackTrace();
             Assertions.fail(e);
@@ -108,6 +102,5 @@ public class FTPInputTest {
         Assertions.assertEquals(207, records.size());
         log.debug(records.get(0).toString());
     }
-
 
 }

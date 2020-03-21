@@ -74,7 +74,8 @@ public class FTPPartitionMapper implements Serializable {
     }
 
     private FTPPartitionMapper addNewMapper(List<FTPPartitionMapper> mappers) {
-        FTPPartitionMapper newMapper = new FTPPartitionMapper(configuration, ftpService, recordBuilderFactory, recordIORepository,  i18n);
+        FTPPartitionMapper newMapper = new FTPPartitionMapper(configuration, ftpService, recordBuilderFactory, recordIORepository,
+                i18n);
         mappers.add(newMapper);
         return newMapper;
     }
