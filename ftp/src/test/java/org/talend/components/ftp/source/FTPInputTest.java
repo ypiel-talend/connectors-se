@@ -36,6 +36,7 @@ import org.talend.sdk.component.junit.SimpleFactory;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.EnvironmentConfiguration;
 import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
+import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnvironment;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
@@ -45,8 +46,16 @@ import java.io.File;
 import java.util.List;
 
 @Slf4j
+
 @Environment(ContextualEnvironment.class)
 @EnvironmentConfiguration(environment = "Contextual", systemProperties = {})
+
+@Environment(SparkRunnerEnvironment.class)
+@EnvironmentConfiguration(environment = "Spark", systemProperties = {
+        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
+        @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
+        @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false") })
+
 @WithComponents(value = "org.talend.components.ftp")
 @FtpFile(base = "fakeFTP/")
 public class FTPInputTest {
@@ -68,6 +77,7 @@ public class FTPInputTest {
         datastore.setUseCredentials(true);
         datastore.setUsername(FtpServer.USER);
         datastore.setPassword(FtpServer.PASSWD);
+        datastore.setPort(FtpServer.PORT);
 
         FTPDataSet dataset = new FTPDataSet();
         dataset.setDatastore(datastore);

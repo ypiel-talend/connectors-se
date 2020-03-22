@@ -39,6 +39,8 @@ import java.util.Optional;
 @Slf4j
 public class FtpServer implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
 
+    public static final int PORT = Integer.valueOf(System.getProperty("org.talend.components.ftp.jupiter.FtpServer.port", "21"));
+
     public static final String USER = "ftpuser";
 
     public static final String PASSWD = "password";
@@ -70,7 +72,7 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
             server = new FakeFtpServer();
             server.addUserAccount(new UserAccount(USER, PASSWD, "/"));
             server.setFileSystem(fs);
-            server.setServerControlPort(21);
+            server.setServerControlPort(PORT);
             server.start();
         }
     }

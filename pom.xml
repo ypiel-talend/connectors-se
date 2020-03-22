@@ -38,7 +38,7 @@
         <module>couchbase</module>
         <module>azure</module>
         <module>rest</module>
-        <module>dynamics-crm</module>
+        <!-- module>dynamics-crm</module -->
         <!-- disable eventhubs build before all ready
 	<module>azure-eventhubs</module>
 	-->
@@ -50,10 +50,10 @@
         <module>connectors-test-bom</module>
         <module>bigquery</module>
         <module>workday</module>
-        <module>extensions</module>
+        <!-- module>extensions</module -->
         <module>pubsub</module>
         <module>ftp</module>
-        <module>netsuite</module>
+        <!-- module>netsuite</module -->
     </modules>
 
     <scm>
@@ -87,7 +87,7 @@
 
         <locales.version>[1.8,)</locales.version>
 
-        <component-runtime.version>1.1.16</component-runtime.version>
+        <component-runtime.version>1.1.15</component-runtime.version>
         <slf4j.version>1.7.25</slf4j.version>
 
         <beam.version>2.12.0</beam.version>
