@@ -140,6 +140,7 @@ public class FTPInput implements Serializable {
         if (ftpClient != null) {
             ftpClient.disconnect();
         }
+        ftpClient = null;
     }
 
 }
