@@ -62,10 +62,10 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
         if (ftpFile.isPresent()) {
             fs = new UnixFakeFileSystem();
             fs.setCreateParentDirectoriesAutomatically(true);
-            URI baseUri = Thread.currentThread().getContextClassLoader().getResource(ftpFile.get().base() + "root").toURI();
+            URI baseUri = Thread.currentThread().getContextClassLoader().getResource(ftpFile.get().base() + "rootFTP").toURI();
             File ftpResourceDir = new File(baseUri).getParentFile();
             fs.add(new DirectoryEntry("/"));
-            Arrays.stream(ftpResourceDir.listFiles()).filter(f -> !("root".equals(f.getName()))).forEach(f -> addInFs(f, ""));
+            Arrays.stream(ftpResourceDir.listFiles()).filter(f -> !("rootFTP".equals(f.getName()))).forEach(f -> addInFs(f, ""));
 
             server = new FakeFtpServer();
             server.addUserAccount(new UserAccount(USER, PASSWD, "/"));
