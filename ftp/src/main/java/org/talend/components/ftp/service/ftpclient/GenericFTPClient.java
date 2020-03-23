@@ -60,6 +60,8 @@ public abstract class GenericFTPClient implements AutoCloseable {
 
     public abstract boolean storeFile(String path, InputStream stream);
 
+    public abstract OutputStream storeFileStream(String path);
+
     @Override
     public final void close() {
         disconnect();

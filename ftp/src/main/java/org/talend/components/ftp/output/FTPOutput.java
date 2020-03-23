@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPClient;
 import org.talend.components.common.stream.api.RecordIORepository;
+import org.talend.components.common.stream.api.output.RecordWriter;
+import org.talend.components.common.stream.format.ContentFormat;
 import org.talend.components.ftp.service.FTPService;
 import org.talend.components.ftp.service.ftpclient.GenericFTPClient;
 import org.talend.components.ftp.service.ftpclient.LogWriter;
@@ -32,9 +34,13 @@ import javax.annotation.PreDestroy;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Version
@@ -49,47 +55,59 @@ public class FTPOutput implements Serializable {
 
     private final FTPService ftpService;
 
-    private final RecordIORepository ioRepository;
+    private final RecordIORepository recordIORepository;
 
     private transient GenericFTPClient ftpClient;
 
-    private Charset charset;
+    private transient RecordWriter recordWriter;
 
-    @PostConstruct
-    public void init() {
+    private transient boolean init = false;
 
-        // charset = Charset.forName(configuration.getDataSet().getEncoding());
-    }
+    private transient OutputStream currentStream;
+
+    private transient long currentStreamSize = 0l;
+
+    private transient int currentRecords = 0;
+
+    private transient String remoteDir;
+
 
     @ElementListener
     public void onRecord(final Record record) {
-
-        final String name = record.getString("name");
-        final byte[] content = record.getSchema().getEntries().stream().filter(it -> "content".equals(it.getName())).findFirst()
-                .map(entry -> {
-                    switch (entry.getType()) {
-                    case STRING:
-                        return record.getString("content").getBytes(charset);
-                    case BYTES:
-                        return record.getBytes("content");
-                    default:
-                        throw new IllegalArgumentException("Unsupported content of type: " + entry.getType());
-                    }
-                }).orElseThrow(() -> new IllegalArgumentException("No content found"));
-
-        GenericFTPClient currentClient = getFtpClient();
-
-        try (final InputStream stream = new ByteArrayInputStream(content)) {
-            String path = configuration.getDataSet().getPath() + (configuration.getDataSet().getPath()
-                    .endsWith(configuration.getDataSet().getDatastore().getFileSystemSeparator()) ? ""
-                            : configuration.getDataSet().getDatastore().getFileSystemSeparator())
-                    + name;
-            if (!currentClient.storeFile(path, stream)) {
-                throw new IllegalStateException("Can't store: " + name);
+        if (!init) {
+            init = true;
+            remoteDir = configuration.getDataSet().getPath();
+            if (!remoteDir.endsWith("/")) {
+                remoteDir += "/";
             }
-        } catch (final IOException e) {
-            throw new IllegalStateException("Can't store: " + name, e);
+            ContentFormat contentFormat = configuration.getDataSet().getFormatConfiguration();
+            recordWriter = recordIORepository.findWriter(contentFormat.getClass()).getWriter(this::getCurrentStream, contentFormat);
         }
+        try {
+            recordWriter.add(record);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private OutputStream getCurrentStream() {
+        if (currentStream == null
+                || (configuration.getLimitBy().isLimitedByRecords() && currentRecords >= configuration.getRecordsLimit())
+                || (configuration.getLimitBy().isLimitedBySize() && currentStreamSize >= configuration.getSizeLimit())) {
+            if (currentStream != null) {
+                try {
+                    currentStream.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+            // Must create new file
+            String path = remoteDir + "file_" + UUID.randomUUID().toString() + "." + configuration.getDataSet().getFormat().getExtension();
+            currentStream = getFtpClient().storeFileStream(path);
+        }
+
+        return currentStream;
+
     }
 
     private GenericFTPClient getFtpClient() {

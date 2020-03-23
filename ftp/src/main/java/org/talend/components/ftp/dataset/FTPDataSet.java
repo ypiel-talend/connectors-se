@@ -67,14 +67,18 @@ public class FTPDataSet implements Serializable {
     private TextConfiguration textConfiguration = new TextConfiguration();
 
     public enum Format {
-        CSV("csvConfiguration"),
-        TEXT("textConfiguration");
+        CSV("csvConfiguration", "csv"),
+        TEXT("textConfiguration", "txt");
 
         @Getter(AccessLevel.PROTECTED)
         private String configName;
 
-        private Format(String configName) {
+        @Getter
+        private String extension;
+
+        private Format(String configName, String extension) {
             this.configName = configName;
+            this.extension = extension;
         }
     }
 

@@ -65,9 +65,23 @@ public class FTPOutputConfiguration implements Serializable {
     private SizeUnit sizeUnit;
 
     public enum LimitBy {
-        SIZE,
-        RECORDS,
-        BOTH
+        SIZE(0x01),
+        RECORDS(0x10),
+        SIZE_AND_RECORDS(0x11);
+
+        private int flag;
+
+        private LimitBy(int flag) {
+            this.flag = flag;
+        }
+
+        public boolean isLimitedBySize() {
+            return (flag & SIZE.flag) > 0;
+        }
+
+        public boolean isLimitedByRecords() {
+            return (flag & RECORDS.flag) > 0;
+        }
     }
 
     public enum SizeUnit {

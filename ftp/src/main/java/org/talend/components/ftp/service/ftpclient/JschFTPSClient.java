@@ -212,4 +212,14 @@ public class JschFTPSClient extends GenericFTPClient {
         }
 
     }
+
+    @Override
+    public OutputStream storeFileStream(String path) {
+        try {
+            return channel.put(path);
+        } catch (SftpException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
 }

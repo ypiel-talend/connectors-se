@@ -209,4 +209,14 @@ public class ApacheFTPClient extends GenericFTPClient {
         }
     }
 
+    @Override
+    public OutputStream storeFileStream(String path) {
+        try {
+            return ftpClient.storeFileStream(path);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
 }
