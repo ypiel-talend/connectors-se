@@ -75,6 +75,7 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
         }
     }
 
+
     private void addInFs(File file, String base) {
         log.debug("Adding " + base + "/" + file.getName());
         if (file.isDirectory()) {
@@ -103,12 +104,15 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
-        return false;
+        return parameterContext.getParameter().getType().isAssignableFrom(UnixFakeFileSystem.class);
     }
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
+        if (parameterContext.getParameter().getType().isAssignableFrom(UnixFakeFileSystem.class)) {
+            return fs;
+        }
         return null;
     }
 }

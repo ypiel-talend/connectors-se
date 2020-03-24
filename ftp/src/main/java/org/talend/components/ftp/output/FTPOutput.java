@@ -18,6 +18,7 @@ import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPClient;
 import org.talend.components.common.stream.api.RecordIORepository;
 import org.talend.components.common.stream.api.output.RecordWriter;
+import org.talend.components.common.stream.api.output.TargetFinder;
 import org.talend.components.common.stream.format.ContentFormat;
 import org.talend.components.ftp.service.FTPService;
 import org.talend.components.ftp.service.ftpclient.GenericFTPClient;
@@ -69,44 +70,61 @@ public class FTPOutput implements Serializable {
 
     private transient int currentRecords = 0;
 
-    private transient String remoteDir;
+    private transient String fileBaseName;
+
+    private transient int fileIndex;
 
 
     @ElementListener
     public void onRecord(final Record record) {
         if (!init) {
             init = true;
-            remoteDir = configuration.getDataSet().getPath();
+            String remoteDir = configuration.getDataSet().getPath();
             if (!remoteDir.endsWith("/")) {
                 remoteDir += "/";
             }
-            ContentFormat contentFormat = configuration.getDataSet().getFormatConfiguration();
-            recordWriter = recordIORepository.findWriter(contentFormat.getClass()).getWriter(this::getCurrentStream, contentFormat);
+            fileBaseName = remoteDir + "file_" + UUID.randomUUID();
+
         }
+
+        checkCurrentStream();
         try {
             recordWriter.add(record);
+            currentRecords++;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private OutputStream getCurrentStream() {
+    private void checkCurrentStream() {
         if (currentStream == null
                 || (configuration.getLimitBy().isLimitedByRecords() && currentRecords >= configuration.getRecordsLimit())
                 || (configuration.getLimitBy().isLimitedBySize() && currentStreamSize >= configuration.getSizeLimit())) {
             if (currentStream != null) {
                 try {
+                    recordWriter.end();
+                    recordWriter.close();
                     currentStream.close();
+                    if (ftpClient.isConnected()) {
+                        getFtpClient().disconnect();
+                    }
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
                 }
             }
+            currentRecords = 0;
             // Must create new file
-            String path = remoteDir + "file_" + UUID.randomUUID().toString() + "." + configuration.getDataSet().getFormat().getExtension();
+            String path = fileBaseName + "_" + fileIndex++ + "." + configuration.getDataSet().getFormat().getExtension();
+            log.debug("Creating remote file " + path);
             currentStream = getFtpClient().storeFileStream(path);
+            ContentFormat contentFormat = configuration.getDataSet().getFormatConfiguration();
+            recordWriter = recordIORepository.findWriter(contentFormat.getClass()).getWriter(() -> currentStream, contentFormat);
+            try {
+                recordWriter.init(contentFormat);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-
-        return currentStream;
 
     }
 
@@ -126,6 +144,17 @@ public class FTPOutput implements Serializable {
 
     @PreDestroy
     public void release() {
+        if (currentStream != null) {
+            try {
+                recordWriter.flush();
+                recordWriter.end();
+                recordWriter.close();
+                currentStream.flush();
+                currentStream.close();
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
         if (ftpClient != null) {
             ftpClient.disconnect();
         }

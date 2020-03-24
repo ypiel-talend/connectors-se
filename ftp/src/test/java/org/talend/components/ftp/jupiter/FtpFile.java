@@ -21,7 +21,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-@Target({ TYPE, METHOD })
+@Target({ TYPE })
 @Retention(RUNTIME)
 @ExtendWith(FtpServer.class)
 public @interface FtpFile {
