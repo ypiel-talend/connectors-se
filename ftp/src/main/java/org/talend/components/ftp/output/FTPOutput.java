@@ -90,6 +90,7 @@ public class FTPOutput implements Serializable {
         checkCurrentStream();
         try {
             recordWriter.add(record);
+            recordWriter.flush();
             currentRecords++;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
