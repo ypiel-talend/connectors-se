@@ -95,4 +95,8 @@ public interface I18nMessage {
     String errorVacantAccountKey();
 
     String errorNoRecordReceived();
+
+    String errorPrivateKeyPasswordIncorrect();
+
+    String errorPrivateKeyIncorrect();
 }
