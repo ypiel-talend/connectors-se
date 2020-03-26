@@ -36,9 +36,8 @@ import java.lang.reflect.Field;
 @DataSet("FtpDataset")
 @Icon(value = Icon.IconType.CUSTOM, custom = "ftp")
 @GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("datastore"), @GridLayout.Row({ "path" }),
-        @GridLayout.Row("format"), @GridLayout.Row("csvConfiguration"), @GridLayout.Row("textConfiguration") })
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("csvConfiguration"),
-        @GridLayout.Row("textConfiguration") })
+        @GridLayout.Row("format"), @GridLayout.Row("csvConfiguration") })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("csvConfiguration"), })
 @Slf4j
 public class FTPDataSet implements Serializable {
 
@@ -61,14 +60,8 @@ public class FTPDataSet implements Serializable {
     @Documentation("Configuration for CSV format")
     private CSVConfiguration csvConfiguration = new CSVConfiguration();
 
-    @Option
-    @ActiveIf(target = "format", value = "TEXT")
-    @Documentation("Configuration for Text format")
-    private TextConfiguration textConfiguration = new TextConfiguration();
-
     public enum Format {
-        CSV("csvConfiguration", "csv"),
-        TEXT("textConfiguration", "txt");
+        CSV("csvConfiguration", "csv");
 
         @Getter(AccessLevel.PROTECTED)
         private String configName;

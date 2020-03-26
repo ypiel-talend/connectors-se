@@ -40,6 +40,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
@@ -64,16 +65,13 @@ public class FTPOutput implements Serializable {
 
     private transient boolean init = false;
 
-    private transient OutputStream currentStream;
-
-    private transient long currentStreamSize = 0l;
+    private transient SizeAwareOutputStream currentStream;
 
     private transient int currentRecords = 0;
 
     private transient String fileBaseName;
 
     private transient int fileIndex;
-
 
     @ElementListener
     public void onRecord(final Record record) {
@@ -83,8 +81,7 @@ public class FTPOutput implements Serializable {
             if (!remoteDir.endsWith("/")) {
                 remoteDir += "/";
             }
-            fileBaseName = remoteDir + "file_" + UUID.randomUUID();
-
+            fileBaseName = remoteDir + "file_" + shortUUID();
         }
 
         checkCurrentStream();
@@ -97,15 +94,23 @@ public class FTPOutput implements Serializable {
         }
     }
 
+    private static String shortUUID() {
+        UUID uuid = UUID.randomUUID();
+        long l = ByteBuffer.wrap(uuid.toString().getBytes()).getLong();
+        return Long.toString(l, Character.MAX_RADIX);
+    }
+
     private void checkCurrentStream() {
         if (currentStream == null
                 || (configuration.getLimitBy().isLimitedByRecords() && currentRecords >= configuration.getRecordsLimit())
-                || (configuration.getLimitBy().isLimitedBySize() && currentStreamSize >= configuration.getSizeLimit())) {
+                || (configuration.getLimitBy().isLimitedBySize()
+                        && currentStream.getCurrentSize() >= configuration.getSizeUnit().apply(configuration.getSizeLimit()))) {
             if (currentStream != null) {
+                // end current stream
                 try {
                     recordWriter.end();
+                    recordWriter.flush();
                     recordWriter.close();
-                    currentStream.close();
                     if (ftpClient.isConnected()) {
                         getFtpClient().disconnect();
                     }
@@ -117,7 +122,7 @@ public class FTPOutput implements Serializable {
             // Must create new file
             String path = fileBaseName + "_" + fileIndex++ + "." + configuration.getDataSet().getFormat().getExtension();
             log.debug("Creating remote file " + path);
-            currentStream = getFtpClient().storeFileStream(path);
+            currentStream = new SizeAwareOutputStream(getFtpClient().storeFileStream(path));
             ContentFormat contentFormat = configuration.getDataSet().getFormatConfiguration();
             recordWriter = recordIORepository.findWriter(contentFormat.getClass()).getWriter(() -> currentStream, contentFormat);
             try {
@@ -147,11 +152,9 @@ public class FTPOutput implements Serializable {
     public void release() {
         if (currentStream != null) {
             try {
-                recordWriter.flush();
                 recordWriter.end();
+                recordWriter.flush();
                 recordWriter.close();
-                currentStream.flush();
-                currentStream.close();
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }

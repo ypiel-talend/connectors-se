@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.ftp.output;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +81,6 @@ public class FTPOutputTest {
 
         FTPDataSet dataset = new FTPDataSet();
         dataset.setDatastore(datastore);
-        dataset.setPath("/out");
 
         configuration = new FTPOutputConfiguration();
         configuration.setDataSet(dataset);
@@ -77,54 +88,97 @@ public class FTPOutputTest {
     }
 
     @EnvironmentalTest
-    public void testOutput(UnixFakeFileSystem fileSystem) {
-        int nbRecords = 200;
+    public void testRecordLimit(UnixFakeFileSystem fileSystem) {
+        int nbRecords = 210;
+        configuration.getDataSet().setPath("/out1");
         configuration.getDataSet().setFormat(FTPDataSet.Format.CSV);
         configuration.setLimitBy(FTPOutputConfiguration.LimitBy.RECORDS);
-        configuration.setRecordsLimit(500);
+        configuration.setRecordsLimit(50);
 
         String configURI = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
-         Schema schema = rbf.newSchemaBuilder(Schema.Type.RECORD)
+        Schema schema = rbf.newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(rbf.newEntryBuilder().withName("k").withType(Schema.Type.STRING).build())
-                .withEntry(rbf.newEntryBuilder().withName("v").withType(Schema.Type.STRING).build())
-                .build();
+                .withEntry(rbf.newEntryBuilder().withName("v").withType(Schema.Type.STRING).build()).build();
 
-        List<Record> inputData = IntStream.range(0, nbRecords).mapToObj(i ->
-            rbf.newRecordBuilder(schema).withString("k", "entry" + i).withString("v", "value" + i).build()
-        ).collect(Collectors.toList());
-
+        List<Record> inputData = IntStream.range(0, nbRecords)
+                .mapToObj(i -> rbf.newRecordBuilder(schema).withString("k", "entry" + i).withString("v", "value" + i).build())
+                .collect(Collectors.toList());
 
         COMPONENTS.setInputData(inputData);
 
-        Job.components().component("source", "test://emitter").component("output", "FTP://FTPOutput?" + configURI)
-                .connections().from("source").to("output").build().run();
+        Job.components().component("source", "test://emitter").component("output", "FTP://FTPOutput?" + configURI).connections()
+                .from("source").to("output").build().run();
 
-        List<FileEntry> files = fileSystem.listFiles("/out");
+        List<FileEntry> files = fileSystem.listFiles("/out1");
         List<String> csvLines = new ArrayList<>();
-        files.stream().filter(f -> f.getName() != "/out/file1.txt")
-                .map(FileEntry::createInputStream)
-                .map(is -> {
-                    try (ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
-                        byte[] buffer = new byte[1024];
-                        int read = 0;
-                        while ((read = is.read(buffer)) > 0) {
-                            bout.write(buffer, 0, read);
-                        }
-                        return bout.toByteArray();
-                    } catch (IOException ioe) {
-                        log.error(ioe.getMessage(), ioe);
-                        return new byte[0];
-                    }
-                })
-                .map(b -> new String(b, StandardCharsets.ISO_8859_1))
-                .forEach(s -> {
-                    log.debug(s);
-                    Arrays.stream(s.split("\r\n"))
-                            .filter(l ->  !"".equals(l.trim()))
-                            .forEach(csvLines::add);
-                });
+        files.stream().filter(f -> f.getName() != "/out1/file1.txt").map(FileEntry::createInputStream).map(is -> {
+            try (ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[1024];
+                int read = 0;
+                while ((read = is.read(buffer)) > 0) {
+                    bout.write(buffer, 0, read);
+                    bout.flush();
+                }
+                return bout.toByteArray();
+            } catch (IOException ioe) {
+                log.error(ioe.getMessage(), ioe);
+                return new byte[0];
+            }
+        }).map(b -> new String(b, StandardCharsets.ISO_8859_1)).forEach(s -> {
+            log.debug(s);
+            Arrays.stream(s.split("\r\n")).filter(l -> !"".equals(l.trim())).forEach(csvLines::add);
+        });
 
         Assertions.assertEquals(nbRecords, csvLines.size(), "Wrong number of lines");
+    }
+
+    @EnvironmentalTest
+    public void testSizeLimit(UnixFakeFileSystem fileSystem) {
+        int nbRecords = 200;
+        configuration.getDataSet().setPath("/out2");
+        configuration.getDataSet().setFormat(FTPDataSet.Format.CSV);
+        configuration.setLimitBy(FTPOutputConfiguration.LimitBy.SIZE);
+        configuration.setSizeLimit(1);
+        configuration.setSizeUnit(FTPOutputConfiguration.SizeUnit.KB);
+        configuration.setRecordsLimit(50);
+
+        String configURI = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
+
+        Schema schema = rbf.newSchemaBuilder(Schema.Type.RECORD)
+                .withEntry(rbf.newEntryBuilder().withName("k").withType(Schema.Type.STRING).build())
+                .withEntry(rbf.newEntryBuilder().withName("v").withType(Schema.Type.STRING).build()).build();
+
+        List<Record> inputData = IntStream.range(0, nbRecords)
+                .mapToObj(i -> rbf.newRecordBuilder(schema).withString("k", "entry" + i).withString("v", "value" + i).build())
+                .collect(Collectors.toList());
+
+        COMPONENTS.setInputData(inputData);
+
+        Job.components().component("source", "test://emitter").component("output", "FTP://FTPOutput?" + configURI).connections()
+                .from("source").to("output").build().run();
+
+        List<FileEntry> files = fileSystem.listFiles("/out2");
+        List<String> csvLines = new ArrayList<>();
+        files.stream().filter(f -> f.getName() != "/out2/file1.txt").map(FileEntry::createInputStream).map(is -> {
+            try (ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[1024];
+                int read = 0;
+                while ((read = is.read(buffer)) > 0) {
+                    bout.write(buffer, 0, read);
+                    bout.flush();
+                }
+                return bout.toByteArray();
+            } catch (IOException ioe) {
+                log.error(ioe.getMessage(), ioe);
+                return new byte[0];
+            }
+        }).map(b -> new String(b, StandardCharsets.ISO_8859_1)).forEach(s -> {
+            log.debug(s);
+            Arrays.stream(s.split("\r\n")).filter(l -> !"".equals(l.trim())).forEach(csvLines::add);
+        });
+
+        Assertions.assertEquals(nbRecords, csvLines.size(), "Wrong number of lines");
+        files.stream().map(FileEntry::getName).forEach(fileSystem::delete);
     }
 }

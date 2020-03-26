@@ -1,4 +1,4 @@
-@Components(family = "FTP", categories = "Net")
+@Components(family = "FTP", categories = "Internet")
 @Icon(value = Icon.IconType.CUSTOM, custom = "ftp")
 package org.talend.components.ftp;
 

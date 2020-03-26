@@ -105,9 +105,9 @@ public class FTPInput implements Serializable {
                 GenericFTPFile file = fileIterator.next();
                 final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-                String path = configuration.getDataSet().getPath() + (configuration.getDataSet().getPath()
-                        .endsWith(configuration.getDataSet().getDatastore().getFileSystemSeparator()) ? ""
-                                : configuration.getDataSet().getDatastore().getFileSystemSeparator())
+                String path = configuration.getDataSet().getPath()
+                        + (configuration.getDataSet().getPath().endsWith(FTPService.PATH_SEPARATOR) ? ""
+                                : FTPService.PATH_SEPARATOR)
                         + file.getName();
                 getFtpClient().retrieveFile(path, buffer);
                 recordIterator = recordReader.read(new ByteArrayInputStream(buffer.toByteArray()));

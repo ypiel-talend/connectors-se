@@ -31,12 +31,12 @@ public class FTPClientFactory implements Serializable {
         case FTP:
             ftpClient = ApacheFTPClient.createFTP(datastore);
             break;
-        case FTPS:
-            ftpClient = ApacheFTPClient.createFTPS(datastore);
-            break;
-        case SFTP:
-            ftpClient = JschFTPSClient.create(datastore);
-            break;
+        // case FTPS:
+        // ftpClient = ApacheFTPClient.createFTPS(datastore);
+        // break;
+        // case SFTP:
+        // ftpClient = JschFTPSClient.create(datastore);
+        // break;
         default:
             throw new FTPConnectorException("Unknown File protocol : " + datastore.getFileProtocol());
         }

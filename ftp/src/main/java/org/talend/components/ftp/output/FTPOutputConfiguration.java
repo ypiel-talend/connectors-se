@@ -96,7 +96,7 @@ public class FTPOutputConfiguration implements Serializable {
             multiplier = m;
         };
 
-        private long apply(long base) {
+        public long apply(long base) {
             return base * multiplier;
         }
     }

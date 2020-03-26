@@ -75,7 +75,6 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
         }
     }
 
-
     private void addInFs(File file, String base) {
         log.debug("Adding " + base + "/" + file.getName());
         if (file.isDirectory()) {

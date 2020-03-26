@@ -34,6 +34,8 @@ public class FTPService implements Serializable {
 
     public static final String ACTION_HEALTH_CHECK = "HEALTH_CHECK";
 
+    public static final String PATH_SEPARATOR = "/";
+
     @Service
     private I18nMessage i18n;
 

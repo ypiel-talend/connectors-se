@@ -33,18 +33,17 @@ import java.io.Serializable;
 @Data
 @Icon(value = Icon.IconType.CUSTOM, custom = "ftp")
 @Checkable(FTPService.ACTION_HEALTH_CHECK)
-@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("fileProtocol"), @GridLayout.Row({ "host", "port" }),
-        @GridLayout.Row("useCredentials"), @GridLayout.Row({ "username", "password" }),
-        @GridLayout.Row({ "trustType", "protocol" }), @GridLayout.Row("active") })
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("fileSystemSeparator"),
-        @GridLayout.Row("keepAliveTimeout"), @GridLayout.Row("keepAliveReplyTimeout"), @GridLayout.Row("dateFormat"),
-        @GridLayout.Row("recentDateFormat") })
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("fileProtocol"), @GridLayout.Row("host"),
+        @GridLayout.Row("port"), @GridLayout.Row("useCredentials"), @GridLayout.Row({ "username", "password" }) })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "trustType", "protocol" }),
+        @GridLayout.Row("keepAliveTimeout"), @GridLayout.Row("keepAliveReplyTimeout") })
 @Documentation("FTP connection Properties")
 public class FTPDataStore implements Serializable {
 
     @Option
     @Documentation("Type of protocol to use to connect")
     @DefaultValue("FTP")
+    @Required
     private FileProtocol fileProtocol = FileProtocol.FTP;
 
     @Option
@@ -53,6 +52,7 @@ public class FTPDataStore implements Serializable {
     private String host;
 
     @Option
+    @DefaultValue("21")
     @Documentation("FTP port.")
     private int port = ApacheFTPClient.DEFAULT_FTP_PORT;
 
@@ -82,15 +82,6 @@ public class FTPDataStore implements Serializable {
     private String protocol = "TLS";
 
     @Option
-    @Documentation("Activate active mode, if false passive mode is used.")
-    private boolean active;
-
-    @Option
-    @Documentation("The file system separator.")
-    @DefaultValue("/")
-    private String fileSystemSeparator = "/";
-
-    @Option
     @Documentation("How long to wait before sending another control keep-alive message.")
     @DefaultValue("5000")
     private int keepAliveTimeout = 5000;
@@ -100,14 +91,6 @@ public class FTPDataStore implements Serializable {
     @DefaultValue("1000")
     private int keepAliveReplyTimeout = 1000;
 
-    @Option
-    @Documentation("Date format.")
-    private String dateFormat;
-
-    @Option
-    @Documentation("Recent date format.")
-    private String recentDateFormat;
-
     public enum TrustType {
         ALL,
         VALID,
@@ -115,8 +98,8 @@ public class FTPDataStore implements Serializable {
     }
 
     public enum FileProtocol {
-        FTP,
-        FTPS,
-        SFTP
+        FTP // ,
+        // FTPS,
+        // SFTP
     }
 }

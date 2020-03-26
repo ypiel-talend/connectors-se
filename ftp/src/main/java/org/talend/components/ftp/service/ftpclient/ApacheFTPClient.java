@@ -54,13 +54,6 @@ public class ApacheFTPClient extends GenericFTPClient {
 
     public static ApacheFTPClient createFTP(FTPDataStore dataStore) {
         FTPClient ftpClient = ftpClient = new FTPClient();
-        if (dataStore.getDateFormat() != null && !"".equals(dataStore.getDateFormat().trim())
-                && dataStore.getRecentDateFormat() != null && !"".equals(dataStore.getRecentDateFormat().trim())) {
-            final FTPClientConfig config = new FTPClientConfig();
-            config.setDefaultDateFormatStr(dataStore.getDateFormat());
-            config.setDefaultDateFormatStr(dataStore.getRecentDateFormat());
-            ftpClient.configure(config);
-        }
 
         ftpClient.setControlKeepAliveTimeout(dataStore.getKeepAliveTimeout());
         ftpClient.setControlKeepAliveReplyTimeout(dataStore.getKeepAliveReplyTimeout());
@@ -88,14 +81,6 @@ public class ApacheFTPClient extends GenericFTPClient {
             throw new UnsupportedOperationException("Unsupported trust type: " + dataStore.getTrustType());
         }
         FTPClient ftpClient = ftps;
-
-        if (dataStore.getDateFormat() != null && !"".equals(dataStore.getDateFormat().trim())
-                && dataStore.getRecentDateFormat() != null && !"".equals(dataStore.getRecentDateFormat().trim())) {
-            final FTPClientConfig config = new FTPClientConfig();
-            config.setDefaultDateFormatStr(dataStore.getDateFormat());
-            config.setDefaultDateFormatStr(dataStore.getRecentDateFormat());
-            ftpClient.configure(config);
-        }
 
         ftpClient.setControlKeepAliveTimeout(dataStore.getKeepAliveTimeout());
         ftpClient.setControlKeepAliveReplyTimeout(dataStore.getKeepAliveReplyTimeout());
@@ -129,11 +114,7 @@ public class ApacheFTPClient extends GenericFTPClient {
 
     @Override
     public void afterAuth(FTPDataStore dataStore) {
-        if (dataStore.isActive()) {
-            ftpClient.enterLocalActiveMode();
-        } else {
-            ftpClient.enterLocalPassiveMode();
-        }
+        ftpClient.enterLocalPassiveMode();
     }
 
     @Override
