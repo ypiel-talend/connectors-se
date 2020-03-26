@@ -118,6 +118,9 @@
         <!-- The XTM customer id that manage the translation of this project-->
         <xtm.customer.id>12240076</xtm.customer.id>
         <xtm.api.url>https://www.xtm-cloud.com/rest-api</xtm.api.url>
+
+        <!-- CVE fix -->
+        <netty-codec.version>4.1.48.Final</netty-codec.version>
     </properties>
 
     <dependencyManagement>
@@ -243,6 +246,11 @@
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
                 <version>${jackson-codehaus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http2</artifactId>
+                <version>${netty-codec.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
