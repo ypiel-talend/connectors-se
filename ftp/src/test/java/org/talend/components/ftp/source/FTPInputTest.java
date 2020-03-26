@@ -23,6 +23,7 @@ import org.mockftpserver.fake.UserAccount;
 import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 import org.slf4j.impl.StaticLoggerBinder;
+import org.talend.components.common.stream.format.LineConfiguration;
 import org.talend.components.common.stream.format.csv.FieldSeparator;
 import org.talend.components.ftp.dataset.FTPDataSet;
 import org.talend.components.ftp.datastore.FTPDataStore;
@@ -85,6 +86,7 @@ public class FTPInputTest {
         FieldSeparator fieldSeparator = new FieldSeparator();
         fieldSeparator.setFieldSeparatorType(FieldSeparator.Type.SEMICOLON);
         configuration.getDataSet().getCsvConfiguration().setFieldSeparator(fieldSeparator);
+        configuration.getDataSet().getCsvConfiguration().setLineConfiguration(new LineConfiguration());
 
         String configURI = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
