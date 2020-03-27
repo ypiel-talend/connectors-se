@@ -59,7 +59,7 @@ import java.util.List;
 // @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false")})
 
 @WithComponents(value = "org.talend.components.ftp")
-@FtpFile(base = "fakeFTP/")
+@FtpFile(base = "fakeFTP/", port = 4523)
 public class FTPInputTest {
 
     @Injected
@@ -79,7 +79,7 @@ public class FTPInputTest {
         datastore.setUseCredentials(true);
         datastore.setUsername(FtpServer.USER);
         datastore.setPassword(FtpServer.PASSWD);
-        datastore.setPort(FtpServer.PORT);
+        datastore.setPort(4523);
 
         FTPDataSet dataset = new FTPDataSet();
         dataset.setDatastore(datastore);

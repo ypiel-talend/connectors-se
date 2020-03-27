@@ -27,4 +27,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface FtpFile {
 
     String base();
+
+    int port() default 21;
 }

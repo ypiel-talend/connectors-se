@@ -44,8 +44,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class FtpServer implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
 
-    public static final int PORT = Integer.valueOf(System.getProperty("org.talend.components.ftp.jupiter.FtpServer.port", "21"));
-
     public static final String USER = "ftpuser";
 
     public static final String PASSWD = "password";
@@ -69,7 +67,7 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
         Optional<FtpFile> ftpFile = AnnotationUtils.findAnnotation(extensionContext.getRequiredTestClass(), FtpFile.class);
 
         if (ftpFile.isPresent()) {
-            if (server == null || !server.isStarted()) {
+            if (server == null) {
                 log.debug("************************** Server START");
 
                 fs = new UnixFakeFileSystem();
@@ -84,7 +82,7 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
                 server = new FakeFtpServer();
                 server.addUserAccount(new UserAccount(USER, PASSWD, "/"));
                 server.setFileSystem(fs);
-                server.setServerControlPort(PORT);
+                server.setServerControlPort(ftpFile.get().port());
                 server.start();
 
                 while (!server.isStarted()) {

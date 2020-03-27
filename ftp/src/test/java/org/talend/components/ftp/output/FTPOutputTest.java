@@ -62,7 +62,7 @@ import java.util.stream.IntStream;
 // @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false")})
 
 @WithComponents(value = "org.talend.components.ftp")
-@FtpFile(base = "fakeFTP/")
+@FtpFile(base = "fakeFTP/", port = 4522)
 public class FTPOutputTest {
 
     @Injected
@@ -85,7 +85,7 @@ public class FTPOutputTest {
 
         FTPDataStore datastore = new FTPDataStore();
         datastore.setHost("localhost");
-        datastore.setPort(FtpServer.PORT);
+        datastore.setPort(4522);
         datastore.setUseCredentials(true);
         datastore.setUsername(FtpServer.USER);
         datastore.setPassword(FtpServer.PASSWD);
@@ -158,7 +158,6 @@ public class FTPOutputTest {
                 return new byte[0];
             }
         }).map(b -> new String(b, StandardCharsets.ISO_8859_1)).forEach(s -> {
-            log.debug(s);
             Arrays.stream(s.split("\r\n")).filter(l -> !"".equals(l.trim())).forEach(csvLines::add);
         });
 
@@ -226,7 +225,6 @@ public class FTPOutputTest {
                 return new byte[0];
             }
         }).map(b -> new String(b, StandardCharsets.ISO_8859_1)).forEach(s -> {
-            log.debug(s);
             Arrays.stream(s.split("\r\n")).filter(l -> !"".equals(l.trim())).forEach(csvLines::add);
         });
 
