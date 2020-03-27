@@ -84,6 +84,7 @@ public class FTPOutputTest {
 
         FTPDataStore datastore = new FTPDataStore();
         datastore.setHost("localhost");
+        datastore.setPort(FtpServer.PORT);
         datastore.setUseCredentials(true);
         datastore.setUsername(FtpServer.USER);
         datastore.setPassword(FtpServer.PASSWD);

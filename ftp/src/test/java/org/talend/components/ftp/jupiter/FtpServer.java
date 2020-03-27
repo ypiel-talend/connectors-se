@@ -75,6 +75,8 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
             server.setFileSystem(fs);
             server.setServerControlPort(PORT);
             server.start();
+
+            while(!server.isStarted()) {}
         }
     }
 
