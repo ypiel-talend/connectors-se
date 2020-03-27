@@ -35,9 +35,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class FtpServer implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
+
+    public static final int PORT = Integer.valueOf(System.getProperty("org.talend.components.ftp.jupiter.FtpServer.port", "21"));
 
     public static final String USER = "ftpuser";
 
@@ -47,19 +50,22 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
 
     private UnixFakeFileSystem fs;
 
+    public static AtomicBoolean started = new AtomicBoolean(false);
+
     @Override
     public void afterAll(ExtensionContext extensionContext) throws Exception {
-        if (server != null) {
-            server.stop();
-            server = null;
-        }
+         if (server != null) {
+         server.stop();
+         server = null;
+         }
     }
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         Optional<FtpFile> ftpFile = AnnotationUtils.findAnnotation(extensionContext.getRequiredTestClass(), FtpFile.class);
 
-        if (ftpFile.isPresent()) {
+        if (ftpFile.isPresent() && !started.get()) {
+            started.set(true);
             fs = new UnixFakeFileSystem();
             fs.setCreateParentDirectoriesAutomatically(true);
             URI baseUri = Thread.currentThread().getContextClassLoader().getResource(ftpFile.get().base() + "rootFTP").toURI();
@@ -70,7 +76,7 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
             server = new FakeFtpServer();
             server.addUserAccount(new UserAccount(USER, PASSWD, "/"));
             server.setFileSystem(fs);
-            server.setServerControlPort(21);
+            server.setServerControlPort(PORT);
             server.start();
         }
     }

@@ -34,6 +34,7 @@ import org.talend.sdk.component.junit.SimpleFactory;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.EnvironmentConfiguration;
 import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
+import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnvironment;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
@@ -51,6 +52,14 @@ import java.util.stream.IntStream;
 @Slf4j
 @Environment(ContextualEnvironment.class)
 @EnvironmentConfiguration(environment = "Contextual", systemProperties = {})
+
+// @Environment(SparkRunnerEnvironment.class)
+// @EnvironmentConfiguration(environment = "Spark", systemProperties = {
+// @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
+// @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
+// @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false"),
+// @EnvironmentConfiguration.Property(key = "spark.driver.bindAddress", value = "3285") })
+
 @WithComponents(value = "org.talend.components.ftp")
 @FtpFile(base = "fakeFTP/")
 public class FTPOutputTest {
