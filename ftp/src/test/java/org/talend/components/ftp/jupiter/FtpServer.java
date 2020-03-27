@@ -50,8 +50,6 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
 
     private UnixFakeFileSystem fs;
 
-    public static AtomicBoolean started = new AtomicBoolean(false);
-
     @Override
     public void afterAll(ExtensionContext extensionContext) throws Exception {
          if (server != null) {
@@ -64,8 +62,7 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         Optional<FtpFile> ftpFile = AnnotationUtils.findAnnotation(extensionContext.getRequiredTestClass(), FtpFile.class);
 
-        if (ftpFile.isPresent() && !started.get()) {
-            started.set(true);
+        if (ftpFile.isPresent()) {
             fs = new UnixFakeFileSystem();
             fs.setCreateParentDirectoriesAutomatically(true);
             URI baseUri = Thread.currentThread().getContextClassLoader().getResource(ftpFile.get().base() + "rootFTP").toURI();
