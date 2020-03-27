@@ -38,12 +38,10 @@ public class SizeAwareOutputStream extends OutputStream {
     @Override
     public void flush() throws IOException {
         out.flush();
-        log.debug(this + "flush");
     }
 
     @Override
     public void close() throws IOException {
         out.close();
-        log.debug(this + "close");
     }
 }
