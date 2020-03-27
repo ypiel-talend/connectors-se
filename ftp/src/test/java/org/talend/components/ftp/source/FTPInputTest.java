@@ -12,6 +12,7 @@
  */
 package org.talend.components.ftp.source;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -55,8 +56,7 @@ import java.util.List;
 // @EnvironmentConfiguration(environment = "Spark", systemProperties = {
 // @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
 // @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
-// @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false"),
-// @EnvironmentConfiguration.Property(key = "spark.driver.bindAddress", value = "3205") })
+// @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false")})
 
 @WithComponents(value = "org.talend.components.ftp")
 @FtpFile(base = "fakeFTP/")
@@ -113,7 +113,6 @@ public class FTPInputTest {
 
         Assertions.assertNotNull(records);
         Assertions.assertEquals(207, records.size());
-
     }
 
 }

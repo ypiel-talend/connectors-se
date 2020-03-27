@@ -12,10 +12,12 @@
  */
 package org.talend.components.ftp.output;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockftpserver.fake.filesystem.DirectoryEntry;
 import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 import org.slf4j.impl.StaticLoggerBinder;
@@ -57,8 +59,7 @@ import java.util.stream.IntStream;
 // @EnvironmentConfiguration(environment = "Spark", systemProperties = {
 // @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
 // @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
-// @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false"),
-// @EnvironmentConfiguration.Property(key = "spark.driver.bindAddress", value = "3285") })
+// @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false")})
 
 @WithComponents(value = "org.talend.components.ftp")
 @FtpFile(base = "fakeFTP/")
@@ -99,8 +100,12 @@ public class FTPOutputTest {
 
     @EnvironmentalTest
     public void testRecordLimit(UnixFakeFileSystem fileSystem) {
+        String path = "/out1";
+        fileSystem.add(new DirectoryEntry(path));
         int nbRecords = 210;
-        configuration.getDataSet().setPath("/out1");
+        int expectedFiles = 5;
+
+        configuration.getDataSet().setPath(path);
         configuration.getDataSet().setFormat(FTPDataSet.Format.CSV);
         configuration.setLimitBy(FTPOutputConfiguration.LimitBy.RECORDS);
         configuration.setRecordsLimit(50);
@@ -120,9 +125,26 @@ public class FTPOutputTest {
         Job.components().component("source", "test://emitter").component("output", "FTP://FTPOutput?" + configURI).connections()
                 .from("source").to("output").build().run();
 
-        List<FileEntry> files = fileSystem.listFiles("/out1");
+        // Waiting for completion
+        List<FileEntry> files = fileSystem.listFiles(path);
+        int nbFiles = files.size();
+        int nbRetry = 0;
+        int maxNbRetries = 5;
+        while (nbFiles < expectedFiles && nbRetry < maxNbRetries) {
+            files = fileSystem.listFiles(path);
+            nbFiles = files.size();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (nbRetry > maxNbRetries) {
+            Assertions.fail("Wrong number of files generated : " + nbFiles + " instead of " + expectedFiles);
+        }
+
         List<String> csvLines = new ArrayList<>();
-        files.stream().filter(f -> f.getName() != "/out1/file1.txt").map(FileEntry::createInputStream).map(is -> {
+        files.stream().map(FileEntry::createInputStream).map(is -> {
             try (ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[1024];
                 int read = 0;
@@ -145,13 +167,16 @@ public class FTPOutputTest {
 
     @EnvironmentalTest
     public void testSizeLimit(UnixFakeFileSystem fileSystem) {
+        String path = "/out2";
+        fileSystem.add(new DirectoryEntry(path));
         int nbRecords = 200;
-        configuration.getDataSet().setPath("/out2");
+        int expectedFiles = 4;
+
+        configuration.getDataSet().setPath(path);
         configuration.getDataSet().setFormat(FTPDataSet.Format.CSV);
         configuration.setLimitBy(FTPOutputConfiguration.LimitBy.SIZE);
         configuration.setSizeLimit(1);
         configuration.setSizeUnit(FTPOutputConfiguration.SizeUnit.KB);
-        configuration.setRecordsLimit(50);
 
         String configURI = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
@@ -168,9 +193,26 @@ public class FTPOutputTest {
         Job.components().component("source", "test://emitter").component("output", "FTP://FTPOutput?" + configURI).connections()
                 .from("source").to("output").build().run();
 
-        List<FileEntry> files = fileSystem.listFiles("/out2");
+        // Waiting for completion
+        List<FileEntry> files = fileSystem.listFiles(path);
+        int nbFiles = files.size();
+        int nbRetry = 0;
+        int maxNbRetries = 5;
+        while (nbFiles < expectedFiles && nbRetry < maxNbRetries) {
+            files = fileSystem.listFiles(path);
+            nbFiles = files.size();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (nbRetry > maxNbRetries) {
+            Assertions.fail("Wrong number of files generated : " + nbFiles + " instead of " + expectedFiles);
+        }
+
         List<String> csvLines = new ArrayList<>();
-        files.stream().filter(f -> f.getName() != "/out2/file1.txt").map(FileEntry::createInputStream).map(is -> {
+        files.stream().map(FileEntry::createInputStream).map(is -> {
             try (ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[1024];
                 int read = 0;

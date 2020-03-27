@@ -13,6 +13,7 @@
 package org.talend.components.ftp.jupiter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.set.SynchronizedSet;
 import org.apache.commons.net.ftp.FTPFile;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -34,8 +35,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class FtpServer implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
@@ -52,10 +56,12 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
 
     @Override
     public void afterAll(ExtensionContext extensionContext) throws Exception {
-         if (server != null) {
-         server.stop();
-         server = null;
-         }
+
+        if (server != null && server.isStarted()) {
+            log.debug("************************** Server STOP");
+            server.stop();
+            server = null;
+        }
     }
 
     @Override
@@ -63,20 +69,27 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
         Optional<FtpFile> ftpFile = AnnotationUtils.findAnnotation(extensionContext.getRequiredTestClass(), FtpFile.class);
 
         if (ftpFile.isPresent()) {
-            fs = new UnixFakeFileSystem();
-            fs.setCreateParentDirectoriesAutomatically(true);
-            URI baseUri = Thread.currentThread().getContextClassLoader().getResource(ftpFile.get().base() + "rootFTP").toURI();
-            File ftpResourceDir = new File(baseUri).getParentFile();
-            fs.add(new DirectoryEntry("/"));
-            Arrays.stream(ftpResourceDir.listFiles()).filter(f -> !("rootFTP".equals(f.getName()))).forEach(f -> addInFs(f, ""));
+            if (server == null || !server.isStarted()) {
+                log.debug("************************** Server START");
 
-            server = new FakeFtpServer();
-            server.addUserAccount(new UserAccount(USER, PASSWD, "/"));
-            server.setFileSystem(fs);
-            server.setServerControlPort(PORT);
-            server.start();
+                fs = new UnixFakeFileSystem();
+                fs.setCreateParentDirectoriesAutomatically(true);
+                URI baseUri = Thread.currentThread().getContextClassLoader().getResource(ftpFile.get().base() + "rootFTP")
+                        .toURI();
+                File ftpResourceDir = new File(baseUri).getParentFile();
+                fs.add(new DirectoryEntry("/"));
+                Arrays.stream(ftpResourceDir.listFiles()).filter(f -> !("rootFTP".equals(f.getName())))
+                        .forEach(f -> addInFs(f, ""));
 
-            while(!server.isStarted()) {}
+                server = new FakeFtpServer();
+                server.addUserAccount(new UserAccount(USER, PASSWD, "/"));
+                server.setFileSystem(fs);
+                server.setServerControlPort(PORT);
+                server.start();
+
+                while (!server.isStarted()) {
+                }
+            }
         }
     }
 
