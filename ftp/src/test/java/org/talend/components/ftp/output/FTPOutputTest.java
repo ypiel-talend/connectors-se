@@ -17,14 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockftpserver.fake.filesystem.DirectoryEntry;
-import org.mockftpserver.fake.filesystem.FileEntry;
-import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 import org.slf4j.impl.StaticLoggerBinder;
 import org.talend.components.ftp.dataset.FTPDataSet;
 import org.talend.components.ftp.datastore.FTPDataStore;
-import org.talend.components.ftp.jupiter.FtpFile;
-import org.talend.components.ftp.jupiter.FtpServer;
 import org.talend.components.ftp.source.FTPInputConfiguration;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
@@ -41,6 +36,8 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.manager.chain.Job;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -62,11 +59,14 @@ import java.util.stream.IntStream;
 // @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false")})
 
 @WithComponents(value = "org.talend.components.ftp")
-@FtpFile(base = "fakeFTP/", port = 4522)
 public class FTPOutputTest {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
+
+    @Container
+    public GenericContainer ftpContainer = new GenericContainer("onekilo79/ftpd_test")
+            .withExposedPorts(21);
 
     @Service
     public RecordBuilderFactory rbf;
@@ -85,10 +85,10 @@ public class FTPOutputTest {
 
         FTPDataStore datastore = new FTPDataStore();
         datastore.setHost("localhost");
-        datastore.setPort(4522);
+        datastore.setPort(21);
         datastore.setUseCredentials(true);
-        datastore.setUsername(FtpServer.USER);
-        datastore.setPassword(FtpServer.PASSWD);
+        datastore.setUsername("user");
+        datastore.setPassword("passw");
 
         FTPDataSet dataset = new FTPDataSet();
         dataset.setDatastore(datastore);
@@ -99,7 +99,7 @@ public class FTPOutputTest {
     }
 
     @EnvironmentalTest
-    public void testRecordLimit(UnixFakeFileSystem fileSystem) {
+    public void testRecordLimit() {
         String path = "/out1";
         fileSystem.add(new DirectoryEntry(path));
         int nbRecords = 210;
