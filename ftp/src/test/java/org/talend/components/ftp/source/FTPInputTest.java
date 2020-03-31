@@ -14,22 +14,17 @@ package org.talend.components.ftp.source;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.mockftpserver.fake.FakeFtpServer;
-import org.mockftpserver.fake.UserAccount;
-import org.mockftpserver.fake.filesystem.FileEntry;
-import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 import org.slf4j.impl.StaticLoggerBinder;
 import org.talend.components.common.stream.format.LineConfiguration;
 import org.talend.components.common.stream.format.csv.FieldSeparator;
 import org.talend.components.ftp.dataset.FTPDataSet;
 import org.talend.components.ftp.datastore.FTPDataStore;
-import org.talend.components.ftp.jupiter.FtpFile;
-import org.talend.components.ftp.jupiter.FtpServer;
 import org.talend.components.ftp.service.FTPService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
@@ -43,6 +38,11 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.manager.chain.Job;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.util.List;
@@ -59,16 +59,30 @@ import java.util.List;
 // @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false")})
 
 @WithComponents(value = "org.talend.components.ftp")
-@FtpFile(base = "fakeFTP/", port = 4523)
+@Testcontainers
 public class FTPInputTest {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
 
+    @Container
+    public GenericContainer ftpContainer = new GenericContainer("stilliard/pure-ftpd:latest")
+            .withExposedPorts(21)
+            .withEnv("PUBLICHOST", "localhost")
+            .withEnv("ADDED_FLAGS", "-d")
+            .withEnv("FTP_USER_NAME", "user")
+            .withEnv("FTP_USER_PASS", "passwd")
+            .withEnv("FTP_USER_HOME", "/home/ftpusers")
+            .withLogConsumer(new Slf4jLogConsumer(log))
+            .withClasspathResourceMapping("fakeFTP", "/home/ftpusers", BindMode.READ_WRITE)
+            .withCommand();
+
     private FTPInputConfiguration configuration;
 
     @BeforeEach
     void buildConfig() {
+
+        log.debug("port=" + ftpContainer.getMappedPort(21));
 
         final StaticLoggerBinder binder = StaticLoggerBinder.getSingleton();
 
@@ -77,9 +91,9 @@ public class FTPInputTest {
         FTPDataStore datastore = new FTPDataStore();
         datastore.setHost("localhost");
         datastore.setUseCredentials(true);
-        datastore.setUsername(FtpServer.USER);
-        datastore.setPassword(FtpServer.PASSWD);
-        datastore.setPort(4523);
+        datastore.setUsername("user");
+        datastore.setPassword("passwd");
+        datastore.setPort(ftpContainer.getMappedPort(21));
 
         FTPDataSet dataset = new FTPDataSet();
         dataset.setDatastore(datastore);
