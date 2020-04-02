@@ -39,6 +39,13 @@ public class JsonToRecord {
         this.factory = factory;
     }
 
+    public Record toRecord(final Schema schema, final JsonObject object) {
+        final Record record = toRecord(object);
+
+        final Record newRec = factory.newRecordBuilder(schema, record).build();
+        return newRec;
+    }
+
     /*
      * Copy from TCK RecordConverters.java
      * Just removing dependency to JsonLorg.apache.johnzon.core.JsonLongImpl

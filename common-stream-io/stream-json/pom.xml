@@ -42,6 +42,7 @@
       <artifactId>connectors-test-bom</artifactId>
       <type>pom</type>
     </dependency>
+
   </dependencies>
 
   <build>

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.common.stream.input.json.jsonToRecord.JsonToRecord;
 import org.talend.components.common.stream.output.json.RecordToJson;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 
@@ -26,7 +27,11 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 
 class JsonToRecordTest {
 
@@ -94,8 +99,35 @@ class JsonToRecordTest {
     }
 
     private JsonObject getJsonObject(String content) {
-        try (JsonReader reader = Json.createReader(new StringReader(content))) {
+        return getJsonObject(new StringReader(content));
+    }
+
+    private JsonObject getJsonObject(final Reader content) {
+        try (JsonReader reader = Json.createReader(content)) {
             return reader.readObject();
         }
     }
+
+    @Test
+    void withAReferenceSchema() {
+        InputStream isRef = getClass().getClassLoader().getResourceAsStream("withComputedSchemaRef.json");
+        final JsonObject jsonObjectRef = getJsonObject(new InputStreamReader(isRef));
+        final Record recordRef = toRecord.toRecord(jsonObjectRef);
+
+        InputStream is = getClass().getClassLoader().getResourceAsStream("withComputedSchema.json");
+        final JsonObject jsonObject = getJsonObject(new InputStreamReader(is));
+
+        final Record record = toRecord.toRecord(recordRef.getSchema(), jsonObject);
+
+        Assertions.assertEquals(Schema.Type.RECORD, record.getSchema().getType());
+        Assertions.assertEquals(4, record.getSchema().getEntries().size());
+        Assertions.assertEquals(3, record.getSchema().getEntries().get(2).getElementSchema().getEntries().size());
+        Assertions.assertEquals(3, record.getSchema().getEntries().get(3).getElementSchema().getEntries().size());
+
+    }
+
+    private Schema.Entry buildEntry(final RecordBuilderFactory factory, final String name, final Schema.Type type) {
+        return factory.newEntryBuilder().withType(type).withName(name).build();
+    }
+
 }

@@ -1,0 +1,13 @@
+{
+  "aaa" : "a value",
+  "aaabis" : "a bis value",
+  "bbb" : {
+    "ccc" : 123,
+    "cccbis" : true,
+    "ddd" : "d value"
+  },
+  "eee" : [
+    {"fff" :  456, "ggg" : "g value", "hhh" :  "h value"},
+    {"fff" :  456, "ggg" : "g value"}
+  ]
+}
