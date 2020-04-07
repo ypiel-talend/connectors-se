@@ -12,7 +12,18 @@ def dockerCredentials = usernamePassword(
 	credentialsId: 'docker-registry-credentials',
     passwordVariable: 'DOCKER_PASSWORD',
     usernameVariable: 'DOCKER_LOGIN')
-
+def netsuiteCredentials = usernamePassword(
+                                credentialsId: 'netsuite-integration',
+                                usernameVariable: 'NETSUITE_INTEGRATION_USER',
+                                passwordVariable: 'NETSUITE_INTEGRATION_PASSWORD')
+def netsuiteConsumerCredentials = usernamePassword(
+                                credentialsId: 'netsuite-integration-consumer',
+                                usernameVariable: 'NETSUITE_INTEGRATION_CONSUMER_USER',
+                                passwordVariable: 'NETSUITE_INTEGRATION_CONSUMER_PASSWORD')
+def netsuiteTokenCredentials = usernamePassword(
+                                credentialsId: 'netsuite-integration-token',
+                                usernameVariable: 'NETSUITE_INTEGRATION_TOKEN_USER',
+                                passwordVariable: 'NETSUITE_INTEGRATION_TOKEN_PASSWORD')
 
 def PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
 
@@ -91,21 +102,7 @@ spec:
                     // for next concurrent builds
                     sh 'for i in ci_documentation ci_nexus ci_site; do rm -Rf $i; rsync -av . $i; done'
                     // real task
-                    withCredentials([
-                            nexusCredentials
-                            , usernamePassword(
-                                credentialsId: 'netsuite-integration',
-                                usernameVariable: 'NETSUITE_INTEGRATION_USER',
-                                passwordVariable: 'NETSUITE_INTEGRATION_PASSWORD')
-                            , usernamePassword(
-                                credentialsId: 'netsuite-integration-consumer',
-                                usernameVariable: 'NETSUITE_INTEGRATION_CONSUMER_USER',
-                                passwordVariable: 'NETSUITE_INTEGRATION_CONSUMER_PASSWORD')
-                            , usernamePassword(
-                                credentialsId: 'netsuite-integration-token',
-                                usernameVariable: 'NETSUITE_INTEGRATION_TOKEN_USER',
-                                passwordVariable: 'NETSUITE_INTEGRATION_TOKEN_PASSWORD')
-                    ]) {
+                    withCredentials([nexusCredentials, netsuiteCredentials, netsuiteConsumerCredentials, netsuiteTokenCredentials]) {
                         script {
                             sh "mvn -U -B -s .jenkins/settings.xml clean install -PITs -Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/ -e ${talendOssRepositoryArg}"
                         }
@@ -229,7 +226,7 @@ spec:
                 }
             }
             steps {
-            	withCredentials([gitCredentials, nexusCredentials]) {
+            	withCredentials([gitCredentials, nexusCredentials, netsuiteCredentials, netsuiteConsumerCredentials, netsuiteTokenCredentials]) {
 					container('main') {
                         sh "sh .jenkins/release.sh"
               		}
