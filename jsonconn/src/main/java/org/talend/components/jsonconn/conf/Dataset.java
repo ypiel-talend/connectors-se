@@ -13,8 +13,11 @@
 package org.talend.components.jsonconn.conf;
 
 import lombok.Data;
+import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
@@ -22,7 +25,14 @@ import java.io.Serializable;
 @DataSet("dataset")
 @Documentation("")
 @Data
-public class Dataset implements Serializable {
+@GridLayout({ @GridLayout.Row("datastore"), @GridLayout.Row("format"), @GridLayout.Row("json"), @GridLayout.Row("jsonPointer") })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
+public class Dataset extends JsonConfiguration implements Serializable {
+
+    public enum FORMAT {
+        RECORD,
+        JSON_OBJECT
+    }
 
     @Option
     @Documentation("")
@@ -30,6 +40,12 @@ public class Dataset implements Serializable {
 
     @Option
     @Documentation("")
+    @Required
+    FORMAT format;
+
+    @Option
+    @Documentation("")
+    @Required
     String json;
 
 }

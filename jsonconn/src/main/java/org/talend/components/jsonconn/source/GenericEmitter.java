@@ -14,6 +14,7 @@ package org.talend.components.jsonconn.source;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jsonconn.conf.Config;
+import org.talend.components.jsonconn.conf.Dataset;
 import org.talend.components.jsonconn.service.JsonService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -28,9 +29,9 @@ import java.io.Serializable;
 @Slf4j
 @Version(1)
 @Icon(Icon.IconType.STAR)
-@Emitter(name = "jsonInput")
+@org.talend.sdk.component.api.input.Emitter(name = "genericInput")
 @Documentation("")
-public class JsonEmitter implements Serializable {
+public class GenericEmitter implements Serializable {
 
     private final Config config;
 
@@ -38,19 +39,23 @@ public class JsonEmitter implements Serializable {
 
     private transient boolean done = false;
 
-    public JsonEmitter(@Option("configuration") final Config config, final JsonService service) {
+    public GenericEmitter(@Option("configuration") final Config config, final JsonService service) {
         this.service = service;
         this.config = config;
     }
 
     @Producer
-    public JsonObject next() {
+    public Object next() {
         if (done) {
             return null;
         }
         done = true;
 
-        return service.toJsonObject(config.getDataset().getJson());
+        if (config.getDataset().getFormat() == Dataset.FORMAT.JSON_OBJECT) {
+            return service.toJsonObject(config.getDataset().getJson());
+        } else {
+            return service.toRecord(config.getDataset());
+        }
     }
 
 }
