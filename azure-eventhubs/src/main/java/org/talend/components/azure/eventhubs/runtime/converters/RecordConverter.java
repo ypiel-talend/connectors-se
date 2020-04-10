@@ -10,30 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.azure.eventhubs.service;
+package org.talend.components.azure.eventhubs.runtime.converters;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 
-@Internationalized
-public interface Messages {
+// TODO should be extracted to common library
+public interface RecordConverter<T> {
 
-    String healthCheckOk();
+    Schema inferSchema(T record);
 
-    String healthCheckFailed();
+    Record toRecord(T record) throws Throwable;
 
-    String errorUnsupportedType(String fieldType, String fieldName);
+    T fromRecord(Record record) throws Throwable;
 
-    String errorWrongSequenceNumber(long seq, long latestSeq);
-
-    String errorMissingElement(String element);
-
-    String invalidatedSASURL();
-
-    String missingConsumerGroup();
-
-    String missingEnqueuedDateTime();
-
-    String missingContainerName();
-
-    String missingCheckpointStore();
 }

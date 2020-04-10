@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -24,15 +24,18 @@ import org.talend.components.azure.eventhubs.dataset.AzureEventHubsDataSet;
 import org.talend.components.azure.eventhubs.datastore.AzureEventHubsDataStore;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
-import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @Disabled("Azure eventhubs credentials is not ready on ci")
 @WithComponents("org.talend.components.azure.eventhubs")
-class UiActionServiceTest extends AzureEventHubsTestBase {
+class AzureEventhubsServiceTest extends AzureEventHubsTestBase {
 
     private static final String INVALID_ENDPOINT = "sb://not-exit-ns.servicebus.windows.net";
+
+    private static final String INVALID_NAMESPACE = "not-exit-ns";
+
+    private static final String VALID_NAMESPACE = "comptest";
 
     // Bad config
     private static final String BAD_SHARED_EVENTHUB_NAME = "not-exist-event-hub";
@@ -42,7 +45,7 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
     private static final String BAD_SASKEY = "zn+KhzbKgnJ7GZJ+jwuFKtHitV7bmHDBjq9YF5g0348=";
 
     @Service
-    private UiActionService service;
+    private AzureEventhubsService service;
 
     @Service
     private Messages i18n;
@@ -58,9 +61,34 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
 
     @Test
     @DisplayName("Test endpoint Failed [Invalid]")
-    public void validateConnectionFailed() {
+    public void validateConnectionKO() {
         final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
+        dataStore.setSpecifyEndpoint(true);
         dataStore.setEndpoint(INVALID_ENDPOINT);
+        final HealthCheckStatus status = service.checkEndpoint(dataStore, i18n);
+        assertNotNull(status);
+        assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
+        assertFalse(status.getComment().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test namespace OK [Valid]")
+    public void checkSpecifyNamespaceOK() {
+        final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
+        dataStore.setSpecifyEndpoint(false);
+        dataStore.setNamespace(VALID_NAMESPACE);
+        final HealthCheckStatus status = service.checkEndpoint(dataStore, i18n);
+        assertNotNull(status);
+        assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
+        assertFalse(status.getComment().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test namespace Failed [Invalid]")
+    public void checkSpecifyNamespaceKO() {
+        final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
+        dataStore.setSpecifyEndpoint(false);
+        dataStore.setNamespace(INVALID_NAMESPACE);
         final HealthCheckStatus status = service.checkEndpoint(dataStore, i18n);
         assertNotNull(status);
         assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
@@ -106,6 +134,7 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
     @DisplayName("Test bad SAS Key [Invalid]")
     public void checkBadSASKey() {
         final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
+        dataStore.setSpecifyEndpoint(true);
         dataStore.setEndpoint(ENDPOINT);
         dataStore.setSasKeyName(SASKEY_NAME);
         dataStore.setSasKey(BAD_SASKEY);
@@ -113,22 +142,6 @@ class UiActionServiceTest extends AzureEventHubsTestBase {
         assertNotNull(status);
         assertEquals(ValidationResult.Status.KO, status.getStatus());
         assertFalse(status.getComment().isEmpty());
-    }
-
-    @Test
-    @DisplayName("Test check list of partion ids [Valid]")
-    public void checkListPartionIds() {
-        final AzureEventHubsDataStore dataStore = new AzureEventHubsDataStore();
-        dataStore.setEndpoint(ENDPOINT);
-        dataStore.setSasKeyName(SASKEY_NAME);
-        dataStore.setSasKey(SASKEY);
-
-        AzureEventHubsDataSet dataSet = new AzureEventHubsDataSet();
-        dataSet.setConnection(dataStore);
-        dataSet.setEventHubName(SHARED_EVENTHUB_NAME);
-        final SuggestionValues idValues = service.listPartitionIds(dataSet);
-        assertNotNull(idValues);
-        assertEquals(4, idValues.getItems().size());
     }
 
 }

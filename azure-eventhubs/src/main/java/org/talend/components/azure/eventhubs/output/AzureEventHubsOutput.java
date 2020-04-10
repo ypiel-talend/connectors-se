@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,19 +12,22 @@
  */
 package org.talend.components.azure.eventhubs.output;
 
-import java.io.IOException;
+import static com.azure.messaging.eventhubs.implementation.ClientConstants.ENDPOINT_FORMAT;
+import static org.talend.components.azure.eventhubs.common.AzureEventHubsConstant.DEFAULT_DOMAIN_NAME;
+
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.Locale;
 
 import javax.annotation.PreDestroy;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonReaderFactory;
 import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+import javax.json.spi.JsonProvider;
 
+import org.talend.components.azure.eventhubs.runtime.adapter.ContentAdapterFactory;
+import org.talend.components.azure.eventhubs.runtime.adapter.EventDataContentAdapter;
 import org.talend.components.azure.eventhubs.service.Messages;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -36,50 +39,41 @@ import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.eventhubs.BatchOptions;
-import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
-import com.microsoft.azure.eventhubs.EventData;
-import com.microsoft.azure.eventhubs.EventDataBatch;
-import com.microsoft.azure.eventhubs.EventHubClient;
-import com.microsoft.azure.eventhubs.EventHubException;
-import com.microsoft.azure.eventhubs.PartitionSender;
+import com.azure.messaging.eventhubs.EventData;
+import com.azure.messaging.eventhubs.EventDataBatch;
+import com.azure.messaging.eventhubs.EventHubClientBuilder;
+import com.azure.messaging.eventhubs.EventHubProducerClient;
+import com.azure.messaging.eventhubs.models.CreateBatchOptions;
 
 import lombok.extern.slf4j.Slf4j;
 
-import static org.talend.components.azure.eventhubs.common.AzureEventHubsConstant.DEFAULT_CHARSET;
-
 @Slf4j
 @Version
-@Icon(Icon.IconType.DEFAULT)
+@Icon(value = Icon.IconType.CUSTOM, custom = "azure-event-hubs")
 @Processor(name = "AzureEventHubsOutput")
 @Documentation("AzureEventHubs output")
 public class AzureEventHubsOutput implements Serializable {
 
     private final AzureEventHubsOutputConfiguration configuration;
 
-    private final LocalConfiguration localConfiguration;
-
     private transient List<Record> records;
 
-    private Messages messages;
+    private transient Messages messages;
 
     private boolean init;
 
-    private ScheduledExecutorService executorService;
+    private transient EventHubProducerClient eventHubClient;
 
-    private EventHubClient eventHubClient;
-
-    private PartitionSender partitionSender;
-
-    private Jsonb jsonb;
+    private EventDataContentAdapter contentAdapter;
 
     public AzureEventHubsOutput(@Option("configuration") final AzureEventHubsOutputConfiguration outputConfig,
-            final LocalConfiguration localConfiguration, final Messages messages) {
+            RecordBuilderFactory recordBuilderFactory, JsonBuilderFactory jsonBuilderFactory, JsonProvider jsonProvider,
+            JsonReaderFactory readerFactory, Jsonb jsonb, Messages messages) {
         this.configuration = outputConfig;
-        this.localConfiguration = localConfiguration;
+        this.contentAdapter = ContentAdapterFactory.getAdapter(configuration.getDataset(), recordBuilderFactory,
+                jsonBuilderFactory, jsonProvider, readerFactory, jsonb, messages);
         this.messages = messages;
     }
 
@@ -89,7 +83,7 @@ public class AzureEventHubsOutput implements Serializable {
     }
 
     @ElementListener
-    public void elementListener(@Input final Record record) throws URISyntaxException, IOException, EventHubException {
+    public void elementListener(@Input final Record record) {
         if (!init) {
             // prevent creating db connection if no records
             // it's mostly useful for streaming scenario
@@ -98,20 +92,21 @@ public class AzureEventHubsOutput implements Serializable {
         records.add(record);
     }
 
-    private void lazyInit() throws URISyntaxException, IOException, EventHubException {
+    private void lazyInit() {
         this.init = true;
-        executorService = Executors.newScheduledThreadPool(1);
-        final ConnectionStringBuilder connStr = new ConnectionStringBuilder()//
-                .setEndpoint(new URI(configuration.getDataset().getConnection().getEndpoint()));
-        connStr.setSasKeyName(configuration.getDataset().getConnection().getSasKeyName());
-        connStr.setSasKey(configuration.getDataset().getConnection().getSasKey());
-        connStr.setEventHubName(configuration.getDataset().getEventHubName());
-
-        eventHubClient = EventHubClient.createSync(connStr.toString(), executorService);
-        if (AzureEventHubsOutputConfiguration.PartitionType.SPECIFY_PARTITION_ID.equals(configuration.getPartitionType())) {
-            partitionSender = eventHubClient.createPartitionSenderSync(configuration.getPartitionId());
+        String endpoint = null;
+        if (configuration.getDataset().getConnection().isSpecifyEndpoint()) {
+            endpoint = configuration.getDataset().getConnection().getEndpoint();//
+        } else {
+            endpoint = String.format(Locale.US, ENDPOINT_FORMAT, configuration.getDataset().getConnection().getNamespace(),
+                    DEFAULT_DOMAIN_NAME);
         }
-        jsonb = JsonbBuilder.create();
+
+        String ehConnString = String.format("Endpoint=%s;SharedAccessKeyName=%s;SharedAccessKey=%s;EntityPath=%s", endpoint,
+                configuration.getDataset().getConnection().getSasKeyName(),
+                configuration.getDataset().getConnection().getSasKey(), configuration.getDataset().getEventHubName());
+
+        eventHubClient = new EventHubClientBuilder().connectionString(ehConnString).buildProducerClient();
 
     }
 
@@ -119,21 +114,20 @@ public class AzureEventHubsOutput implements Serializable {
     public void afterGroup() {
 
         try {
-            BatchOptions options = new BatchOptions();
+            EventDataBatch events = null;
             if (AzureEventHubsOutputConfiguration.PartitionType.COLUMN.equals(configuration.getPartitionType())) {
-                options.partitionKey = configuration.getKeyColumn();
-            }
-            final EventDataBatch events = eventHubClient.createBatch(options);
-            for (Record record : records) {
-                byte[] payloadBytes = recordToCsvByteArray(record);
-                events.tryAdd(EventData.create(payloadBytes));
-            }
-            if (AzureEventHubsOutputConfiguration.PartitionType.SPECIFY_PARTITION_ID.equals(configuration.getPartitionType())) {
-                partitionSender.sendSync(events);
+                CreateBatchOptions options = new CreateBatchOptions();
+                options.setPartitionKey(configuration.getKeyColumn());
+                events = eventHubClient.createBatch(options);
             } else {
-                eventHubClient.sendSync(events);
+                events = eventHubClient.createBatch();
             }
-        } catch (final Exception e) {
+            for (Record record : records) {
+                byte[] payloadBytes = contentAdapter.toBytes(record);
+                events.tryAdd(new EventData(payloadBytes));
+            }
+            eventHubClient.send(events);
+        } catch (final Throwable e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
@@ -141,78 +135,12 @@ public class AzureEventHubsOutput implements Serializable {
     @PreDestroy
     public void preDestroy() {
         try {
-            if (partitionSender != null) {
-                partitionSender.closeSync();
+            if (eventHubClient != null) {
+                eventHubClient.close();
             }
-            eventHubClient.closeSync();
-            executorService.shutdown();
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
-    private byte[] recordToCsvByteArray(Record record) throws IOException {
-        // TODO make delimited configurable
-        StringBuilder sb = new StringBuilder();
-        Schema schema = record.getSchema();
-        boolean isFirstColumn = true;
-        for (Schema.Entry field : schema.getEntries()) {
-            if (!isFirstColumn) {
-                sb.append(";");
-            } else {
-                isFirstColumn = false;
-            }
-            sb.append(getStringValue(record, field));
-
-        }
-        byte[] bytes = sb.toString().getBytes(DEFAULT_CHARSET);
-        sb.setLength(0);
-        return bytes;
-    }
-
-    private String getStringValue(Record record, Schema.Entry field) throws IOException {
-        Object value = null;
-        switch (field.getType()) {
-        case STRING:
-            value = record.getString(field.getName());
-            break;
-        case BOOLEAN:
-            if (record.getOptionalBoolean(field.getName()).isPresent()) {
-                value = record.getBoolean(field.getName());
-            }
-            break;
-        case DOUBLE:
-            if (record.getOptionalDouble(field.getName()).isPresent()) {
-                value = record.getDouble(field.getName());
-            }
-            break;
-        case FLOAT:
-            if (record.getOptionalFloat(field.getName()).isPresent()) {
-                value = record.getFloat(field.getName());
-            }
-            break;
-        case LONG:
-            if (record.getOptionalLong(field.getName()).isPresent()) {
-                value = record.getLong(field.getName());
-            }
-            break;
-        case INT:
-            if (record.getOptionalInt(field.getName()).isPresent()) {
-                value = record.getInt(field.getName());
-            }
-            break;
-        case DATETIME:
-            value = record.getDateTime(field.getName());
-            break;
-        case BYTES:
-            if (record.getOptionalBytes(field.getName()).isPresent()) {
-                value = new String(record.getBytes(field.getName()), DEFAULT_CHARSET);
-            }
-            break;
-        default:
-            throw new IllegalStateException(messages.errorUnsupportedType(field.getType().name(), field.getName()));
-        }
-        return value == null ? "" : String.valueOf(value);
-
-    }
 }
