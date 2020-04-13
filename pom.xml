@@ -53,7 +53,7 @@
         <module>extensions</module>
         <module>pubsub</module>
         <module>netsuite</module>
-        <module>jsonconn</module>
+        <module>record-tester</module>
     </modules>
 
     <scm>
