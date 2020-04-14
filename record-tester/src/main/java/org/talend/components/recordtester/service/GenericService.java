@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.talend.components.recordtester.conf.CodingConfig;
 import org.talend.components.recordtester.conf.Config;
 import org.talend.components.recordtester.conf.Dataset;
+import org.talend.components.recordtester.conf.Feedback;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -55,6 +56,10 @@ public class GenericService {
             config = globalConfig.getCodingConfig();
         }
 
+        return this.get(config);
+    }
+
+    public List<Object> get(final CodingConfig config) {
         final CodingConfig.RECORD_TYPE type = Optional.ofNullable(config.getProvider()).orElse(CodingConfig.RECORD_TYPE.EMPTY);
         RecordProvider provider = null;
         try {
@@ -78,9 +83,31 @@ public class GenericService {
         return services;
     }
 
-    @Update("TEST")
+    @Update("COPY")
     public CodingConfig update(@Option("dataset") final Dataset dataset) throws Exception {
         return dataset.getDsCodingConfig();
+    }
+
+    @Update("FEEDBACK_DS")
+    public Feedback updateds(@Option("dsCodingConfig") final CodingConfig codingConfig) throws Exception {
+        final List<Object> records = this.get(codingConfig);
+
+        StringBuilder sb = new StringBuilder();
+        records.stream().forEach(r -> sb.append(r.toString() + "\n"));
+
+        final Feedback feedback = new Feedback();
+        ;
+        feedback.setFeedback(sb.toString());
+
+        return feedback;
+    }
+
+    @Update("FEEDBACK")
+    public Feedback update(@Option("dataset") final Dataset dataset, @Option("overwriteDataset") final boolean overwriteDataset,
+            @Option("codingConfig") final CodingConfig codingConfig) throws Exception {
+
+        final Feedback feedback = this.updateds(overwriteDataset ? codingConfig : dataset.getDsCodingConfig());
+        return feedback;
     }
 
 }

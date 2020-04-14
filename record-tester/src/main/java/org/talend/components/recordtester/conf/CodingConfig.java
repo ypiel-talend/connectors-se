@@ -84,4 +84,5 @@ public class CodingConfig implements Serializable {
     @ActiveIf(target = "provider", value = "JSON")
     @Documentation("Use jsonToRecord from common-stream-io or TCK RecordConverters")
     private boolean commonio = false;
+
 }

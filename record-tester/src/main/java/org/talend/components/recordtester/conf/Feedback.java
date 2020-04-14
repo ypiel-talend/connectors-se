@@ -13,12 +13,7 @@
 package org.talend.components.recordtester.conf;
 
 import lombok.Data;
-import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Updatable;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.constraint.Required;
-import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -26,30 +21,13 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@DataSet("dataset")
-@Documentation("")
-@GridLayout({ @GridLayout.Row("datastore"), @GridLayout.Row("dsCodingConfig"), @GridLayout.Row("showFeedback"),
-        @GridLayout.Row("feedback") })
+@GridLayout({ @GridLayout.Row("feedback") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
-public class Dataset implements Serializable {
+public class Feedback implements Serializable {
 
     @Option
     @Documentation("")
-    Datastore datastore;
-
-    @Option
-    @Documentation("")
-    CodingConfig dsCodingConfig;
-
-    @Option
-    @Documentation("")
-    boolean showFeedback = false;
-
-    @Option
-    @Documentation("")
-    @ActiveIf(target = "showFeedback", value = "true")
-    @Updatable(value = "FEEDBACK_DS", parameters = { "dsCodingConfig" }, after = "feedback")
     @Code("")
-    private Feedback feedback = new Feedback();
+    String feedback = "";
 
 }

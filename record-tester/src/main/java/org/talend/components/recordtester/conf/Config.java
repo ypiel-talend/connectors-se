@@ -31,7 +31,8 @@ import org.talend.sdk.component.api.service.update.Update;
 import java.io.Serializable;
 
 @Data
-@GridLayout({ @GridLayout.Row("dataset"), @GridLayout.Row("overwriteDataset"), @GridLayout.Row("codingConfig") })
+@GridLayout({ @GridLayout.Row("dataset"), @GridLayout.Row("overwriteDataset"), @GridLayout.Row("codingConfig"),
+        @GridLayout.Row("showFeedback"), @GridLayout.Row("feedback") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
 public class Config implements Serializable {
 
@@ -40,7 +41,7 @@ public class Config implements Serializable {
     Dataset dataset;
 
     @Option
-    @Updatable(value = "TEST", parameters = { "dataset" }, after = "provider")
+    @Updatable(value = "COPY", parameters = { "dataset" }, after = "provider")
     @Documentation("")
     @ActiveIf(target = "overwriteDataset", value = "true")
     CodingConfig codingConfig;
@@ -48,5 +49,17 @@ public class Config implements Serializable {
     @Option
     @Documentation("")
     boolean overwriteDataset = false;
+
+    @Option
+    @Documentation("")
+    @ActiveIf(target = "overwriteDataset", value = "true")
+    boolean showFeedback = false;
+
+    @Option
+    @Documentation("")
+    @ActiveIf(target = "showFeedback", value = "true")
+    @ActiveIf(target = "overwriteDataset", value = "true")
+    @Updatable(value = "FEEDBACK", parameters = { "dataset", "overwriteDataset", "codingConfig" }, after = "feedback")
+    private Feedback feedback = new Feedback();
 
 }
