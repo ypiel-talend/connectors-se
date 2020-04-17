@@ -17,4 +17,4 @@
 #echo ${NETSUITE_INTEGRATION_TOKEN_PASSWORD:0:3}
 
 cd netsuite
-mvn -U -B -s .jenkins/settings.xml clean install -PITs -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/../.jenkins/ -e ${talendOssRepositoryArg}
+mvn -U -B -s ../.jenkins/settings.xml clean install -PITs -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/ -e ${talendOssRepositoryArg}
