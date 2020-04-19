@@ -51,12 +51,12 @@ public abstract class AbstractProvider implements RecordProvider {
         this.jsonProvider = (JsonProvider) services.get(JsonProvider.class);
     }
 
-    protected Schema.Entry newArrayEntry(String name, Schema nested) {
+    public Schema.Entry newArrayEntry(String name, Schema nested) {
         return recordBuilderFactory.newEntryBuilder().withType(Schema.Type.ARRAY).withName(name).withNullable(true)
                 .withElementSchema(nested).build();
     }
 
-    protected Schema.Entry newEntry(Schema.Type type, String name) {
+    public Schema.Entry newEntry(Schema.Type type, String name) {
         return recordBuilderFactory.newEntryBuilder().withName(name).withType(type).withNullable(true).build();
     }
 

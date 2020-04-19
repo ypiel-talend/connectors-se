@@ -1,0 +1,44 @@
+Record getRecord(int i, Schema.Entry arrayEntry, boolean missing) {
+    final Record rec1 = provider.getRecordBuilderFactory()
+                        .newRecordBuilder().withString("aaa", "aaa" + i)
+                        .withString("bbb", "bbb" + i)
+                        .build();
+
+    final Record rec2 = provider.getRecordBuilderFactory().newRecordBuilder()
+                            .withString("aaa", "aaaB" + i)
+                            .withString("bbb", "bbbB" + i)
+                            .build();
+
+    List elts = new ArrayList();
+        elts.add(rec1);
+        elts.add(rec2);
+
+    Record.Builder intermediate = provider.getRecordBuilderFactory().newRecordBuilder()
+                                    .withArray(arrayEntry, elts)
+                                    .withDouble("val1",12.12d);
+
+    if (i % 3 != 0) {
+        intermediate = intermediate.withString("val2", "val2_" + i);
+    } else {
+        if (!missing) {
+          intermediate = intermediate.withString("val2", null);
+        }
+    }
+
+    return intermediate.build();
+}
+
+//--------------------------------------------------------------------------------------------
+
+boolean isMissing = true;
+
+final Schema nestedRecord = provider.getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD)
+                                .withEntry(provider.newEntry(Schema.Type.STRING, "aaa"))
+                                .withEntry(provider.newEntry(Schema.Type.STRING, "bbb"))
+                                .build();
+
+
+for (int i = 1; i <= 10; i++) {
+    final Record record = getRecord(i, provider.newArrayEntry("data", nestedRecord), isMissing);
+    records.add(record);
+}

@@ -13,20 +13,11 @@
 package org.talend.components.recordtester.conf;
 
 import lombok.Data;
-import org.talend.components.recordtester.service.generic.Beanshell;
-import org.talend.components.recordtester.service.generic.Json;
-import org.talend.components.recordtester.service.json.JsonWithArrayWithNull;
-import org.talend.components.recordtester.service.json.JsonWithNull;
-import org.talend.components.recordtester.service.record.Empty;
-import org.talend.components.recordtester.service.record.SchemaWithANull;
-import org.talend.components.recordtester.service.record.SchemaWithMissing;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.service.update.Update;
 
 import java.io.Serializable;
 
@@ -44,7 +35,7 @@ public class Config implements Serializable {
     @Updatable(value = "COPY", parameters = { "dataset" }, after = "provider")
     @Documentation("")
     @ActiveIf(target = "overwriteDataset", value = "true")
-    CodingConfig codingConfig;
+    CodingConfig codingConfig = new CodingConfig();
 
     @Option
     @Documentation("")

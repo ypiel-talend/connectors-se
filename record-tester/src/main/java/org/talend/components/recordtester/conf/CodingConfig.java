@@ -15,11 +15,7 @@ package org.talend.components.recordtester.conf;
 import lombok.Data;
 import org.talend.components.recordtester.service.generic.Beanshell;
 import org.talend.components.recordtester.service.generic.Json;
-import org.talend.components.recordtester.service.json.JsonWithArrayWithNull;
-import org.talend.components.recordtester.service.json.JsonWithNull;
 import org.talend.components.recordtester.service.record.Empty;
-import org.talend.components.recordtester.service.record.SchemaWithANull;
-import org.talend.components.recordtester.service.record.SchemaWithMissing;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -36,10 +32,6 @@ public class CodingConfig implements Serializable {
 
     public enum RECORD_TYPE {
         EMPTY(Empty.class),
-        FIXED_SCHEMA_WITH_A_NULL_VALUE(SchemaWithANull.class),
-        FIXED_SCHEMA_WITH_A_MISSING_VALUE(SchemaWithMissing.class),
-        JSON_WITH_NULL(JsonWithNull.class),
-        JSON_WITH_ARRAY_WITH_NULL(JsonWithArrayWithNull.class),
         BEANSHELL(Beanshell.class),
         JSON(Json.class);
         ;

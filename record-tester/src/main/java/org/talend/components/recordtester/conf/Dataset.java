@@ -15,6 +15,7 @@ package org.talend.components.recordtester.conf;
 import lombok.Data;
 import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
@@ -28,8 +29,8 @@ import java.io.Serializable;
 @Data
 @DataSet("dataset")
 @Documentation("")
-@GridLayout({ @GridLayout.Row("datastore"), @GridLayout.Row("dsCodingConfig"), @GridLayout.Row("showFeedback"),
-        @GridLayout.Row("feedback") })
+@GridLayout({ @GridLayout.Row("datastore"), @GridLayout.Row("file"), @GridLayout.Row("dsCodingConfig"),
+        @GridLayout.Row("showFeedback"), @GridLayout.Row("feedback") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
 public class Dataset implements Serializable {
 
@@ -39,7 +40,13 @@ public class Dataset implements Serializable {
 
     @Option
     @Documentation("")
-    CodingConfig dsCodingConfig;
+    @Suggestable(value = "LIST_FILES")
+    String file = "";
+
+    @Option
+    @Documentation("")
+    @Updatable(value = "LOAD_FILE", parameters = { "file" }, after = "provider")
+    CodingConfig dsCodingConfig = new CodingConfig();
 
     @Option
     @Documentation("")

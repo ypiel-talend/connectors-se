@@ -10,13 +10,23 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.recordtester.service.record;
+package org.talend.components.recordtester.conf;
 
-public class SchemaWithMissing extends SchemaWithANull {
+import lombok.Data;
+import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.widget.Code;
+import org.talend.sdk.component.api.meta.Documentation;
 
-    public SchemaWithMissing() {
-        super();
-        this.setMissing(true);
-    }
+@Data
+@GridLayout({ @GridLayout.Row("content") })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
+public class FileContent {
+
+    @Option
+    @Code("")
+    @Documentation("")
+    private String content = "";
 
 }

@@ -66,54 +66,6 @@ class GenericEmitterTest {
     }
 
     @EnvironmentalTest
-    void testSchemaWithANull() {
-        config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.FIXED_SCHEMA_WITH_A_NULL_VALUE);
-
-        final List<Record> records = getRecords();
-
-        assertEquals(10, records.size());
-        final Record record = records.get(0);
-
-        System.out.println("End.");
-    }
-
-    @EnvironmentalTest
-    void testSchemaWithMissing() {
-        config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.FIXED_SCHEMA_WITH_A_MISSING_VALUE);
-
-        final List<Record> records = getRecords();
-
-        assertEquals(10, records.size());
-        final Record record = records.get(0);
-
-        System.out.println("End.");
-    }
-
-    @EnvironmentalTest
-    void testJsonWithNull() {
-        config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON_WITH_NULL);
-
-        final List<Record> records = getRecords();
-
-        assertEquals(10, records.size());
-        final Record record = records.get(0);
-
-        System.out.println("End.");
-    }
-
-    @EnvironmentalTest
-    void testJsonWithArrayWithNull() {
-        config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON_WITH_ARRAY_WITH_NULL);
-
-        final List<Record> records = getRecords();
-
-        assertEquals(1, records.size());
-        final Record record = records.get(0);
-
-        System.out.println("End.");
-    }
-
-    @EnvironmentalTest
     void testBeanShell() {
         config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.BEANSHELL);
         config.getCodingConfig()
