@@ -14,6 +14,7 @@ package org.talend.components.recordtester.conf;
 
 import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -22,8 +23,9 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@GridLayout({ @GridLayout.Row("dataset"), @GridLayout.Row("overwriteDataset"), @GridLayout.Row("codingConfig"),
-        @GridLayout.Row("showFeedback"), @GridLayout.Row("feedback") })
+@GridLayout({ @GridLayout.Row("dataset"), @GridLayout.Row("overwriteDataset"), @GridLayout.Row("file"),
+        @GridLayout.Row("justLoadFile"), @GridLayout.Row("codingConfig"), @GridLayout.Row("showFeedback"),
+        @GridLayout.Row("feedback") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
 public class Config implements Serializable {
 
@@ -32,7 +34,13 @@ public class Config implements Serializable {
     Dataset dataset;
 
     @Option
-    @Updatable(value = "COPY", parameters = { "dataset" }, after = "provider")
+    @Documentation("")
+    @ActiveIf(target = "overwriteDataset", value = "true")
+    @Suggestable(value = "LIST_FILES")
+    String file = "";
+
+    @Option
+    @Updatable(value = "COPY", parameters = { "file", "justLoadFile" }, after = "provider")
     @Documentation("")
     @ActiveIf(target = "overwriteDataset", value = "true")
     CodingConfig codingConfig = new CodingConfig();
@@ -40,6 +48,11 @@ public class Config implements Serializable {
     @Option
     @Documentation("")
     boolean overwriteDataset = false;
+
+    @Option
+    @Documentation("")
+    @ActiveIf(target = "overwriteDataset", value = "true")
+    boolean justLoadFile = false;
 
     @Option
     @Documentation("")

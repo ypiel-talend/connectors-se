@@ -40,6 +40,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -106,8 +107,12 @@ public class GenericService {
     }
 
     @Update("COPY")
-    public CodingConfig update(@Option("dataset") final Dataset dataset) throws Exception {
-        return dataset.getDsCodingConfig();
+    // public CodingConfig update(@Option("dataset") final Dataset dataset, @Option("filea") final String filea,
+    public CodingConfig update(final String filea, final boolean justLoadFile) throws Exception {
+        if (justLoadFile) {
+            return this.loadFile(filea);
+        }
+        return new CodingConfig(); // dataset.getDsCodingConfig();
     }
 
     @Update("FEEDBACK_DS")
@@ -172,7 +177,12 @@ public class GenericService {
         URI uri = GenericService.class.getResource(root).toURI();
         final Path myPath;
         if (uri.getScheme().equals("jar")) {
-            FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object> emptyMap());
+            FileSystem fileSystem = null;
+            try {
+                fileSystem = FileSystems.getFileSystem(uri);
+            } catch (FileSystemNotFoundException e) {
+                fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object> emptyMap());
+            }
             myPath = fileSystem.getPath(root);
         } else {
             myPath = Paths.get(uri);
