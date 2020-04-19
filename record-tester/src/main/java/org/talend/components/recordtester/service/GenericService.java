@@ -25,6 +25,7 @@ import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
+import org.talend.sdk.component.api.service.http.Response;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.update.Update;
 
@@ -71,6 +72,9 @@ public class GenericService {
 
     @Service
     private JsonProvider jsonProvider;
+
+    @Service
+    Client httpClient;
 
     public List<Object> get(final Config globalConfig) {
 
@@ -139,17 +143,29 @@ public class GenericService {
 
     @Update("LOAD_FILE")
     public CodingConfig loadFile(final String file) throws Exception {
-        final InputStream stream = GenericService.class.getResourceAsStream(file);
-
         CodingConfig cc = new CodingConfig();
-        final String s = loadStream(stream);
+        if (file.startsWith("http")) {
+            final Response<byte[]> response = httpClient.execute("GET", file, Collections.emptyMap(), Collections.emptyMap());
+            final StringBuilder body = new StringBuilder();
+            final String content = new String(Optional.ofNullable(response.body()).orElse(new byte[0]));
+            if (response.status() >= 300) {
+                body.append("Retrieved content status code : ").append(response.status()).append("\n");
+            }
+            body.append(content);
 
-        if (file.endsWith(".json")) {
             cc.setProvider(CodingConfig.RECORD_TYPE.JSON);
-            cc.setJson(s);
-        } else if (file.endsWith(".bsh")) {
-            cc.setProvider(CodingConfig.RECORD_TYPE.BEANSHELL);
-            cc.setBeanShellCode(s);
+            cc.setJson(body.toString());
+        } else {
+            final InputStream stream = GenericService.class.getResourceAsStream(file);
+            final String s = loadStream(stream);
+
+            if (file.endsWith(".json")) {
+                cc.setProvider(CodingConfig.RECORD_TYPE.JSON);
+                cc.setJson(s);
+            } else if (file.endsWith(".bsh")) {
+                cc.setProvider(CodingConfig.RECORD_TYPE.BEANSHELL);
+                cc.setBeanShellCode(s);
+            }
         }
 
         return cc;
@@ -163,7 +179,7 @@ public class GenericService {
         try {
             final List<SuggestionValues.Item> items = walkThroughResource(root.toString()).filter(p -> Files.isRegularFile(p))
                     .map(this::pathToItem).collect(Collectors.toList());
-            return new SuggestionValues(false, items);
+            return new SuggestionValues(true, items);
         } catch (URISyntaxException | IOException e) {
             throw new IllegalArgumentException("Can't load files.", e);
         }
