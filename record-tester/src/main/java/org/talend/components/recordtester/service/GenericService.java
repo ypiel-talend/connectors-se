@@ -22,6 +22,7 @@ import org.talend.components.recordtester.conf.Feedback;
 import org.talend.components.recordtester.conf.FileContent;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Updatable;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
@@ -125,6 +126,13 @@ public class GenericService {
         final List<Object> records = this.get(dsCodingConfig);
 
         StringBuilder sb = new StringBuilder();
+        if (records.size() > 0 && records.get(0) instanceof Record) {
+            sb.append("First element schema:\n\n");
+            final Record cast = Record.class.cast(records.get(0));
+            sb.append(cast.getSchema());
+            sb.append("\n\n---------------------------------------------------------------------\n\n");
+        }
+
         records.stream().forEach(r -> sb.append(r.toString() + "\n"));
 
         final Feedback feedback = new Feedback();
@@ -134,10 +142,9 @@ public class GenericService {
     }
 
     @Update("FEEDBACK")
-    public Feedback update(final Dataset dataset, final boolean overwriteDataset, final CodingConfig codingConfig)
-            throws Exception {
+    public Feedback update(final boolean overwriteDataset, final CodingConfig codingConfig) throws Exception {
 
-        final Feedback feedback = this.updateds(overwriteDataset ? codingConfig : dataset.getDsCodingConfig());
+        final Feedback feedback = this.updateds(overwriteDataset ? codingConfig : new CodingConfig());
         return feedback;
     }
 
@@ -155,6 +162,7 @@ public class GenericService {
 
             cc.setProvider(CodingConfig.RECORD_TYPE.JSON);
             cc.setJson(body.toString());
+            cc.setBeanShellCode(body.toString());
         } else {
             final InputStream stream = GenericService.class.getResourceAsStream(file);
             final String s = loadStream(stream);

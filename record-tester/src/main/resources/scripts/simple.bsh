@@ -1,0 +1,20 @@
+// This is a beancshell script : http://www.beanshell.org/manual/contents.html
+// /!\ Only syntax java 1.4 is supported (no generics !)
+// provider is instance of org.talend.components.recordtester.service.generic.Beanshell
+
+getRecord(int i){
+
+    final Record rec1 = provider.getRecordBuilderFactory()
+            .newRecordBuilder()
+            .withString("Title", "Book title " + i)
+            .withDouble("price", (1.2) * i)
+            .withBoolean("in-stock", (i % 2 == 0))
+            .build();
+
+    return rec1;
+
+}
+
+for(int i = 1; i <= 10; i++){
+    records.add(getRecord(i));
+}

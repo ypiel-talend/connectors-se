@@ -63,7 +63,7 @@ public class Config implements Serializable {
     @Documentation("")
     @ActiveIf(target = "showFeedback", value = "true")
     @ActiveIf(target = "overwriteDataset", value = "true")
-    @Updatable(value = "FEEDBACK", parameters = { "dataset", "overwriteDataset", "codingConfig" }, after = "feedback")
+    @Updatable(value = "FEEDBACK", parameters = { "overwriteDataset", "codingConfig" }, after = "feedback")
     private Feedback feedback = new Feedback();
 
 }

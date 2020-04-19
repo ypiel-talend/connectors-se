@@ -1,3 +1,7 @@
+// This is a beancshell script : http://www.beanshell.org/manual/contents.html
+// /!\ Only syntax java 1.4 is supported (no generics !)
+// provider is instance of org.talend.components.recordtester.service.generic.Beanshell
+
 Record getRecord(int i, Schema.Entry arrayEntry, boolean missing) {
     final Record rec1 = provider.getRecordBuilderFactory()
                         .newRecordBuilder().withString("aaa", "aaa" + i)
