@@ -1,0 +1,8 @@
+{
+  "aaa" : "val1",
+  "data" : [
+    {"aaa" :  "aaa1", "bbb" :  "bbb2", "ccc" :  "ccc1"},
+    {"aaa" :  "aaa2", "bbb" :  null, "ccc" :  "ccc2"},
+    {"aaa" :  "aaa3", "bbb" :  "bbb3", "ccc" :  "ccc3"}
+  ]
+}
