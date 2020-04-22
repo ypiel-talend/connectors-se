@@ -235,10 +235,4 @@ public class GenericService {
 
     }
 
-    public void afac(final String param)
-
-    {
-
-        System.out.println("sdsdsd" + "fff" + "dfdf" + "ffff" + "mmm");
-    }
 }

@@ -66,11 +66,4 @@ public class Config implements Serializable {
     @Updatable(value = "FEEDBACK", parameters = { "overwriteDataset", "codingConfig" }, after = "feedback")
     private Feedback feedback = new Feedback();
 
-    public void afac(final String param)
-
-    {
-
-        System.out.println("sdsdsd" + "fff" + "dfdf" + "ffff" + "mmm");
-    }
-
 }
