@@ -12,6 +12,7 @@
  */
 package org.talend.components.jdbc.service;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
@@ -33,6 +34,8 @@ import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import javax.json.JsonObject;
+
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -51,6 +54,7 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.configuration.Configuration;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.dependency.Resolver;
+import org.talend.sdk.component.api.service.http.Response;
 
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -70,6 +74,9 @@ public class JdbcService {
 
     @Service
     private I18nMessage i18n;
+
+    @Service
+    private TokenClient tokenClient;
 
     @Configuration("jdbc")
     private Supplier<JdbcConfiguration> jdbcConfiguration;
@@ -126,17 +133,18 @@ public class JdbcService {
     }
 
     public JdbcDatasource createDataSource(final JdbcConnection connection) {
-        return new JdbcDatasource(i18n, resolver, connection, getDriver(connection), false, false);
+        return new JdbcDatasource(tokenClient, i18n, resolver, connection, getDriver(connection), false, false);
     }
 
     public JdbcDatasource createDataSource(final JdbcConnection connection, final boolean rewriteBatchedStatements) {
-        return new JdbcDatasource(i18n, resolver, connection, getDriver(connection), false, rewriteBatchedStatements);
+        return new JdbcDatasource(tokenClient, i18n, resolver, connection, getDriver(connection), false,
+                rewriteBatchedStatements);
     }
 
     public JdbcDatasource createDataSource(final JdbcConnection connection, boolean isAutoCommit,
             final boolean rewriteBatchedStatements) {
         final JdbcConfiguration.Driver driver = getDriver(connection);
-        return new JdbcDatasource(i18n, resolver, connection, driver, isAutoCommit, rewriteBatchedStatements);
+        return new JdbcDatasource(tokenClient, i18n, resolver, connection, driver, isAutoCommit, rewriteBatchedStatements);
     }
 
     public static class JdbcDatasource implements AutoCloseable {
@@ -145,8 +153,9 @@ public class JdbcService {
 
         private HikariDataSource dataSource;
 
-        public JdbcDatasource(final I18nMessage i18nMessage, final Resolver resolver, final JdbcConnection connection,
-                final JdbcConfiguration.Driver driver, final boolean isAutoCommit, final boolean rewriteBatchedStatements) {
+        public JdbcDatasource(final TokenClient tokenClient, final I18nMessage i18nMessage, final Resolver resolver,
+                final JdbcConnection connection, final JdbcConfiguration.Driver driver, final boolean isAutoCommit,
+                final boolean rewriteBatchedStatements) {
             final Thread thread = Thread.currentThread();
             final ClassLoader prev = thread.getContextClassLoader();
 
@@ -160,11 +169,16 @@ public class JdbcService {
             try {
                 thread.setContextClassLoader(classLoaderDescriptor.asClassLoader());
                 dataSource = new HikariDataSource();
-                dataSource.setUsername(connection.getUserId());
+
                 if (AuthenticationType.KEY_PAIR == connection.getAuthenticationType()) {
+                    dataSource.setUsername(connection.getUserId());
                     dataSource.addDataSourceProperty("privateKey",
                             getPrivateKey(connection.getPrivateKey(), connection.getPrivateKeyPassword(), i18nMessage));
+                } else if (AuthenticationType.OAUTH == connection.getAuthenticationType()) {
+                    dataSource.addDataSourceProperty("authenticator", "oauth");
+                    dataSource.addDataSourceProperty("token", getAccessToken(tokenClient, connection));
                 } else {
+                    dataSource.setUsername(connection.getUserId());
                     dataSource.setPassword(connection.getPassword());
                 }
                 dataSource.setDriverClassName(driver.getClassName());
@@ -225,6 +239,28 @@ public class JdbcService {
                     ? privateKey.replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
                             .replace("-----END ENCRYPTED PRIVATE KEY-----", "")
                     : privateKey.replace("-----BEGIN RSA PRIVATE KEY-----", "").replace("-----END RSA PRIVATE KEY-----", "");
+        }
+
+        private String getAccessToken(TokenClient tokenClient, JdbcConnection connection) {
+            tokenClient.base(connection.getOauthTokenEndpoint());
+            StringBuilder builder = new StringBuilder();
+            builder.append("client_id=").append(connection.getClientId()).append("&client_secret=")
+                    .append(connection.getClientSecret()).append("&redirect_uri=").append(connection.getRedirectUri());
+
+            if (connection.getRefreshToken() == null) {
+                builder.append("&code=").append(connection.getAuthorizationCode()).append("&grant_type=authorization_code");
+            } else {
+                builder.append("&refresh_token=").append(connection.getRefreshToken()).append("&grant_type=refresh_token");
+            }
+            Response<JsonObject> response = tokenClient.getAccessToken(builder.toString());
+            JsonObject jsonResult = response.body();
+            if (response.status() != 200) {
+                throw new IllegalArgumentException(jsonResult.getString("error_description"));
+            }
+
+            of(jsonResult).filter(json -> json.containsKey("refresh_token")).map(json -> json.getString("refresh_token"))
+                    .ifPresent(connection::setRefreshToken);
+            return jsonResult.getString("access_token");
         }
 
         public Connection getConnection() throws SQLException {
