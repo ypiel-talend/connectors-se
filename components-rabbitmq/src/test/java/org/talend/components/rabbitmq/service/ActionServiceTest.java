@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,20 +13,13 @@
 package org.talend.components.rabbitmq.service;
 
 import org.junit.jupiter.api.Test;
-import org.talend.components.rabbitmq.configuration.BasicConfiguration;
 import org.talend.components.rabbitmq.datastore.RabbitMQDataStore;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
 
-import java.util.Optional;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.HOSTNAME;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PASSWORD;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PORT;

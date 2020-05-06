@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  */
 package org.talend.components.rabbitmq;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Duration;
+
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -24,7 +24,8 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
-import java.time.Duration;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.HTTP_PORT;
