@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2019 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,11 +12,18 @@
  */
 package org.talend.components.rabbitmq.service;
 
-import com.rabbitmq.client.BuiltinExchangeType;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.http.client.Client;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeoutException;
+
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -34,28 +41,22 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeoutException;
+import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.http.client.Client;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PASSWORD;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.TEST_MESSAGE;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.FANOUT_EXCHANGE_NAME;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.DIRECT_EXCHANGE_NAME;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.QUEUE_NAME;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.FANOUT_EXCHANGE_NAME;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.MAXIMUM_MESSAGES;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PASSWORD;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.QUEUE_NAME;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.TEST_MESSAGE;
 import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.USER_NAME;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
