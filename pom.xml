@@ -18,7 +18,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <version>1.7.3</version>
     <packaging>pom</packaging>
 
     <name>Components</name>
@@ -59,7 +59,7 @@
         <connection>scm:git:https://github.com/talend/connectors-se.git</connection>
         <developerConnection>scm:git:https://github.com/talend/connectors-se.git</developerConnection>
         <url>https://github.com/talend/connectors-se</url>
-        <tag>HEAD</tag>
+        <tag>release/1.7.3</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
@@ -77,8 +77,8 @@
     </distributionManagement>
 
     <properties>
-        <connectors-test-bom.version>1.7.3-SNAPSHOT</connectors-test-bom.version>
-        <common.version>1.7.3-SNAPSHOT</common.version>
+        <connectors-test-bom.version>1.7.3</connectors-test-bom.version>
+        <common.version>1.7.3</common.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
