@@ -12,7 +12,9 @@
  */
 package org.talend.components.rabbitmq.publisher;
 
-import com.rabbitmq.client.Channel;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.talend.components.rabbitmq.exception.ExchangeDeclareException;
 import org.talend.components.rabbitmq.exception.ExchangeDeleteException;
 import org.talend.components.rabbitmq.output.ActionOnExchange;
@@ -20,7 +22,7 @@ import org.talend.components.rabbitmq.output.OutputConfiguration;
 import org.talend.components.rabbitmq.service.I18nMessage;
 import org.talend.sdk.component.api.service.Service;
 
-import java.io.IOException;
+import com.rabbitmq.client.Channel;
 
 import static org.talend.components.rabbitmq.output.ActionOnExchange.DELETE_AND_CREATE_EXCHANGE;
 
@@ -52,7 +54,7 @@ public class ExchangePublisher implements MessagePublisher {
 
     @Override
     public void publish(String message) throws IOException {
-        channel.basicPublish(exchange, routingKey, null, message.getBytes());
+        channel.basicPublish(exchange, routingKey, null, message.getBytes(StandardCharsets.UTF_8));
     }
 
     private void onExchange(Channel channel, ActionOnExchange action, String exchangeName) {

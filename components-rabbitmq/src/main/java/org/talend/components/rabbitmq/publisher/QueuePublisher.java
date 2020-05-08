@@ -12,14 +12,16 @@
  */
 package org.talend.components.rabbitmq.publisher;
 
-import com.rabbitmq.client.Channel;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.talend.components.rabbitmq.exception.QueueDeclareException;
 import org.talend.components.rabbitmq.exception.QueueDeleteException;
 import org.talend.components.rabbitmq.output.ActionOnQueue;
 import org.talend.components.rabbitmq.output.OutputConfiguration;
 import org.talend.components.rabbitmq.service.I18nMessage;
 
-import java.io.IOException;
+import com.rabbitmq.client.Channel;
 
 import static org.talend.components.rabbitmq.output.ActionOnQueue.DELETE_AND_CREATE_QUEUE;
 
@@ -56,6 +58,6 @@ public class QueuePublisher implements MessagePublisher {
 
     @Override
     public void publish(String message) throws IOException {
-        channel.basicPublish("", queue, null, message.getBytes());
+        channel.basicPublish("", queue, null, message.getBytes(StandardCharsets.UTF_8));
     }
 }
