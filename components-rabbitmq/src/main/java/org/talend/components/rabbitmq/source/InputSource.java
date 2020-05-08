@@ -14,19 +14,16 @@ package org.talend.components.rabbitmq.source;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeoutException;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.GetResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.talend.components.rabbitmq.exception.ExchangeDeclareException;
 import org.talend.components.rabbitmq.exception.QueueDeclareException;
 import org.talend.components.rabbitmq.service.I18nMessage;
@@ -34,6 +31,12 @@ import org.talend.components.rabbitmq.service.RabbitMQService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.GetResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
 
@@ -100,7 +103,7 @@ public class InputSource implements Serializable {
         do {
             GetResponse response = channel.basicGet(exchangeQueueName, true);
             if (response != null) {
-                textMessage[0] = new String(response.getBody());
+                textMessage[0] = new String(response.getBody(), StandardCharsets.UTF_8);
             }
         } while (textMessage[0] == null && counter < configuration.getMaximumMessages());
 
