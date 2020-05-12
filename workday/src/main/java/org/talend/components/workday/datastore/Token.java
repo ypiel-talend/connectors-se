@@ -34,6 +34,7 @@ public class Token {
 
     /**
      * No enough time to do operations.
+     * 
      * @return true if too old (not enough time left)
      */
     public boolean isTooOld() {

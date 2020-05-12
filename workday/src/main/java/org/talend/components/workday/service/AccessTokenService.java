@@ -31,10 +31,8 @@ public class AccessTokenService {
     private LocalCache tokenCache;
 
     public Token findToken(WorkdayDataStore datastore) {
-        return this.tokenCache.computeIfAbsent(Token.class,
-                datastore.getClientId() + "-" + datastore.getEndpoint(),
-                this::isTokenTooOld,
-                 () -> this.newToken(datastore));
+        return this.tokenCache.computeIfAbsent(Token.class, datastore.getClientId() + "-" + datastore.getEndpoint(),
+                this::isTokenTooOld, () -> this.newToken(datastore));
     }
 
     private Token newToken(WorkdayDataStore datastore) {
@@ -42,8 +40,7 @@ public class AccessTokenService {
     }
 
     private boolean isTokenTooOld(LocalCache.Element element) {
-        return Optional.ofNullable(element)
-                .map(LocalCache.Element::getValue) // element value => token
+        return Optional.ofNullable(element).map(LocalCache.Element::getValue) // element value => token
                 .filter(Token.class::isInstance) // should be true
                 .map(Token.class::cast) //
                 .map(Token::isTooOld) // test expiry date.
