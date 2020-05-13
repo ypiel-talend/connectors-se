@@ -14,10 +14,20 @@ package org.talend.components.recordtester.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.talend.components.common.stream.input.json.JsonToRecord;
 import org.talend.components.recordtester.conf.CodingConfig;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit5.WithComponents;
+
+import javax.json.JsonReader;
+import javax.json.JsonReaderFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,10 +38,31 @@ class GenericServiceTest {
     @Service
     GenericService service;
 
+    @Service
+    RecordBuilderFactory recordBuilderFactory;
+
+    @Service
+    JsonReaderFactory jsonReaderFactory;
+
     @Test
     void getListNames() {
         final CodingConfig codingConfig = new CodingConfig();
         final SuggestionValues listFiles = service.getListFiles();
-        assertEquals(1, listFiles.getItems().size());
+        assertEquals(4, listFiles.getItems().size());
     }
+
+    @Test
+    void dumpSchema() {
+        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("fd.json");
+        final JsonReader reader = jsonReaderFactory.createReader(resourceAsStream, Charset.forName("utf-8"));
+        final JsonToRecord jsonToRecord = new JsonToRecord(recordBuilderFactory);
+        final Record record = jsonToRecord.toRecord(reader.readObject());
+        final Schema schema = record.getSchema();
+
+        final String dump = service.dumpSchema(schema);
+
+        final Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
+        builder.withEntry()
+    }
+
 }
