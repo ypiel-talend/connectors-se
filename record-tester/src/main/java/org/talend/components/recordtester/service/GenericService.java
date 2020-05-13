@@ -23,6 +23,7 @@ import org.talend.components.recordtester.conf.FileContent;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
@@ -129,7 +130,7 @@ public class GenericService {
         if (records.size() > 0 && records.get(0) instanceof Record) {
             sb.append("First element schema:\n\n");
             final Record cast = Record.class.cast(records.get(0));
-            sb.append(cast.getSchema());
+            sb.append(dumpSchema(cast.getSchema()));
             sb.append("\n\n---------------------------------------------------------------------\n\n");
         }
 
@@ -232,7 +233,37 @@ public class GenericService {
         }
 
         return sb.toString();
-
     }
 
+    public String dumpSchema(final Schema schema) {
+        StringBuilder sb = new StringBuilder();
+
+        _dumpSchema(0, sb, schema);
+
+        return sb.toString();
+    }
+
+    private void _dumpSchema(final int level, final StringBuilder sb, final Schema schema){
+
+        addDump(level, sb, schema.getType().name());
+        if(schema.getType() == Schema.Type.ARRAY) {
+            _dumpSchema(level+1, sb, schema.getElementSchema());
+        }
+        else{
+            schema.getEntries().stream().forEach(e -> {
+                addDump(level + 1, sb, e.getName() + " : " + e.getType() + "("+e.isNullable()+")");
+
+            });
+        }
+    }
+
+    private String addDump(final int level, final StringBuilder sb, final String s) {
+        for(int i = 0; i < level; i++){
+            sb.append("  ");
+        }
+        sb.append(s);
+        sb.append("\n");
+
+        return sb.toString();
+    }
 }
