@@ -16,6 +16,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -178,6 +179,7 @@ public class JschFTPSClient extends GenericFTPClient {
         ftpFile.setName(lsEntry.getFilename());
         ftpFile.setSize(lsEntry.getAttrs().getSize());
         ftpFile.setDirectory(lsEntry.getAttrs().isDir());
+
 
         return ftpFile;
     }

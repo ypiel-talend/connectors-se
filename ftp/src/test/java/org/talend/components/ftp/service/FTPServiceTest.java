@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockftpserver.fake.filesystem.DirectoryEntry;
+import org.mockftpserver.fake.filesystem.FileSystemEntry;
 import org.mockftpserver.fake.filesystem.Permissions;
 import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 import org.talend.components.ftp.dataset.FTPDataSet;
@@ -72,6 +73,25 @@ public class FTPServiceTest {
         dataset.getDatastore().setPassword("WRONG");
         Assertions.assertEquals(HealthCheckStatus.Status.KO, beanUnderTest.validateDataStore(dataset.getDatastore()).getStatus(),
                 "Status should be KO.");
+    }
+
+    @Test
+    public void testCheckWritePermission(UnixFakeFileSystem fs) {
+        DirectoryEntry writable = new DirectoryEntry("/writable");
+        writable.setPermissions(new Permissions("r--rw-rw-"));
+        writable.setOwner("root");
+        fs.add(writable);
+
+        DirectoryEntry nonwritable = new DirectoryEntry("/nonwritable");
+        nonwritable.setPermissions(new Permissions("r--r--r--"));
+        nonwritable.setOwner("root");
+        fs.add(nonwritable);
+
+        dataset.setPath("/writable");
+        Assertions.assertTrue(beanUnderTest.hasWritePermission(dataset), "/writable folder should be writable");
+
+        dataset.setPath("/nonwritable");
+        Assertions.assertFalse(beanUnderTest.hasWritePermission(dataset), "/nonwritable folder should not be writable");
     }
 
 }

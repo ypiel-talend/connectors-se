@@ -85,6 +85,9 @@ public class FTPOutput implements Serializable {
     public void onRecord(final Record record) {
         if (!init) {
             init = true;
+            if (!ftpService.hasWritePermission(configuration.getDataSet())) {
+                throw new FTPConnectorException(i18n.errorCannotWrite());
+            }
             String remoteDir = configuration.getDataSet().getPath();
             if (!remoteDir.endsWith("/")) {
                 remoteDir += "/";

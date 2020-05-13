@@ -157,6 +157,9 @@ public class ApacheFTPClient extends GenericFTPClient {
         genericFTPFile.setName(getFilename(ftpFile.getName()));
         genericFTPFile.setDirectory(ftpFile.isDirectory());
         genericFTPFile.setSize(ftpFile.getSize());
+        genericFTPFile.setWritable(ftpFile.hasPermission(FTPFile.USER_ACCESS, FTPFile.WRITE_PERMISSION)
+                || ftpFile.hasPermission(FTPFile.GROUP_ACCESS, FTPFile.WRITE_PERMISSION)
+                || ftpFile.hasPermission(FTPFile.WORLD_ACCESS, FTPFile.WRITE_PERMISSION));
 
         return genericFTPFile;
     }

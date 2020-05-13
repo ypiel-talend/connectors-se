@@ -22,6 +22,7 @@ import org.talend.components.ftp.service.ftpclient.FTPClientFactory;
 import org.talend.components.ftp.service.ftpclient.GenericFTPClient;
 import org.talend.components.ftp.service.ftpclient.GenericFTPFile;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
@@ -82,6 +83,21 @@ public class FTPService implements Serializable {
                             .map(p -> new SuggestionValues.Item(p, p)).collect(Collectors.toList()));
         }
 
+    }
+
+    public boolean hasWritePermission(FTPDataSet dataset) {
+        String[] pathElements = dataset.getPath().split(PATH_SEPARATOR);
+        String pathLastElement = pathElements[pathElements.length - 1];
+        try (GenericFTPClient client = getClient(dataset.getDatastore())) {
+            return client.listFiles(getDirectory(dataset.getPath()))
+                    .stream()
+                    .filter(GenericFTPFile::isDirectory)
+                    .filter(f -> f.getName().equals(pathLastElement))
+                    .map(GenericFTPFile::isWritable)
+                    .findFirst()
+                    .orElse(false).booleanValue();
+
+        }
     }
 
     private String getDirectory(String path) {
