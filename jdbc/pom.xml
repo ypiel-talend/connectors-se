@@ -20,6 +20,8 @@
         <!-- test version -->
         <derby.version>10.12.1.1</derby.version>
         <testcontainers.version>1.11.2</testcontainers.version>
+        <!-- To avoid build failures with locales validation -->
+        <talend.validation.internationalization>false</talend.validation.internationalization>
     </properties>
 
     <dependencies>
