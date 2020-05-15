@@ -30,7 +30,7 @@ import java.util.List;
 
 @Data
 @DataSet("Dataset")
-@PollableDuplicateDataset
+//@PollableDuplicateDataset
 @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "resource" }), @GridLayout.Row({ "methodType" }),
         @GridLayout.Row({ "format" }), @GridLayout.Row({ "hasHeaders" }), @GridLayout.Row({ "headers" }),
         @GridLayout.Row({ "hasQueryParams" }), @GridLayout.Row({ "queryParams" }), @GridLayout.Row({ "hasPathParams" }),

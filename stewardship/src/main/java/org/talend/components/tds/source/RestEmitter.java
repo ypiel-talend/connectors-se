@@ -31,7 +31,7 @@ import java.util.Iterator;
 @Icon(value = Icon.IconType.CUSTOM, custom = "talend-tds-colored")
 @Emitter(name = "Input")
 @Documentation("Http REST Input component")
-@Pollable(name = "Polling", resumeMethod = "resume")
+//@Pollable(name = "Polling", resumeMethod = "resume")
 public class RestEmitter implements Serializable {
 
     private final RequestConfig config;
