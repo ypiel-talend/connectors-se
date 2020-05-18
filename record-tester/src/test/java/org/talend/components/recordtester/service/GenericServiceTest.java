@@ -62,7 +62,7 @@ class GenericServiceTest {
         final String dump = service.dumpSchema(schema);
 
         final Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
-        builder.withEntry()
+        // builder.withEntry()
     }
 
 }

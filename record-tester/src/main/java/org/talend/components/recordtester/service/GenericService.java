@@ -206,7 +206,7 @@ public class GenericService {
             try {
                 fileSystem = FileSystems.getFileSystem(uri);
             } catch (FileSystemNotFoundException e) {
-                fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object> emptyMap());
+                fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
             }
             myPath = fileSystem.getPath(root);
         } else {
@@ -243,22 +243,23 @@ public class GenericService {
         return sb.toString();
     }
 
-    private void _dumpSchema(final int level, final StringBuilder sb, final Schema schema){
+    private void _dumpSchema(final int level, final StringBuilder sb, final Schema schema) {
 
         addDump(level, sb, schema.getType().name());
-        if(schema.getType() == Schema.Type.ARRAY) {
-            _dumpSchema(level+1, sb, schema.getElementSchema());
-        }
-        else{
+        if (schema.getType() == Schema.Type.ARRAY) {
+            _dumpSchema(level + 1, sb, schema.getElementSchema());
+        } else {
             schema.getEntries().stream().forEach(e -> {
-                addDump(level + 1, sb, e.getName() + " : " + e.getType() + "("+e.isNullable()+")");
-
+                addDump(level + 1, sb, e.getName() + " : " + e.getType() + "(nullable : " + e.isNullable() + ")");
+                if (e.getType() == Schema.Type.RECORD || e.getType() == Schema.Type.ARRAY) {
+                    _dumpSchema(level + 1, sb, e.getElementSchema());
+                }
             });
         }
     }
 
     private String addDump(final int level, final StringBuilder sb, final String s) {
-        for(int i = 0; i < level; i++){
+        for (int i = 0; i < level; i++) {
             sb.append("  ");
         }
         sb.append(s);
