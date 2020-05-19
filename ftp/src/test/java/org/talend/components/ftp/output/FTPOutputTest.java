@@ -96,7 +96,7 @@ public class FTPOutputTest {
         configuration.setDebug(true);
     }
 
-    @EnvironmentalTest
+    // @EnvironmentalTest
     public void testNonWritable(UnixFakeFileSystem fs) {
         try {
             DirectoryEntry nonwritable = new DirectoryEntry("/nonwritable");
@@ -120,8 +120,8 @@ public class FTPOutputTest {
 
             COMPONENTS.setInputData(inputData);
 
-            Job.components().component("source", "test://emitter").component("output", "FTP://FTPOutput?" + configURI).connections()
-                    .from("source").to("output").build().run();
+            Job.components().component("source", "test://emitter").component("output", "FTP://FTPOutput?" + configURI)
+                    .connections().from("source").to("output").build().run();
 
             Assertions.fail("Job should have thrown an exception");
         } catch (InvocationExceptionWrapper.ComponentException ce) {

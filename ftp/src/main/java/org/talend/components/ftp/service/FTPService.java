@@ -12,34 +12,24 @@
  */
 package org.talend.components.ftp.service;
 
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPClientConfig;
-import org.apache.commons.net.ftp.FTPSClient;
-import org.apache.commons.net.util.TrustManagerUtils;
-import org.talend.components.ftp.dataset.FTPDataSet;
+import lombok.extern.slf4j.Slf4j;
 import org.talend.components.ftp.datastore.FTPDataStore;
 import org.talend.components.ftp.service.ftpclient.FTPClientFactory;
 import org.talend.components.ftp.service.ftpclient.GenericFTPClient;
 import org.talend.components.ftp.service.ftpclient.GenericFTPFile;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
-import java.util.function.Predicate;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyList;
 
 @Slf4j
 @Service
@@ -56,6 +46,8 @@ public class FTPService implements Serializable {
 
     @Service
     private FTPClientFactory ftpClientFactory;
+
+    private transient Map<String, GenericFTPClient> clientMap;
 
     @HealthCheck(ACTION_HEALTH_CHECK)
     public HealthCheckStatus validateDataStore(@Option final FTPDataStore dataStore) {
@@ -77,7 +69,7 @@ public class FTPService implements Serializable {
 
     @Suggestions(ACTION_SUGGESTION_PATH)
     public SuggestionValues suggestPath(@Option final FTPDataStore datastore, @Option final String path) {
-        try (GenericFTPClient ftpClient = getClient(datastore)) {
+        try (GenericFTPClient ftpClient = getClient((FTPConnectorConfiguration) datastore)) {
             return new SuggestionValues(false,
                     ftpClient.listFiles(getDirectory(path)).stream().map(f -> generateFilePath(path, f.getName()))
                             .map(p -> new SuggestionValues.Item(p, p)).collect(Collectors.toList()));
@@ -85,17 +77,17 @@ public class FTPService implements Serializable {
 
     }
 
-    public boolean hasWritePermission(FTPDataSet dataset) {
-        String[] pathElements = dataset.getPath().split(PATH_SEPARATOR);
+    public boolean hasWritePermission(FTPConnectorConfiguration configuration) {
+        String path = configuration.getDataSet().getPath();
+        if (path.endsWith(PATH_SEPARATOR)) {
+            path = path.substring(0, path.length() - PATH_SEPARATOR.length());
+        }
+        String[] pathElements = path.split(PATH_SEPARATOR);
         String pathLastElement = pathElements[pathElements.length - 1];
-        try (GenericFTPClient client = getClient(dataset.getDatastore())) {
-            return client.listFiles(getDirectory(dataset.getPath()))
-                    .stream()
-                    .filter(GenericFTPFile::isDirectory)
-                    .filter(f -> f.getName().equals(pathLastElement))
-                    .map(GenericFTPFile::isWritable)
-                    .findFirst()
-                    .orElse(false).booleanValue();
+        try (GenericFTPClient client = getClient(configuration)) {
+            return client.listFiles(getDirectory(path)).stream().filter(GenericFTPFile::isDirectory)
+                    .filter(f -> f.getName().equals(pathLastElement)).map(GenericFTPFile::isWritable).findFirst().orElse(false)
+                    .booleanValue();
 
         }
     }
@@ -115,7 +107,22 @@ public class FTPService implements Serializable {
         return dirPath + (dirPath.endsWith(PATH_SEPARATOR) ? "" : PATH_SEPARATOR) + filename;
     }
 
-    public GenericFTPClient getClient(FTPDataStore dataStore) {
+    public GenericFTPClient getClient(FTPConnectorConfiguration configuration) {
+
+        if (clientMap == null) {
+            clientMap = Collections.synchronizedMap(new HashMap<>());
+        }
+
+        GenericFTPClient client = clientMap.get(configuration.getConfigKey());
+        if (client == null || !client.isConnected()) {
+            client = getClient(configuration.getDataSet().getDatastore());
+            clientMap.put(configuration.getConfigKey(), client);
+        }
+
+        return client;
+    }
+
+    protected GenericFTPClient getClient(FTPDataStore dataStore) {
         GenericFTPClient ftpClient = ftpClientFactory.getClient(dataStore);
         ftpClient.connect(dataStore.getHost(), dataStore.getPort());
         if (dataStore.isUseCredentials()) {
@@ -127,23 +134,30 @@ public class FTPService implements Serializable {
         return ftpClient;
     }
 
+    public void releaseClient(FTPConnectorConfiguration configuration) {
+        GenericFTPClient client = clientMap.remove(configuration.getConfigKey());
+        if (client != null) {
+            client.disconnect();
+            client.close();
+        }
+    }
+
     /**
-     * Checks if the path in the dataset points to a single file
+     * Checks if the path points to a single file
      * 
-     * @param dataset
+     * @param ftpClient the FTP client to use
+     * @param path the path to test
      * @return true if the path is a file, false otherwise
      */
-    public boolean pathIsFile(FTPDataSet dataset) {
-        try (GenericFTPClient ftpClient = getClient(dataset.getDatastore())) {
-            List<GenericFTPFile> files = ftpClient.listFiles(dataset.getPath());
-            String[] pathElements = dataset.getPath().split(PATH_SEPARATOR);
-            String pathLastElement = pathElements[pathElements.length - 1];
-            if (files.size() == 1) {
-                return !files.get(0).isDirectory() && (files.get(0).getName().equals(pathLastElement));
-            }
-
-            return false;
+    public boolean pathIsFile(GenericFTPClient ftpClient, String path) {
+        List<GenericFTPFile> files = ftpClient.listFiles(path);
+        String[] pathElements = path.split(PATH_SEPARATOR);
+        String pathLastElement = pathElements[pathElements.length - 1];
+        if (files.size() == 1) {
+            return !files.get(0).isDirectory() && (files.get(0).getName().equals(pathLastElement));
         }
+
+        return false;
     }
 
 }

@@ -180,7 +180,6 @@ public class JschFTPSClient extends GenericFTPClient {
         ftpFile.setSize(lsEntry.getAttrs().getSize());
         ftpFile.setDirectory(lsEntry.getAttrs().isDir());
 
-
         return ftpFile;
     }
 
