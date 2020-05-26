@@ -57,7 +57,7 @@
         <module>ftp</module>
         <module>cosmosDB</module>
         <module>google-storage</module>
-        <module>components-rabbitmq</module>
+        <module>rabbitmq</module>
     </modules>
 
     <scm>

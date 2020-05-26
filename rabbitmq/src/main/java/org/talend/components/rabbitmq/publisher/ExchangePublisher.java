@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 
 import org.talend.components.rabbitmq.exception.ExchangeDeclareException;
 import org.talend.components.rabbitmq.exception.ExchangeDeleteException;
-import org.talend.components.rabbitmq.output.ActionOnExchange;
 import org.talend.components.rabbitmq.output.OutputConfiguration;
 import org.talend.components.rabbitmq.service.I18nMessage;
 import org.talend.sdk.component.api.service.Service;
@@ -42,7 +41,9 @@ public class ExchangePublisher implements MessagePublisher {
         this.routingKey = configuration.getBasicConfig().getRoutingKey();
         this.exchange = configuration.getBasicConfig().getExchange();
         this.i18n = i18nMessage;
-        onExchange(channel, configuration.getActionOnExchange(), exchange);
+        if (configuration.getActionOnExchange() == DELETE_AND_CREATE_EXCHANGE) {
+            onExchange(channel, exchange);
+        }
         try {
             channel.exchangeDeclare(configuration.getBasicConfig().getExchange(),
                     configuration.getBasicConfig().getExchangeType().getType(), configuration.getBasicConfig().getDurable(),
@@ -57,11 +58,9 @@ public class ExchangePublisher implements MessagePublisher {
         channel.basicPublish(exchange, routingKey, null, message.getBytes(StandardCharsets.UTF_8));
     }
 
-    private void onExchange(Channel channel, ActionOnExchange action, String exchangeName) {
+    private void onExchange(Channel channel, String exchangeName) {
         try {
-            if (action == DELETE_AND_CREATE_EXCHANGE) {
-                channel.exchangeDelete(exchangeName);
-            }
+            channel.exchangeDelete(exchangeName);
         } catch (IOException e) {
             throw new ExchangeDeleteException(i18n.errorCantRemoveExchange(), e);
         }

@@ -12,6 +12,8 @@
  */
 package org.talend.components.rabbitmq.source;
 
+import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -37,8 +39,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.GetResponse;
 
 import lombok.extern.slf4j.Slf4j;
-
-import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
 
 @Slf4j
 @Documentation("Main class for JMSInput records processing")
@@ -99,15 +99,17 @@ public class InputSource implements Serializable {
 
     @Producer
     public JsonObject next() throws IOException {
-        final String[] textMessage = { null };
-        do {
-            GetResponse response = channel.basicGet(exchangeQueueName, true);
-            if (response != null) {
-                textMessage[0] = new String(response.getBody(), StandardCharsets.UTF_8);
+        if (counter < configuration.getMaximumMessages()) {
+            String textMessage = null;
+            while (textMessage == null) {
+                GetResponse response = channel.basicGet(exchangeQueueName, true);
+                if (response != null) {
+                    textMessage = new String(response.getBody(), StandardCharsets.UTF_8);
+                    return buildJSON(textMessage);
+                }
             }
-        } while (textMessage[0] == null && counter < configuration.getMaximumMessages());
-
-        return textMessage[0] != null ? buildJSON(textMessage[0]) : null;
+        }
+        return null;
     }
 
     private JsonObject buildJSON(String text) {

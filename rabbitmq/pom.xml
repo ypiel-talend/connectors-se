@@ -5,12 +5,10 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.9.0-SNAPSHOT</version>
+        <version>1.10.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.talend.components</groupId>
-    <artifactId>components-rabbitmq</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>rabbitmq</artifactId>
 
     <name>Components :: RabbitMQ</name>
 
@@ -22,12 +20,12 @@
 <!--        <junit5.version>5.3.1</junit5.version>-->
 
         <talend-docker-registry>registry.datapwn.com</talend-docker-registry>
-        <amqp-client.version>5.6.0</amqp-client.version>
+        <amqp-client.version>5.9.0</amqp-client.version>
         <testcontainers.version>1.14.1</testcontainers.version>
-        <spring-web.version>5.1.4.RELEASE</spring-web.version>
-        <rabbitmq.httpclient.version>3.1.0.RELEASE</rabbitmq.httpclient.version>
-        <apache.httpclient.version>4.5.7</apache.httpclient.version>
-        <talend.component.studioHome/>
+        <spring-web.version>5.2.6.RELEASE</spring-web.version>
+        <rabbitmq.httpclient.version>3.6.1.RELEASE</rabbitmq.httpclient.version>
+        <apache.httpclient.version>4.5.12</apache.httpclient.version>
+        <talend.component.studioHome>/home/mbasiuk/workspace/Studios/Talend-Studio-20200515_0353-V7.4.1SNAPSHOT</talend.component.studioHome>
     </properties>
 
     <dependencies>
@@ -46,36 +44,20 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>${spring-web.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>http-client</artifactId>
             <version>${rabbitmq.httpclient.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${apache.httpclient.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>

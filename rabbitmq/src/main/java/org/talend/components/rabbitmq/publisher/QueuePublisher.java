@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 
 import org.talend.components.rabbitmq.exception.QueueDeclareException;
 import org.talend.components.rabbitmq.exception.QueueDeleteException;
-import org.talend.components.rabbitmq.output.ActionOnQueue;
 import org.talend.components.rabbitmq.output.OutputConfiguration;
 import org.talend.components.rabbitmq.service.I18nMessage;
 
@@ -37,7 +36,9 @@ public class QueuePublisher implements MessagePublisher {
         this.channel = channel;
         this.queue = configuration.getBasicConfig().getQueue();
         this.i18n = i18nMessage;
-        onQueue(channel, configuration.getActionOnQueue(), queue);
+        if (configuration.getActionOnQueue() == DELETE_AND_CREATE_QUEUE) {
+            deleteQueue(channel, queue);
+        }
         try {
             channel.queueDeclare(configuration.getBasicConfig().getQueue(), configuration.getBasicConfig().getDurable(), false,
                     configuration.getBasicConfig().getAutoDelete(), null);
@@ -46,11 +47,9 @@ public class QueuePublisher implements MessagePublisher {
         }
     }
 
-    private void onQueue(Channel channel, ActionOnQueue action, String queueName) {
+    private void deleteQueue(Channel channel, String queueName) {
         try {
-            if (action == DELETE_AND_CREATE_QUEUE) {
-                channel.queueDelete(queueName);
-            }
+            channel.queueDelete(queueName);
         } catch (IOException e) {
             throw new QueueDeleteException(i18n.errorCantRemoveQueue(), e);
         }
