@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -107,19 +108,17 @@ public class FTPService implements Serializable {
         return dirPath + (dirPath.endsWith(PATH_SEPARATOR) ? "" : PATH_SEPARATOR) + filename;
     }
 
-    public GenericFTPClient getClient(FTPConnectorConfiguration configuration) {
-
+    public GenericFTPClient getClient(final FTPConnectorConfiguration configuration) {
         if (clientMap == null) {
-            clientMap = Collections.synchronizedMap(new HashMap<>());
+            clientMap = new ConcurrentHashMap<>();
         }
 
-        GenericFTPClient client = clientMap.get(configuration.getConfigKey());
-        if (client == null || !client.isConnected()) {
-            client = getClient(configuration.getDataSet().getDatastore());
-            clientMap.put(configuration.getConfigKey(), client);
-        }
-
-        return client;
+        return clientMap.compute(configuration.getConfigKey(), (key, current) -> {
+            if (current == null || !current.isConnected()) {
+                return getClient(configuration.getDataSet().getDatastore());
+            }
+            return current;
+        });
     }
 
     protected GenericFTPClient getClient(FTPDataStore dataStore) {
