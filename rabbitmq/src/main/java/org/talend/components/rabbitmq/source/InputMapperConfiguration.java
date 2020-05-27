@@ -12,17 +12,16 @@
  */
 package org.talend.components.rabbitmq.source;
 
-import lombok.Data;
+import java.io.Serializable;
+
 import org.talend.components.rabbitmq.configuration.BasicConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import java.io.Serializable;
+import lombok.Data;
 
-@GridLayout(value = { @GridLayout.Row({ "basicConfig" }),
-        @GridLayout.Row({ "maximumMessages" }) }, names = GridLayout.FormType.MAIN)
+@GridLayout(value = { @GridLayout.Row({ "basicConfig" }) }, names = GridLayout.FormType.MAIN)
 @GridLayout(value = { @GridLayout.Row({ "basicConfig" }) }, names = GridLayout.FormType.ADVANCED)
 @Documentation("Main configuration class for RabbitMQInput component")
 @Data
@@ -31,11 +30,5 @@ public class InputMapperConfiguration implements Serializable {
     @Option
     @Documentation("Common configuration")
     private BasicConfiguration basicConfig;
-
-    @Option
-    @Min(0)
-    @Documentation("Maximum messages defines a number of messages this component will listen to. "
-            + "After reaching the maximum component will stop receiving messages")
-    private Integer maximumMessages = 100;
 
 }

@@ -18,7 +18,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -36,7 +41,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.GetResponse;
+import com.rabbitmq.client.DeliverCallback;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,8 +55,6 @@ public class InputSource implements Serializable {
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
-    private int counter = 0;
-
     private Connection connection;
 
     private Channel channel;
@@ -60,12 +63,15 @@ public class InputSource implements Serializable {
 
     private final I18nMessage i18n;
 
+    private LinkedBlockingQueue<byte[]> queue;
+
     public InputSource(@Option final InputMapperConfiguration configuration, final RabbitMQService service,
             final JsonBuilderFactory jsonBuilderFactory, final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;
         this.jsonBuilderFactory = jsonBuilderFactory;
         this.i18n = i18nMessage;
+        this.queue = new LinkedBlockingQueue<>();
     }
 
     @PostConstruct
@@ -95,27 +101,35 @@ public class InputSource implements Serializable {
             }
             break;
         }
+
+        consume();
     }
 
     @Producer
-    public JsonObject next() throws IOException {
-        if (counter < configuration.getMaximumMessages()) {
-            String textMessage = null;
-            while (textMessage == null) {
-                GetResponse response = channel.basicGet(exchangeQueueName, true);
-                if (response != null) {
-                    textMessage = new String(response.getBody(), StandardCharsets.UTF_8);
-                    return buildJSON(textMessage);
-                }
-            }
+    public JsonObject next() throws InterruptedException, IOException {
+        if (queue.isEmpty() && channel.messageCount(exchangeQueueName) > 0) {
+            return Optional.ofNullable(queue.take()).map(this::convertResponseToString).map(this::buildJSON).orElse(null);
+        } else {
+            return Optional.ofNullable(queue.poll()).map(this::convertResponseToString).map(this::buildJSON).orElse(null);
         }
-        return null;
+    }
+
+    private void consume() throws IOException {
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            queue.add(delivery.getBody());
+        };
+
+        channel.basicConsume(exchangeQueueName, true, deliverCallback, consumerTag -> {
+        });
+    }
+
+    private String convertResponseToString(byte[] bytes) {
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     private JsonObject buildJSON(String text) {
         JsonObjectBuilder recordBuilder = jsonBuilderFactory.createObjectBuilder();
         recordBuilder.add(MESSAGE_CONTENT, text);
-        counter++;
         return recordBuilder.build();
     }
 

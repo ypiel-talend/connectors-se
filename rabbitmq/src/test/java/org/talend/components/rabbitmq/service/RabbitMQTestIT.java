@@ -12,6 +12,18 @@
  */
 package org.talend.components.rabbitmq.service;
 
+import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.DIRECT_EXCHANGE_NAME;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.FANOUT_EXCHANGE_NAME;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PASSWORD;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.QUEUE_NAME;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.TEST_MESSAGE;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.USER_NAME;
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -47,19 +59,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.http.client.Client;
 
-import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.DIRECT_EXCHANGE_NAME;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.FANOUT_EXCHANGE_NAME;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.MAXIMUM_MESSAGES;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PASSWORD;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.QUEUE_NAME;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.TEST_MESSAGE;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.USER_NAME;
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
-
 @WithComponents("org.talend.components.rabbitmq") // component package
 @ExtendWith(RabbitMQTestExtention.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -85,13 +84,12 @@ public class RabbitMQTestIT {
     }
 
     @Test
-    public void sendAndReceiveQueueMessage() {
+    public void sendAndReceiveQueueMessage() throws Exception {
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
         Job.components().component("rabbitmq-output", "RabbitMQ://Output?" + outputConfig).component("emitter", "test://emitter")
                 .connections().from("emitter").to("rabbitmq-output").build().run();
-
         // Receive message from QUEUE_NAME
         final String inputConfig = configurationByExample().forInstance(getInputConfiguration()).configured().toQueryString();
 
@@ -99,14 +97,13 @@ public class RabbitMQTestIT {
                 .component("collector", "test://collector").connections().from("rabbitmq-output").to("collector").build().run();
 
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
-        Optional optional = res.stream().findFirst();
+        Optional<JsonObject> optional = res.stream().findFirst();
         assertTrue(optional.isPresent(), "Message was not received");
-        assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
-                "Sent and received messages should be equal");
+        assertEquals(TEST_MESSAGE, (optional.get()).getString((MESSAGE_CONTENT)), "Sent and received messages should be equal");
     }
 
     @Test
-    public void receiveFanoutMessage() throws MalformedURLException, URISyntaxException {
+    public void receiveFanoutMessage() throws Exception {
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
         Client client = new Client(
@@ -128,23 +125,20 @@ public class RabbitMQTestIT {
         inputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
         inputConfiguration.getBasicConfig().setExchangeType(ExchangeType.FANOUT);
         inputConfiguration.getBasicConfig().setExchange(FANOUT_EXCHANGE_NAME);
-
         final String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-
         Job.components().component("rabbitmq-output", "RabbitMQ://Input?" + inputConfig)
                 .component("collector", "test://collector").connections().from("rabbitmq-output").to("collector").build().run();
 
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
-        Optional optional = res.stream().findFirst();
+        Optional<JsonObject> optional = res.stream().findFirst();
 
         assertTrue(optional.isPresent(), "Message was not received");
 
-        assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
-                "Sent and received messages should be equal");
+        assertEquals(TEST_MESSAGE, (optional.get()).getString((MESSAGE_CONTENT)), "Sent and received messages should be equal");
     }
 
     @Test
-    public void receiveDirectMessage() throws MalformedURLException, URISyntaxException {
+    public void receiveDirectMessage() throws Exception {
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setReceiverType(ReceiverType.EXCHANGE);
         Client client = new Client(
@@ -168,17 +162,15 @@ public class RabbitMQTestIT {
         inputConfiguration.getBasicConfig().setExchange(DIRECT_EXCHANGE_NAME);
 
         final String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-
         Job.components().component("rabbitmq-input", "RabbitMQ://Input?" + inputConfig).component("collector", "test://collector")
                 .connections().from("rabbitmq-input").to("collector").build().run();
 
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
-        Optional optional = res.stream().findFirst();
+        Optional<JsonObject> optional = res.stream().findFirst();
 
         assertTrue(optional.isPresent(), "Message was not received");
 
-        assertEquals(TEST_MESSAGE, ((JsonObject) optional.get()).getString((MESSAGE_CONTENT)),
-                "Sent and received messages should be equal");
+        assertEquals(TEST_MESSAGE, (optional.get()).getString((MESSAGE_CONTENT)), "Sent and received messages should be equal");
     }
 
     private void sendMessageToExchange(RabbitMQDataStore store, BuiltinExchangeType exchangeType, String exchangeName) {
@@ -218,7 +210,6 @@ public class RabbitMQTestIT {
         InputMapperConfiguration configuration = new InputMapperConfiguration();
         BasicConfiguration basicConfiguration = getBasicConfiguration();
         configuration.setBasicConfig(basicConfiguration);
-        configuration.setMaximumMessages(MAXIMUM_MESSAGES);
         return configuration;
     }
 
