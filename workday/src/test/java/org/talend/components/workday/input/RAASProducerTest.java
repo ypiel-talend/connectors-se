@@ -12,8 +12,6 @@
  */
 package org.talend.components.workday.input;
 
-import javax.json.JsonObject;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +20,7 @@ import org.talend.components.workday.WorkdayException;
 import org.talend.components.workday.dataset.RAASLayout;
 import org.talend.components.workday.dataset.WorkdayDataSet;
 import org.talend.components.workday.service.WorkdayReaderService;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -54,10 +53,10 @@ class RAASProducerTest extends WorkdayBaseTest {
         RAASProducerTest.dataset.getRaas().setReport("billingReport");
 
         WorkdayProducer producer = new WorkdayProducer(cfg, service);
-        JsonObject o = producer.next();
+        Record o = producer.next();
         Assertions.assertNotNull(o);
 
-        JsonObject o2 = producer.next();
+        Record o2 = producer.next();
         Assertions.assertNotNull(o2);
     }
 
@@ -67,10 +66,10 @@ class RAASProducerTest extends WorkdayBaseTest {
         RAASProducerTest.dataset.getRaas().setReport("billing report");
 
         WorkdayProducer producer = new WorkdayProducer(cfg, service);
-        JsonObject o = producer.next();
+        Record o = producer.next();
         Assertions.assertNotNull(o);
 
-        JsonObject o2 = producer.next();
+        Record o2 = producer.next();
         Assertions.assertNotNull(o2);
     }
 

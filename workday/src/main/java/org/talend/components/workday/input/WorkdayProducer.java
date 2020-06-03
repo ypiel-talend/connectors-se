@@ -12,6 +12,11 @@
  */
 package org.talend.components.workday.input;
 
+import java.io.Serializable;
+import java.util.Iterator;
+
+import javax.json.JsonObject;
+
 import org.talend.components.workday.dataset.WorkdayDataSet;
 import org.talend.components.workday.service.WorkdayReaderService;
 import org.talend.sdk.component.api.component.Icon;
@@ -20,10 +25,7 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
-
-import javax.json.JsonObject;
-import java.io.Serializable;
-import java.util.Iterator;
+import org.talend.sdk.component.api.record.Record;
 
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "WorkdayInput")
@@ -37,7 +39,7 @@ public class WorkdayProducer implements Serializable {
 
     private final WorkdayReaderService reader;
 
-    private transient Iterator<JsonObject> jsonIterator = null;
+    private transient Iterator<Record> jsonIterator = null;
 
     public WorkdayProducer(@Option("configuration") WorkdayConfiguration config, WorkdayReaderService reader) {
         this.config = config;
@@ -45,7 +47,7 @@ public class WorkdayProducer implements Serializable {
     }
 
     @Producer
-    public JsonObject next() {
+    public Record next() {
         if (this.jsonIterator == null) {
             final WorkdayDataSet workdayds = this.config.getDataSet();
             JsonObject obj = reader.find(workdayds.getDatastore(), workdayds, workdayds.extractQueryParam());

@@ -20,13 +20,20 @@ import javax.json.JsonObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.talend.components.workday.WorkdayException;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.junit5.WithComponents;
 
+@WithComponents("org.talend.components.workday")
 class WorkdayReaderServiceTest {
+
+    @Service
+    private WorkdayReaderService reader;
 
     @Test
     void extractIterator() {
-        WorkdayReaderService reader = new WorkdayReaderService();
-        final Iterator<JsonObject> iter1 = reader.extractIterator(null, "hello");
+
+        final Iterator<Record> iter1 = reader.extractIterator(null, "hello");
         Assertions.assertNotNull(iter1);
         Assertions.assertFalse(iter1.hasNext());
 
@@ -36,13 +43,13 @@ class WorkdayReaderServiceTest {
                 "error for test : ErrTest");
 
         JsonObject objOK = Json.createObjectBuilder().add("tabVide", Json.createArrayBuilder()).build();
-        final Iterator<JsonObject> iterArray = reader.extractIterator(objOK, "tabVide");
+        final Iterator<Record> iterArray = reader.extractIterator(objOK, "tabVide");
         Assertions.assertNotNull(iterArray);
         Assertions.assertFalse(iterArray.hasNext());
 
         JsonObject objOK2 = Json.createObjectBuilder().add("tabOK", Json.createArrayBuilder()
                 .add(Json.createObjectBuilder().add("p", "Hello")).add(Json.createObjectBuilder().add("p", "World"))).build();
-        final Iterator<JsonObject> iterArray2 = reader.extractIterator(objOK2, "tabOK");
+        final Iterator<Record> iterArray2 = reader.extractIterator(objOK2, "tabOK");
         Assertions.assertNotNull(iterArray2);
         Assertions.assertTrue(iterArray2.hasNext());
     }
