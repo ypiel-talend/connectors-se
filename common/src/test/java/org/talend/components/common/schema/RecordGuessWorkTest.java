@@ -12,10 +12,16 @@
  */
 package org.talend.components.common.schema;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -211,5 +217,26 @@ class RecordGuessWorkTest {
         final Record r2 = tr.toRecord(jsonObject2, schema);
         Assertions.assertNotNull(r1);
         Assertions.assertNotNull(r2);
+    }
+
+    @Test
+    void loadComplexFromFilesRecordsA(){
+        int[] n = new int[]{1,2,3};
+
+        final RecordGuessWork gw = new RecordGuessWork();
+        for(int i : n) {
+            try (InputStream fis = getClass().getClassLoader().getResourceAsStream("recordsA/00"+i+".json")) {
+                JsonReader reader = Json.createReader(fis);
+                JsonObject jsonObject = reader.readObject();
+                gw.add(jsonObject);
+            } catch (IOException e) {
+                System.err.println("err : " + e);
+                e.printStackTrace();
+            }
+        }
+
+        final Schema schema = gw.generateSchema(this.factory);
+        Assertions.assertEquals("dc", schema.getEntries().get(3).getElementSchema().getEntries().get(2).getName());
+        Assertions.assertEquals(Schema.Type.DOUBLE, schema.getEntries().get(3).getElementSchema().getEntries().get(2).getType());
     }
 }
