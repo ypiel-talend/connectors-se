@@ -24,4 +24,8 @@ public class Small {
     private String c2;
 
     private String c3;
+
+    private Double d1;
+
+    private Boolean b1;
 }

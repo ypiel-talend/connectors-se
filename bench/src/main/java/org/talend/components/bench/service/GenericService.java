@@ -57,6 +57,8 @@ public class GenericService {
         this.objectSmall.setC1("value 1");
         this.objectSmall.setC2("value 2");
         this.objectSmall.setC3("value 3");
+        this.objectSmall.setD1(23.3d);
+        this.objectSmall.setB1(Boolean.TRUE);
 
         this.objectMedium.setL1(this.objectSmall.toBuilder().build());
         this.objectMedium.setL2(this.objectSmall.toBuilder().c2("new c2 value").build());
@@ -82,21 +84,21 @@ public class GenericService {
         return this.recordBuilderFactory.newRecordBuilder().withString("attr1", "basic value 1") //
                 .withString("attr2", "basic value 2") //
                 .withString("attr3", "basic value 3") //
-                .build();
+                .withBoolean("b1", false).build();
     }
 
     private void init() {
         this.smallRecord = this.recordBuilderFactory.newRecordBuilder().withString("c1", "value 1") //
                 .withString("c2", "value 2") //
                 .withString("c3", "value 3") //
-                .build();
+                .withFloat("f1", 23.0F).withLong("l1", 234L).build();
 
         this.mediumRecord = this.recordBuilderFactory.newRecordBuilder().withRecord("l1", this.smallRecord) //
                 .withString("text1", "Long text for bench performance test\nFrom Talend") //
                 .withString("text2", "big text to test large object\nfor test that real test performance") //
                 .withString("text3", "big text to test large object\nfor test that real test performance") //
                 .withLong("number1", 1225L) //
-                .withRecord("other", buildBasic()).build();
+                .withBoolean("b1", true).withRecord("other", buildBasic()).build();
 
         Record basic = this.buildBasic();
         final Entry arrayEntry = this.recordBuilderFactory.newEntryBuilder().withType(Type.ARRAY).withName("array")
