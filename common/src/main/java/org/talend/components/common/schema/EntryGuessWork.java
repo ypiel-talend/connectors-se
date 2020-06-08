@@ -157,6 +157,9 @@ public class EntryGuessWork {
                 this.possibleTypes.remove(Schema.Type.LONG);
             }
         }
+        if (this.possibleTypes.contains(Schema.Type.BOOLEAN)) {
+            this.possibleTypes.remove(Schema.Type.BOOLEAN);
+        }
     }
 
     private void addString(String s) {
