@@ -34,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@Data
 public class GenericService {
 
     @Service
@@ -96,7 +95,7 @@ public class GenericService {
                 .withString("text1", "Long text for bench performance test\nFrom Talend") //
                 .withString("text2", "big text to test large object\nfor test that real test performance") //
                 .withString("text3", "big text to test large object\nfor test that real test performance") //
-                .withLong("text3", 1225L) //
+                .withLong("number1", 1225L) //
                 .withRecord("other", buildBasic()).build();
 
         Record basic = this.buildBasic();
@@ -123,7 +122,7 @@ public class GenericService {
             return object;
         }
         if (ot == ObjectType.JSON) {
-            return this.mapper.writeObjectAsString(object);
+            return this.mapper.toStructure(object);
         }
         if (ot == ObjectType.RECORD) {
             if (sz == ObjectSize.SMALL) {
