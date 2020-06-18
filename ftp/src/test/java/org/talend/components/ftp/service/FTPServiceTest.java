@@ -69,6 +69,9 @@ public class FTPServiceTest {
 
         dataset.setPath("/communes/communes_0.csv");
         Assertions.assertTrue(beanUnderTest.pathIsFile(client, dataset.getPath()), "/communes/communes_0.csv is a file.");
+
+        dataset.setPath("/");
+        Assertions.assertFalse(beanUnderTest.pathIsFile(client, dataset.getPath()), "/ is a not file.");
     }
 
     @Test
