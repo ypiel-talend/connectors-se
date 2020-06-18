@@ -150,12 +150,9 @@ public class FTPService implements Serializable {
      */
     public boolean pathIsFile(GenericFTPClient ftpClient, String path) {
         List<GenericFTPFile> files = ftpClient.listFiles(path);
-        String[] pathElements = path.split(PATH_SEPARATOR);
-        if (pathElements.length >= 1) {
-            String pathLastElement = pathElements[pathElements.length - 1];
-            if (files.size() == 1) {
-                return !files.get(0).isDirectory() && (files.get(0).getName().equals(pathLastElement));
-            }
+        if (files.size() == 1) {
+            String pathLastElement = path.substring(path.lastIndexOf("/") + 1);
+            return !files.get(0).isDirectory() && (files.get(0).getName().equals(pathLastElement));
         }
 
         return false;
