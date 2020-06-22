@@ -18,6 +18,7 @@ import javax.json.JsonValue;
 
 import org.apache.johnzon.mapper.Mapper;
 import org.apache.johnzon.mapper.MapperBuilder;
+import org.talend.components.bench.beans.FlatLarge;
 import org.talend.components.bench.beans.Large;
 import org.talend.components.bench.beans.Medium;
 import org.talend.components.bench.beans.Small;
@@ -50,6 +51,8 @@ public class GenericService {
 
     private final Large objectLarge = Large.builder().build();
 
+    private final FlatLarge flatLargeObject = new FlatLarge();
+
     public GenericService() {
         this.objectSmall.setC1("value 1");
         this.objectSmall.setC2("value 2");
@@ -75,13 +78,108 @@ public class GenericService {
         this.objectLarge.setMediums(Arrays.asList(this.objectMedium.toBuilder().build(),
                 this.objectMedium.toBuilder().l1(this.objectSmall.toBuilder().build()).build()));
         this.objectLarge.setSubObject(this.objectLarge.toBuilder().build());
-    }
 
-    private Record buildBasic() {
-        return this.recordBuilderFactory.newRecordBuilder().withString("attr1", "basic value 1") //
-                .withString("attr2", "basic value 2") //
-                .withString("attr3", "basic value 3") //
-                .withBoolean("b1", false).build();
+        this.flatLargeObject.setText1("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText2("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText3("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText4("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText5("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText6("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText7("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText8("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText9("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText10("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText11("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText12("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText13("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText14("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText15("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText16("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText17("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText18("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText19("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText20("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText21("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText22("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText23("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText24("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText25("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText26("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText27("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText28("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText29("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText30("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText31("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText32("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText33("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText34("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText35("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText36("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText37("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText38("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText39("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText40("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText41("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText42("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText43("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText44("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText45("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText46("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText47("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText48("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText49("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText50("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText51("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText52("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText53("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText54("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText55("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText56("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText57("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText58("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText59("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText60("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText61("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText62("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText63("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText64("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText65("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText66("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText67("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText68("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText69("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText70("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText71("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText72("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText73("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText74("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText75("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText76("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText77("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText78("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText79("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText80("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText81("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText82("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText83("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText84("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText85("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText86("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText87("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText88("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText89("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText90("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText91("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText92("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText93("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText94("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText95("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText96("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText97("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText98("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText99("big text to test flat large object\nfor test that real test performance");
+        this.flatLargeObject.setText100("big text to test flat large object\nfor test that real test performance");
+
     }
 
     public Object generate(Dataset.ObjectType ot, Dataset.ObjectSize sz) {
@@ -111,6 +209,9 @@ public class GenericService {
         }
         if (sz == ObjectSize.LARGE) {
             return this.objectLarge;
+        }
+        if (sz == ObjectSize.LARGE_FLAT) {
+            return this.flatLargeObject;
         }
         return this.objectSmall; // default.
     }

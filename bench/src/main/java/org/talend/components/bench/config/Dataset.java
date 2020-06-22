@@ -45,7 +45,8 @@ public class Dataset implements Serializable {
     public enum ObjectSize {
         SMALL,
         MEDIUM,
-        LARGE;
+        LARGE,
+        LARGE_FLAT;
     }
 
     @Option

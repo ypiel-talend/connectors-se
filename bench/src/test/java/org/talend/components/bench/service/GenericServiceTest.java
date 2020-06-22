@@ -12,6 +12,9 @@
  */
 package org.talend.components.bench.service;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Assertions;
@@ -46,6 +49,18 @@ class GenericServiceTest {
             final Object json = service.generate(ObjectType.JSON, oz);
             Assertions.assertNotNull(json, "null json with " + oz.name());
             Assertions.assertTrue(json instanceof JsonObject, "type " + json.getClass().getName() + " for " + oz.name());
+            if (oz == ObjectSize.LARGE) {
+                String jsonLine = ((JsonObject) json).toString();
+                System.out.println(jsonLine);
+                try (FileOutputStream out = new FileOutputStream("/home/clesaec/project/JIRA/yellowbrick/data.json")) {
+                    for (long i = 0; i < 40_000L; i++) {
+                        out.write(jsonLine.getBytes());
+                        out.write("\n".getBytes());
+                    }
+                } catch (IOException ex) {
+
+                }
+            }
         }
     }
 }
