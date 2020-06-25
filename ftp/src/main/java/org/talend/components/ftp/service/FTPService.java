@@ -80,11 +80,15 @@ public class FTPService implements Serializable {
 
     public boolean hasWritePermission(FTPConnectorConfiguration configuration) {
         String path = configuration.getDataSet().getPath();
-        if (path.endsWith(PATH_SEPARATOR)) {
+        // Need to find to really check permissions for root
+        if (PATH_SEPARATOR.equals(path)) {
+            return true;
+        }
+
+        if (path.endsWith(PATH_SEPARATOR) && path.length() > PATH_SEPARATOR.length()) {
             path = path.substring(0, path.length() - PATH_SEPARATOR.length());
         }
-        String[] pathElements = path.split(PATH_SEPARATOR);
-        String pathLastElement = pathElements[pathElements.length - 1];
+        String pathLastElement = path.substring(path.lastIndexOf(PATH_SEPARATOR));
         try (GenericFTPClient client = getClient(configuration)) {
             return client.listFiles(getDirectory(path)).stream().filter(GenericFTPFile::isDirectory)
                     .filter(f -> f.getName().equals(pathLastElement)).map(GenericFTPFile::isWritable).findFirst().orElse(false)

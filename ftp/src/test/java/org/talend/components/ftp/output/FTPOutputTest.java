@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.mockftpserver.fake.filesystem.DirectoryEntry;
 import org.mockftpserver.fake.filesystem.FileEntry;
+import org.mockftpserver.fake.filesystem.FileSystemEntry;
 import org.mockftpserver.fake.filesystem.Permissions;
 import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 import org.slf4j.impl.StaticLoggerBinder;
@@ -48,7 +49,9 @@ import org.talend.sdk.component.runtime.base.lang.exception.InvocationExceptionW
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -263,5 +266,58 @@ public class FTPOutputTest {
 
         Assertions.assertEquals(nbRecords, csvLines.size(), "Wrong number of lines");
         files.stream().map(FileEntry::getName).forEach(fileSystem::delete);
+    }
+
+    @EnvironmentalTest
+    public void testOutputAtRoot(UnixFakeFileSystem fileSystem) {
+        String path = "/";
+        int nbRecords = 1;
+        int expectedFiles = 1;
+
+        configuration.getDataSet().setPath(path);
+        configuration.getDataSet().setFormat(FTPDataSet.Format.CSV);
+        configuration.getDataSet().getCsvConfiguration().setLineConfiguration(new LineConfiguration());
+        configuration.setLimitBy(FTPOutputConfiguration.LimitBy.SIZE);
+        configuration.setSizeLimit(1);
+        configuration.setSizeUnit(FTPOutputConfiguration.SizeUnit.KB);
+
+        String configURI = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
+
+        Schema schema = rbf.newSchemaBuilder(Schema.Type.RECORD)
+                .withEntry(rbf.newEntryBuilder().withName("k").withType(Schema.Type.STRING).build())
+                .withEntry(rbf.newEntryBuilder().withName("v").withType(Schema.Type.STRING).build()).build();
+
+        List<Record> inputData = IntStream.range(0, nbRecords)
+                .mapToObj(i -> rbf.newRecordBuilder(schema).withString("k", "entry" + i).withString("v", "value" + i).build())
+                .collect(Collectors.toList());
+
+        COMPONENTS.setInputData(inputData);
+
+        Job.components().component("source", "test://emitter").component("output", "FTP://FTPOutput?" + configURI).connections()
+                .from("source").to("output").build().run();
+
+        // Waiting for completion
+        List<FileSystemEntry> files = fileSystem.listFiles(path);
+        FileEntry csvEntry = (FileEntry) files.stream().filter(f -> !(f.isDirectory()) && f.getName().endsWith(".csv")).findFirst().orElseThrow(() -> new RuntimeException("No csv file created"));
+        try (InputStream csvIn = csvEntry.createInputStream();
+             ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int read = 0;
+            while ((read = csvIn.read(buffer)) > 0) {
+                bout.write(buffer, 0, read);
+                bout.flush();
+            }
+
+            String csvContent = new String(bout.toByteArray(), StandardCharsets.ISO_8859_1);
+            Assertions.assertNotNull(csvContent);
+            Assertions.assertEquals("entry0,value0\r\n", csvContent);
+        }  catch (IOException ioe) {
+            log.error(ioe.getMessage(), ioe);
+            Assertions.fail(ioe.getMessage());
+        }
+
+
+        //Assertions.assertEquals(nbRecords, csvLines.size(), "Wrong number of lines");
+        //files.stream().map(FileEntry::getName).forEach(fileSystem::delete);
     }
 }
