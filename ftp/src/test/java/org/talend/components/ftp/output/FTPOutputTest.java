@@ -298,9 +298,9 @@ public class FTPOutputTest {
 
         // Waiting for completion
         List<FileSystemEntry> files = fileSystem.listFiles(path);
-        FileEntry csvEntry = (FileEntry) files.stream().filter(f -> !(f.isDirectory()) && f.getName().endsWith(".csv")).findFirst().orElseThrow(() -> new RuntimeException("No csv file created"));
-        try (InputStream csvIn = csvEntry.createInputStream();
-             ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
+        FileEntry csvEntry = (FileEntry) files.stream().filter(f -> !(f.isDirectory()) && f.getName().endsWith(".csv"))
+                .findFirst().orElseThrow(() -> new RuntimeException("No csv file created"));
+        try (InputStream csvIn = csvEntry.createInputStream(); ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[1024];
             int read = 0;
             while ((read = csvIn.read(buffer)) > 0) {
@@ -311,13 +311,12 @@ public class FTPOutputTest {
             String csvContent = new String(bout.toByteArray(), StandardCharsets.ISO_8859_1);
             Assertions.assertNotNull(csvContent);
             Assertions.assertEquals("entry0,value0\r\n", csvContent);
-        }  catch (IOException ioe) {
+        } catch (IOException ioe) {
             log.error(ioe.getMessage(), ioe);
             Assertions.fail(ioe.getMessage());
         }
 
-
-        //Assertions.assertEquals(nbRecords, csvLines.size(), "Wrong number of lines");
-        //files.stream().map(FileEntry::getName).forEach(fileSystem::delete);
+        // Assertions.assertEquals(nbRecords, csvLines.size(), "Wrong number of lines");
+        // files.stream().map(FileEntry::getName).forEach(fileSystem::delete);
     }
 }

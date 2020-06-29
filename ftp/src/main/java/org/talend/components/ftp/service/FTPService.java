@@ -88,7 +88,7 @@ public class FTPService implements Serializable {
         if (path.endsWith(PATH_SEPARATOR) && path.length() > PATH_SEPARATOR.length()) {
             path = path.substring(0, path.length() - PATH_SEPARATOR.length());
         }
-        String pathLastElement = path.substring(path.lastIndexOf(PATH_SEPARATOR));
+        String pathLastElement = path.substring(path.lastIndexOf(PATH_SEPARATOR) + PATH_SEPARATOR.length());
         try (GenericFTPClient client = getClient(configuration)) {
             return client.listFiles(getDirectory(path)).stream().filter(GenericFTPFile::isDirectory)
                     .filter(f -> f.getName().equals(pathLastElement)).map(GenericFTPFile::isWritable).findFirst().orElse(false)
