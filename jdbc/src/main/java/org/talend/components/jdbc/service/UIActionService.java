@@ -165,7 +165,7 @@ public class UIActionService {
         final Collection<SuggestionValues.Item> items = new HashSet<>();
         try (Connection connection = jdbcService.createDataSource(datastore).getConnection()) {
             final DatabaseMetaData dbMetaData = connection.getMetaData();
-            try (ResultSet tables = dbMetaData.getTables(connection.getCatalog(), connection.getSchema(), null,
+            try (ResultSet tables = dbMetaData.getTables(connection.getCatalog(), JdbcService.getSchema(connection), null,
                     getAvailableTableTypes(dbMetaData).toArray(new String[0]))) {
                 while (tables.next()) {
                     ofNullable(ofNullable(tables.getString("TABLE_NAME")).orElseGet(() -> {
