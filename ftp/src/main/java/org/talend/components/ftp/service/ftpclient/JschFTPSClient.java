@@ -173,6 +173,11 @@ public class JschFTPSClient extends GenericFTPClient {
         }
     }
 
+    @Override
+    public boolean canWrite(String path) {
+        return true;
+    }
+
     private GenericFTPFile toGenericFTPFile(ChannelSftp.LsEntry lsEntry) {
         GenericFTPFile ftpFile = new GenericFTPFile();
 

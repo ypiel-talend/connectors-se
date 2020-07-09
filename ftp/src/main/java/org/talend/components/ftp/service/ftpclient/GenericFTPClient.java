@@ -53,6 +53,8 @@ public abstract class GenericFTPClient implements AutoCloseable {
         return listFiles(path, null);
     }
 
+    public abstract boolean canWrite(String path);
+
     public abstract void retrieveFile(String path, OutputStream out);
 
     public abstract void configure(FTPInputConfiguration configuration);

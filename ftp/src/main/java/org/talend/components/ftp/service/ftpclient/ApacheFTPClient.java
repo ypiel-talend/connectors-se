@@ -50,6 +50,8 @@ public class ApacheFTPClient extends GenericFTPClient {
 
     private boolean isFTPS;
 
+    private boolean isWindowsSystem;
+
     private ApacheFTPClient() {
 
     }
@@ -117,6 +119,11 @@ public class ApacheFTPClient extends GenericFTPClient {
     @Override
     public void afterAuth(FTPDataStore dataStore) {
         ftpClient.enterLocalPassiveMode();
+        try {
+            isWindowsSystem = ftpClient.getSystemType().toUpperCase().contains("WINDOWS");
+        } catch (IOException e) {
+            log.warn(e.getMessage());
+        }
     }
 
     @Override
@@ -153,18 +160,44 @@ public class ApacheFTPClient extends GenericFTPClient {
         }
     }
 
+    @Override
+    public boolean canWrite(String path) {
+        if (isWindowsSystem) {
+            return true;
+        }
+
+        try {
+            ftpClient.setListHiddenFiles(true);
+            Arrays.stream(ftpClient.listFiles(path)).forEach(System.out::println);
+            FTPFile[] candidates = ftpClient.listFiles(path, f -> f.getName().equals("."));
+            if (candidates.length == 0) {
+                // No way to list directory itself, need to go to parent
+                String dirName = path.substring(path.lastIndexOf('/') + 1);
+                Arrays.stream(ftpClient.listFiles(path + "/..")).forEach(System.out::println);
+                candidates = ftpClient.listFiles(path + "/..", f -> f.getName().equals(dirName) || f.getName().equals(path));
+            }
+            ftpClient.setListHiddenFiles(false);
+            return toGenericFTPFile(candidates[0]).isWritable();
+        } catch (IOException ioe) {
+            log.error(getI18n().errorListFiles(ioe.getMessage()));
+            return true;
+        }
+    }
+
     private <R> GenericFTPFile toGenericFTPFile(FTPFile ftpFile) {
         GenericFTPFile genericFTPFile = new GenericFTPFile();
 
         genericFTPFile.setName(getFilename(ftpFile.getName()));
         genericFTPFile.setDirectory(ftpFile.isDirectory());
         genericFTPFile.setSize(ftpFile.getSize());
-        genericFTPFile.setWritable(true);
 
-        // genericFTPFile.setWritable(ftpFile.hasPermission(FTPFile.USER_ACCESS, FTPFile.WRITE_PERMISSION)
-        // || ftpFile.hasPermission(FTPFile.GROUP_ACCESS, FTPFile.WRITE_PERMISSION)
-        // || ftpFile.hasPermission(FTPFile.WORLD_ACCESS, FTPFile.WRITE_PERMISSION));
-
+        if (isWindowsSystem) {
+            genericFTPFile.setWritable(true);
+        } else {
+            genericFTPFile.setWritable(ftpFile.hasPermission(FTPFile.USER_ACCESS, FTPFile.WRITE_PERMISSION)
+                    || ftpFile.hasPermission(FTPFile.GROUP_ACCESS, FTPFile.WRITE_PERMISSION)
+                    || ftpFile.hasPermission(FTPFile.WORLD_ACCESS, FTPFile.WRITE_PERMISSION));
+        }
         return genericFTPFile;
     }
 

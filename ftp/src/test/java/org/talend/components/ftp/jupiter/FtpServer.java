@@ -48,6 +48,8 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
 
     public static final String PASSWD = "password";
 
+    public static final String HOME_DIR = "/home";
+
     private FakeFtpServer server;
 
     private UnixFakeFileSystem fs;
@@ -80,7 +82,10 @@ public class FtpServer implements BeforeAllCallback, AfterAllCallback, Parameter
                         .forEach(f -> addInFs(f, ""));
 
                 server = new FakeFtpServer();
-                server.addUserAccount(new UserAccount(USER, PASSWD, "/"));
+                server.addUserAccount(new UserAccount(USER, PASSWD, HOME_DIR));
+                DirectoryEntry userHomeDir = new DirectoryEntry(HOME_DIR);
+                userHomeDir.setPermissionsFromString("rw-rw-rwx");
+                fs.add(userHomeDir);
                 server.setFileSystem(fs);
                 server.setServerControlPort(ftpFile.get().port());
                 server.start();
