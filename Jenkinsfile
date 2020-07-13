@@ -12,6 +12,12 @@ def dockerCredentials = usernamePassword(
 	credentialsId: 'docker-registry-credentials',
     passwordVariable: 'DOCKER_PASSWORD',
     usernameVariable: 'DOCKER_LOGIN')
+def veracodeCredentials = usernamePassword(
+        credentialsId: 'veracode-api-credentials',
+        passwordVariable: 'VERACODE_KEY',
+        usernameVariable: 'VERACODE_ID')
+
+
 
 def netsuiteCredentials = usernamePassword(
                                 credentialsId: 'netsuite-integration',
@@ -77,6 +83,10 @@ spec:
     environment {
         MAVEN_OPTS = "-Dmaven.artifact.threads=128 -Dorg.slf4j.simpleLogger.showThreadName=true -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/"
         TALEND_REGISTRY = 'registry.datapwn.com'
+
+        VERACODE_APP_NAME = 'Talend Component Kit'
+        VERACODE_SANDBOX = 'connectors-se'
+        APP_ID = '579232'
     }
 
     options {
@@ -154,6 +164,32 @@ spec:
                                     allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true,
                                     reportDir   : 'ci_documentation/target/talend-component-kit_documentation/', reportFiles: 'index.html', reportName: "Component Documentation"
                             ])
+                        }
+                    }
+                }
+                stage('Vera code') {
+                    steps {
+                        container('main') {
+                            withCredentials([veracodeCredentials]) {
+                                veracode applicationName: "$VERACODE_APP_NAME",
+                                    canFailJob: true,
+                                    createProfile: false,
+                                    debug: true,
+                                    copyRemoteFiles: true,
+                                    fileNamePattern: '',
+                                    useProxy: false,
+                                    replacementPattern: '',
+                                    sandboxName: "$VERACODE_SANDBOX",
+                                    createSandbox: true,
+                                    scanExcludesPattern: '',
+                                    scanIncludesPattern: '',
+                                    scanName: "${env.BRANCH_NAME}-${currentBuild.number}-${currentBuild.startTimeInMillis}",
+                                    uploadExcludesPattern: '',
+                                    uploadIncludesPattern: '**/*.jar',
+                                    waitForScan: true,
+                                    vid: "$VERACODE_ID",
+                                    vkey: "$VERACODE_KEY"
+                            }
                         }
                     }
                 }
