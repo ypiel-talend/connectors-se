@@ -168,15 +168,16 @@ public class ApacheFTPClient extends GenericFTPClient {
 
         try {
             ftpClient.setListHiddenFiles(true);
-            Arrays.stream(ftpClient.listFiles(path)).forEach(System.out::println);
             FTPFile[] candidates = ftpClient.listFiles(path, f -> f.getName().equals("."));
             if (candidates.length == 0) {
                 // No way to list directory itself, need to go to parent
                 String dirName = path.substring(path.lastIndexOf('/') + 1);
-                Arrays.stream(ftpClient.listFiles(path + "/..")).forEach(System.out::println);
                 candidates = ftpClient.listFiles(path + "/..", f -> f.getName().equals(dirName) || f.getName().equals(path));
             }
             ftpClient.setListHiddenFiles(false);
+            if (candidates.length == 0) {
+                return true; // No way to know write permission for folder, let's allow it
+            }
             return toGenericFTPFile(candidates[0]).isWritable();
         } catch (IOException ioe) {
             log.error(getI18n().errorListFiles(ioe.getMessage()));
