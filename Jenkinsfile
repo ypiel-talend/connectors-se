@@ -12,10 +12,6 @@ def dockerCredentials = usernamePassword(
 	credentialsId: 'docker-registry-credentials',
     passwordVariable: 'DOCKER_PASSWORD',
     usernameVariable: 'DOCKER_LOGIN')
-def veracodeCredentials = usernamePassword(
-        credentialsId: 'veracode-api-credentials',
-        passwordVariable: 'VERACODE_KEY',
-        usernameVariable: 'VERACODE_ID')
 
 
 
@@ -164,32 +160,6 @@ spec:
                                     allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true,
                                     reportDir   : 'ci_documentation/target/talend-component-kit_documentation/', reportFiles: 'index.html', reportName: "Component Documentation"
                             ])
-                        }
-                    }
-                }
-                stage('Vera code') {
-                    steps {
-                        container('main') {
-                            withCredentials([veracodeCredentials]) {
-                                veracode applicationName: "$VERACODE_APP_NAME",
-                                    canFailJob: true,
-                                    createProfile: false,
-                                    debug: true,
-                                    copyRemoteFiles: true,
-                                    fileNamePattern: '',
-                                    useProxy: false,
-                                    replacementPattern: '',
-                                    sandboxName: "$VERACODE_SANDBOX",
-                                    createSandbox: true,
-                                    scanExcludesPattern: '',
-                                    scanIncludesPattern: '',
-                                    scanName: "${env.BRANCH_NAME}-${currentBuild.number}-${currentBuild.startTimeInMillis}",
-                                    uploadExcludesPattern: '',
-                                    uploadIncludesPattern: '**/*.jar',
-                                    waitForScan: true,
-                                    vid: "$VERACODE_ID",
-                                    vkey: "$VERACODE_KEY"
-                            }
                         }
                     }
                 }
