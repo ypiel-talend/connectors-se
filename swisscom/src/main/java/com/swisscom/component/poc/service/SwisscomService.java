@@ -20,6 +20,7 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 import java.io.IOException;
@@ -33,6 +34,9 @@ public class SwisscomService {
 
     public final static String HEALTHCHECK = "HEALTHCHECK";
 
+    @Service
+    private RecordBuilderFactory recordBuilderFactory;
+
     @HealthCheck(HEALTHCHECK)
     public HealthCheckStatus healthCheck(@Option final Connection connection) {
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Health check ok");
@@ -40,8 +44,17 @@ public class SwisscomService {
 
     @DiscoverSchema("discover")
     public Schema discover(@Option("dataSet") final Dataset dataSet) {
-        Record record = null;
-        return record.getSchema();
+        final Schema schema = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
+                .withEntry(recordBuilderFactory.newEntryBuilder().withName("bbb").withType(Schema.Type.INT).withNullable(false)
+                        .withDefaultValue(10).withComment("My comment").build())
+                .withEntry(recordBuilderFactory.newEntryBuilder().withName("first").withType(Schema.Type.INT).withNullable(false)
+                        .build())
+                .withEntry(recordBuilderFactory.newEntryBuilder().withName(dataSet.getConnection().getMyconnection())
+                        .withType(Schema.Type.STRING).withNullable(true).build())
+                .withEntry(recordBuilderFactory.newEntryBuilder().withName("aaaaa").withType(Schema.Type.INT).withNullable(false)
+                        .build())
+                .build();
+        return schema;
     }
 
 }
