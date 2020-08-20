@@ -103,8 +103,8 @@ public class FTPDataStore implements Serializable {
     }
 
     public enum FileProtocol {
-        FTP // ,
-        // FTPS,
+        FTP,
+        FTPS // ,
         // SFTP
     }
 }

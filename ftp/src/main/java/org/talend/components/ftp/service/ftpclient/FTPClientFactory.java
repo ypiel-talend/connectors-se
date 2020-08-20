@@ -31,6 +31,7 @@ public class FTPClientFactory implements Serializable {
     private static Map<FTPDataStore.FileProtocol, Function<FTPDataStore, GenericFTPClient>> getClientProviders() {
         Map<FTPDataStore.FileProtocol, Function<FTPDataStore, GenericFTPClient>> map = new HashMap<>();
         map.put(FTPDataStore.FileProtocol.FTP, ApacheFTPClient::createFTP);
+        map.put(FTPDataStore.FileProtocol.FTPS, ApacheFTPClient::createFTPS);
         // Complete for other protocol
         return map;
     }
