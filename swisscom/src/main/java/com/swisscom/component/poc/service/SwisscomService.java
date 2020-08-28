@@ -18,6 +18,8 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.completion.SuggestionValues;
+import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -28,6 +30,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 
 @Service
 public class SwisscomService {
@@ -55,6 +58,17 @@ public class SwisscomService {
                         .build())
                 .build();
         return schema;
+    }
+
+    @Suggestions("loadList")
+    public SuggestionValues loadList(@Option final Dataset ds) {
+        SuggestionValues values = new SuggestionValues();
+        values.setItems(Arrays.asList(
+                new SuggestionValues.Item("1", ds.getConnection().getMyconnection()),
+                new SuggestionValues.Item("2", "bbbb"),
+                new SuggestionValues.Item("3", "cccc")));
+
+        return values;
     }
 
 }

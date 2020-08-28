@@ -14,6 +14,7 @@ package com.swisscom.component.poc.config;
 
 import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
@@ -26,7 +27,8 @@ import java.util.List;
 
 @Data
 @DataSet("Dataset")
-@GridLayout({ @GridLayout.Row({ "connection" }), @GridLayout.Row({ "nb" }), @GridLayout.Row({ "cols" }) })
+@GridLayout({ @GridLayout.Row({ "connection" }), @GridLayout.Row({ "nb" }), @GridLayout.Row({ "cols" }),
+        @GridLayout.Row({ "myList" }) })
 @Documentation("")
 public class Dataset implements Serializable {
 
@@ -44,5 +46,10 @@ public class Dataset implements Serializable {
     @Option
     @Documentation("")
     private Connection connection;
+
+    @Option
+    @Documentation("")
+    @Suggestable(value = "loadList", parameters = { ".." })
+    public String myList;
 
 }
