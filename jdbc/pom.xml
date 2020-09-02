@@ -18,6 +18,7 @@
         <HikariCP.version>3.1.0</HikariCP.version>
         <!-- test version -->
         <derby.version>10.12.1.1</derby.version>
+        <snowflake.version>3.12.11</snowflake.version>
         <testcontainers.version>1.14.1</testcontainers.version>
         <!-- To run ITs test give the following option to mvn : -Dtest.excluded="" -->
         <test.excluded>IT</test.excluded>
@@ -146,7 +147,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.11.1</version>
+            <version>${snowflake.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -207,7 +208,7 @@
                 <dependency>
                     <groupId>net.snowflake</groupId>
                     <artifactId>snowflake-jdbc</artifactId>
-                    <version>3.11.1</version>
+                    <version>${snowflake.version}</version>
                     <scope>provided</scope>
                 </dependency>
                 <dependency>
