@@ -10,64 +10,45 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.swisscom.component.poc.input;
+package com.swisscom.component.poc.output;
 
 import com.swisscom.component.poc.config.Config;
 import com.swisscom.component.poc.service.SwisscomService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.input.Emitter;
-import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
+import org.talend.sdk.component.api.processor.ElementListener;
+import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
-@Version(1)
-@Emitter(name = "Input")
+@Slf4j
+@Getter
+@Version
+@Processor(name = "Output")
 @Icon(value = Icon.IconType.CUSTOM, custom = "test")
 @Documentation("")
-public class Input implements Serializable {
+public class Output implements Serializable {
 
     private Config config;
 
-    private SwisscomService service;
-
-    private boolean done = false;
-
-    public Input(@Option("configuration") final Config config, final SwisscomService service) {
+    public Output(@Option("configuration") final Config config, final SwisscomService service) {
         this.config = config;
-        this.service = service;
     }
 
-    @Producer
-    public Entry next() {
-        if (done) {
-            return null;
-        }
-        done = true;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        this.config.getDataset().getCols().stream().forEach(c -> sb.append(c).append(", "));
-        sb.append("]");
-
-        return new Entry(0, this.config.getMyconfig() + " : " + this.config.getDataset().getCols().size() + " : " + sb);
+    @PostConstruct
+    public void init() {
+        // no-op
     }
 
-    @Data
-    @AllArgsConstructor
-    public final static class Entry {
-
-        @NonNull
-        private int id;
-
-        @NonNull
-        private String content;
+    @ElementListener
+    public void process(final Record input) {
+        log.info("Swisscom" + input);
     }
 
 }

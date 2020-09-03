@@ -48,14 +48,15 @@ public class SwisscomService {
     @DiscoverSchema("discover")
     public Schema discover(@Option("dataSet") final Dataset dataSet) {
         final Schema schema = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("bbb").withType(Schema.Type.INT).withNullable(false)
-                        .withDefaultValue(10).withComment("My comment").build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("first").withType(Schema.Type.INT).withNullable(false)
-                        .build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName(dataSet.getConnection().getMyconnection())
-                        .withType(Schema.Type.STRING).withNullable(true).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("aaaaa").withType(Schema.Type.INT).withNullable(false)
-                        .build())
+                .withEntry(recordBuilderFactory.newEntryBuilder().withName("myFirstColumn").withType(Schema.Type.INT)
+                        .withNullable(false).withDefaultValue(10).withComment("My comment").build())
+                .withEntry(recordBuilderFactory.newEntryBuilder().withName("MySecondColumn").withType(Schema.Type.INT)
+                        .withNullable(false).build())
+                .withEntry(recordBuilderFactory.newEntryBuilder()
+                        .withName("colNameFromContext" + dataSet.getConnection().getMyconnection()).withType(Schema.Type.STRING)
+                        .withNullable(true).build())
+                .withEntry(recordBuilderFactory.newEntryBuilder().withName("LastColumn").withType(Schema.Type.INT)
+                        .withNullable(false).build())
                 .build();
         return schema;
     }
@@ -63,10 +64,8 @@ public class SwisscomService {
     @Suggestions("loadList")
     public SuggestionValues loadList(@Option final Dataset ds) {
         SuggestionValues values = new SuggestionValues();
-        values.setItems(Arrays.asList(
-                new SuggestionValues.Item("1", ds.getConnection().getMyconnection()),
-                new SuggestionValues.Item("2", "bbbb"),
-                new SuggestionValues.Item("3", "cccc")));
+        values.setItems(Arrays.asList(new SuggestionValues.Item("1", ds.getConnection().getMyconnection()),
+                new SuggestionValues.Item("2", "bbbb"), new SuggestionValues.Item("3", "cccc")));
 
         return values;
     }
