@@ -12,16 +12,12 @@
  */
 package org.talend.components.cosmosDB.output;
 
-import com.microsoft.azure.documentdb.DataType;
-import com.microsoft.azure.documentdb.DocumentClient;
-import com.microsoft.azure.documentdb.DocumentClientException;
-import com.microsoft.azure.documentdb.DocumentCollection;
-import com.microsoft.azure.documentdb.Index;
-import com.microsoft.azure.documentdb.IndexingPolicy;
-import com.microsoft.azure.documentdb.PartitionKeyDefinition;
-import com.microsoft.azure.documentdb.RangeIndex;
-import com.microsoft.azure.documentdb.RequestOptions;
-import lombok.extern.slf4j.Slf4j;
+import java.io.Serializable;
+import java.util.Arrays;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.cosmosDB.service.CosmosDBService;
 import org.talend.components.cosmosDB.service.I18nMessage;
@@ -34,12 +30,19 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.io.Serializable;
-import java.util.Arrays;
+import com.microsoft.azure.documentdb.DataType;
+import com.microsoft.azure.documentdb.DocumentClient;
+import com.microsoft.azure.documentdb.DocumentClientException;
+import com.microsoft.azure.documentdb.DocumentCollection;
+import com.microsoft.azure.documentdb.Index;
+import com.microsoft.azure.documentdb.IndexingPolicy;
+import com.microsoft.azure.documentdb.PartitionKeyDefinition;
+import com.microsoft.azure.documentdb.RangeIndex;
+import com.microsoft.azure.documentdb.RequestOptions;
 
-@Version(1)
+import lombok.extern.slf4j.Slf4j;
+
+@Version(2)
 @Slf4j
 @Icon(value = Icon.IconType.CUSTOM, custom = "CosmosDBOutput")
 @Processor(name = "SQLAPIOutput")
@@ -50,7 +53,7 @@ public class CosmosDBOutput implements Serializable {
 
     private final CosmosDBOutputConfiguration configuration;
 
-    private transient final CosmosDBService service;
+    private final CosmosDBService service;
 
     private transient DocumentClient client;
 
@@ -67,6 +70,7 @@ public class CosmosDBOutput implements Serializable {
     public void init() {
 
         client = service.documentClientFrom(configuration.getDataset().getDatastore());
+
         if (configuration.isCreateCollection()) {
             createDocumentCollectionIfNotExists();
         }
@@ -137,4 +141,5 @@ public class CosmosDBOutput implements Serializable {
             }
         }
     }
+
 }
