@@ -223,14 +223,16 @@ public class RestService {
 
     @HealthCheck(HEALTHCHECK)
     public HealthCheckStatus healthCheck(@Option final Datastore datastore) {
+        String host = datastore.getBase();
         try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(datastore.getBase()).openConnection();
+            host = getHost(host);
+            HttpURLConnection conn = (HttpURLConnection) new URL(host).openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(datastore.getConnectionTimeout());
             conn.setReadTimeout(datastore.getReadTimeout());
             conn.connect();
             final int status = conn.getResponseCode();
-            log.info(i18n.healthCheckStatus(datastore.getBase(), status));
+            log.info(i18n.healthCheckStatus(host, status));
             if (status == HttpURLConnection.HTTP_OK) {
                 return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.healthCheckOk());
             }
@@ -242,7 +244,12 @@ public class RestService {
             log.debug(i18n.healthCheckException(sw.toString()));
         }
 
-        return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.healthCheckFailed(datastore.getBase()));
+        return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.healthCheckFailed(host));
+    }
+
+    public String getHost(final String baseUrl) throws MalformedURLException {
+        final URL url = new URL(baseUrl);
+        return url.getProtocol() + "://" + url.getHost() + (url.getPort() > -1 ? ":" + url.getPort() : "");
     }
 
     /**
