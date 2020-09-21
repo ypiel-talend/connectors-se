@@ -60,7 +60,7 @@ public class OutputParserFactory {
         String delegate = record.toString();
         log.debug("delegate: " + delegate);
         if (delegate.startsWith("AvroRecord")) {
-            //To avoid import dependence of AvroRecord
+            // To avoid import dependence of AvroRecord
             return delegate.substring(20, delegate.length() - 1);
         }
         return delegate;
