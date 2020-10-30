@@ -29,7 +29,7 @@ import java.io.Serializable;
 @Data
 @DataSet("dataset")
 @Documentation("")
-@GridLayout({ @GridLayout.Row("datastore"), @GridLayout.Row("file"), @GridLayout.Row("dsCodingConfig"),
+@GridLayout({ @GridLayout.Row("datastore"), @GridLayout.Row("splits"), @GridLayout.Row("file"), @GridLayout.Row("dsCodingConfig"),
         @GridLayout.Row("showFeedback"), @GridLayout.Row("feedback") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
 public class Dataset implements Serializable {
@@ -58,5 +58,9 @@ public class Dataset implements Serializable {
     @Updatable(value = "FEEDBACK_DS", parameters = { "dsCodingConfig" }, after = "feedback")
     @Code("")
     private Feedback feedback = new Feedback();
+
+    @Option
+    @Documentation("")
+    private Integer splits = 1;
 
 }

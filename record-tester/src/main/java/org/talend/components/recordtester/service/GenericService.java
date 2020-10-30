@@ -206,7 +206,7 @@ public class GenericService {
             try {
                 fileSystem = FileSystems.getFileSystem(uri);
             } catch (FileSystemNotFoundException e) {
-                fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+                fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object> emptyMap());
             }
             myPath = fileSystem.getPath(root);
         } else {

@@ -23,7 +23,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@GridLayout({ @GridLayout.Row("dataset"), @GridLayout.Row("overwriteDataset"), @GridLayout.Row("file"),
+@GridLayout({ @GridLayout.Row("dataset"), @GridLayout.Row("overwriteDataset"), @GridLayout.Row("splits"), @GridLayout.Row("file"),
         @GridLayout.Row("justLoadFile"), @GridLayout.Row("codingConfig"), @GridLayout.Row("showFeedback"),
         @GridLayout.Row("feedback") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
@@ -48,6 +48,11 @@ public class Config implements Serializable {
     @Option
     @Documentation("")
     boolean overwriteDataset = false;
+
+    @Option
+    @Documentation("")
+    @ActiveIf(target = "overwriteDataset", value = "true")
+    private Integer splits = 1;
 
     @Option
     @Documentation("")
