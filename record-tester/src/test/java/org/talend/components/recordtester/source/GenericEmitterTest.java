@@ -66,38 +66,119 @@ class GenericEmitterTest {
     }
 
     @EnvironmentalTest
-    void testBeanShell() {
-        config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.BEANSHELL);
-        config.getCodingConfig()
+    void testBeanShellWithSplit() {
+        final List<Record> records = _testBeanShellWithSplit(false);
+        assertEquals(50, records.size());
+    }
+
+    @EnvironmentalTest
+    void testBeanShellWithSplitWithrewrite() {
+        final List<Record> records = _testBeanShellWithSplit(true);
+        assertEquals(20, records.size());
+    }
+
+    @EnvironmentalTest
+    List<Record> _testBeanShellWithSplit(boolean rewrite) {
+        config.getDataset().setSplits(5);
+        config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.BEANSHELL);
+        config.getDataset().getDsCodingConfig()
                 .setBeanShellCode("for(int i = 1; i <= 10; i++){\n" + " record = provider.getRecordBuilderFactory()\n"
                         + " .newRecordBuilder()\n" + " .withString(\"foo\", \"bar_\"+i);\n" + " records.add(record.build());\n"
                         + "}");
 
-        final List<Record> records = getRecords();
+        config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.BEANSHELL);
+        config.getCodingConfig()
+                .setBeanShellCode("for(int i = 1; i <= 5; i++){\n" + " record = provider.getRecordBuilderFactory()\n"
+                        + " .newRecordBuilder()\n" + " .withString(\"foo\", \"bar_\"+i);\n" + " records.add(record.build());\n"
+                        + "}");
+        config.setSplits(4);
+        config.setOverwriteDataset(rewrite);
 
-        assertEquals(10, records.size());
-        final Record record = records.get(0);
+        return getRecords();
+    }
 
-        System.out.println("End.");
+
+    @EnvironmentalTest
+    void testJsonWithSplit() {
+        List<Record> records = _testJsonWithWithSplit(false);
+        assertEquals(6, records.size());
     }
 
     @EnvironmentalTest
-    void testJson() {
+    void testJsonWithSplitWithRewrite() {
+        List<Record> records = _testJsonWithWithSplit(true);
+        assertEquals(10, records.size());
+    }
+
+    List<Record> _testJsonWithWithSplit(boolean rewrite) {
+        config.getDataset().setSplits(2);
+        config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
+        config.getDataset().getDsCodingConfig().setJsonPointer("/arr_b");
+        config.getDataset().getDsCodingConfig()
+                .setJson("{\n" +
+                        "\t\"att_a\" : \"val_a\",\n" +
+                        "\t\"arr_b\" : [\n" +
+                        "\t\t{\"att_c\": 1, \"att_d\": \"val_d1\"},\n" +
+                        "\t\t{\"att_c\": 2, \"att_d\": \"val_d2\"},\n" +
+                        "\t\t{\"att_c\": 3, \"att_d\": \"val_d3\"}\n" +
+                        "\t]\n" +
+                        "}");
+
         config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
-        config.getCodingConfig().setJsonPointer("/");
+        config.getCodingConfig().setJsonPointer("/arr_b");
         config.getCodingConfig()
-                .setJson("{\n" + "  \"aaa\" : \"aaaaa\",\n" + "  \"bbb\" : 12.5,\n" + "  \"ccc\" : true,\n" + "  \"ddd\" : {\n"
-                        + "    \"eee\" : \"eeee\"\n" + "  },\n" + "  \"fff\" : [\n"
-                        + "  \t{\"ggg\" : \"ggg1\", \"hhh\" : \"hhh1\"},\n" + "  \t{\"ggg\" : \"ggg2\", \"hhh\" : \"hhh2\"}\n"
-                        + "  ]\n" + "}");
+                .setJson("{\n" +
+                        "\t\"att_a\" : \"val_a\",\n" +
+                        "\t\"arr_b\" : [\n" +
+                        "\t\t{\"att_c\": 1, \"att_d\": \"val_d1\"},\n" +
+                        "\t\t{\"att_c\": 2, \"att_d\": \"val_d2\"}\n" +
+                        "\t]\n" +
+                        "}");
+        config.setOverwriteDataset(rewrite);
+        config.setSplits(5);
+
+        return getRecords();
+    }
+
+    @EnvironmentalTest
+    void testJsonFile() {
+        config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
+        config.getDataset().setFile("fd.json");
+
 
         final List<Record> records = getRecords();
-
         assertEquals(1, records.size());
-        final Record record = records.get(0);
-
-        System.out.println("End.");
     }
+
+    @EnvironmentalTest
+    void testEmptyProvider(){
+        final List<Record> records = _testEmptyProvider(false);
+        assertEquals(0, records.size());
+    }
+
+    @EnvironmentalTest
+    void testEmptyProviderDatasetWithRewrite(){
+        final List<Record> records = _testEmptyProvider(true);
+        assertEquals(0, records.size());
+    }
+
+    List<Record> _testEmptyProvider(boolean rewrite) {
+        if(!rewrite){
+            config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.EMPTY);
+            config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
+            config.setFile("fd.json");
+        }
+        else{
+            config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.EMPTY);
+            config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
+            config.getDataset().setFile("fd.json");
+        }
+
+        config.setOverwriteDataset(rewrite);
+
+        return getRecords();
+    }
+
 
     private List<Record> getRecords() {
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();

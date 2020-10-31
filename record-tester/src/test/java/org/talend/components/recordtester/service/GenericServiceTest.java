@@ -61,8 +61,30 @@ class GenericServiceTest {
 
         final String dump = service.dumpSchema(schema);
 
-        final Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
-        // builder.withEntry()
+        assertEquals("RECORD\n" +
+                "  menu : RECORD(nullable : false)\n" +
+                "  RECORD\n" +
+                "    id : STRING(nullable : true)\n" +
+                "    value : STRING(nullable : true)\n" +
+                "    recA : RECORD(nullable : false)\n" +
+                "    RECORD\n" +
+                "      attr1 : STRING(nullable : true)\n" +
+                "      attr2 : LONG(nullable : false)\n" +
+                "      recB : RECORD(nullable : false)\n" +
+                "      RECORD\n" +
+                "        attr3 : BOOLEAN(nullable : false)\n" +
+                "        attr4 : DOUBLE(nullable : false)\n" +
+                "    popup : RECORD(nullable : false)\n" +
+                "    RECORD\n" +
+                "      menuitem : ARRAY(nullable : false)\n" +
+                "      RECORD\n" +
+                "        value : STRING(nullable : true)\n" +
+                "        onclick : STRING(nullable : true)\n" +
+                "  arrayOfArray : ARRAY(nullable : false)\n" +
+                "  ARRAY\n" +
+                "    RECORD\n" +
+                "      aaa : STRING(nullable : true)\n" +
+                "      bbb : DOUBLE(nullable : false)\n", dump);
     }
 
 }
