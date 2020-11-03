@@ -12,7 +12,10 @@ def dockerCredentials = usernamePassword(
 	credentialsId: 'docker-registry-credentials',
     passwordVariable: 'DOCKER_PASSWORD',
     usernameVariable: 'DOCKER_LOGIN')
-
+def sonarCredentials = usernamePassword(
+    credentialsId: 'sonar-credentials',
+    passwordVariable: 'SONAR_PASSWORD', 
+    usernameVariable: 'SONAR_LOGIN')
 
 def PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
 
@@ -83,6 +86,7 @@ spec:
         choice(name: 'Action', 
                choices: [ 'STANDARD', 'PUSH_TO_XTM', 'DEPLOY_FROM_XTM', 'RELEASE' ],
                description: 'Kind of running : \nSTANDARD (default), normal building\n PUSH_TO_XTM : Export the project i18n resources to Xtm to be translated. This action can be performed from master or maintenance branches only. \nDEPLOY_FROM_XTM: Download and deploy i18n resources from Xtm to nexus for this branch.\nRELEASE : build release')
+        booleanParam(name: 'FORCE_SONAR', defaultValue: false, description: 'Force Sonar analysis')
     }
 
     stages {
@@ -162,6 +166,22 @@ spec:
                         container('main') {
                             withCredentials([nexusCredentials]) {
                                 sh "cd ci_nexus && mvn -U -B -s .jenkins/settings.xml clean deploy -e -Pdocker -DskipTests ${talendOssRepositoryArg}"
+                            }
+                        }
+                    }
+                }
+                stage('Sonar') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            expression { env.BRANCH_NAME.startsWith('maintenance/') }
+                            expression { params.FORCE_SONAR == true }
+                        }
+                    }
+                    steps {
+                        container('main') {
+                            withCredentials([sonarCredentials]) {
+                                sh "mvn -Dsonar.host.url=https://sonar-eks.datapwn.com -Dsonar.login='$SONAR_LOGIN' -Dsonar.password='$SONAR_PASSWORD' sonar:sonar -PITs -s .jenkins/settings.xml -Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/"
                             }
                         }
                     }
