@@ -16,6 +16,7 @@ import lombok.Data;
 import org.talend.components.recordtester.service.generic.Beanshell;
 import org.talend.components.recordtester.service.generic.Json;
 import org.talend.components.recordtester.service.record.Empty;
+import org.talend.components.recordtester.service.record.Fixed;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -25,16 +26,16 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@GridLayout({ @GridLayout.Row("provider"), @GridLayout.Row("beanShellCode"), @GridLayout.Row("jsonPointer"),
-        @GridLayout.Row("commonio"), @GridLayout.Row("json") })
+@GridLayout({ @GridLayout.Row("provider"), @GridLayout.Row("nbRecord"), @GridLayout.Row("beanShellCode"),
+        @GridLayout.Row("jsonPointer"), @GridLayout.Row("commonio"), @GridLayout.Row("json") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
 public class CodingConfig implements Serializable {
 
     public enum RECORD_TYPE {
         EMPTY(Empty.class),
         BEANSHELL(Beanshell.class),
-        JSON(Json.class);
-        ;
+        JSON(Json.class),
+        FIXED(Fixed.class);
 
         Class clazz;
 
@@ -50,6 +51,11 @@ public class CodingConfig implements Serializable {
     @Option
     @Documentation("")
     RECORD_TYPE provider = RECORD_TYPE.EMPTY;
+
+    @Option
+    @ActiveIf(target = "provider", value = "FIXED")
+    @Documentation("")
+    private int nbRecord = 100;
 
     @Option
     @Code("java")
