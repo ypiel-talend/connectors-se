@@ -31,13 +31,12 @@ public class Fixed extends AbstractProvider {
 
     private long ref_timestamp;
 
-    private final Schema fixed_schema;
+    private Schema fixed_schema;
 
-    private final Schema sub_record_schema;
+    private Schema sub_record_schema;
 
-    public Fixed() {
-        super();
-
+    @Override
+    public void init() {
         try {
             ref_timestamp = sdf.parse("01/01/2000").getTime();
         } catch (ParseException e) {
@@ -73,7 +72,7 @@ public class Fixed extends AbstractProvider {
     public Record createARecord(int i, int current_null_field, int toggle) {
         Record.Builder builder = this.getRecordBuilderFactory().newRecordBuilder(this.fixed_schema);
 
-        builder.withString("a_string", current_null_field == 1 ? null : "string_" + i);
+        builder.withString("a_string", current_null_field != 1 ? "string_" + i : null);
         if (current_null_field != 2)
             builder.withBoolean("a_boolean", toggle % 2 == 0);
         if (current_null_field != 3)
@@ -88,17 +87,18 @@ public class Fixed extends AbstractProvider {
             builder.withFloat("a_float", (toggle % 2 == 0) ? Float.MIN_VALUE : Float.MAX_VALUE);
 
         try {
-            builder.withDateTime("a_date", (current_null_field != 8) ? sdf.parse("10/04/" + (2000 + i)) : null);
+            builder.withDateTime("a_datetime", (current_null_field != 8) ? sdf.parse("10/04/" + (2000 + i)) : null);
         } catch (ParseException e) {
             throw new RuntimeException("Can't generate date.", e);
         }
 
-        if (current_null_field != 8)
+        if (current_null_field != 9)
             builder.withBytes("a_byte_array", ("index_" + i).getBytes());
 
         final Record sub_record = this.getRecordBuilderFactory().newRecordBuilder(this.sub_record_schema)
                 .withString("rec_string", "rec_string_" + i).withInt("rec_int", i).build();
-        builder.withRecord("a_record", current_null_field != 9 ? sub_record : null);
+
+        builder.withRecord(this.newRecordEntry("a_record", sub_record_schema), current_null_field != 10 ? sub_record : null);
 
         return builder.build();
     }
@@ -249,7 +249,7 @@ public class Fixed extends AbstractProvider {
 
         private int current = 0;
 
-        private int current_null_field = 0;
+        private int current_null_field = -1;
 
         private int toggle = 1;
 
@@ -270,7 +270,7 @@ public class Fixed extends AbstractProvider {
         public Object next() {
             current++;
             current_null_field++;
-            if (current_null_field >= this.nbFields) {
+            if (current_null_field > this.nbFields) {
                 current_null_field = 0;
             }
             toggle++;
