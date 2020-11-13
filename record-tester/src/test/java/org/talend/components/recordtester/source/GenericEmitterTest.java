@@ -97,7 +97,6 @@ class GenericEmitterTest {
         return getRecords();
     }
 
-
     @EnvironmentalTest
     void testJsonWithSplit() {
         List<Record> records = _testJsonWithWithSplit(false);
@@ -115,25 +114,14 @@ class GenericEmitterTest {
         config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
         config.getDataset().getDsCodingConfig().setJsonPointer("/arr_b");
         config.getDataset().getDsCodingConfig()
-                .setJson("{\n" +
-                        "\t\"att_a\" : \"val_a\",\n" +
-                        "\t\"arr_b\" : [\n" +
-                        "\t\t{\"att_c\": 1, \"att_d\": \"val_d1\"},\n" +
-                        "\t\t{\"att_c\": 2, \"att_d\": \"val_d2\"},\n" +
-                        "\t\t{\"att_c\": 3, \"att_d\": \"val_d3\"}\n" +
-                        "\t]\n" +
-                        "}");
+                .setJson("{\n" + "\t\"att_a\" : \"val_a\",\n" + "\t\"arr_b\" : [\n"
+                        + "\t\t{\"att_c\": 1, \"att_d\": \"val_d1\"},\n" + "\t\t{\"att_c\": 2, \"att_d\": \"val_d2\"},\n"
+                        + "\t\t{\"att_c\": 3, \"att_d\": \"val_d3\"}\n" + "\t]\n" + "}");
 
         config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
         config.getCodingConfig().setJsonPointer("/arr_b");
-        config.getCodingConfig()
-                .setJson("{\n" +
-                        "\t\"att_a\" : \"val_a\",\n" +
-                        "\t\"arr_b\" : [\n" +
-                        "\t\t{\"att_c\": 1, \"att_d\": \"val_d1\"},\n" +
-                        "\t\t{\"att_c\": 2, \"att_d\": \"val_d2\"}\n" +
-                        "\t]\n" +
-                        "}");
+        config.getCodingConfig().setJson("{\n" + "\t\"att_a\" : \"val_a\",\n" + "\t\"arr_b\" : [\n"
+                + "\t\t{\"att_c\": 1, \"att_d\": \"val_d1\"},\n" + "\t\t{\"att_c\": 2, \"att_d\": \"val_d2\"}\n" + "\t]\n" + "}");
         config.setOverwriteDataset(rewrite);
         config.setSplits(5);
 
@@ -145,30 +133,28 @@ class GenericEmitterTest {
         config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
         config.getDataset().setFile("fd.json");
 
-
         final List<Record> records = getRecords();
         assertEquals(1, records.size());
     }
 
     @EnvironmentalTest
-    void testEmptyProvider(){
+    void testEmptyProvider() {
         final List<Record> records = _testEmptyProvider(false);
         assertEquals(0, records.size());
     }
 
     @EnvironmentalTest
-    void testEmptyProviderDatasetWithRewrite(){
+    void testEmptyProviderDatasetWithRewrite() {
         final List<Record> records = _testEmptyProvider(true);
         assertEquals(0, records.size());
     }
 
     List<Record> _testEmptyProvider(boolean rewrite) {
-        if(!rewrite){
+        if (!rewrite) {
             config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.EMPTY);
             config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
             config.setFile("fd.json");
-        }
-        else{
+        } else {
             config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.EMPTY);
             config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.JSON);
             config.getDataset().setFile("fd.json");
@@ -178,7 +164,6 @@ class GenericEmitterTest {
 
         return getRecords();
     }
-
 
     private List<Record> getRecords() {
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
