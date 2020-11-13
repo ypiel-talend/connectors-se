@@ -24,4 +24,8 @@ public interface RecordProvider {
 
     List<Object> get(final CodingConfig config);
 
+    // called after setService
+    default void init() {
+        // no-op
+    }
 }

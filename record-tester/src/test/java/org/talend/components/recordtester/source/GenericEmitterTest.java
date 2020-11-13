@@ -149,6 +149,15 @@ class GenericEmitterTest {
         assertEquals(0, records.size());
     }
 
+    @EnvironmentalTest
+    void testFixedRecord() {
+        config.setOverwriteDataset(true);
+        config.getCodingConfig().setProvider(CodingConfig.RECORD_TYPE.FIXED);
+        config.getCodingConfig().setNbRecord(500);
+        final List<Record> records = getRecords();
+        assertEquals(500, records.size());
+    }
+
     List<Record> _testEmptyProvider(boolean rewrite) {
         if (!rewrite) {
             config.getDataset().getDsCodingConfig().setProvider(CodingConfig.RECORD_TYPE.EMPTY);

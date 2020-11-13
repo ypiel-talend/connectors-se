@@ -98,6 +98,7 @@ public class GenericService {
             throw new IllegalArgumentException("Can't load record provider " + type, e);
         }
         provider.setServices(this.getServices());
+        provider.init();
         return provider.get(config);
     }
 
