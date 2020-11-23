@@ -27,13 +27,17 @@ import java.util.ListIterator;
 
 public class Fixed extends AbstractProvider {
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
     private long ref_timestamp;
 
     private Schema fixed_schema;
 
     private Schema sub_record_schema;
+
+    private synchronized java.util.Date stringToDate(final String str) throws java.text.ParseException {
+        return sdf.parse(str);
+    }
 
     @Override
     public void init() {
@@ -87,7 +91,7 @@ public class Fixed extends AbstractProvider {
             builder.withFloat("a_float", (toggle % 2 == 0) ? Float.MIN_VALUE : Float.MAX_VALUE);
 
         try {
-            builder.withDateTime("a_datetime", (current_null_field != 8) ? sdf.parse("10/04/" + (2000 + i)) : null);
+            builder.withDateTime("a_datetime", (current_null_field != 8) ? stringToDate("10/04/" + (2000 + i)) : null);
         } catch (ParseException e) {
             throw new RuntimeException("Can't generate date.", e);
         }
