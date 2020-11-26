@@ -196,7 +196,7 @@ public class GenericService {
     }
 
     private SuggestionValues.Item pathToItem(final Path p) {
-        return new SuggestionValues.Item(p.toString(), p.getFileName().toString());
+        return new SuggestionValues.Item(p.toString(), p.toString());
     }
 
     public Stream<Path> walkThroughResource(final String root) throws URISyntaxException, IOException {

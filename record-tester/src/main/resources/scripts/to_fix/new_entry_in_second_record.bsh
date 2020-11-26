@@ -1,0 +1,20 @@
+// This is a beancshell script : http://www.beanshell.org/manual/contents.html
+// /!\ Only syntax java 1.4 is supported (no generics !)
+// provider is instance of org.talend.components.recordtester.service.generic.Beanshell
+
+getRecord(int i){
+
+    Record.Builder builder = provider.getRecordBuilderFactory().newRecordBuilder();
+    builder = builder.withString("name", "name_"+i)
+                        .withInt("age", i);
+    if(i > 1){
+        // The second record contains a new entry that is not in the first schema
+        builder = builder.withString("new_entry", "value");
+    }
+
+    return builder.build();
+}
+
+for(int i = 1; i <= 2; i++){
+    records.add(getRecord(i));
+}
