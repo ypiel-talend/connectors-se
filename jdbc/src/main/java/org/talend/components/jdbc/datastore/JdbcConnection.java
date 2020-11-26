@@ -40,8 +40,8 @@ import static org.talend.components.jdbc.service.UIActionService.ACTION_LIST_SUP
 @ToString(exclude = { "password" })
 @GridLayout({ @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("defineUrl"), @GridLayout.Row("jdbcUrl"),
         @GridLayout.Row("explodedURL"), @GridLayout.Row("userId"), @GridLayout.Row("password") })
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("protocol"), @GridLayout.Row("connectionTimeOut"),
-        @GridLayout.Row("connectionValidationTimeOut") })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "defineProtocol", "protocol" }),
+        @GridLayout.Row("connectionTimeOut"), @GridLayout.Row("connectionValidationTimeOut") })
 @DataStore("JdbcConnection")
 @Checkable(UIActionService.ACTION_BASIC_HEALTH_CHECK)
 @Documentation("A connection to a data base")
@@ -81,6 +81,12 @@ public class JdbcConnection implements Serializable {
     private String userId;
 
     @Option
+    @Documentation("Let user define protocol of the jdbc url.")
+    @DefaultValue("false")
+    private Boolean defineProtocol = false;
+
+    @Option
+    @ActiveIf(target = "defineProtocol", value = { "true" })
     @Documentation("Protocol")
     private String protocol;
 
