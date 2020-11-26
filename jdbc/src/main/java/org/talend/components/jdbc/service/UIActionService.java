@@ -29,6 +29,7 @@ import org.talend.sdk.component.api.service.completion.Values;
 import org.talend.sdk.component.api.service.configuration.Configuration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import org.talend.sdk.component.api.service.update.Update;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -80,6 +81,42 @@ public class UIActionService {
 
     @Configuration("jdbc")
     private Supplier<JdbcConfiguration> jdbcConfiguration;
+
+    public JdbcConfiguration.Driver getConfiguration(final String dbType, final String handler) {
+        JdbcConfiguration.Driver driver = jdbcConfiguration.get().getDrivers().stream().filter(d -> d.getId().equals(dbType))
+                .findFirst().orElse(null);
+
+        log.info("With : " + dbType + " Find drive : " + driver.getId());
+        log.info("Given handler : " + handler);
+
+        if (driver.getHandlers().contains(handler)) {
+            log.info("Handler is in the driver ! : " + driver.getHandlers());
+            driver = jdbcConfiguration.get().getDrivers().stream().filter(d -> d.getId().equals(handler)).findFirst()
+                    .orElse(null);
+        }
+
+        log.info("Returned driver : " + driver);
+
+        return driver;
+    }
+
+    @Update("DEFAULT_URL")
+    public JdbcConnection.ExplodedURL setDefaultURLValues(final String dbType, final String handler) {
+        final JdbcConnection.ExplodedURL explodedURL = new JdbcConnection.ExplodedURL();
+
+        final JdbcConfiguration.Driver configuration = this.getConfiguration(dbType, handler);
+
+        if (configuration == null) {
+            return explodedURL;
+        }
+
+        explodedURL.setDatabase(configuration.getDefaults().getDatabase());
+        explodedURL.setHost(configuration.getDefaults().getHost());
+        explodedURL.setPort(configuration.getDefaults().getPort());
+        explodedURL.setParameters(configuration.getDefaults().getParameters());
+
+        return explodedURL;
+    }
 
     @DynamicValues(ACTION_LIST_SUPPORTED_DB)
     public Values loadSupportedDataBaseTypes() {
