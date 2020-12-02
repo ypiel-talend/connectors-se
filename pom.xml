@@ -48,7 +48,6 @@
         <module>bigquery</module>
         <module>workday</module>
         <module>extensions</module>
-        <module>pubsub</module>
         <module>cosmosDB</module>
         <module>google-storage</module>
         <module>migration-tester</module>
