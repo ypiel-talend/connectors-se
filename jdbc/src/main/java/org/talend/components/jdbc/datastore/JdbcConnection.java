@@ -38,8 +38,8 @@ import static org.talend.components.jdbc.service.UIActionService.ACTION_LIST_SUP
 
 @Data
 @ToString(exclude = { "password" })
-@GridLayout({ @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("defineUrl"), @GridLayout.Row("jdbcUrl"),
-        @GridLayout.Row("explodedURL"), @GridLayout.Row("userId"), @GridLayout.Row("password") })
+@GridLayout({ @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("explodedURL"), @GridLayout.Row("userId"),
+        @GridLayout.Row("password") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "defineProtocol", "protocol" }),
         @GridLayout.Row("connectionTimeOut"), @GridLayout.Row("connectionValidationTimeOut") })
 @DataStore("JdbcConnection")
@@ -60,19 +60,8 @@ public class JdbcConnection implements Serializable {
     private String handler;
 
     @Option
-    @Documentation("Let user define complet jdbc url or not")
-    @DefaultValue("false")
-    private Boolean defineUrl = false;
-
-    @Option
-    @ActiveIf(target = "defineUrl", value = { "true" })
-    @Documentation("jdbc connection url")
-    private String jdbcUrl;
-
-    @Option
-    @ActiveIf(target = "defineUrl", value = { "false" })
     @Documentation("Exploded jdbc url")
-    @Updatable(value = "DEFAULT_URL", parameters = { "dbType", "handler" }, after = "host")
+    @Updatable(value = "DEFAULT_URL", parameters = { "dbType", "handler", "explodedURL" }, after = "defineUrl")
     private ExplodedURL explodedURL;
 
     @Option
@@ -107,23 +96,38 @@ public class JdbcConnection implements Serializable {
     private long connectionValidationTimeOut = 10;
 
     @Data
-    @GridLayout({ @GridLayout.Row("host"), @GridLayout.Row("port"), @GridLayout.Row("database"), @GridLayout.Row("parameters") })
+    @GridLayout({ @GridLayout.Row("defineUrl"), @GridLayout.Row("jdbcUrl"), @GridLayout.Row("host"), @GridLayout.Row("port"),
+            @GridLayout.Row("database"), @GridLayout.Row("parameters") })
     @Documentation("Exploded jdbc url")
     public static class ExplodedURL implements Serializable {
 
         @Option
+        @Documentation("Let user define complet jdbc url or not")
+        @DefaultValue("false")
+        private Boolean defineUrl = false;
+
+        @Option
+        @ActiveIf(target = "defineUrl", value = { "true" })
+        @Documentation("jdbc connection url")
+        private String jdbcUrl;
+
+        @Option
+        @ActiveIf(target = "defineUrl", value = { "false" })
         @Documentation("jdbc host")
         private String host;
 
         @Option
+        @ActiveIf(target = "defineUrl", value = { "false" })
         @Documentation("jdbc port")
         private int port;
 
         @Option
+        @ActiveIf(target = "defineUrl", value = { "false" })
         @Documentation("jdbc database")
         private String database;
 
         @Option
+        @ActiveIf(target = "defineUrl", value = { "false" })
         @Documentation("jdbc parameters")
         private List<JdbcConfiguration.KeyVal> parameters;
     }

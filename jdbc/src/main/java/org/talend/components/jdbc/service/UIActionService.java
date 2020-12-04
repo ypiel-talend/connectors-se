@@ -44,6 +44,7 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -101,21 +102,70 @@ public class UIActionService {
     }
 
     @Update("DEFAULT_URL")
-    public JdbcConnection.ExplodedURL setDefaultURLValues(final String dbType, final String handler) {
-        final JdbcConnection.ExplodedURL explodedURL = new JdbcConnection.ExplodedURL();
+    public JdbcConnection.ExplodedURL setDefaultURLValues(final String dbType, final String handler,
+            JdbcConnection.ExplodedURL explodedURL) {
+        final JdbcConnection.ExplodedURL newConf = new JdbcConnection.ExplodedURL();
 
         final JdbcConfiguration.Driver configuration = this.getConfiguration(dbType, handler);
 
         if (configuration == null) {
-            return explodedURL;
+            return newConf;
         }
 
-        explodedURL.setDatabase(configuration.getDefaults().getDatabase());
-        explodedURL.setHost(configuration.getDefaults().getHost());
-        explodedURL.setPort(configuration.getDefaults().getPort());
-        explodedURL.setParameters(configuration.getDefaults().getParameters());
+        newConf.setDefineUrl(explodedURL.getDefineUrl());
 
-        return explodedURL;
+        newConf.setJdbcUrl(setIfEmpty(explodedURL.getJdbcUrl(), buildUrl(configuration.getDefaults())));
+
+        newConf.setDatabase(setIfEmpty(explodedURL.getDatabase(), configuration.getDefaults().getDatabase()));
+        newConf.setHost(setIfEmpty(explodedURL.getHost(), configuration.getDefaults().getHost()));
+        newConf.setPort(setIfEmpty(explodedURL.getPort(), configuration.getDefaults().getPort()));
+        newConf.setParameters(setIfEmpty(explodedURL.getParameters(), configuration.getDefaults().getParameters()));
+
+        return newConf;
+    }
+
+    private List<JdbcConfiguration.KeyVal> setIfEmpty(List<JdbcConfiguration.KeyVal> current,
+            List<JdbcConfiguration.KeyVal> newVal) {
+        if (current == null) {
+            return newVal;
+        }
+
+        if (current.size() > 0) {
+            return current;
+        }
+
+        return newVal;
+    }
+
+    private Integer setIfEmpty(final Integer current, final Integer newValue) {
+        if (current == null) {
+            return newValue;
+        }
+
+        if (current == 0) {
+            return newValue;
+        }
+
+        return current;
+    }
+
+    private String setIfEmpty(final String current, final String newValue) {
+        if (current == null) {
+            return newValue;
+        }
+
+        if (current.trim().isEmpty()) {
+            return newValue;
+        }
+
+        return current;
+    }
+
+    private String buildUrl(JdbcConfiguration.Defaults defaults) {
+        final String params = defaults.getParameters().stream().map(p -> p.getKey() + "=" + p.getValue())
+                .collect(Collectors.joining("&"));
+        return "jdbc:" + defaults.getProtocol() + "://" + defaults.getHost() + ":" + defaults.getPort() + "/"
+                + defaults.getDatabase() + "?" + params;
     }
 
     @DynamicValues(ACTION_LIST_SUPPORTED_DB)

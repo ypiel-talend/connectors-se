@@ -105,6 +105,10 @@ public class JdbcConfiguration implements Serializable {
 
         @Option
         @Documentation("jdbc host")
+        private String protocol;
+
+        @Option
+        @Documentation("jdbc host")
         private String host;
 
         @Option
