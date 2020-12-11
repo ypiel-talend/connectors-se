@@ -64,25 +64,26 @@ public class JsonToRecord {
             case ARRAY: {
                 final List<Object> items = value.asJsonArray().stream().map(this::mapJson).collect(toList());
                 builder.withArray(factory.newEntryBuilder().withName(key).withType(Schema.Type.ARRAY)
-                        .withElementSchema(getArrayElementSchema(factory, items)).build(), items);
+                        .withElementSchema(getArrayElementSchema(factory, items)).withNullable(true).build(), items);
                 break;
             }
             case OBJECT: {
                 final Record record = toRecord(value.asJsonObject());
                 builder.withRecord(factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD)
-                        .withElementSchema(record.getSchema()).build(), record);
+                        .withElementSchema(record.getSchema()).withNullable(true).build(), record);
                 break;
             }
             case TRUE:
             case FALSE:
-                builder.withBoolean(key, JsonValue.TRUE.equals(value));
+                final Schema.Entry entry = factory.newEntryBuilder().withName(key).withType(Schema.Type.BOOLEAN).withNullable(true).build();
+                builder.withBoolean(entry, JsonValue.TRUE.equals(value));
                 break;
             case STRING:
                 builder.withString(key, JsonString.class.cast(value).getString());
                 break;
             case NUMBER:
                 final JsonNumber number = JsonNumber.class.cast(value);
-                this.numberOption.setNumber(builder, key, number);
+                this.numberOption.setNumber(builder, factory.newEntryBuilder(), key, number);
                 break;
             case NULL:
                 break;
@@ -203,8 +204,9 @@ public class JsonToRecord {
                 return number.doubleValue();
             }
 
-            public void setNumber(Record.Builder builder, String key, JsonNumber number) {
-                builder.withDouble(key, number.doubleValue());
+            public void setNumber(Record.Builder builder, Schema.Entry.Builder entryBuilder, String key, JsonNumber number) {
+                final Schema.Entry entry = entryBuilder.withName(key).withType(Schema.Type.DOUBLE).withNullable(true).build();
+                builder.withDouble(entry, number.doubleValue());
             }
 
             public Schema.Type getNumberType(JsonNumber number) {
@@ -221,11 +223,13 @@ public class JsonToRecord {
                 }
             }
 
-            public void setNumber(Record.Builder builder, String key, JsonNumber number) {
+            public void setNumber(Record.Builder builder, Schema.Entry.Builder entryBuilder, String key, JsonNumber number) {
                 if (number.isIntegral()) {
-                    builder.withLong(key, number.longValueExact());
+                    final Schema.Entry entry = entryBuilder.withName(key).withType(Schema.Type.LONG).withNullable(true).build();
+                    builder.withLong(entry, number.longValueExact());
                 } else {
-                    builder.withDouble(key, number.doubleValue());
+                    final Schema.Entry entry = entryBuilder.withName(key).withType(Schema.Type.DOUBLE).withNullable(true).build();
+                    builder.withDouble(entry, number.doubleValue());
                 }
             }
 
@@ -239,7 +243,7 @@ public class JsonToRecord {
 
         public abstract Number getNumber(JsonNumber number);
 
-        public abstract void setNumber(Record.Builder builder, String key, JsonNumber number);
+        public abstract void setNumber(Record.Builder builder, Schema.Entry.Builder entryBuilder, String key, JsonNumber number);
 
         public abstract Schema.Type getNumberType(JsonNumber number);
     }
