@@ -75,7 +75,8 @@ public class JsonToRecord {
             }
             case TRUE:
             case FALSE:
-                final Schema.Entry entry = factory.newEntryBuilder().withName(key).withType(Schema.Type.BOOLEAN).withNullable(true).build();
+                final Schema.Entry entry = factory.newEntryBuilder().withName(key).withType(Schema.Type.BOOLEAN)
+                        .withNullable(true).build();
                 builder.withBoolean(entry, JsonValue.TRUE.equals(value));
                 break;
             case STRING:
