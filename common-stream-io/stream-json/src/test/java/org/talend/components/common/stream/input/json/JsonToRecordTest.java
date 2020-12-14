@@ -12,7 +12,12 @@
  */
 package org.talend.components.common.stream.input.json;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -137,7 +142,7 @@ class JsonToRecordTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
+    @ValueSource(booleans = {true, false})
     void fieldAreNullable(final boolean forceDouble) {
         start(forceDouble);
 
@@ -148,6 +153,54 @@ class JsonToRecordTest {
         record.getSchema().getEntries().stream().forEach(e -> {
             Assertions.assertTrue(e.isNullable(), e.getName() + " of type " + e.getType() + " should be nullable.");
         });
+    }
+
+    @Test
+    void keepNullFieldsInSchema() {
+        // An array of record wich contains all type. First record is fullfilled. EAch next record contains a null.
+        // Schema should be the same for all.
+        String file = "array_with_missing_attribute.json";
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
+            String source = new BufferedReader(new InputStreamReader(in))
+                    .lines().collect(Collectors.joining("\n"));
+
+            JsonObject json = getJsonObject(source);
+            final Record record = toRecord.toRecord(json);
+            Assertions.assertNotNull(record);
+
+            Assertions.assertEquals(record.getSchema().getEntries().get(0).getName(), "an_array");
+            Assertions.assertEquals(record.getSchema().getEntries().get(0).getElementSchema().getType(), Schema.Type.RECORD);
+            final int size = record.getSchema().getEntries().get(0).getElementSchema().getEntries().size();
+            record.getArray(Record.class, "an_array").stream()
+                    .forEach(r -> Assertions.assertTrue(r.getSchema().getEntries().size() == size));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void keepNullFieldsInSchemaDeep() {
+        String file = "nested_array_with_missing_attributes.json";
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
+            String source = new BufferedReader(new InputStreamReader(in))
+                    .lines().collect(Collectors.joining("\n"));
+
+            JsonObject json = getJsonObject(source);
+            final Record record = toRecord.toRecord(json);
+
+            Assertions.assertNotNull(record);
+
+            record.getArray(Record.class, "an_array").stream()
+                    .forEach(e -> Assertions.assertEquals(3, e.getSchema().getEntries().size()));
+            record.getArray(Record.class, "an_array").stream()
+                    // The second element of main array doesn't have a_nested_array, we skip it
+                    .filter(e -> e.getArray(Record.class, "a_nested_array") != null)
+                    .forEach(e -> e.getArray(Record.class, "a_nested_array").stream()
+                            .forEach(r -> Assertions.assertEquals(5, r.getSchema().getEntries().size())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private Entry findEntry(Schema schema, String entryName) {

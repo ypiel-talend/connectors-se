@@ -1,0 +1,76 @@
+{
+  "an_array": [
+    {
+      "a_string": "aaaa",
+      "a_double": 123.123,
+      "a_boolean": true,
+      "a_record": {
+        "att": "val"
+      },
+      "an_array": [
+        "aaa",
+        "zzz",
+        "bbb"
+      ]
+    },
+    {
+      "a_string": null,
+      "a_double": 123.123,
+      "a_boolean": true,
+      "a_record": {
+        "att": "val"
+      },
+      "an_array": [
+        "aaa",
+        "zzz",
+        "bbb"
+      ]
+    },
+    {
+      "a_string": "aaaa",
+      "a_double": null,
+      "a_boolean": true,
+      "a_record": {
+        "att": "val"
+      },
+      "an_array": [
+        "aaa",
+        "zzz",
+        "bbb"
+      ]
+    },
+    {
+      "a_string": "aaaa",
+      "a_double": 123.123,
+      "a_boolean": null,
+      "a_record": {
+        "att": "val"
+      },
+      "an_array": [
+        "aaa",
+        "zzz",
+        "bbb"
+      ]
+    },
+    {
+      "a_string": "aaaa",
+      "a_double": 123.123,
+      "a_boolean": true,
+      "a_record": null,
+      "an_array": [
+        "aaa",
+        "zzz",
+        "bbb"
+      ]
+    },
+    {
+      "a_string": "aaaa",
+      "a_double": 123.123,
+      "a_boolean": true,
+      "a_record": {
+        "att": "val"
+      },
+      "an_array": null
+    }
+  ]
+}
