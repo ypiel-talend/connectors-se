@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.json.Json;
@@ -142,7 +144,7 @@ class JsonToRecordTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
+    @ValueSource(booleans = { true, false })
     void fieldAreNullable(final boolean forceDouble) {
         start(forceDouble);
 
@@ -161,8 +163,7 @@ class JsonToRecordTest {
         // Schema should be the same for all.
         String file = "array_with_missing_attribute.json";
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
-            String source = new BufferedReader(new InputStreamReader(in))
-                    .lines().collect(Collectors.joining("\n"));
+            String source = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
 
             JsonObject json = getJsonObject(source);
             final Record record = toRecord.toRecord(json);
@@ -182,8 +183,7 @@ class JsonToRecordTest {
     void keepNullFieldsInSchemaDeep() {
         String file = "nested_array_with_missing_attributes.json";
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
-            String source = new BufferedReader(new InputStreamReader(in))
-                    .lines().collect(Collectors.joining("\n"));
+            String source = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
 
             JsonObject json = getJsonObject(source);
             final Record record = toRecord.toRecord(json);
@@ -196,11 +196,37 @@ class JsonToRecordTest {
                     // The second element of main array doesn't have a_nested_array, we skip it
                     .filter(e -> e.getArray(Record.class, "a_nested_array") != null)
                     .forEach(e -> e.getArray(Record.class, "a_nested_array").stream()
-                            .forEach(r -> Assertions.assertEquals(5, r.getSchema().getEntries().size())));
+                            .forEach(r -> Assertions.assertEquals(4, r.getSchema().getEntries().size())));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    @Test
+    void ArrayWithNestedArrayWithMissingSchemaEntry() {
+        String file = "array_with_nested_array_with_missing_schema_entry.json";
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
+            String source = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
+
+            JsonObject json = getJsonObject(source);
+            final Record record = toRecord.toRecord(json);
+
+            Assertions.assertNotNull(record);
+
+            // Nb entries in nestded array of a 1 an_array element
+            int expected = record.getArray(Record.class, "an_array").stream().findFirst().get()
+                    .getArray(Record.class, "a_nested_array").stream().findFirst().get()
+                    .getSchema().getEntries().stream().filter(e -> "a_nested_nested_array".equals(e.getName())).findFirst().get().getElementSchema().getEntries().size();
+
+            int nbEntries = record.getArray(Record.class, "an_array").stream().reduce((first, second) -> second /* get the last */).get()
+                    .getArray(Record.class, "a_nested_array").stream().findFirst().get()
+                    .getSchema().getEntries().stream().filter(e -> "a_nested_nested_array".equals(e.getName())).findFirst().get().getElementSchema().getEntries().size();
+
+            Assertions.assertEquals(expected, nbEntries);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private Entry findEntry(Schema schema, String entryName) {

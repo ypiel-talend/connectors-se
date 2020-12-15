@@ -1,0 +1,167 @@
+{
+  "an_array": [
+    {
+      "a_string": "aaaa",
+      "a_nested_array": [
+        {
+          "a_nested_string": "zzzz",
+          "a_nested_int": 2,
+          "a_nested_boolean": true,
+          "a_nested_nested_array": [
+            {
+              "a_nested_nested_string": "nnnn1",
+              "a_nested_nested_int": 31,
+              "a_nested_nested_bool": true
+            },
+            {
+              "a_nested_nested_string": "nnnn1",
+              "a_nested_nested_int": 31,
+              "a_nested_nested_bool": true
+            },
+            {
+              "a_nested_nested_string": "nnnn1",
+              "a_nested_nested_int": 31
+            }
+          ]
+        },
+        {
+          "a_nested_string": "zzzz",
+          "a_nested_int": 2,
+          "a_nested_nested_array": [
+            {
+              "a_nested_nested_string": "nnnn2",
+              "a_nested_nested_int": 32,
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn2",
+              "a_nested_nested_int": 32,
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn2",
+              "a_nested_nested_int": 32
+            }
+          ]
+        },
+        {
+          "a_nested_string": "zzzz",
+          "a_nested_boolean": true,
+          "a_nested_nested_array": [
+            {
+              "a_nested_nested_string": "nnnn3",
+              "a_nested_nested_int": 33,
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn3",
+              "a_nested_nested_int": 33,
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn3",
+              "a_nested_nested_int": 33
+            }
+          ]
+        },
+        {
+          "a_nested_string": "zzzz",
+          "a_nested_int": 2,
+          "a_nested_boolean": true,
+          "a_moreover_nested": "more",
+          "a_nested_nested_array": [
+            {
+              "a_nested_nested_string": "nnnn4",
+              "a_nested_nested_int": 33,
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn4",
+              "a_nested_nested_int": 33,
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn4",
+              "a_nested_nested_int": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "a_string": "aaaa"
+    },
+    {
+      "a_bool": false,
+      "a_nested_array": [
+        {
+          "a_nested_string": "zzzz",
+          "a_nested_int": 2,
+          "a_nested_nested_array": [
+            {
+              "a_nested_nested_string": "nnnn5",
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn5",
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn5"
+            }
+          ]
+        },
+        {
+          "a_nested_string": "zzzz",
+          "a_nested_int": 2,
+          "a_nested_nested_array": [
+            {
+              "a_nested_nested_string": "nnnn6",
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn6",
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn6"
+            }
+          ]
+        },
+        {
+          "a_nested_string": "zzzz",
+          "a_nested_nested_array": [
+            {
+              "a_nested_nested_string": "nnnn7",
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn7",
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn7"
+            }
+          ]
+        },
+        {
+          "a_nested_string": "zzzz",
+          "a_nested_int": 2,
+          "a_nested_nested_array": [
+            {
+              "a_nested_nested_string": "nnnn8",
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn8",
+              "a_nested_nested_bool": false
+            },
+            {
+              "a_nested_nested_string": "nnnn8"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
