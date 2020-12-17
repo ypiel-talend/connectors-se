@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
@@ -28,6 +28,8 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -64,20 +66,91 @@ public class JsonToRecord {
         return toRecord(object, new HashMap<>(), "");
     }
 
-    public Record toRecord(final JsonObject object, final Map<String, Schema> arrayElementSchemas, final String path) {
+    @Data
+    @RequiredArgsConstructor
+    public static class SchemaInfo {
+
+        final JsonValue.ValueType type;
+
+        Schema arrayElementSchema;
+
+        Schema recordSchema;
+
+        public Schema computeArrayElementSchemaIfNotSet(final Supplier<Schema> schemaSupplier) {
+            if (arrayElementSchema == null) {
+                arrayElementSchema = schemaSupplier.get();
+            }
+            return arrayElementSchema;
+        }
+
+        public Schema computeRecordSchemaIfNotSet(final Supplier<Schema> schemaSupplier) {
+            if (recordSchema == null) {
+                recordSchema = schemaSupplier.get();
+            }
+            return recordSchema;
+        }
+    }
+
+    private Record alignRecordOnGivenSchema(final Schema arrayElementSchema, final Record r) {
+        final Record.Builder nestedBuilder = factory.newRecordBuilder(arrayElementSchema);
+        r.getSchema().getEntries().stream().forEach(e -> {
+            switch (e.getType()) {
+            case RECORD:
+                nestedBuilder.withRecord(e, r.getRecord(e.getName()));
+                break;
+            case ARRAY:
+                nestedBuilder.withArray(e, r.getArray(Object.class, e.getName()));
+                break;
+            case STRING:
+                nestedBuilder.withString(e, r.getString(e.getName()));
+                break;
+            case BYTES:
+                nestedBuilder.withBytes(e, r.getBytes(e.getName()));
+                break;
+            case INT:
+                nestedBuilder.withInt(e, r.getInt(e.getName()));
+                break;
+            case LONG:
+                nestedBuilder.withLong(e, r.getLong(e.getName()));
+                break;
+            case FLOAT:
+                nestedBuilder.withFloat(e, r.getFloat(e.getName()));
+                break;
+            case DOUBLE:
+                nestedBuilder.withDouble(e, r.getDouble(e.getName()));
+                break;
+            case BOOLEAN:
+                nestedBuilder.withBoolean(e, r.getBoolean(e.getName()));
+                break;
+            case DATETIME:
+                nestedBuilder.withDateTime(e, r.getDateTime(e.getName()));
+            default:
+                throw new RuntimeException("A new type should have been added, it should be supported : " + e.getType());
+            }
+        });
+
+        return nestedBuilder.build();
+    }
+
+    public Record toRecord(final JsonObject object, final Map<String, SchemaInfo> schemaInfoMap, final String path) {
         final Record.Builder builder = factory.newRecordBuilder();
         object.forEach((String key, JsonValue value) -> {
 
-            String curPath = path+"$"+key;
-            switch (value.getValueType()) {
+            String curPath = path + "$" + key;
+            final JsonValue.ValueType valueType = value.getValueType();
+            schemaInfoMap.computeIfAbsent(curPath, k -> new SchemaInfo(valueType));
+
+            switch (valueType) {
             case ARRAY: {
-                List<Object> items = value.asJsonArray().stream().map(e -> this.mapJson(e, arrayElementSchemas, curPath)).collect(toList());
+                List<Object> items = value.asJsonArray().stream().map(e -> this.mapJson(e, schemaInfoMap, curPath))
+                        .collect(toList());
 
                 final List<Object> fitems = items;
 
                 // This force nested arrays to have the same schema as
                 // first same level/same name nested array
-                final Schema arrayElementSchema =  arrayElementSchemas.computeIfAbsent(curPath, k -> getArrayElementSchema(factory, fitems));
+                final Schema arrayElementSchema = schemaInfoMap.get(curPath)
+                        .computeArrayElementSchemaIfNotSet(() -> getArrayElementSchema(factory, fitems));
 
                 if (arrayElementSchema.getType() == Schema.Type.RECORD) {
                     // If it is an array of record, we set the elementSchema of the
@@ -85,45 +158,7 @@ public class JsonToRecord {
                     // If not, some record may have missing entries in their schema.
                     items = items.stream().map(i -> {
                         final Record r = (Record) i;
-                        final Record.Builder nestedBuilder = factory.newRecordBuilder(arrayElementSchema);
-                        r.getSchema().getEntries().stream().forEach(e -> {
-                            switch (e.getType()) {
-                            case RECORD:
-                                nestedBuilder.withRecord(e, r.getRecord(e.getName()));
-                                break;
-                            case ARRAY:
-                                nestedBuilder.withArray(e, r.getArray(Object.class, e.getName()));
-                                break;
-                            case STRING:
-                                nestedBuilder.withString(e, r.getString(e.getName()));
-                                break;
-                            case BYTES:
-                                nestedBuilder.withBytes(e, r.getBytes(e.getName()));
-                                break;
-                            case INT:
-                                nestedBuilder.withInt(e, r.getInt(e.getName()));
-                                break;
-                            case LONG:
-                                nestedBuilder.withLong(e, r.getLong(e.getName()));
-                                break;
-                            case FLOAT:
-                                nestedBuilder.withFloat(e, r.getFloat(e.getName()));
-                                break;
-                            case DOUBLE:
-                                nestedBuilder.withDouble(e, r.getDouble(e.getName()));
-                                break;
-                            case BOOLEAN:
-                                nestedBuilder.withBoolean(e, r.getBoolean(e.getName()));
-                                break;
-                            case DATETIME:
-                                nestedBuilder.withDateTime(e, r.getDateTime(e.getName()));
-                            default:
-                                throw new RuntimeException(
-                                        "A new type should have been added, it should be supported : " + e.getType());
-                            }
-                        });
-
-                        return nestedBuilder.build();
+                        return alignRecordOnGivenSchema(arrayElementSchema, r);
                     }).collect(toList());
                 }
 
@@ -132,7 +167,11 @@ public class JsonToRecord {
                 break;
             }
             case OBJECT: {
-                final Record record = toRecord(value.asJsonObject(), arrayElementSchemas, curPath);
+                Record record = toRecord(value.asJsonObject(), schemaInfoMap, curPath);
+                final Record frecord = record;
+                final Schema schema = schemaInfoMap.get(curPath).computeRecordSchemaIfNotSet(() -> frecord.getSchema());
+                record = alignRecordOnGivenSchema(schema, record);
+
                 builder.withRecord(factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD)
                         .withElementSchema(record.getSchema()).withNullable(true).build(), record);
                 break;
@@ -151,6 +190,7 @@ public class JsonToRecord {
                 this.numberOption.setNumber(builder, factory.newEntryBuilder(), key, number);
                 break;
             case NULL:
+                setNull(key, builder, schemaInfoMap.get(curPath));
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported value type: " + value);
@@ -159,7 +199,41 @@ public class JsonToRecord {
         return builder.build();
     }
 
-    private Object mapJson(final JsonValue it, final Map<String, Schema> arrayElementSchemas, final String path) {
+    private void setNull(String key, Record.Builder builder, SchemaInfo schemaInfo) {
+        switch (schemaInfo.getType()) {
+        case ARRAY:
+            final Schema.Entry entryArray = factory.newEntryBuilder().withName(key).withNullable(true)
+                    .withElementSchema(schemaInfo.computeRecordSchemaIfNotSet(() -> factory.newSchemaBuilder(Schema.Type.RECORD)
+                            .build() /* If 1st record is null, empty record schema ! */ ))
+                    .build();
+            builder.withArray(entryArray, null);
+            break;
+        case OBJECT:
+            final Schema.Entry entryRecord = factory.newEntryBuilder().withName(key).withNullable(true)
+                    .withElementSchema(schemaInfo.computeRecordSchemaIfNotSet(() -> factory.newSchemaBuilder(Schema.Type.RECORD)
+                            .build() /* If 1st record is null, empty schema ! */ ))
+                    .build();
+            builder.withRecord(entryRecord, null);
+            break;
+        case TRUE:
+        case FALSE:
+            builder.withBoolean(key, false); // should be NULL
+            break;
+        case STRING:
+            builder.withString(key, null);
+            break;
+        case NUMBER:
+            builder.withDouble(key, -1);
+            break;
+        case NULL:
+            builder.withString(key, null); // if Null was 1st type
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported value type: " + schemaInfo.getType());
+        }
+    }
+
+    private Object mapJson(final JsonValue it, Map<String, SchemaInfo> arrayElementSchemas, final String path) {
         if (JsonObject.class.isInstance(it)) {
             return toRecord(it.asJsonObject(), arrayElementSchemas, path);
         }

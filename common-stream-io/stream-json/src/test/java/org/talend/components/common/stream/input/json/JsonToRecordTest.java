@@ -215,12 +215,14 @@ class JsonToRecordTest {
 
             // Nb entries in nestded array of a 1 an_array element
             int expected = record.getArray(Record.class, "an_array").stream().findFirst().get()
-                    .getArray(Record.class, "a_nested_array").stream().findFirst().get()
-                    .getSchema().getEntries().stream().filter(e -> "a_nested_nested_array".equals(e.getName())).findFirst().get().getElementSchema().getEntries().size();
+                    .getArray(Record.class, "a_nested_array").stream().findFirst().get().getSchema().getEntries().stream()
+                    .filter(e -> "a_nested_nested_array".equals(e.getName())).findFirst().get().getElementSchema().getEntries()
+                    .size();
 
-            int nbEntries = record.getArray(Record.class, "an_array").stream().reduce((first, second) -> second /* get the last */).get()
-                    .getArray(Record.class, "a_nested_array").stream().findFirst().get()
-                    .getSchema().getEntries().stream().filter(e -> "a_nested_nested_array".equals(e.getName())).findFirst().get().getElementSchema().getEntries().size();
+            int nbEntries = record.getArray(Record.class, "an_array").stream()
+                    .reduce((first, second) -> second /* get the last */).get().getArray(Record.class, "a_nested_array").stream()
+                    .findFirst().get().getSchema().getEntries().stream().filter(e -> "a_nested_nested_array".equals(e.getName()))
+                    .findFirst().get().getElementSchema().getEntries().size();
 
             Assertions.assertEquals(expected, nbEntries);
 
