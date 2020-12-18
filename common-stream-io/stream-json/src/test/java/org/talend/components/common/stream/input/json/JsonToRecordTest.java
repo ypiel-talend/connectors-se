@@ -137,7 +137,7 @@ class JsonToRecordTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
+    @ValueSource(booleans = { true, false })
     void fieldAreNullable(final boolean forceDouble) {
         start(forceDouble);
 
@@ -145,9 +145,7 @@ class JsonToRecordTest {
         JsonObject json = getJsonObject(source);
         final Record record = toRecord.toRecord(json);
 
-        record.getSchema().getEntries().stream().forEach(e -> {
-            Assertions.assertTrue(e.isNullable(), e.getName() + " of type " + e.getType() + " should be nullable.");
-        });
+        record.getSchema().getEntries().stream().forEach(e -> {Assertions.assertTrue(e.isNullable(), e.getName()+ " of type " + e.getType()+" should be nullable.");});
     }
 
     private Entry findEntry(Schema schema, String entryName) {

@@ -61,35 +61,34 @@ public class JsonToRecord {
         final Record.Builder builder = factory.newRecordBuilder();
         object.forEach((String key, JsonValue value) -> {
             switch (value.getValueType()) {
-                case ARRAY: {
+            case ARRAY: {
                 final List<Object> items = value.asJsonArray().stream().map(this::mapJson).collect(toList());
-                    builder.withArray(factory.newEntryBuilder().withName(key).withType(Schema.Type.ARRAY)
+                builder.withArray(factory.newEntryBuilder().withName(key).withType(Schema.Type.ARRAY)
                         .withElementSchema(getArrayElementSchema(factory, items)).withNullable(true).build(), items);
-                    break;
-                }
-                case OBJECT: {
-                    final Record record = toRecord(value.asJsonObject());
-                    builder.withRecord(factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD)
-                            .withElementSchema(record.getSchema()).withNullable(true).build(), record);
-                    break;
-                }
-                case TRUE:
-                case FALSE:
-                    final Schema.Entry entry = factory.newEntryBuilder().withName(key).withType(Schema.Type.BOOLEAN)
-                            .withNullable(true).build();
-                    builder.withBoolean(entry, JsonValue.TRUE.equals(value));
-                    break;
-                case STRING:
-                    builder.withString(key, JsonString.class.cast(value).getString());
-                    break;
-                case NUMBER:
-                    final JsonNumber number = JsonNumber.class.cast(value);
-                    this.numberOption.setNumber(builder, factory.newEntryBuilder(), key, number);
-                    break;
-                case NULL:
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported value type: " + value);
+                break;
+            }
+            case OBJECT: {
+                final Record record = toRecord(value.asJsonObject());
+                builder.withRecord(factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD)
+                        .withElementSchema(record.getSchema()).withNullable(true).build(), record);
+                break;
+            }
+            case TRUE:
+            case FALSE:
+                final Schema.Entry entry = factory.newEntryBuilder().withName(key).withType(Schema.Type.BOOLEAN).withNullable(true).build();
+                builder.withBoolean(entry, JsonValue.TRUE.equals(value));
+                break;
+            case STRING:
+                builder.withString(key, JsonString.class.cast(value).getString());
+                break;
+            case NUMBER:
+                final JsonNumber number = JsonNumber.class.cast(value);
+                this.numberOption.setNumber(builder, factory.newEntryBuilder(), key, number);
+                break;
+            case NULL:
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported value type: " + value);
             }
         });
         return builder.build();
