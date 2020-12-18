@@ -15,7 +15,6 @@ package org.talend.components.common.stream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.talend.components.common.stream.api.JsonEmitter;
 import org.talend.components.common.stream.api.RecordIORepository;
 import org.talend.components.common.stream.api.input.RecordReaderSupplier;
@@ -188,7 +187,6 @@ class JsonFormatTest {
 
     // If an array have Heterogeneous records, it merges all schemas
     @EnvironmentalTest
-    @Disabled
     void testHeterogeneousArray() {
         config.setJsonFile("heterogeneousArray.json");
         final List<Record> records = runPipeline();
@@ -201,7 +199,6 @@ class JsonFormatTest {
     }
 
     @EnvironmentalTest
-    @Disabled
     void testHeterogeneousArraySameFieldWithDifferentTypes() {
         config.setJsonFile("heterogeneousArray2.json");
         final List<Record> records = runPipeline();
