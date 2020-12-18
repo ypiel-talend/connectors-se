@@ -40,6 +40,8 @@ public class GenericMapper implements Serializable {
 
     private final Config config;
 
+    private int split = -1;
+
     private GenericService service;
 
     public GenericMapper(@Option("configuration") final Config config, final GenericService service) {
@@ -52,6 +54,11 @@ public class GenericMapper implements Serializable {
         return 0;
     }
 
+    public GenericMapper setSplit(final int split) {
+        this.split = split;
+        return this;
+    }
+
     @Split
     public List<GenericMapper> split(@PartitionSize final long bundleSize) {
         Integer splits = config.getDataset().getSplits();
@@ -61,11 +68,12 @@ public class GenericMapper implements Serializable {
 
         log.info("GenericMapper nb split : " + splits);
 
-        return IntStream.range(0, splits).mapToObj(i -> new GenericMapper(config, service)).collect(Collectors.toList());
+        return IntStream.range(0, splits).mapToObj(i -> new GenericMapper(config, service).setSplit(i + 1))
+                .collect(Collectors.toList());
     }
 
     @Emitter
     public GenericEmitter createSource() {
-        return new GenericEmitter(config, service);
+        return new GenericEmitter(split, config, service);
     }
 }

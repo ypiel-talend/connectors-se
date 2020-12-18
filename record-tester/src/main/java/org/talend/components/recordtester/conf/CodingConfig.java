@@ -48,6 +48,8 @@ public class CodingConfig implements Serializable {
         }
     }
 
+    private int split = -1;
+
     @Option
     @Documentation("")
     RECORD_TYPE provider = RECORD_TYPE.EMPTY;

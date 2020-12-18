@@ -35,6 +35,8 @@ public class Fixed extends AbstractProvider {
 
     private Schema sub_record_schema;
 
+    private Schema nestedArraySchema;
+
     private synchronized java.util.Date stringToDate(final String str) throws java.text.ParseException {
         return sdf.parse(str);
     }
@@ -51,7 +53,10 @@ public class Fixed extends AbstractProvider {
                 .withEntry(this.newEntry(Schema.Type.STRING, "rec_string")).withEntry(this.newEntry(Schema.Type.INT, "rec_int"))
                 .build();
 
+        nestedArraySchema = this.getRecordBuilderFactory().newSchemaBuilder(Schema.Type.STRING).build();
+
         this.fixed_schema = this.getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD)
+                .withEntry(this.newEntry(Schema.Type.INT, "split")).withEntry(this.newEntry(Schema.Type.STRING, "thread"))
                 .withEntry(this.newEntry(Schema.Type.STRING, "a_string"))
                 .withEntry(this.newEntry(Schema.Type.BOOLEAN, "a_boolean")).withEntry(this.newEntry(Schema.Type.INT, "a_int"))
                 .withEntry(this.newEntry(Schema.Type.LONG, "a_long")).withEntry(this.newEntry(Schema.Type.FLOAT, "a_float"))
@@ -70,11 +75,14 @@ public class Fixed extends AbstractProvider {
 
     @Override
     public List<Object> get(CodingConfig config) {
-        return new FakeList(config.getNbRecord(), this);
+        return new FakeList(config.getSplit(), config.getNbRecord(), this);
     }
 
-    public Record createARecord(int i, int current_null_field, int toggle) {
+    public Record createARecord(int split, int i, int current_null_field, int toggle) {
         Record.Builder builder = this.getRecordBuilderFactory().newRecordBuilder(this.fixed_schema);
+
+        final Thread thread = Thread.currentThread();
+        builder.withInt("split", split).withString("thread", thread.getName() + "-" + thread.getId());
 
         builder.withString("a_string", current_null_field != 1 ? "string_" + i : null);
         if (current_null_field != 2)
@@ -102,7 +110,10 @@ public class Fixed extends AbstractProvider {
         final Record sub_record = this.getRecordBuilderFactory().newRecordBuilder(this.sub_record_schema)
                 .withString("rec_string", "rec_string_" + i).withInt("rec_int", i).build();
 
-        builder.withRecord(this.newRecordEntry("a_record", sub_record_schema), current_null_field != 10 ? sub_record : null);
+        builder.withArray(newArrayEntry("a_string_array", nestedArraySchema),
+                current_null_field != 10 ? Arrays.asList("aaaa" + i, "bbbb" + i, "cccc" + i, "dddd" + i, "eeee" + i) : null);
+
+        builder.withRecord(this.newRecordEntry("a_record", sub_record_schema), current_null_field != 11 ? sub_record : null);
 
         return builder.build();
     }
@@ -113,9 +124,12 @@ public class Fixed extends AbstractProvider {
 
         private final Fixed provider;
 
-        public FakeList(int size, Fixed provider) {
+        private final int split;
+
+        public FakeList(int split, int size, Fixed provider) {
             this.size = size;
             this.provider = provider;
+            this.split = split;
         }
 
         @Override
@@ -135,7 +149,7 @@ public class Fixed extends AbstractProvider {
 
         @Override
         public Iterator<Object> iterator() {
-            return new FixedRecordIterator(this.size, this.provider);
+            return new FixedRecordIterator(this.split, this.size, this.provider);
         }
 
         @Override
@@ -200,12 +214,12 @@ public class Fixed extends AbstractProvider {
 
         @Override
         public Record get(int index) {
-            return this.provider.createARecord(index, 0, 1);
+            return this.provider.createARecord(-1, index, 0, 1);
         }
 
         @Override
         public Record set(int index, Object element) {
-            return this.provider.createARecord(index, 0, 1);
+            return this.provider.createARecord(-1, index, 0, 1);
         }
 
         @Override
@@ -215,7 +229,7 @@ public class Fixed extends AbstractProvider {
 
         @Override
         public Record remove(int index) {
-            return this.provider.createARecord(index, 0, 1);
+            return this.provider.createARecord(-1, index, 0, 1);
         }
 
         @Override
@@ -251,6 +265,8 @@ public class Fixed extends AbstractProvider {
 
         private final Fixed provider;
 
+        private final int split;
+
         private int current = 0;
 
         private int current_null_field = -1;
@@ -259,10 +275,11 @@ public class Fixed extends AbstractProvider {
 
         private int nbFields;
 
-        public FixedRecordIterator(int size, Fixed provider) {
+        public FixedRecordIterator(int split, int size, Fixed provider) {
             this.size = size;
             this.provider = provider;
             this.nbFields = this.provider.getNbFields();
+            this.split = split;
         }
 
         @Override
@@ -281,7 +298,7 @@ public class Fixed extends AbstractProvider {
             if (toggle >= 3) {
                 toggle = 1;
             }
-            return this.provider.createARecord(current, current_null_field, toggle);
+            return this.provider.createARecord(this.split, current, current_null_field, toggle);
         }
     }
 }

@@ -29,15 +29,18 @@ public class GenericEmitter implements Serializable {
 
     private final Config config;
 
+    private final int split;
+
     private GenericService service;
 
     private transient boolean done = false;
 
     private Iterator<Object> records;
 
-    public GenericEmitter(@Option("configuration") final Config config, final GenericService service) {
+    public GenericEmitter(final int split, @Option("configuration") final Config config, final GenericService service) {
         this.service = service;
         this.config = config;
+        this.split = split;
     }
 
     @Producer
@@ -47,6 +50,8 @@ public class GenericEmitter implements Serializable {
         }
 
         if (records == null) {
+            this.config.getCodingConfig().setSplit(split);
+            this.config.getDataset().getDsCodingConfig().setSplit(split);
             records = service.get(config).iterator();
         }
 

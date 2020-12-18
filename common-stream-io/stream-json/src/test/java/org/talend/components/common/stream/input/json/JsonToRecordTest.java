@@ -142,7 +142,7 @@ class JsonToRecordTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
+    @ValueSource(booleans = { true, false })
     void fieldAreNullable(final boolean forceDouble) {
         start(forceDouble);
 
@@ -161,8 +161,7 @@ class JsonToRecordTest {
         // Schema should be the same for all.
         String file = "array_with_missing_attribute.json";
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
-            String source = new BufferedReader(new InputStreamReader(in))
-                    .lines().collect(Collectors.joining("\n"));
+            String source = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
 
             JsonObject json = getJsonObject(source);
             final Record record = toRecord.toRecord(json);
@@ -182,8 +181,7 @@ class JsonToRecordTest {
     void keepNullFieldsInSchemaDeep() {
         String file = "nested_array_with_missing_attributes.json";
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
-            String source = new BufferedReader(new InputStreamReader(in))
-                    .lines().collect(Collectors.joining("\n"));
+            String source = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
 
             JsonObject json = getJsonObject(source);
             final Record record = toRecord.toRecord(json);
@@ -196,7 +194,7 @@ class JsonToRecordTest {
                     // The second element of main array doesn't have a_nested_array, we skip it
                     .filter(e -> e.getArray(Record.class, "a_nested_array") != null)
                     .forEach(e -> e.getArray(Record.class, "a_nested_array").stream()
-                            .forEach(r -> Assertions.assertEquals(5, r.getSchema().getEntries().size())));
+                            .forEach(r -> Assertions.assertEquals(4, r.getSchema().getEntries().size())));
         } catch (IOException e) {
             e.printStackTrace();
         }
