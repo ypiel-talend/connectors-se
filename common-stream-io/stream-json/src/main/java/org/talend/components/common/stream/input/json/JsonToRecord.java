@@ -202,14 +202,14 @@ public class JsonToRecord {
     private void setNull(String key, Record.Builder builder, SchemaInfo schemaInfo) {
         switch (schemaInfo.getType()) {
         case ARRAY:
-            final Schema.Entry entryArray = factory.newEntryBuilder().withName(key).withNullable(true)
+            final Schema.Entry entryArray = factory.newEntryBuilder().withName(key).withType(Schema.Type.ARRAY).withNullable(true)
                     .withElementSchema(schemaInfo.computeRecordSchemaIfNotSet(() -> factory.newSchemaBuilder(Schema.Type.RECORD)
                             .build() /* If 1st record is null, empty record schema ! */ ))
                     .build();
             builder.withArray(entryArray, null);
             break;
         case OBJECT:
-            final Schema.Entry entryRecord = factory.newEntryBuilder().withName(key).withNullable(true)
+            final Schema.Entry entryRecord = factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD).withNullable(true)
                     .withElementSchema(schemaInfo.computeRecordSchemaIfNotSet(() -> factory.newSchemaBuilder(Schema.Type.RECORD)
                             .build() /* If 1st record is null, empty schema ! */ ))
                     .build();
