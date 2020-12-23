@@ -92,7 +92,7 @@
         <beanutils.version>1.9.4</beanutils.version>
         <jackson.version>2.10.1</jackson.version>
         <jackson-codehaus.version>1.9.14-TALEND</jackson-codehaus.version>
-        
+
         <jsoup.version>1.13.1</jsoup.version>
 
         <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
@@ -110,7 +110,7 @@
         <httpcore.version>4.4.12</httpcore.version>
         <compress.version>1.19</compress.version>
         <commons-codec.version>1.14</commons-codec.version>
-        
+
         <jersey.version>2.22.2</jersey.version>
 
         <talend_oss_snapshots>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/
@@ -132,6 +132,7 @@
         <jetty.version>9.4.33.v20201020</jetty.version>
         <nimbus-jose-jwt.version>8.11</nimbus-jose-jwt.version>
         <zookeeper.version>3.4.14</zookeeper.version>
+        <guava.version>30.0-jre</guava.version>
 
         <!-- code quality enforcer default values.
              run build w/ -Pcode-quality to have a full validation -->
@@ -316,7 +317,7 @@
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient.version}</version>
              </dependency>
-             <dependency>
+			 <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
                 <version>${httpcore.version}</version>
@@ -335,6 +336,11 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jsoup</groupId>
