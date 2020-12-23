@@ -72,23 +72,17 @@ public class JsonToRecord {
 
         final JsonValue.ValueType type;
 
-        Schema arrayElementSchema;
+        Schema schema;
 
-        Schema recordSchema;
+        // Schema recordSchema;
 
-        public Schema computeArrayElementSchemaIfNotSet(final Supplier<Schema> schemaSupplier) {
-            if (arrayElementSchema == null) {
-                arrayElementSchema = schemaSupplier.get();
+        public Schema computeSchemaIfNotSet(final Supplier<Schema> schemaSupplier) {
+            if (schema == null) {
+                schema = schemaSupplier.get();
             }
-            return arrayElementSchema;
+            return schema;
         }
 
-        public Schema computeRecordSchemaIfNotSet(final Supplier<Schema> schemaSupplier) {
-            if (recordSchema == null) {
-                recordSchema = schemaSupplier.get();
-            }
-            return recordSchema;
-        }
     }
 
     private Record alignRecordOnGivenSchema(final Schema arrayElementSchema, final Record r) {
@@ -150,7 +144,7 @@ public class JsonToRecord {
                 // This force nested arrays to have the same schema as
                 // first same level/same name nested array
                 final Schema arrayElementSchema = schemaInfoMap.get(curPath)
-                        .computeArrayElementSchemaIfNotSet(() -> getArrayElementSchema(factory, fitems));
+                        .computeSchemaIfNotSet(() -> getArrayElementSchema(factory, fitems));
 
                 if (arrayElementSchema.getType() == Schema.Type.RECORD) {
                     // If it is an array of record, we set the elementSchema of the
@@ -169,7 +163,7 @@ public class JsonToRecord {
             case OBJECT: {
                 Record record = toRecord(value.asJsonObject(), schemaInfoMap, curPath);
                 final Record frecord = record;
-                final Schema schema = schemaInfoMap.get(curPath).computeRecordSchemaIfNotSet(() -> frecord.getSchema());
+                final Schema schema = schemaInfoMap.get(curPath).computeSchemaIfNotSet(() -> frecord.getSchema());
                 record = alignRecordOnGivenSchema(schema, record);
 
                 builder.withRecord(factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD)
@@ -190,47 +184,12 @@ public class JsonToRecord {
                 this.numberOption.setNumber(builder, factory.newEntryBuilder(), key, number);
                 break;
             case NULL:
-                setNull(key, builder, schemaInfoMap.get(curPath));
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported value type: " + value);
             }
         });
         return builder.build();
-    }
-
-    private void setNull(String key, Record.Builder builder, SchemaInfo schemaInfo) {
-        switch (schemaInfo.getType()) {
-        case ARRAY:
-            final Schema.Entry entryArray = factory.newEntryBuilder().withName(key).withType(Schema.Type.ARRAY).withNullable(true)
-                    .withElementSchema(schemaInfo.computeRecordSchemaIfNotSet(() -> factory.newSchemaBuilder(Schema.Type.RECORD)
-                            .build() /* If 1st record is null, empty record schema ! */ ))
-                    .build();
-            builder.withArray(entryArray, null);
-            break;
-        case OBJECT:
-            final Schema.Entry entryRecord = factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD).withNullable(true)
-                    .withElementSchema(schemaInfo.computeRecordSchemaIfNotSet(() -> factory.newSchemaBuilder(Schema.Type.RECORD)
-                            .build() /* If 1st record is null, empty schema ! */ ))
-                    .build();
-            builder.withRecord(entryRecord, null);
-            break;
-        case TRUE:
-        case FALSE:
-            builder.withBoolean(key, false); // should be NULL
-            break;
-        case STRING:
-            builder.withString(key, null);
-            break;
-        case NUMBER:
-            builder.withDouble(key, -1);
-            break;
-        case NULL:
-            builder.withString(key, null); // if Null was 1st type
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported value type: " + schemaInfo.getType());
-        }
     }
 
     private Object mapJson(final JsonValue it, Map<String, SchemaInfo> arrayElementSchemas, final String path) {

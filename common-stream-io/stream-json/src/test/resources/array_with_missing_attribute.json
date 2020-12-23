@@ -1,6 +1,13 @@
 {
   "an_array": [
     {
+      "a_string": null,
+      "a_double": null,
+      "a_boolean": null,
+      "a_record": null,
+      "an_array": null
+    },
+    {
       "a_string": "aaaa",
       "a_double": 123.123,
       "a_boolean": true,
