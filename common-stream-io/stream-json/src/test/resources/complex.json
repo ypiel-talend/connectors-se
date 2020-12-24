@@ -1,0 +1,40 @@
+{
+  "a_string": "a_string",
+  "an_array": [
+    {
+      "a_nested_array": [
+        {
+          "aaa": "aaa",
+          "bbb": "bbb",
+          "ccc": "ccc"
+        },
+        {
+          "aaa": "aaa",
+          "bbb": "bbb",
+          "ccc": "ccc"
+        },
+        {
+          "aaa": "aaa",
+          "bbb": "bbb",
+          "ddd": "dddd"
+        }
+      ]
+    },
+    {
+      "a_nested_array": [
+        {
+          "aaa": "aaa",
+          "bbb": "bbb"
+        },
+        {
+          "aaa": "aaa",
+          "bbb": "bbb"
+        },
+        {
+          "aaa": "aaa",
+          "ddd": "dddd"
+        }
+      ]
+    }
+  ]
+}

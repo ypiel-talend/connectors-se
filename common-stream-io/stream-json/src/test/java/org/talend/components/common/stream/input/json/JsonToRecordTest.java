@@ -17,20 +17,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.lang.reflect.AnnotatedElement;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExecutionCondition;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.talend.components.common.stream.output.json.RecordToJson;
@@ -145,7 +155,7 @@ class JsonToRecordTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
+    @ValueSource(booleans = {true, false})
     void fieldAreNullable(final boolean forceDouble) {
         start(forceDouble);
 
@@ -160,6 +170,8 @@ class JsonToRecordTest {
 
     @Test
     void keepNullFieldsInSchema() {
+        Assumptions.assumeTrue(JsonToRecord.align_record_schema_in_array, JsonToRecord.align_record_schema_in_array_prop + " is disabled");
+
         // An array of record wich contains all type. First record is fullfilled. EAch next record contains a null.
         // Schema should be the same for all.
         String file = "array_with_missing_attribute.json";
@@ -182,6 +194,8 @@ class JsonToRecordTest {
 
     @Test
     void keepNullFieldsInSchemaDeep() {
+        Assumptions.assumeTrue(JsonToRecord.align_record_schema_in_array, JsonToRecord.align_record_schema_in_array_prop + " is disabled");
+
         String file = "nested_array_with_missing_attributes.json";
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
             String source = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
@@ -205,6 +219,8 @@ class JsonToRecordTest {
 
     @Test
     void ArrayWithNestedArrayWithMissingSchemaEntry() {
+        Assumptions.assumeTrue(JsonToRecord.align_record_schema_in_array, JsonToRecord.align_record_schema_in_array_prop + " is disabled");
+
         String file = "array_with_nested_array_with_missing_schema_entry.json";
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(file)) {
             String source = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
@@ -241,4 +257,5 @@ class JsonToRecordTest {
             return reader.readObject();
         }
     }
+
 }

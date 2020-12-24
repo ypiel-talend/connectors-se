@@ -30,6 +30,7 @@ import javax.json.JsonValue;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.talend.components.common.Lazy;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -38,6 +39,11 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public class JsonToRecord {
+
+    public final static String align_record_schema_in_array_prop = "connectors.enable_jsontorecord_align_records_schemas_in_array";
+    public final static String align_record_schema_in_array_env = "CONNECTORS_ENABLE_JSONTORECORD_ALIGN_RECORDS_SCHEMAS_IN_ARRAY";
+    public final static boolean align_record_schema_in_array = Boolean.valueOf(System.getProperty(align_record_schema_in_array_prop,
+            System.getenv().getOrDefault(align_record_schema_in_array_env, "false")));
 
     private final RecordBuilderFactory factory;
 
@@ -63,141 +69,69 @@ public class JsonToRecord {
      * java/org/talend/sdk/component/runtime/record/RecordConverters.java#L134
      */
     public Record toRecord(final JsonObject object) {
-        return toRecord(object, new HashMap<>(), "");
+        final SchemaAlignmentStrategy schemaAlignmentStrategy = schemaAlignmentStrategyFactory();
+        schemaAlignmentStrategy.init(factory);
+        return toRecord(object, schemaAlignmentStrategy, "");
     }
 
-    @Data
-    @RequiredArgsConstructor
-    public static class SchemaInfo {
-
-        final JsonValue.ValueType type;
-
-        Schema schema;
-
-        // Schema recordSchema;
-
-        public Schema computeSchemaIfNotSet(final Supplier<Schema> schemaSupplier) {
-            if (schema == null) {
-                schema = schemaSupplier.get();
-            }
-            return schema;
-        }
-
-    }
-
-    private Record alignRecordOnGivenSchema(final Schema arrayElementSchema, final Record r) {
-        final Record.Builder nestedBuilder = factory.newRecordBuilder(arrayElementSchema);
-        r.getSchema().getEntries().stream().forEach(e -> {
-            switch (e.getType()) {
-            case RECORD:
-                nestedBuilder.withRecord(e, r.getRecord(e.getName()));
-                break;
-            case ARRAY:
-                nestedBuilder.withArray(e, r.getArray(Object.class, e.getName()));
-                break;
-            case STRING:
-                nestedBuilder.withString(e, r.getString(e.getName()));
-                break;
-            case BYTES:
-                nestedBuilder.withBytes(e, r.getBytes(e.getName()));
-                break;
-            case INT:
-                nestedBuilder.withInt(e, r.getInt(e.getName()));
-                break;
-            case LONG:
-                nestedBuilder.withLong(e, r.getLong(e.getName()));
-                break;
-            case FLOAT:
-                nestedBuilder.withFloat(e, r.getFloat(e.getName()));
-                break;
-            case DOUBLE:
-                nestedBuilder.withDouble(e, r.getDouble(e.getName()));
-                break;
-            case BOOLEAN:
-                nestedBuilder.withBoolean(e, r.getBoolean(e.getName()));
-                break;
-            case DATETIME:
-                nestedBuilder.withDateTime(e, r.getDateTime(e.getName()));
-            default:
-                throw new RuntimeException("A new type should have been added, it should be supported : " + e.getType());
-            }
-        });
-
-        return nestedBuilder.build();
-    }
-
-    public Record toRecord(final JsonObject object, final Map<String, SchemaInfo> schemaInfoMap, final String path) {
+    public Record toRecord(final JsonObject object, final SchemaAlignmentStrategy alignmentStrategy, final String path) {
         final Record.Builder builder = factory.newRecordBuilder();
         object.forEach((String key, JsonValue value) -> {
 
             String curPath = path + "$" + key;
             final JsonValue.ValueType valueType = value.getValueType();
-            schemaInfoMap.putIfAbsent(curPath, new SchemaInfo(valueType));
+
+            alignmentStrategy.setType(curPath, valueType);
 
             switch (valueType) {
-            case ARRAY: {
-                List<Object> items = value.asJsonArray().stream().map(e -> this.mapJson(e, schemaInfoMap, curPath))
-                        .collect(toList());
+                case ARRAY: {
+                    List<Object> items = value.asJsonArray().stream().map(e -> this.mapJson(e, alignmentStrategy, curPath))
+                            .collect(toList());
 
-                final List<Object> fitems = items;
+                    final List<Object> fitems = items;
+                    final Supplier<Schema> schemaSupplier = Lazy.lazy(() -> getArrayElementSchema(factory, fitems));
+                    items = alignmentStrategy.align(curPath, schemaSupplier, fitems);
 
-                // This force nested arrays to have the same schema as
-                // first same level/same name nested array
-                final Schema arrayElementSchema = schemaInfoMap.get(curPath)
-                        .computeSchemaIfNotSet(() -> getArrayElementSchema(factory, fitems));
-
-               if (arrayElementSchema.getType() == Schema.Type.RECORD) {
-                    // If it is an array of record, we set the elementSchema of the
-                    // in all record since it is an aggregate.
-                    // If not, some record may have missing entries in their schema.
-                    items = items.stream().map(i -> {
-                        final Record r = (Record) i;
-                        return alignRecordOnGivenSchema(arrayElementSchema, r);
-                    }).collect(toList());
+                    builder.withArray(factory.newEntryBuilder().withName(key).withType(Schema.Type.ARRAY)
+                            .withElementSchema(alignmentStrategy.computeSchemaIfNotSet(curPath, schemaSupplier)).withNullable(true).build(), items);
+                    break;
                 }
+                case OBJECT: {
+                    Record record = toRecord(value.asJsonObject(), alignmentStrategy, curPath);
+                    record = alignmentStrategy.align(curPath, record);
 
-                builder.withArray(factory.newEntryBuilder().withName(key).withType(Schema.Type.ARRAY)
-                        .withElementSchema(arrayElementSchema).withNullable(true).build(), items);
-                break;
-            }
-            case OBJECT: {
-                Record record = toRecord(value.asJsonObject(), schemaInfoMap, curPath);
-                final Record frecord = record;
-                final Schema schema = schemaInfoMap.get(curPath).computeSchemaIfNotSet(() -> frecord.getSchema());
-                record = alignRecordOnGivenSchema(schema, record);
-
-                builder.withRecord(factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD)
-                        .withElementSchema(record.getSchema()).withNullable(true).build(), record);
-                break;
-            }
-            case TRUE:
-            case FALSE:
-                final Schema.Entry entry = factory.newEntryBuilder().withName(key).withType(Schema.Type.BOOLEAN)
-                        .withNullable(true).build();
-                builder.withBoolean(entry, JsonValue.TRUE.equals(value));
-                break;
-            case STRING:
-                builder.withString(key, JsonString.class.cast(value).getString());
-                break;
-            case NUMBER:
-                final JsonNumber number = JsonNumber.class.cast(value);
-                this.numberOption.setNumber(builder, factory.newEntryBuilder(), key, number);
-                break;
-            case NULL:
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported value type: " + value);
+                    builder.withRecord(factory.newEntryBuilder().withName(key).withType(Schema.Type.RECORD)
+                            .withElementSchema(record.getSchema()).withNullable(true).build(), record);
+                    break;
+                }
+                case TRUE:
+                case FALSE:
+                    final Schema.Entry entry = factory.newEntryBuilder().withName(key).withType(Schema.Type.BOOLEAN)
+                            .withNullable(true).build();
+                    builder.withBoolean(entry, JsonValue.TRUE.equals(value));
+                    break;
+                case STRING:
+                    builder.withString(key, JsonString.class.cast(value).getString());
+                    break;
+                case NUMBER:
+                    final JsonNumber number = JsonNumber.class.cast(value);
+                    this.numberOption.setNumber(builder, factory.newEntryBuilder(), key, number);
+                    break;
+                case NULL:
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported value type: " + value);
             }
         });
         return builder.build();
     }
 
-    private Object mapJson(final JsonValue it, Map<String, SchemaInfo> schemaInfoMap, final String path) {
+    private Object mapJson(final JsonValue it, final SchemaAlignmentStrategy alignmentStrategy, final String path) {
         if (JsonObject.class.isInstance(it)) {
-            return toRecord(it.asJsonObject(), schemaInfoMap, path);
+            return toRecord(it.asJsonObject(), alignmentStrategy, path);
         }
         if (JsonArray.class.isInstance(it)) {
-            return it.asJsonArray().stream().map(e -> this.mapJson(e, schemaInfoMap, path)).collect(toList());
+            return it.asJsonArray().stream().map(e -> this.mapJson(e, alignmentStrategy, path)).collect(toList());
         }
         if (JsonString.class.isInstance(it)) {
             return JsonString.class.cast(it).getString();
@@ -297,7 +231,6 @@ public class JsonToRecord {
 
     private enum NumberOption {
         ForceDoubleType {
-
             public Number getNumber(JsonNumber number) {
                 return number.doubleValue();
             }
@@ -312,7 +245,6 @@ public class JsonToRecord {
             }
         },
         InferType {
-
             public Number getNumber(JsonNumber number) {
                 if (number.isIntegral()) {
                     return number.longValueExact();
@@ -344,6 +276,169 @@ public class JsonToRecord {
         public abstract void setNumber(Record.Builder builder, Schema.Entry.Builder entryBuilder, String key, JsonNumber number);
 
         public abstract Schema.Type getNumberType(JsonNumber number);
+    }
+
+    private SchemaAlignmentStrategy schemaAlignmentStrategyFactory() {
+        if (JsonToRecord.align_record_schema_in_array) {
+            return new AlignedSchemaStrategy();
+        } else {
+            return new NotAlingnedSchemaStrategy();
+        }
+    }
+
+    private interface SchemaAlignmentStrategy {
+
+        void init(final RecordBuilderFactory factory);
+
+        void setType(final String path, final JsonValue.ValueType valueType);
+
+        Record align(final String path, final Record record);
+
+        List<Object> align(final String path, final Supplier<Schema> schemaSupplier, final List<Object> array);
+
+        Schema computeSchemaIfNotSet(String curPath, Supplier<Schema> schemaSupplier);
+    }
+
+    private static class NotAlingnedSchemaStrategy implements SchemaAlignmentStrategy {
+
+        private RecordBuilderFactory factory;
+        private Supplier<Schema> schemaSupplier;
+
+        @Override
+        public void init(RecordBuilderFactory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        public void setType(String path, JsonValue.ValueType valueType) {
+
+        }
+
+        @Override
+        public Schema computeSchemaIfNotSet(String path, Supplier<Schema> schemaSupplier) {
+            return schemaSupplier.get();
+        }
+
+        @Override
+        public Record align(String path, Record record) {
+            return record;
+        }
+
+        @Override
+        public List<Object> align(String path, Supplier<Schema> schemaSupplier, List<Object> array) {
+            return array;
+        }
+
+    }
+
+    /**
+     * /!\ Not thread safe
+     */
+    private static class AlignedSchemaStrategy implements SchemaAlignmentStrategy {
+
+        private RecordBuilderFactory factory;
+        private final Map<String, SchemaInfo> schemaInfoMap = new HashMap<>(50);
+
+        @Override
+        public void init(RecordBuilderFactory factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        public void setType(String path, JsonValue.ValueType valueType) {
+            schemaInfoMap.putIfAbsent(path, new SchemaInfo(valueType));
+        }
+
+        //@Override
+        public Schema computeSchemaIfNotSet(final String path, final Supplier<Schema> schemaSupplier) {
+            return schemaInfoMap.get(path).computeSchemaIfNotSet(schemaSupplier);
+        }
+
+        @Override
+        public Record align(final String path, final Record record) {
+            final Schema schema = this.computeSchemaIfNotSet(path, Lazy.lazy(() -> record.getSchema()));
+            return this.alignRecordOnGivenSchema(schema, record);
+        }
+
+        @Override
+        public List<Object> align(final String path, final Supplier<Schema> schemaSupplier, final List<Object> fitems) {
+            // This force nested arrays to have the same schema as
+            // first same level/same name nested array
+            final Schema arrayElementSchema = this.computeSchemaIfNotSet(path, schemaSupplier);
+
+            if (arrayElementSchema.getType() == Schema.Type.RECORD) {
+                // If it is an array of record, we set the elementSchema of the
+                // in all record since it is an aggregate.
+                // If not, some record may have missing entries in their schema.
+                return fitems.stream().map(i -> {
+                    final Record r = (Record) i;
+                    return alignRecordOnGivenSchema(arrayElementSchema, r);
+                }).collect(toList());
+            }
+
+            return fitems;
+        }
+
+        private Record alignRecordOnGivenSchema(final Schema existingSChema, final Record r) {
+            final Record.Builder nestedBuilder = factory.newRecordBuilder(existingSChema);
+            r.getSchema().getEntries().stream().forEach(e -> {
+                switch (e.getType()) {
+                    case RECORD:
+                        nestedBuilder.withRecord(e, r.getRecord(e.getName()));
+                        break;
+                    case ARRAY:
+                        nestedBuilder.withArray(e, r.getArray(Object.class, e.getName()));
+                        break;
+                    case STRING:
+                        nestedBuilder.withString(e, r.getString(e.getName()));
+                        break;
+                    case BYTES:
+                        nestedBuilder.withBytes(e, r.getBytes(e.getName()));
+                        break;
+                    case INT:
+                        nestedBuilder.withInt(e, r.getInt(e.getName()));
+                        break;
+                    case LONG:
+                        nestedBuilder.withLong(e, r.getLong(e.getName()));
+                        break;
+                    case FLOAT:
+                        nestedBuilder.withFloat(e, r.getFloat(e.getName()));
+                        break;
+                    case DOUBLE:
+                        nestedBuilder.withDouble(e, r.getDouble(e.getName()));
+                        break;
+                    case BOOLEAN:
+                        nestedBuilder.withBoolean(e, r.getBoolean(e.getName()));
+                        break;
+                    case DATETIME:
+                        nestedBuilder.withDateTime(e, r.getDateTime(e.getName()));
+                    default:
+                        throw new RuntimeException("A new type should have been added, it should be supported : " + e.getType());
+                }
+            });
+
+            return nestedBuilder.build();
+        }
+    }
+
+    @Data
+    @RequiredArgsConstructor
+    private static class SchemaInfo {
+
+        final JsonValue.ValueType type;
+        Supplier<Schema> schemaSupplier;
+
+        public Schema computeSchemaIfNotSet(final Supplier<Schema> schemaSupplier) {
+            if (this.schemaSupplier == null) {
+                this.schemaSupplier = schemaSupplier;
+            }
+            return this.getSchema();
+        }
+
+        public Schema getSchema() {
+            return schemaSupplier.get();
+        }
+
     }
 
 }
