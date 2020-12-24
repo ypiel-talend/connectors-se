@@ -132,7 +132,7 @@ public class JsonToRecord {
 
             String curPath = path + "$" + key;
             final JsonValue.ValueType valueType = value.getValueType();
-            schemaInfoMap.computeIfAbsent(curPath, k -> new SchemaInfo(valueType));
+            schemaInfoMap.putIfAbsent(curPath, new SchemaInfo(valueType));
 
             switch (valueType) {
             case ARRAY: {
@@ -146,7 +146,7 @@ public class JsonToRecord {
                 final Schema arrayElementSchema = schemaInfoMap.get(curPath)
                         .computeSchemaIfNotSet(() -> getArrayElementSchema(factory, fitems));
 
-                if (arrayElementSchema.getType() == Schema.Type.RECORD) {
+               if (arrayElementSchema.getType() == Schema.Type.RECORD) {
                     // If it is an array of record, we set the elementSchema of the
                     // in all record since it is an aggregate.
                     // If not, some record may have missing entries in their schema.
@@ -192,12 +192,12 @@ public class JsonToRecord {
         return builder.build();
     }
 
-    private Object mapJson(final JsonValue it, Map<String, SchemaInfo> arrayElementSchemas, final String path) {
+    private Object mapJson(final JsonValue it, Map<String, SchemaInfo> schemaInfoMap, final String path) {
         if (JsonObject.class.isInstance(it)) {
-            return toRecord(it.asJsonObject(), arrayElementSchemas, path);
+            return toRecord(it.asJsonObject(), schemaInfoMap, path);
         }
         if (JsonArray.class.isInstance(it)) {
-            return it.asJsonArray().stream().map(e -> this.mapJson(e, arrayElementSchemas, path)).collect(toList());
+            return it.asJsonArray().stream().map(e -> this.mapJson(e, schemaInfoMap, path)).collect(toList());
         }
         if (JsonString.class.isInstance(it)) {
             return JsonString.class.cast(it).getString();
