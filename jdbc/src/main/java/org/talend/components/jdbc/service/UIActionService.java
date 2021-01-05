@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -114,12 +114,12 @@ public class UIActionService {
 
         newConf.setDefineUrl(explodedURL.getDefineUrl());
 
-        newConf.setJdbcUrl(setIfEmpty(explodedURL.getJdbcUrl(), buildUrl(configuration.getDefaults())));
+        newConf.setJdbcUrl(buildUrl(configuration.getDefaults()));
 
-        newConf.setDatabase(setIfEmpty(explodedURL.getDatabase(), configuration.getDefaults().getDatabase()));
-        newConf.setHost(setIfEmpty(explodedURL.getHost(), configuration.getDefaults().getHost()));
-        newConf.setPort(setIfEmpty(explodedURL.getPort(), configuration.getDefaults().getPort()));
-        newConf.setParameters(setIfEmpty(explodedURL.getParameters(), configuration.getDefaults().getParameters()));
+        newConf.setDatabase(configuration.getDefaults().getDatabase());
+        newConf.setHost(configuration.getDefaults().getHost());
+        newConf.setPort(configuration.getDefaults().getPort());
+        newConf.setParameters(configuration.getDefaults().getParameters());
 
         return newConf;
     }
@@ -143,18 +143,6 @@ public class UIActionService {
         }
 
         if (current == 0) {
-            return newValue;
-        }
-
-        return current;
-    }
-
-    private String setIfEmpty(final String current, final String newValue) {
-        if (current == null) {
-            return newValue;
-        }
-
-        if (current.trim().isEmpty()) {
             return newValue;
         }
 
