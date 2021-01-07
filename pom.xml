@@ -18,7 +18,7 @@
 
   <groupId>org.talend.components</groupId>
   <artifactId>connectors-se</artifactId>
-  <version>1.17.0-SNAPSHOT</version>
+  <version>1.17.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Connectors-se</name>
@@ -75,8 +75,8 @@
   </distributionManagement>
 
   <properties>
-    <connectors-test-bom.version>1.17.0-SNAPSHOT</connectors-test-bom.version>
-    <common.version>1.17.0-SNAPSHOT</common.version>
+    <connectors-test-bom.version>1.17.1-SNAPSHOT</connectors-test-bom.version>
+    <common.version>1.17.1-SNAPSHOT</common.version>
 
     <timestamp.year>${maven.build.timestamp}</timestamp.year>
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
@@ -862,9 +862,9 @@
             </goals>
             <configuration>
               <rules>
-                <banDuplicatePomDependencyVersions/>
-                <dependencyConvergence/>
-                <banDistributionManagement/>
+                <banDuplicatePomDependencyVersions />
+                <dependencyConvergence />
+                <banDistributionManagement />
               </rules>
             </configuration>
           </execution>
@@ -1122,8 +1122,8 @@
                       ${maven.multiModuleProjectDirectory}/target/documentation_resources/resources/html
                     </stylesdir>
                     <stylesheet>talend.css</stylesheet>
-                    <data-uri/>
-                    <toc/>
+                    <data-uri />
+                    <toc />
                   </attributes>
                 </configuration>
               </execution>
