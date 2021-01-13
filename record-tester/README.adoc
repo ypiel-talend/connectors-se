@@ -1,5 +1,6 @@
 = Record generator
 :toc:
+toclevels: 4
 
 == Main features
 This connector proposes several record providers to generate records. Here are currently supported record providers:
