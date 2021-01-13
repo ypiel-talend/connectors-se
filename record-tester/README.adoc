@@ -1,19 +1,21 @@
 = Record generator
 
-This connector proposes several record provider to generate some kinds of records source. Here are currently supported record providers:
+This connector proposes several record providers to generate records. Here are currently supported record providers:
 
-- Empty : generates no record at all
-- Beanshell : you can code in java your records generation. It is very useful to easily reproduce a specific record and reproduce a use case. You are able to create records directly using TCK api. The limitation is that you have to use java 4 syntax (no generics nor lambda).
-- Json : you can give a json content that will be converted to record y tck itself, or by common-stream-io connectors-se library. So you can reproduce use cas of any connectors using this library (should be all connectors that deal with json)
-- Fixed record : It generates _n_ records with fixed schema. All types supported by TCK are in the record. Null value is set cyclically to all attributes. Min and max values are set for numbers
+- *Empty* : generates no record at all
+- *Beanshell* : _you can code in java_ your records generation. It is very useful to easily reproduce a specific record to reproduce a use case. You are able to create records directly using TCK api. The limitation is that you have to use java 4 syntax (_no generics nor lambda_).
+- *Json* : you can give a json content that will be converted to record y tck itself, or by common-stream-io connectors-se library. So you can reproduce use cases of any connectors using this library (should be all connectors that deal with json)
+- *Fixed record* : It generates _n_ records with fixed schema. All types supported by TCK are in the record. Null value is set cyclically to all attributes. Min and max values are set for numbers
 
-You can load json or beanshell code from resource file of the record, or from an HTTP call, so you can save your json or beanshell code in https://gist.github.com/ for instance.
+You can load json or beanshell code from resource file of the record, or from an HTTP call, so you can save your json or beanshell code in https://gist.github.com/ for instance:
 
-Another great feature is that you can generate and see generated records directly at design time, no need to create a pipeline nor execute it to check generated records. The schema of the first record is all displayed:
+image::images/load_file.png[]
+
+Another great feature is that you can generate and see generated records directly at design time. No need to create a pipeline, nor execute it, to check generated records. The schema of the first record is also displayed:
 
 image::images/feedback.png[]
 
-Since tis connector is to make test, we wanted to configure the simplest way it can. So, the dataset configuration can be overriden in designer. So no need to go back to dataset, update/save, come back to pipeline, to take effect. Just edit the configuration in the designer view:
+Since this connector is to make tests, we wanted to configure it the simplest way it can. So, the dataset configuration can be overwritten in designer. No need to go back to dataset, update/save, come back to pipeline, to take effect. Just edit the configuration in the designer view:
 
 image::images/overwrite_dataset.png[]
 
@@ -125,3 +127,10 @@ RECORD
 - You can see that each field is null on after the second, the first record contains all fields.
 - Numbers alternates with their min and their max
 - The split number and the thread id are also part of the record
+
+=== Use it in a pipeline
+The dataset you have created is available to be selected as source of a pipeline. Once you have selected it you can use it with the configuration set in dataset, but, you can also overwrite the configuration.
+
+- Select the input connector
+- In the configuration panel, select 'Overwrite dataset'
+- You can configure the connector. This configuration will be used and not the one from the dataset
