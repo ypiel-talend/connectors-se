@@ -43,7 +43,7 @@ image::images/dataset_form.png[]
 You will have some additional parameters for json provider :
 
 - Json pointer : You can define a json pointer to only compute a sub part of the json content. If it is an array, it will generate a record by item
-- Use common-io : A connector can return a json object. This is the default. In taht cas it is the TCK framework that will convert the json object to record
+- Use common-io : A connector can return a json object. This is the default. In that case it is the TCK framework that will convert the json object to record. If we select this option, _common-stream-io/stream-json_ will be used. Currently our efforts are on this library. So there could be some differences between the json2record from this library and the one from tck.
 
 ==== Beanshell provider
 This provider relies on beanshell library : https://beanshell.github.io/
