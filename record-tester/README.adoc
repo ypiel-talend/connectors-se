@@ -22,6 +22,37 @@ Since this connector is to make tests, we wanted to configure it the simplest wa
 
 image::images/overwrite_dataset.png[]
 
+== How to add in a Remote Engine Gen2
+=== Build the connector
+- First, clone the connectors-se repository
+----
+git clone git@github.com:Talend/connectors-se.git
+----
+- Build the connector
+----
+mvn clean install -pl record-tester -am -DskipTests
+----
+=== Customize the REG2
+I this example I use eap environment.
+
+- Go into your REG2 installation folder
+- Customize your connectors image
+----
+docker run -v $(pwd)/eap/:/re4p/ -v /home/${USER}/dev/connectors-se/record-tester/target/:/car/ -v /var/run/docker.sock:/var/run/docker.sock tacokit/remote-engine-customizer:1.1.18 register-component-archive --component-archive=/car/recordtester-x.y.z-SNAPSHOT.car --remote-engine-dir=/re4p/ --from-image-type=DOCKER
+----
+- Restart your REG2
+----
+./remote-engine.sh restart -r at -k <key>
+----
+- In eap_component-server_1 container you should see this log without error
+----
+~/Talend/RE_TPD/remote-engine-gen-2-2020-12$ docker logs eap_component-server_1
+
+[...]
+[2021-01-13T17:18:47,457][INFO ][           main][ent.container.ContainerManager] Created container recordtester
+[...]
+----
+
 == How to use ?
 === Create connection
 First, create a connection and select '_Record generator_' connection type.
