@@ -28,7 +28,7 @@ def escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
 def deploymentSuffix = (env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")) ? "${PRODUCTION_DEPLOYMENT_REPOSITORY}" : ("dev_branch_snapshots/branch_${escapedBranch}")
 
 def m2 = "/tmp/jenkins/tdi/m2/${deploymentSuffix}"
-def talendOssRepositoryArg = (env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")) ? "" : ("-Dtalend_oss_snapshots=https://nexus-smart-branch.datapwn.com/nexus/content/repositories/${deploymentSuffix}")
+def talendOssRepositoryArg = (env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")) ? "" : ("-Dtalend_oss_snapshots=https://artifacts-zl.talend.com:8443/nexus/content/repositories/${deploymentSuffix}")
 
 def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
 
@@ -126,6 +126,12 @@ spec:
             }
             parallel {
                 stage('Documentation') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            expression { env.BRANCH_NAME.startsWith('maintenance/') }
+                        }
+                    }
                     steps {
                         container('main') {
                             withCredentials([dockerCredentials]) {
@@ -147,6 +153,12 @@ spec:
                     }
                 }
                 stage('Site') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            expression { env.BRANCH_NAME.startsWith('maintenance/') }
+                        }
+                    }
                     steps {
                         container('main') {
                             sh 'cd ci_site && mvn -U -B -s .jenkins/settings.xml clean site site:stage -Dmaven.test.failure.ignore=true'
