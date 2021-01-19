@@ -10,17 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.common.stream.format.avro;
+package org.talend.components.common.test.records;
 
-import org.talend.components.common.stream.format.ContentFormat;
+import java.util.function.Consumer;
 
-import lombok.Data;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 
-@Data
-public class AvroConfiguration implements ContentFormat {
+public interface AssertionsBuilder<T> {
 
-    private boolean attachSchema = true;
+    default void startRecord(int id) {
+    }
 
-    private String avroSchema;
+    void addField(int id, Schema.Entry field, Object value);
 
+    Consumer<T> endRecord(int id, Record record);
 }
