@@ -26,11 +26,24 @@ import org.talend.sdk.component.api.component.MigrationHandler;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
+import org.talend.sdk.component.api.processor.AfterGroup;
+import org.talend.sdk.component.api.processor.BeforeGroup;
+import org.talend.sdk.component.api.processor.ElementListener;
+import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
+import org.talend.sdk.component.api.record.Record;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.annotation.PreDestroy;
+
+import static org.talend.components.jdbc.ErrorFactory.toIllegalStateException;
 
 @Slf4j
 @Getter
@@ -44,11 +57,39 @@ public class SimpleOutput extends Output implements Serializable {
 
     private Platform platform;
 
+    @Getter
+    private transient List<Record> records;
+
     public SimpleOutput(@Option("configuration") final OutputConfig configuration, final JdbcService jdbcService,
             final I18nMessage i18n) {
         super(configuration, jdbcService, i18n);
         this.platform = PlatformFactory.get(configuration.getDataset().getConnection(), i18n);
-        this.queryManager = QueryManagerFactory.getQueryManager(platform, i18n, configuration);
+        this.queryManager = (QueryManagerImpl) QueryManagerFactory.getQueryManager(platform, i18n, configuration);
+    }
+
+    @BeforeGroup
+    public void beforeGroup() throws Exception {
+        this.records = new ArrayList<>();
+    }
+
+    @ElementListener
+    public void elementListener(@Input final Record record) throws Exception {
+        super.elementListener(record);
+        records.add(record);
+    }
+
+    @AfterGroup
+    public void afterGroup() throws Exception {
+        checkForTable();
+
+        // TODO : handle discarded records
+        try {
+            final List<Reject> discards = getQueryManager().execute(records, getDatasource());
+            discards.stream().map(Object::toString).forEach(log::error);
+        } catch (final SQLException e) {
+            records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
+            throw toIllegalStateException(e);
+        }
     }
 
     @Slf4j
@@ -78,4 +119,8 @@ public class SimpleOutput extends Output implements Serializable {
         }
     }
 
+    @PreDestroy
+    public void preDestroy() {
+        super.preDestroy();
+    }
 }

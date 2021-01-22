@@ -24,6 +24,8 @@ import org.talend.components.jdbc.service.JdbcService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -43,7 +45,7 @@ import static java.util.stream.Collectors.toList;
 
 @Data
 @Slf4j
-public abstract class QueryManagerImpl implements QueryManager {
+public abstract class QueryManagerImpl implements QueryManager<List<Record>> {
 
     private final Platform platform;
 

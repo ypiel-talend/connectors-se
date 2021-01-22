@@ -12,6 +12,8 @@
  */
 package org.talend.components.jdbc.service;
 
+import java.nio.file.Path;
+
 import org.talend.sdk.component.api.internationalization.Internationalized;
 
 @Internationalized
@@ -93,4 +95,6 @@ public interface I18nMessage {
     String errorVacantAccountKey();
 
     String errorNoRecordReceived();
+
+    String errorCantDeleteTempDirectory(Path tempDirectory);
 }

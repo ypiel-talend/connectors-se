@@ -22,6 +22,7 @@
         <testcontainers.version>1.14.1</testcontainers.version>
         <!-- To run ITs test give the following option to mvn : -Dtest.excluded="" -->
         <test.excluded>IT</test.excluded>
+        <talend.scan.scannedDependencies>org.talend.components:stream-api</talend.scan.scannedDependencies>
     </properties>
 
     <dependencies>
@@ -46,6 +47,11 @@
             <artifactId>xbean-finder-shaded</artifactId>
             <version>${xbean-finder-shaded.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.talend.components</groupId>
+            <artifactId>stream-csv</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!-- test -->
         <dependency>

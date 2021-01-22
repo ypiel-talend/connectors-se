@@ -18,10 +18,11 @@ import org.talend.sdk.component.api.record.Record;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface QueryManager extends Serializable {
+public interface QueryManager<T> extends Serializable {
 
-    List<Reject> execute(List<Record> records, JdbcService.JdbcDatasource dataSource) throws SQLException, IOException;
+    List<Reject> execute(T source, JdbcService.JdbcDatasource dataSource) throws SQLException, IOException;
 }

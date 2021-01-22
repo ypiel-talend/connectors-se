@@ -14,18 +14,18 @@ package org.talend.components.jdbc.output.statement;
 
 import lombok.Data;
 import org.talend.components.jdbc.configuration.OutputConfig;
+import org.talend.components.jdbc.output.platforms.MariaDbPlatform;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.output.statement.operations.Delete;
 import org.talend.components.jdbc.output.statement.operations.Insert;
-import org.talend.components.jdbc.output.statement.operations.QueryManagerImpl;
 import org.talend.components.jdbc.output.statement.operations.Update;
 import org.talend.components.jdbc.output.statement.operations.UpsertDefault;
+import org.talend.components.jdbc.output.statement.operations.mariadb.MariaDBBulkUpload;
 import org.talend.components.jdbc.output.statement.operations.snowflake.SnowflakeDelete;
 import org.talend.components.jdbc.output.statement.operations.snowflake.SnowflakeInsert;
 import org.talend.components.jdbc.output.statement.operations.snowflake.SnowflakeUpdate;
 import org.talend.components.jdbc.output.statement.operations.snowflake.SnowflakeUpsert;
 import org.talend.components.jdbc.service.I18nMessage;
-import org.talend.components.jdbc.service.SnowflakeCopyService;
 
 import static java.util.Locale.ROOT;
 import static org.talend.components.jdbc.output.platforms.SnowflakePlatform.SNOWFLAKE;
@@ -36,7 +36,7 @@ public final class QueryManagerFactory {
     private QueryManagerFactory() {
     }
 
-    public static QueryManagerImpl getQueryManager(final Platform platform, final I18nMessage i18n,
+    public static QueryManager getQueryManager(final Platform platform, final I18nMessage i18n,
             final OutputConfig configuration) {
         final String db = configuration.getDataset().getConnection().getDbType().toLowerCase(ROOT);
         switch (db) {
@@ -63,6 +63,10 @@ public final class QueryManagerFactory {
                 return new Delete(platform, configuration, i18n);
             case UPSERT:
                 return new UpsertDefault(platform, configuration, i18n);
+            case BULK_LOAD:
+                if (db.equals(MariaDbPlatform.MARIADB)) {
+                    return new MariaDBBulkUpload(platform, configuration, i18n);
+                }
             default:
                 throw new IllegalStateException(i18n.errorUnsupportedDatabaseAction());
             }

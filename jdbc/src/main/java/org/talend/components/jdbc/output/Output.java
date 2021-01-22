@@ -12,6 +12,7 @@
  */
 package org.talend.components.jdbc.output;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.configuration.OutputConfig;
@@ -45,17 +46,17 @@ public abstract class Output implements Serializable {
     @Getter
     private final JdbcService jdbcService;
 
+    @Getter(AccessLevel.PROTECTED)
     private final I18nMessage i18n;
 
-    private transient List<Record> records;
-
+    @Getter(AccessLevel.PROTECTED)
     private transient JdbcService.JdbcDatasource datasource;
 
     private Boolean tableExistsCheck;
 
     private boolean tableCreated;
 
-    private transient boolean init;
+    protected transient boolean init;
 
     public Output(final OutputConfig outputConfig, final JdbcService jdbcService, final I18nMessage i18nMessage) {
         this.configuration = outputConfig;
@@ -67,22 +68,17 @@ public abstract class Output implements Serializable {
 
     protected abstract Platform getPlatform();
 
-    @BeforeGroup
-    public void beforeGroup() {
-        this.records = new ArrayList<>();
-    }
+    protected abstract List<Record> getRecords();
 
-    @ElementListener
-    public void elementListener(@Input final Record record) throws SQLException {
+    public void elementListener(Record record) throws Exception {
         if (!init) {
             // prevent creating db connection if no records
             // it's mostly useful for streaming scenario
             lazyInit();
         }
-        records.add(record);
     }
 
-    private void lazyInit() throws SQLException {
+    protected void lazyInit() throws Exception {
         this.init = true;
         this.datasource = jdbcService.createDataSource(configuration.getDataset().getConnection(),
                 configuration.isRewriteBatchedStatements());
@@ -94,29 +90,18 @@ public abstract class Output implements Serializable {
         }
     }
 
-    @AfterGroup
-    public void afterGroup() throws SQLException {
+    protected void checkForTable() throws SQLException {
         if (!tableExistsCheck && !tableCreated && configuration.isCreateTableIfNotExists()) {
             try (final Connection connection = datasource.getConnection()) {
                 getPlatform().createTableIfNotExist(connection, configuration.getDataset().getTableName(),
                         configuration.getKeys(), configuration.getSortStrategy(), configuration.getSortKeys(),
                         configuration.getDistributionStrategy(), configuration.getDistributionKeys(),
-                        configuration.getVarcharLength(), records);
+                        configuration.getVarcharLength(), getRecords());
                 tableCreated = true;
             }
         }
-
-        // TODO : handle discarded records
-        try {
-            final List<Reject> discards = getQueryManager().execute(records, datasource);
-            discards.stream().map(Object::toString).forEach(log::error);
-        } catch (final SQLException | IOException e) {
-            records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
-            throw toIllegalStateException(e);
-        }
     }
 
-    @PreDestroy
     public void preDestroy() {
         if (datasource != null) {
             datasource.close();
