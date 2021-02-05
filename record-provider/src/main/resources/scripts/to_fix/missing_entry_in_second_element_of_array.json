@@ -1,0 +1,7 @@
+{
+    "description" : "A single record with array of records.",
+    "an_array": [
+        {"name":  "name_1", "age":  1, "city": "Nantes"},
+        {"name":  "name_2", "age":  2}
+    ]
+}

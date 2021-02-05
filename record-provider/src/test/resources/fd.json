@@ -1,0 +1,25 @@
+{
+  "menu": {
+    "id": "file",
+    "value": "File",
+    "recA" : {
+      "attr1" : "a String",
+      "attr2" : 123,
+      "recB" : {
+        "attr3" : true,
+        "attr4" : 123.25
+      }
+    },
+    "popup": {
+      "menuitem": [
+        {"value": "New", "onclick": "CreateNewDoc()"},
+        {"value": "Open", "onclick": "OpenDoc()"},
+        {"value": "Close", "onclick": "CloseDoc()"}
+      ]
+    }
+  },
+  "arrayOfArray" : [
+    [{"aaa" :  "aa1", "bbb" :  12.12}, {"aaa" :  "aa2", "bbb" :  22.12}],
+    [{"aaa" :  "aa1", "bbb" :  12.12}, {"aaa" :  "aa2", "bbb" :  22.12}]
+  ]
+}
