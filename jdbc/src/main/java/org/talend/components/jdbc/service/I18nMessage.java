@@ -97,4 +97,9 @@ public interface I18nMessage {
     String errorNoRecordReceived();
 
     String errorCantDeleteTempDirectory(Path tempDirectory);
+
+    String errorPrivateKeyPasswordIncorrect();
+
+    String errorPrivateKeyIncorrect();
+
 }
