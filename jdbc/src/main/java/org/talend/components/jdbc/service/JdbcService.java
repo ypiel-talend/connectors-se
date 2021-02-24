@@ -189,8 +189,8 @@ public class JdbcService {
                 // dataSource.addDataSourceProperty("useServerPrepStmts", "true");
 
                 // Security Issues with LOAD DATA LOCAL https://jira.talendforge.org/browse/TDI-42001
-                dataSource.addDataSourceProperty("allowLoadLocalInfile", "false"); // MySQL
-                dataSource.addDataSourceProperty("allowLocalInfile", "false"); // MariaDB
+                dataSource.addDataSourceProperty("allowLoadLocalInfile", "true"); // MySQL
+                dataSource.addDataSourceProperty("allowLocalInfile", "true"); // MariaDB
 
                 driver.getFixedParameters().stream().forEach(kv -> dataSource.addDataSourceProperty(kv.getKey(), kv.getValue()));
 

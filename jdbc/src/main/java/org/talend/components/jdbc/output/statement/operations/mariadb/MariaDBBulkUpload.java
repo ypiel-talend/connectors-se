@@ -28,8 +28,10 @@ import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 public class MariaDBBulkUpload implements QueryManager<Path> {
 
     private final Platform platform;
@@ -42,10 +44,15 @@ public class MariaDBBulkUpload implements QueryManager<Path> {
     public List<Reject> execute(Path source, JdbcService.JdbcDatasource dataSource) throws SQLException, IOException {
         try (final Connection connection = dataSource.getConnection()) {
             String query = "LOAD DATA LOCAL INFILE '" + source + "' INTO TABLE " + configuration.getDataset().getTableName()
-                    + ";";
+                    + " FIELDS TERMINATED BY ','" + " LINES TERMINATED BY '\\n'" + ";";
             try (Statement stmnt = connection.createStatement()) {
                 stmnt.executeUpdate(query);
+                connection.commit();
+            } catch (SQLException sqle) {
+                connection.rollback();
+                throw sqle;
             }
+
         }
         return Collections.emptyList();
     }

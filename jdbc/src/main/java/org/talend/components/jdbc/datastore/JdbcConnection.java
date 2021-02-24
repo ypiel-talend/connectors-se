@@ -39,15 +39,19 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
 @Data
 @Version(value = 2, migrationHandler = JdbcConnectionMigrationHandler.class)
 @ToString(exclude = { "password", "privateKey", "privateKeyPassword" })
-@GridLayout({ @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("jdbcUrl"), @GridLayout.Row("authenticationType"),
-        @GridLayout.Row("userId"), @GridLayout.Row("password"), @GridLayout.Row("privateKey"),
-        @GridLayout.Row("privateKeyPassword") })
+@GridLayout({ @GridLayout.Row("foo"), @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("jdbcUrl"),
+        @GridLayout.Row("authenticationType"), @GridLayout.Row("userId"), @GridLayout.Row("password"),
+        @GridLayout.Row("privateKey"), @GridLayout.Row("privateKeyPassword") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("connectionTimeOut"),
         @GridLayout.Row("connectionValidationTimeOut") })
 @DataStore("JdbcConnection")
 @Checkable(UIActionService.ACTION_BASIC_HEALTH_CHECK)
 @Documentation("A connection to a data base")
 public class JdbcConnection implements Serializable {
+
+    @Option
+    @Documentation("Foo.")
+    private String foo;
 
     @Option
     @Required

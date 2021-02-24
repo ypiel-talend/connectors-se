@@ -33,6 +33,7 @@ import org.talend.components.common.stream.api.output.RecordWriter;
 import org.talend.components.common.stream.api.output.RecordWriterSupplier;
 import org.talend.components.common.stream.format.ContentFormat;
 import org.talend.components.common.stream.format.csv.CSVConfiguration;
+import org.talend.components.common.stream.format.csv.FieldSeparator;
 import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.output.platforms.PlatformFactory;
@@ -74,7 +75,7 @@ public class BulkOutput extends Output {
 
     private transient Path currentTempFile;
 
-    private transient ContentFormat contentFormat;
+    private transient CSVConfiguration contentFormat;
 
     private transient RecordWriterSupplier recordWriterSupplier;
 
@@ -93,15 +94,16 @@ public class BulkOutput extends Output {
 
     @PostConstruct
     public void postConstruct() throws Exception {
-        System.out.println("PostConstruct");
         contentFormat = new CSVConfiguration();
+        FieldSeparator fieldSeparator = new FieldSeparator();
+        fieldSeparator.setFieldSeparatorType(FieldSeparator.Type.COMMA);
+        contentFormat.setFieldSeparator(fieldSeparator);
         recordWriterSupplier = ioRepository.findWriter(contentFormat.getClass());
         tempDirectory = Files.createTempDirectory("temp-jdbc-bulk-");
     }
 
     @BeforeGroup
     public void beforeGroup() throws Exception {
-        System.out.println(recordWriterSupplier);
         // Create temp file to store records
         currentTempFile = Files.createTempFile(tempDirectory, "jdbc-bulk-", ".csv");
         recordWriter = recordWriterSupplier.getWriter(() -> new FileOutputStream(currentTempFile.toFile()), contentFormat);
@@ -130,7 +132,6 @@ public class BulkOutput extends Output {
     @ElementListener
     public void elementListener(@Input final Record record) throws Exception {
 
-        System.out.println(record);
         super.elementListener(record);
 
         if (firstRecord == null) {
@@ -142,9 +143,6 @@ public class BulkOutput extends Output {
 
     @PreDestroy
     public void preDestroy() {
-
-        System.out.println("PreDestroy");
-
         super.preDestroy();
         try {
             if (currentTempFile != null) {
