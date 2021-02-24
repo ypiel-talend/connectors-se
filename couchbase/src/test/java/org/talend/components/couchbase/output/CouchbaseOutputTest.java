@@ -12,16 +12,23 @@
  */
 package org.talend.components.couchbase.output;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.talend.components.couchbase.source.CouchbaseInput.META_ID_FIELD;
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import com.couchbase.client.deps.io.netty.util.ReferenceCountUtil;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.document.BinaryDocument;
+import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.document.json.JsonObject;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -40,19 +47,7 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import com.couchbase.client.deps.io.netty.util.ReferenceCountUtil;
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.document.BinaryDocument;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.json.JsonObject;
-
 import lombok.extern.slf4j.Slf4j;
-
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.talend.components.couchbase.source.CouchbaseInput.META_ID_FIELD;
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @Slf4j
 @WithComponents("org.talend.components.couchbase")
