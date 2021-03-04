@@ -71,11 +71,14 @@ public abstract class Platform implements Serializable {
                 varcharLength, records);
         final String sql = buildQuery(connection, table);
         try (final Statement statement = connection.createStatement()) {
-
             statement.executeUpdate(sql);
-            connection.commit();
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
         } catch (final Throwable e) {
-            connection.rollback();
+            if (!connection.getAutoCommit()) {
+                connection.rollback();
+            }
             if (!isTableExistsCreationError(e)) {
                 log.error("Create Table error for '" + sql + "'", e);
                 throw toIllegalStateException(e);
