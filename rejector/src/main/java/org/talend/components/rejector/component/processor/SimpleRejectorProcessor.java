@@ -10,16 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.rejector.component.sink;
+package org.talend.components.rejector.component.processor;
 
 import java.io.Serializable;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.talend.components.rejector.component.sink.RejectorProcessorConfiguration;
 import org.talend.components.rejector.service.I18nMessages;
 import org.talend.sdk.component.api.component.Icon;
-import org.talend.sdk.component.api.component.Icon.IconType;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -34,17 +34,17 @@ import org.talend.sdk.component.api.record.Record;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Processor(name = "RejectorProcessor")
-@Icon(value = IconType.CUSTOM, custom = "rejector")
+@Processor(name = "SimpleRejectorProcessor")
+@Icon(value = Icon.IconType.CUSTOM, custom = "rejector")
 @Version(1)
 @Documentation("A connector for testing rejects in Studio.")
-public class RejectorProcessor implements Serializable {
+public class SimpleRejectorProcessor implements Serializable {
 
-    private final RejectorProcessorConfiguration configuration;
+    private final SimpleRejectorProcessorConfiguration configuration;
 
     private final I18nMessages i18n;
 
-    public RejectorProcessor(@Option("configuration") final RejectorProcessorConfiguration configuration,
+    public SimpleRejectorProcessor(@Option("configuration") final SimpleRejectorProcessorConfiguration configuration,
             final I18nMessages messages) {
         this.configuration = configuration;
         this.i18n = messages;
@@ -63,16 +63,17 @@ public class RejectorProcessor implements Serializable {
     }
 
     @ElementListener
-    public void bufferize(final Record data, @Output("REJECT") OutputEmitter<Record> reject) {
-        if (data.hashCode() % 2 == 0) {
+    public void bufferize(final Record data, @Output("main") OutputEmitter<Record> main,
+            @Output("REJECT") OutputEmitter<Record> reject, @Output("REJECT2") OutputEmitter<Record> reject2) {
+        if (Math.random() < configuration.getPctToReject()) {
             reject.emit(data);
+            reject2.emit(data);
         } else {
-            log.info(data.toString());
+            main.emit(data);
         }
     }
 
     @AfterGroup
     public void commit() {
     }
-
 }
