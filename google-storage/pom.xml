@@ -65,15 +65,18 @@
                 <artifactId>google-http-client</artifactId>
                 <version>1.36.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>google-cloud-storage</artifactId>
+                <version>${google-cloud-storage-version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <!-- Google Cloud Storage Dependencies -->
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
-            <version>${google-cloud-storage-version}</version>
         </dependency>
         <dependency>
             <groupId>org.talend.components</groupId>

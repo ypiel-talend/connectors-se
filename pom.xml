@@ -157,6 +157,7 @@
     <validation.wording>false</validation.wording>
     <!-- TODO: replace with a 'validation.svg' -->
     <validation.metadata>true</validation.metadata>
+    <lombok.version>1.18.16</lombok.version>
   </properties>
 
   <dependencyManagement>
@@ -473,7 +474,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.16</version>
+      <version>${lombok.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -485,13 +486,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.28</version>
       <scope>test</scope>
     </dependency>
     <dependency>

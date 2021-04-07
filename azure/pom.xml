@@ -48,7 +48,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <!-- AzureBlob library -->
         <dependency>

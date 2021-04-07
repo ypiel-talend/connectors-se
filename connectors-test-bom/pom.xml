@@ -84,7 +84,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.talend.sdk.component</groupId>
