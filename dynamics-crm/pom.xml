@@ -48,11 +48,50 @@
         <talend-mscrm.version>3.4-20201208</talend-mscrm.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Resolve dependency convergence error section-->
+            <!-- You may wanna run mvn dependency:tree -Dverbose to update it manually -->
+            <!-- NOTE. The content of mvn dependency:tree may be different from want we will get in dependencies.txt -->
+
+            <!--talend-mscrm: axis2-xmlbeans, axis2-transport-http bring transitive dependencies-->
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-activation_1.1_spec</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <!-- talend-mscrm: axis2-transport-http, odata-client-core: 3.1.1, 4.0.0, 4.2.-->
+            <dependency>
+                <groupId>org.codehaus.woodstox</groupId>
+                <artifactId>stax2-api</artifactId>
+                <version>4.2</version>
+            </dependency>
+            <!-- talend-mscrm: axis2-transport-http, httpclient, axis2-xmlbeans -->
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.2</version>
+            </dependency>
+            <!-- talend-mscrm: axis2-transport-http, odata-client-core, odata-client-api -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.6</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.talend.components</groupId>
             <artifactId>talend-mscrm</artifactId>
             <version>${talend-mscrm.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

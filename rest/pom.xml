@@ -23,6 +23,61 @@
         <talend.validation.internationalization>false</talend.validation.internationalization>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Resolve dependency convergence error section-->
+            <!-- You may wanna run mvn dependency:tree -Dverbose to update it manually -->
+            <!-- NOTE. The content of mvn dependency:tree may be different from want we will get in dependencies.txt -->
+
+            <!-- spark-core_2.11 didn't manage those -->
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>3.2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.activation</groupId>
+                <artifactId>activation</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>2.11.12</version>
+            </dependency>
+            <!-- spark-core_2.11 didn't manage those correctly. It defines 3.9.9.Final but for our project it was resolved as 3.6.2.Final -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty</artifactId>
+                <version>3.9.9.Final</version>
+            </dependency>
+            <!-- spark-core_2.11 didn't manage those correctly. It defines 3.4.1 but for our project it was resolved as 3.1.1 -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>3.4.1</version>
+            </dependency>
+
+            <!-- spark-core_2.11, shrinkwrap-resolver-impl-maven -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.5</version>
+            </dependency>
+            <!-- org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-impl-maven defines 3.3.4 but resolves 3.0.0-->
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-provider-api</artifactId>
+                <version>3.3.4</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.talend.components</groupId>

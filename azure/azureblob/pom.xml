@@ -45,6 +45,49 @@
         <mockito.version>2.23.0</mockito.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!--  xlsx-streamer uses newer one -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${apache.poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${apache.poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-schemas</artifactId>
+                <version>${apache.poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-scratchpad</artifactId>
+                <version>${apache.poi.version}</version>
+            </dependency>
+
+            <!-- Resolve dependency convergence error section-->
+            <!-- You may wanna run mvn dependency:tree -Dverbose to update it manually -->
+            <!-- NOTE. The content of mvn dependency:tree may be different from want we will get in dependencies.txt -->
+
+            <!-- hadoop-common, hadoop-client -->
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.2.11</version>
+            </dependency>
+            <!-- hadoop-client, hadoop-common, httpclient -->
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- traductions -->
         <dependency>
@@ -70,22 +113,18 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>${apache.poi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>${apache.poi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml-schemas</artifactId>
-            <version>${apache.poi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>3.17</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>

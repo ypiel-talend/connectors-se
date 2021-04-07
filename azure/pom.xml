@@ -38,12 +38,22 @@
         <talend.component.studioHome />
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- AzureBlob library -->
+            <dependency>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>azure-storage</artifactId>
+                <version>8.1.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- AzureBlob library -->
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-storage</artifactId>
-            <version>8.1.0</version>
         </dependency>
 
         <dependency>

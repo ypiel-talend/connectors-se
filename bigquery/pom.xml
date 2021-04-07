@@ -20,6 +20,59 @@
         <talend.scan.scannedDependencies>org.talend.components:stream-api</talend.scan.scannedDependencies>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Resolve dependency convergence error section-->
+            <!-- You may wanna run mvn dependency:tree -Dverbose to update it manually -->
+            <!-- NOTE. The content of mvn dependency:tree may be different from want we will get in dependencies.txt -->
+
+            <!-- google-cloud-bigquery, google-cloud-storage-->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>3.12.4</version>
+            </dependency>
+            <!-- google-cloud-bigquery, google-cloud-storage-->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>3.12.4</version>
+            </dependency>
+
+            <!--google-cloud-bigquery, google-cloud-storage-->
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>google-cloud-core</artifactId>
+                <version>1.93.7</version>
+            </dependency>
+            <!--google-cloud-bigquery, google-cloud-storage-->
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>google-cloud-core-http</artifactId>
+                <version>1.93.7</version>
+            </dependency>
+
+            <!--google-cloud-bigquery, google-cloud-storage-->
+            <dependency>
+                <groupId>com.google.api.grpc</groupId>
+                <artifactId>proto-google-iam-v1</artifactId>
+                <version>0.13.0</version>
+            </dependency>
+            <!--google-cloud-bigquery, google-cloud-storage-->
+            <dependency>
+                <groupId>com.google.api.grpc</groupId>
+                <artifactId>proto-google-common-protos</artifactId>
+                <version>1.18.0</version>
+            </dependency>
+            <!--google-cloud-bigquery, google-cloud-storage-->
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-context</artifactId>
+                <version>1.31.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.google.cloud</groupId>

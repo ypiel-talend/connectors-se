@@ -13,6 +13,78 @@
 
     <name>Components :: Testing Dependencies</name>
 
+    <properties>
+        <spark-core_2.11.version>2.4.4</spark-core_2.11.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Resolve dependency convergence error section-->
+            <!-- You may wanna run mvn dependency:tree -Dverbose to update it manually -->
+            <!-- NOTE. The content of mvn dependency:tree may be different from want we will get in dependencies.txt -->
+
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-core_2.11</artifactId>
+                <version>${spark-core_2.11.version}</version>
+            </dependency>
+            <!-- spark-core_2.11, hadoop-client -->
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>2.6.0</version>
+            </dependency>
+            <!-- spark-core_2.11, hadoop-client -->
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-client</artifactId>
+                <version>2.13.0</version>
+            </dependency>
+            <!-- spark-core_2.11, hadoop-client -->
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-framework</artifactId>
+                <version>2.6.0</version>
+            </dependency>
+            <!--beam-sdks-java-core-->
+            <dependency>
+                <groupId>org.conscrypt</groupId>
+                <artifactId>conscrypt-openjdk-uber</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <!-- shrinkwrap-resolver-impl-maven, beam-sdks-java-core -->
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>2.3.1</version>
+            </dependency>
+            <!-- hadoop-client,beam-sdks-java-core -->
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.2</version>
+            </dependency>
+            <!--spark-core_2.11,hadoop-client -->
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>3.1</version>
+            </dependency>
+            <!--jackson-module-scala_2.11, spark-core_2.11, spark-streaming_2.11-->
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>2.11.12</version>
+            </dependency>
+            <!-- spark-core_2.11, hadoop-client -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>3.4.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.talend.sdk.component</groupId>
@@ -47,7 +119,6 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.11</artifactId>
-            <version>2.4.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

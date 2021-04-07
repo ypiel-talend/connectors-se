@@ -24,8 +24,52 @@
         <google-repo-version-test>0.121.2</google-repo-version-test>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Resolve dependency convergence error section-->
+            <!-- You may wanna run mvn dependency:tree -Dverbose to update it manually -->
+            <!-- NOTE. The content of mvn dependency:tree may be different from want we will get in dependencies.txt -->
+
+            <!--google-cloud-storage,google-cloud-nio-->
+            <dependency>
+                <groupId>com.google.apis</groupId>
+                <artifactId>google-api-services-storage</artifactId>
+                <version>v1-rev20200814-1.30.10</version>
+            </dependency>
+            <!--google-cloud-storage,google-cloud-nio-->
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>google-cloud-core</artifactId>
+                <version>1.93.8</version>
+            </dependency>
+            <!--google-cloud-storage,google-cloud-nio-->
+            <dependency>
+                <groupId>com.google.auto.value</groupId>
+                <artifactId>auto-value-annotations</artifactId>
+                <version>1.7.2</version>
+            </dependency>
+            <!--google-cloud-storage,google-cloud-nio-->
+            <dependency>
+                <groupId>com.google.api</groupId>
+                <artifactId>gax</artifactId>
+                <version>1.58.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.talend.components</groupId>
+                <artifactId>google-storage</artifactId>
+                <version>1.113.1</version>
+            </dependency>
+            <!--google-cloud-storage,google-cloud-nio-->
+            <dependency>
+                <groupId>com.google.http-client</groupId>
+                <artifactId>google-http-client</artifactId>
+                <version>1.36.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
-        <!-- Google Cloud Storage Dependencie -->
+        <!-- Google Cloud Storage Dependencies -->
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
