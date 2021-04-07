@@ -158,6 +158,8 @@ public class JdbcService {
 
         private String driverId;
 
+        private I18nMessage i18nMessage;
+
         public JdbcDatasource(final TokenClient tokenClient, final I18nMessage i18nMessage, final Resolver resolver,
                 final JdbcConnection connection, final JdbcConfiguration.Driver driver, final boolean isAutoCommit,
                 final boolean rewriteBatchedStatements) {
@@ -242,7 +244,8 @@ public class JdbcService {
             JsonObject jsonResult = response.body();
 
             if (response.status() != 200) {
-                throw new IllegalArgumentException(jsonResult.getString("error_description"));
+                throw new IllegalArgumentException(
+                        i18nMessage.errorAccessTokenResponse(jsonResult.getString("error_description")));
             }
 
             return jsonResult.getString("access_token");
