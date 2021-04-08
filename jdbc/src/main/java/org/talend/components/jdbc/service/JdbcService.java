@@ -245,6 +245,7 @@ public class JdbcService {
 
             if (response.status() != 200) {
                 throw new IllegalArgumentException(
+                        
                         i18nMessage.errorAccessTokenResponse(jsonResult.getString("error_description")));
             }
 

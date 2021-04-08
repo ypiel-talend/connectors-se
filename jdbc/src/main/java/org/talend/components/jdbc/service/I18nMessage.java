@@ -98,5 +98,5 @@ public interface I18nMessage {
 
     String errorPrivateKeyIncorrect();
 
-    String errorAccessTokenResponse(String field);
+    String errorAccessTokenResponse(String errorDescription);
 }
