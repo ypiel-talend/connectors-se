@@ -19,7 +19,6 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,7 +87,6 @@ class JsonToRecordTest {
         Assertions.assertEquals(array.get(1).asJsonObject().getString("f2"), resultArray.get(1).asJsonObject().getString("f2"));
     }
 
-    @Ignore
     @Test
     void toRecordWithDollarChar() {
         JsonObject jsonWithDollarChar = getJsonObject(
