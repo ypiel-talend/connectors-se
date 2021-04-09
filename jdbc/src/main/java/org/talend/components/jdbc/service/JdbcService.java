@@ -165,6 +165,7 @@ public class JdbcService {
                 final boolean rewriteBatchedStatements) {
             final Thread thread = Thread.currentThread();
             final ClassLoader prev = thread.getContextClassLoader();
+            this.i18nMessage = i18nMessage;
 
             classLoaderDescriptor = resolver.mapDescriptorToClassLoader(driver.getPaths());
             String missingJars = driver.getPaths().stream().filter(p -> classLoaderDescriptor.resolvedDependencies().contains(p))
@@ -245,7 +246,6 @@ public class JdbcService {
 
             if (response.status() != 200) {
                 throw new IllegalArgumentException(
-                        
                         i18nMessage.errorAccessTokenResponse(jsonResult.getString("error_description")));
             }
 
