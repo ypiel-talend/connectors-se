@@ -36,7 +36,7 @@ import com.veracode.annotation.SQLQueryCleanser;
 @GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row("tableName"), @GridLayout.Row("streamTableName") })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("connection"), @GridLayout.Row("advancedCommon") })
 @Documentation("This configuration define a dataset using a from a Snowflake stream table.\n")
-public class ChangeDataCaptureDataset implements BaseDataSet {
+public final class ChangeDataCaptureDataset implements BaseDataSet {
 
     /**
      * For now only Snowflake
