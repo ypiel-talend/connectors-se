@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.20.0-SNAPSHOT</version>
+        <version>1.21.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>jdbc</artifactId>
@@ -187,7 +187,7 @@
             <id>ITs</id>
             <properties>
                 <jdbc.it>true</jdbc.it>
-                <test.excluded/>
+                <test.excluded />
             </properties>
             <dependencies>
                 <dependency>
