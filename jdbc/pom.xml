@@ -45,6 +45,7 @@
         <dependency>
             <groupId>com.veracode.annotation</groupId>
             <artifactId>VeracodeAnnotations</artifactId>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xbean</groupId>
