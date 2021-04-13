@@ -29,6 +29,8 @@ import static org.talend.components.jdbc.output.platforms.PlatformFactory.get;
 import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_TABLE_NAMES;
 import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.FormType.ADVANCED;
 
+import com.veracode.annotation.SQLQueryCleanser;
+
 @Data
 @DataSet("ChangeDataCaptureDataset")
 @GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row("tableName"), @GridLayout.Row("streamTableName") })
@@ -85,6 +87,7 @@ public class ChangeDataCaptureDataset implements BaseDataSet {
         return streamTableName + "_COUNTER";
     }
 
+    @SQLQueryCleanser
     private String getQN(String table) {
         String jdbcUrl = connection.getJdbcUrl();
         String[] splitParts = jdbcUrl.split("\\?");

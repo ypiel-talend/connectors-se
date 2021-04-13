@@ -450,6 +450,12 @@
       <version>${slf4j.version}</version>
       <scope>provided</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/com.veracode.annotation/VeracodeAnnotations -->
+    <dependency>
+      <groupId>com.veracode.annotation</groupId>
+      <artifactId>VeracodeAnnotations</artifactId>
+      <version>1.2.1</version>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>

@@ -94,7 +94,7 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
             throw new IllegalArgumentException(i18n.errorUnauthorizedQuery());
         }
 
-        String createStreamStatement = this.cdcDataset.createStreamTableIfNotExist();
+        final String createStreamStatement = this.cdcDataset.createStreamTableIfNotExist();
 
         try {
             dataSource = jdbcDriversService.createDataSource(inputConfig.getDataSet().getConnection());
