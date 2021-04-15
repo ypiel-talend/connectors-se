@@ -9,9 +9,9 @@ def gitCredentials = usernamePassword(
     usernameVariable: 'GITHUB_LOGIN',
     passwordVariable: 'GITHUB_TOKEN')
 def dockerCredentials = usernamePassword(
-	credentialsId: 'docker-registry-credentials',
-    passwordVariable: 'DOCKER_PASSWORD',
-    usernameVariable: 'DOCKER_LOGIN')
+	credentialsId: 'artifactory-datapwn-credentials',
+    passwordVariable: 'ARTIFACTORY_PASSWORD',
+    usernameVariable: 'ARTIFACTORY_LOGIN')
 def sonarCredentials = usernamePassword(
     credentialsId: 'sonar-credentials',
     passwordVariable: 'SONAR_PASSWORD', 
@@ -70,6 +70,8 @@ spec:
         VERACODE_APP_NAME = 'Talend Component Kit'
         VERACODE_SANDBOX = 'connectors-se'
         APP_ID = '579232'
+        ARTIFACTORY_REGISTRY = "artifactory.datapwn.com"
+        TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX="artifactory.datapwn.com/docker-io-remote/"
     }
 
     options {
@@ -90,6 +92,18 @@ spec:
     }
 
     stages {
+        stage('Docker login') {
+            steps {
+                container('main') {
+                    withCredentials([dockerCredentials]) {
+                        sh '''#!/bin/bash
+                        docker version
+                        echo $ARTIFACTORY_PASSWORD | docker login $ARTIFACTORY_REGISTRY -u $ARTIFACTORY_LOGIN --password-stdin
+                        '''
+                    }
+                }
+            }
+        }
         stage('Run maven') {
             when {
                 expression { params.Action == 'STANDARD' }
@@ -108,7 +122,7 @@ spec:
             }
             post {
                 always {
-                    junit testResults: '*/target/surefire-reports/*.xml', allowEmptyResults: true
+                    junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
                     publishHTML(target: [
                             allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true,
                             reportDir   : 'target/talend-component-kit', reportFiles: 'icon-report.html', reportName: "Icon Report"
@@ -126,6 +140,12 @@ spec:
             }
             parallel {
                 stage('Documentation') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            expression { env.BRANCH_NAME.startsWith('maintenance/') }
+                        }
+                    }
                     steps {
                         container('main') {
                             withCredentials([dockerCredentials]) {
@@ -147,6 +167,12 @@ spec:
                     }
                 }
                 stage('Site') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            expression { env.BRANCH_NAME.startsWith('maintenance/') }
+                        }
+                    }
                     steps {
                         container('main') {
                             sh 'cd ci_site && mvn -U -B -s .jenkins/settings.xml clean site site:stage -Dmaven.test.failure.ignore=true'
@@ -162,6 +188,12 @@ spec:
                     }
                 }
                 stage('Nexus') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            expression { env.BRANCH_NAME.startsWith('maintenance/') }
+                        }
+                    }
                     steps {
                         container('main') {
                             withCredentials([nexusCredentials]) {
@@ -178,10 +210,13 @@ spec:
                             expression { params.FORCE_SONAR == true }
                         }
                     }
+                    environment {
+                        LIST_FILE= sh(returnStdout: true, script: "find \$(pwd) -type f -name 'jacoco.xml'  | sed 's/.*/&/' | tr '\n' ','").trim()
+                    }
                     steps {
                         container('main') {
                             withCredentials([sonarCredentials]) {
-                                sh "mvn -Dsonar.host.url=https://sonar-eks.datapwn.com -Dsonar.login='$SONAR_LOGIN' -Dsonar.password='$SONAR_PASSWORD' -Dsonar.branch.name=${env.BRANCH_NAME} sonar:sonar -PITs -s .jenkins/settings.xml -Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/"
+                                sh "mvn -Dsonar.host.url=https://sonar-eks.datapwn.com -Dsonar.login='$SONAR_LOGIN' -Dsonar.password='$SONAR_PASSWORD' -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.coverage.jacoco.xmlReportPaths='${LIST_FILE}' sonar:sonar -PITs -s .jenkins/settings.xml -Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/"
                             }
                         }
                     }

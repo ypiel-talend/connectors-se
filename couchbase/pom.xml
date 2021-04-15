@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.18.0-SNAPSHOT</version>
+    <version>1.21.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>couchbase</artifactId>
@@ -32,6 +32,11 @@
       <groupId>org.testcontainers</groupId>
       <artifactId>couchbase</artifactId>
       <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

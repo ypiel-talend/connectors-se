@@ -12,30 +12,21 @@
  */
 package org.talend.components.jdbc.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.configuration.JdbcConfiguration;
-import org.talend.components.jdbc.configuration.OutputConfig;
-import org.talend.components.jdbc.configuration.RedshiftSortStrategy;
-import org.talend.components.jdbc.dataset.TableNameDataset;
-import org.talend.components.jdbc.datastore.JdbcConnection;
-import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.asyncvalidation.AsyncValidation;
-import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
-import org.talend.sdk.component.api.service.completion.DynamicValues;
-import org.talend.sdk.component.api.service.completion.SuggestionValues;
-import org.talend.sdk.component.api.service.completion.Suggestions;
-import org.talend.sdk.component.api.service.completion.Values;
-import org.talend.sdk.component.api.service.configuration.Configuration;
-import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
-import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparingInt;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.talend.sdk.component.api.record.Schema.Type.RECORD;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -46,15 +37,42 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
-import static java.util.Comparator.comparingInt;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import org.talend.components.jdbc.configuration.JdbcConfiguration;
+import org.talend.components.jdbc.configuration.OutputConfig;
+import org.talend.components.jdbc.configuration.RedshiftSortStrategy;
+import org.talend.components.jdbc.dataset.TableNameDataset;
+import org.talend.components.jdbc.datastore.JdbcConnection;
+import org.talend.components.jdbc.output.platforms.PlatformFactory;
+import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.exception.ComponentException;
+import org.talend.sdk.component.api.exception.ComponentException.ErrorOrigin;
+import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.asyncvalidation.AsyncValidation;
+import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
+import org.talend.sdk.component.api.service.completion.DynamicValues;
+import org.talend.sdk.component.api.service.completion.SuggestionValues;
+import org.talend.sdk.component.api.service.completion.SuggestionValues.Item;
+import org.talend.sdk.component.api.service.completion.Suggestions;
+import org.talend.sdk.component.api.service.completion.Values;
+import org.talend.sdk.component.api.service.configuration.Configuration;
+import org.talend.sdk.component.api.service.discovery.DiscoverDataset;
+import org.talend.sdk.component.api.service.discovery.DiscoverDatasetResult;
+import org.talend.sdk.component.api.service.discovery.DiscoverDatasetResult.DatasetDescription;
+import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
+import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.api.service.schema.DiscoverSchema;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class UIActionService {
+
+    public static final String ACTION_LIST_COLUMNS = "ACTION_LIST_COLUMNS";
 
     public static final String ACTION_LIST_SUPPORTED_DB = "ACTION_LIST_SUPPORTED_DB";
 
@@ -72,11 +90,16 @@ public class UIActionService {
 
     public static final String ACTION_VALIDATE_SORT_KEYS = "ACTION_VALIDATE_SORT_KEYS";
 
+    private static final String ACTION_DISCOVER_SCHEMA = "ACTION_DISCOVER_SCHEMA";
+
     @Service
     private JdbcService jdbcService;
 
     @Service
     private I18nMessage i18n;
+
+    @Service
+    private RecordBuilderFactory recordBuilderFactory;
 
     @Configuration("jdbc")
     private Supplier<JdbcConfiguration> jdbcConfiguration;
@@ -114,15 +137,14 @@ public class UIActionService {
 
     @HealthCheck(ACTION_BASIC_HEALTH_CHECK)
     public HealthCheckStatus validateBasicDataStore(@Option final JdbcConnection datastore) {
-        try (JdbcService.JdbcDatasource dataSource = this.jdbcService.createDataSource(datastore)) {
-            try (final Connection ignored = dataSource.getConnection()) {
-                // no-op
-            } catch (final Exception e) {
-                return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
-            }
-
-            return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successConnection());
+        try (JdbcService.JdbcDatasource dataSource = this.jdbcService.createDataSource(datastore);
+                final Connection ignored = dataSource.getConnection()) {
+            // no-op
+        } catch (final Exception e) {
+            return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         }
+
+        return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successConnection());
     }
 
     @AsyncValidation(ACTION_VALIDATION_READONLY_QUERY)
@@ -135,50 +157,59 @@ public class UIActionService {
 
     @Suggestions(ACTION_SUGGESTION_TABLE_COLUMNS_NAMES)
     public SuggestionValues getTableColumns(@Option final TableNameDataset dataset) {
-        try (JdbcService.JdbcDatasource dataSource = jdbcService.createDataSource(dataset.getConnection());
-                Connection conn = dataSource.getConnection();
-                final Statement statement = conn.createStatement()) {
-            statement.setMaxRows(1);
-            try (final ResultSet result = statement.executeQuery(dataset.getQuery())) {
-                return new SuggestionValues(true, IntStream.rangeClosed(1, result.getMetaData().getColumnCount()).mapToObj(i -> {
-                    try {
-                        return result.getMetaData().getColumnName(i);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+        List<String> listColumns = dataset.getListColumns();
+        return listColumns != null && !listColumns.isEmpty() ? new SuggestionValues(true,
+                listColumns.stream().map(columnName -> new SuggestionValues.Item(columnName, columnName)).collect(toList()))
+                : getListColumns(dataset.getConnection(), dataset.getTableName());
+    }
 
-                    return null;
-                }).filter(Objects::nonNull).map(columnName -> new SuggestionValues.Item(columnName, columnName))
-                        .collect(toSet()));
-            }
-        } catch (final Exception unexpected) {
-            // catch all exceptions for this ui label to return empty list
+    public List<TableInfo> listTables(final JdbcConnection datastore) throws SQLException {
+        try {
+            return rawListTables(datastore);
+        } catch (final Exception unexpected) { // catch all exceptions for this ui label to return empty list
             log.error(i18n.errorCantLoadTableSuggestions(), unexpected);
         }
 
-        return new SuggestionValues(false, emptyList());
+        return Collections.emptyList();
+    }
+
+    public List<TableInfo> rawListTables(final JdbcConnection datastore) throws SQLException {
+        List<TableInfo> infos = new ArrayList<>();
+        try (JdbcService.JdbcDatasource dataSource = jdbcService.createDataSource(datastore);
+                Connection connection = dataSource.getConnection()) {
+
+            final DatabaseMetaData dbMetaData = connection.getMetaData();
+            try (ResultSet tables = dbMetaData.getTables(connection.getCatalog(), JdbcService.getSchema(connection), null,
+                    getAvailableTableTypes(dbMetaData).toArray(new String[0]))) {
+
+                while (tables.next()) {
+                    String name = tables.getString("TABLE_NAME");
+                    if (name == null) {
+                        try {
+                            name = tables.getString("SYNONYM_NAME");
+                        } catch (SQLException e) {
+                            // do nothing, return null as name
+                        }
+                    }
+                    String type = tables.getString("TABLE_TYPE");
+                    infos.add(new TableInfo(name, type));
+                }
+
+            }
+        }
+
+        return infos;
     }
 
     @Suggestions(ACTION_SUGGESTION_TABLE_NAMES)
     public SuggestionValues getTableFromDatabase(@Option final JdbcConnection datastore) {
-        final Collection<SuggestionValues.Item> items = new HashSet<>();
-        try (JdbcService.JdbcDatasource dataSource = jdbcService.createDataSource(datastore);
-                Connection connection = dataSource.getConnection()) {
-            final DatabaseMetaData dbMetaData = connection.getMetaData();
-            try (ResultSet tables = dbMetaData.getTables(connection.getCatalog(), JdbcService.getSchema(connection), null,
-                    getAvailableTableTypes(dbMetaData).toArray(new String[0]))) {
-                while (tables.next()) {
-                    ofNullable(ofNullable(tables.getString("TABLE_NAME")).orElseGet(() -> {
-                        try {
-                            return tables.getString("SYNONYM_NAME");
-                        } catch (final SQLException e) {
-                            return null;
-                        }
-                    })).ifPresent(t -> items.add(new SuggestionValues.Item(t, t)));
-                }
-            }
-        } catch (final Exception unexpected) { // catch all exceptions for this ui label to return empty list
-            log.error(i18n.errorCantLoadTableSuggestions(), unexpected);
+        List<Item> items;
+        try {
+            items = listTables(datastore).stream().filter(e -> e != null).map(e -> new Item(e.getName(), e.getName()))
+                    .collect(toList());
+        } catch (SQLException e) {
+            items = Collections.emptyList();
+            log.error(i18n.errorCantLoadTableSuggestions(), e);
         }
         return new SuggestionValues(true, items);
     }
@@ -202,6 +233,61 @@ public class UIActionService {
         }
 
         return new ValidationResult(ValidationResult.Status.OK, "");
+    }
+
+    @DiscoverSchema(value = ACTION_DISCOVER_SCHEMA)
+    public Schema guessSchema(@Option final TableNameDataset dataset) {
+        try (JdbcService.JdbcDatasource dataSource = jdbcService.createDataSource(dataset.getConnection());
+                Connection conn = dataSource.getConnection();
+                final Statement statement = conn.createStatement()) {
+            statement.setMaxRows(1);
+            try (final ResultSet result = statement.executeQuery(dataset.getQuery())) {
+                final ResultSetMetaData meta = result.getMetaData();
+                final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
+                IntStream.rangeClosed(1, meta.getColumnCount())
+                        .forEach(index -> jdbcService.addField(schemaBuilder, meta, index));
+                return schemaBuilder.build();
+            }
+        } catch (final Exception unexpected) {
+            log.error("[guessSchema]", unexpected);
+            throw new IllegalStateException(unexpected);
+        }
+    }
+
+    @Suggestions(value = ACTION_LIST_COLUMNS)
+    public SuggestionValues getListColumns(@Option final JdbcConnection datastore, String tableName) {
+        String indetifier = PlatformFactory.get(datastore, i18n).identifier(tableName);
+        try (JdbcService.JdbcDatasource dataSource = jdbcService.createDataSource(datastore);
+                Connection conn = dataSource.getConnection();
+                final Statement statement = conn.createStatement()) {
+            statement.setMaxRows(1);
+            try (final ResultSet result = statement.executeQuery("select * from " + indetifier)) {
+                return new SuggestionValues(true, IntStream.rangeClosed(1, result.getMetaData().getColumnCount()).mapToObj(i -> {
+                    try {
+                        return result.getMetaData().getColumnName(i);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+
+                    return null;
+                }).filter(Objects::nonNull).map(columnName -> new SuggestionValues.Item(columnName, columnName))
+                        .collect(toSet()));
+            }
+        } catch (final Exception unexpected) {
+            // catch all exceptions for this ui label to return empty list
+            log.error(i18n.errorCantLoadTableSuggestions(), unexpected);
+        }
+
+        return new SuggestionValues(false, emptyList());
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class TableInfo {
+
+        final String name;
+
+        final String type;
     }
 
 }

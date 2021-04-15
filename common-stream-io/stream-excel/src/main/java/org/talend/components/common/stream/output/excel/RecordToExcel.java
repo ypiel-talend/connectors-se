@@ -13,8 +13,13 @@
 package org.talend.components.common.stream.output.excel;
 
 import java.sql.Date;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.function.Supplier;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -31,7 +36,7 @@ public class RecordToExcel {
 
     /**
      * Build excel row from record.
-     * 
+     *
      * @param constructor : row builder.
      * @param record : record for read values.
      * @return excel row.
@@ -49,7 +54,7 @@ public class RecordToExcel {
 
     /**
      * build excel header from record schema.
-     * 
+     *
      * @param constructor : row builder.
      * @param schema: input schema.
      * @return excel row with title.
@@ -62,7 +67,7 @@ public class RecordToExcel {
 
     /**
      * build cell from row & entry.
-     * 
+     *
      * @param headerRow : excel row for header.
      * @param entry : record schema entry.
      */
@@ -73,7 +78,7 @@ public class RecordToExcel {
 
     /**
      * Simply add a cell to a row.
-     * 
+     *
      * @param row : row it add a cell.
      * @return added cell.
      */
@@ -83,35 +88,53 @@ public class RecordToExcel {
 
     private void majCellValue(Cell cell, Record record, Schema.Entry entry) {
 
-        final String entityName = entry.getName();
+        final String name = entry.getName();
         switch (entry.getType()) {
         case BOOLEAN:
             cell.setCellType(CellType.BOOLEAN);
-            cell.setCellValue(record.getBoolean(entityName));
+            final Optional<Boolean> optionalBoolean = record.getOptionalBoolean(name);
+            if (optionalBoolean.isPresent()) {
+                cell.setCellValue(optionalBoolean.get());
+            }
             break;
         case DATETIME:
             cell.setCellType(CellType.NUMERIC);
-            cell.setCellValue(Date.from(record.getDateTime(entityName).toInstant()));
+            final Optional<ZonedDateTime> optionalDateTime = record.getOptionalDateTime(name);
+            if (optionalDateTime.isPresent()) {
+                cell.setCellValue(Date.from(optionalDateTime.get().toInstant()));
+            }
             break;
         case INT:
             cell.setCellType(CellType.NUMERIC);
-            cell.setCellValue(record.getInt(entityName));
+            final OptionalInt optionalInt = record.getOptionalInt(name);
+            if (optionalInt.isPresent()) {
+                cell.setCellValue(optionalInt.getAsInt());
+            }
             break;
         case LONG:
             cell.setCellType(CellType.NUMERIC);
-            cell.setCellValue(record.getLong(entityName));
+            final OptionalLong optionalLong = record.getOptionalLong(name);
+            if (optionalLong.isPresent()) {
+                cell.setCellValue(optionalLong.getAsLong());
+            }
             break;
         case FLOAT:
             cell.setCellType(CellType.NUMERIC);
-            cell.setCellValue(record.getFloat(entityName));
+            final OptionalDouble optionalFloat = record.getOptionalFloat(name);
+            if (optionalFloat.isPresent()) {
+                cell.setCellValue(optionalFloat.getAsDouble());
+            }
             break;
         case DOUBLE:
             cell.setCellType(CellType.NUMERIC);
-            cell.setCellValue(record.getDouble(entityName));
+            final OptionalDouble optionalDouble = record.getOptionalDouble(name);
+            if (optionalDouble.isPresent()) {
+                cell.setCellValue(optionalDouble.getAsDouble());
+            }
             break;
         case BYTES:
             cell.setCellType(CellType.STRING);
-            cell.setCellValue(Arrays.toString(record.getBytes(entityName)));
+            cell.setCellValue(Arrays.toString(record.getBytes(name)));
             break;
         default:
             cell.setCellType(CellType.STRING);

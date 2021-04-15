@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.18.0-SNAPSHOT</version>
+        <version>1.21.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bigquery</artifactId>
@@ -14,7 +14,6 @@
     <description>Google Big Query</description>
 
     <properties>
-        <testcontainers.version>1.12.3</testcontainers.version>
         <google.bq.sdk.version>1.117.1</google.bq.sdk.version>
         <google.gcs.sdk.version>1.113.1</google.gcs.sdk.version>
 
@@ -111,30 +110,6 @@
             <!-- mvn clean integration-test -Pfailsafe -DargLine="-DGOOGLE_APPLICATION_CREDENTIALS=[path-to-json-credentials] -Dtalend.component.junit.handler.state=static" -->
             <build>
                 <plugins>
-                    <plugin>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${surefire.version}</version>
-                        <configuration>
-                            <includes>
-                                <include>**/*ITCase</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/*Test</exclude>
-                            </excludes>
-                            <additionalClasspathElements>
-                                <additionalClasspathElement>${basedir}/target/classes</additionalClasspathElement>
-                                <additionalClasspathElement>${basedir}/target/test-classes</additionalClasspathElement>
-                            </additionalClasspathElements>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>

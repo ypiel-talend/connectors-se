@@ -16,11 +16,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.talend.components.adlsgen2.AdlsGen2IntegrationTestBase;
 import org.talend.components.adlsgen2.AdlsGen2TestBase;
 import org.talend.components.adlsgen2.common.format.FileEncoding;
 import org.talend.components.adlsgen2.common.format.FileFormat;
@@ -47,7 +48,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @Slf4j
 @WithComponents("org.talend.components.adlsgen2")
-public class OuputTestIT extends AdlsGen2TestBase {
+public class OuputTestIT extends AdlsGen2IntegrationTestBase {
 
     CsvConfiguration csvConfig;
 
@@ -244,16 +245,16 @@ public class OuputTestIT extends AdlsGen2TestBase {
                 .build().run();
         List<Record> records = components.getCollectedData(Record.class);
         Record firstRecord = records.get(0);
-        Assert.assertEquals(schemaSize, firstRecord.getSchema().getEntries().size());
-        Assert.assertNull(firstRecord.getString("nullStringColumn"));
-        Assert.assertNull(firstRecord.getString("nullStringColumn2"));
-        Assert.assertNull(firstRecord.get(Integer.class, "nullIntColumn"));
-        Assert.assertNull(firstRecord.get(Long.class, "nullLongColumn"));
-        Assert.assertNull(firstRecord.get(Float.class, "nullFloatColumn"));
-        Assert.assertNull(firstRecord.get(Double.class, "nullDoubleColumn"));
-        Assert.assertNull(firstRecord.get(Boolean.class, "nullBooleanColumn"));
-        Assert.assertNull(firstRecord.get(byte[].class, "nullByteArrayColumn"));
-        Assert.assertNull(firstRecord.getDateTime("nullDateColumn"));
+        Assertions.assertEquals(schemaSize, firstRecord.getSchema().getEntries().size());
+        Assertions.assertNull(firstRecord.getString("nullStringColumn"));
+        Assertions.assertNull(firstRecord.getString("nullStringColumn2"));
+        Assertions.assertNull(firstRecord.get(Integer.class, "nullIntColumn"));
+        Assertions.assertNull(firstRecord.get(Long.class, "nullLongColumn"));
+        Assertions.assertNull(firstRecord.get(Float.class, "nullFloatColumn"));
+        Assertions.assertNull(firstRecord.get(Double.class, "nullDoubleColumn"));
+        Assertions.assertNull(firstRecord.get(Boolean.class, "nullBooleanColumn"));
+        Assertions.assertNull(firstRecord.get(byte[].class, "nullByteArrayColumn"));
+        Assertions.assertNull(firstRecord.getDateTime("nullDateColumn"));
     }
 
     @Test
@@ -299,8 +300,8 @@ public class OuputTestIT extends AdlsGen2TestBase {
                 .to("out") //
                 .build().run();
         List<Record> records = components.getCollectedData(Record.class);
-        Assert.assertEquals(fieldSize, records.get(0).getSchema().getEntries().size());
-        Assert.assertEquals(fieldSize, records.get(1).getSchema().getEntries().size());
+        Assertions.assertEquals(fieldSize, records.get(0).getSchema().getEntries().size());
+        Assertions.assertEquals(fieldSize, records.get(1).getSchema().getEntries().size());
     }
 
     @ParameterizedTest
