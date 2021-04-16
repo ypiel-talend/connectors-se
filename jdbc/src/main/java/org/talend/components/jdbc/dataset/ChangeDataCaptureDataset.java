@@ -69,6 +69,7 @@ public final class ChangeDataCaptureDataset implements BaseDataSet {
     }
 
     // Snowflake CDC specific !!!
+    @SQLQueryCleanser
     public String createStreamTableIfNotExist() {
         return this.cleanSQL("create stream if not exists " + getQN(streamTableName) + " on table " + getQN(tableName));
     }
