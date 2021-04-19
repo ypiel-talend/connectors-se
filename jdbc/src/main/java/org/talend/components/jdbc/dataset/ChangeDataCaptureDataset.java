@@ -69,19 +69,24 @@ public final class ChangeDataCaptureDataset implements BaseDataSet {
     }
 
     // Snowflake CDC specific !!!
-    @SQLQueryCleanser
     public String createStreamTableIfNotExist() {
-        return this.cleanSQL("create stream if not exists " + getQN(streamTableName) + " on table " + getQN(tableName));
+        final String createStreamSQL =
+                String.format("create stream if not exists %s on table %s", this.cleanSQL(getQN(streamTableName)),
+                        this.cleanSQL(getQN(tableName)));
+        return createStreamSQL;
     }
 
     // Snowflake CDC specific !!!
     public String createCounterTableIfNotExist() {
-        return String.format("create table if not exists %s(c number(8))", getQN(getCounterTableName(streamTableName)));
+        final String createTableSQL = String.format("create table if not exists %s(c number(8))", this.cleanSQL(getQN(getCounterTableName(streamTableName))));
+        return createTableSQL;
     }
 
     public String createStatementConsumeStreamTable() {
-        return "insert into " + getQN(getCounterTableName(streamTableName)) + "(c) " + " select count(*) from "
-                + getQN(streamTableName);
+        final String insertSQL = String.format("insert into %s(c) select count(*) from s%",  //
+                this.cleanSQL(getQN(getCounterTableName(streamTableName))),  //
+                this.cleanSQL(getQN(streamTableName))); //
+        return insertSQL;
     }
 
     private String getCounterTableName(String streamTableName) {
