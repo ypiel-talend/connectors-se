@@ -21,6 +21,7 @@ import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
+import org.talend.components.jdbc.dataset.SQLUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,21 +72,21 @@ public final class ChangeDataCaptureDataset implements BaseDataSet {
     // Snowflake CDC specific !!!
     public String createStreamTableIfNotExist() {
         final String createStreamSQL =
-                String.format("create stream if not exists %s on table %s", this.cleanSQL(getQN(streamTableName)),
-                        this.cleanSQL(getQN(tableName)));
+                String.format("create stream if not exists %s on table %s", SQLUtils.cleanSQL(getQN(streamTableName)),
+                        SQLUtils.cleanSQL(getQN(tableName)));
         return createStreamSQL;
     }
 
     // Snowflake CDC specific !!!
     public String createCounterTableIfNotExist() {
-        final String createTableSQL = String.format("create table if not exists %s(c number(8))", this.cleanSQL(getQN(getCounterTableName(streamTableName))));
+        final String createTableSQL = String.format("create table if not exists %s(c number(8))", SQLUtils.cleanSQL(getQN(getCounterTableName(streamTableName))));
         return createTableSQL;
     }
 
     public String createStatementConsumeStreamTable() {
         final String insertSQL = String.format("insert into %s(c) select count(*) from s%",  //
-                this.cleanSQL(getQN(getCounterTableName(streamTableName))),  //
-                this.cleanSQL(getQN(streamTableName))); //
+                SQLUtils.cleanSQL(getQN(getCounterTableName(streamTableName))),  //
+                SQLUtils.cleanSQL(getQN(streamTableName))); //
         return insertSQL;
     }
 
@@ -93,12 +94,8 @@ public final class ChangeDataCaptureDataset implements BaseDataSet {
         return streamTableName + "_COUNTER";
     }
 
-    @SQLQueryCleanser
-    private String cleanSQL(final String sql) {
-        return sql;
-    }
 
-    @SQLQueryCleanser
+
     private String getQN(String table) {
         String jdbcUrl = connection.getJdbcUrl();
         String[] splitParts = jdbcUrl.split("\\?");
@@ -117,8 +114,8 @@ public final class ChangeDataCaptureDataset implements BaseDataSet {
                 }
             }
 
-            String db = queryParamsMap.get("db");
-            String schema = queryParamsMap.get("schema");
+            String db = SQLUtils.cleanSQL(queryParamsMap.get("db"));
+            String schema = SQLUtils.cleanSQL(queryParamsMap.get("schema"));
             String qn = table;
             if (schema != null && !schema.isEmpty())
                 qn = schema + "." + table;
