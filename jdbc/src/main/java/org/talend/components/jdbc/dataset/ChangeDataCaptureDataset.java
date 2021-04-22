@@ -79,7 +79,7 @@ public final class ChangeDataCaptureDataset implements BaseDataSet {
 
     // Snowflake CDC specific !!!
     public String createCounterTableIfNotExist() {
-        final String createTableSQL = String.format("create table if not exists %s(c number(8))", SQLUtils.cleanSQL(getQN(getCounterTableName(streamTableName))));
+        final String createTableSQL = String.format("create table if not exists %s(c number(8))", SQLUtils.cleanSQL(getQN(getCounterTableName(SQLUtils.cleanSQL(streamTableName)))));
         return createTableSQL;
     }
 
