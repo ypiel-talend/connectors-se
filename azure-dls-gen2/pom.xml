@@ -16,7 +16,6 @@
   <properties>
     <commons-csv.version>1.7.1</commons-csv.version>
     <parquet.version>1.10.1</parquet.version>
-    <hadoop-common.version>3.2.1</hadoop-common.version>
     <hamcrest.version>1.3</hamcrest.version>
   </properties>
 
@@ -82,7 +81,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
-      <version>${hadoop-common.version}</version>
+      <version>${hadoop.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
@@ -173,7 +172,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapreduce-client-core</artifactId>
-      <version>${hadoop-common.version}</version>
+      <version>${hadoop.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>

@@ -112,6 +112,7 @@
     <httpcore.version>4.4.12</httpcore.version>
     <compress.version>1.19</compress.version>
     <commons-codec.version>1.14</commons-codec.version>
+    <hadoop.version>3.2.2</hadoop.version>
     <mockito.version>1.10.19</mockito.version>
     <testcontainers.version>1.15.1</testcontainers.version>
     <jna.version>5.5.0</jna.version>
