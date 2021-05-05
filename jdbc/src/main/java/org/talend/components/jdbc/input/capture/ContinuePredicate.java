@@ -13,15 +13,26 @@
 package org.talend.components.jdbc.input.capture;
 
 import java.sql.ResultSet;
+import java.time.Clock;
+import java.util.function.LongSupplier;
 
-import lombok.Getter;
 
 public class ContinuePredicate {
 
-    @Getter
     private long counter = 0;
 
-    private long startTime = System.currentTimeMillis();
+    private long startTime;
+
+    private final LongSupplier timeGetter;
+
+    public ContinuePredicate(LongSupplier timeGetter) {
+        this.timeGetter = timeGetter;
+        this.startTime = this.timeGetter.getAsLong();
+    }
+
+    public ContinuePredicate() {
+        this(Clock.systemDefaultZone()::millis);
+    }
 
     public void onNext(final boolean hasNext) {
         if (hasNext) {
@@ -36,7 +47,7 @@ public class ContinuePredicate {
 
     private void restart() {
         this.counter = 0;
-        this.startTime = System.currentTimeMillis();
+        this.startTime = this.timeGetter.getAsLong();
     }
 
     public boolean doContinue() {
@@ -44,6 +55,6 @@ public class ContinuePredicate {
             return true;
         }
         // continue only if no result were found less than 2 seconds
-        return System.currentTimeMillis() > this.startTime + 2000L;
+        return this.timeGetter.getAsLong() > this.startTime + 2000L;
     }
 }

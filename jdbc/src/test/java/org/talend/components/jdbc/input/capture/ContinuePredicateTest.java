@@ -17,8 +17,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,10 +31,11 @@ class ContinuePredicateTest {
 
     @Test
     void doContinue() throws InterruptedException {
-        final ContinuePredicate predicate = new ContinuePredicate();
+        AtomicLong start = new AtomicLong(1_000L);
+        final ContinuePredicate predicate = new ContinuePredicate(start::get);
         Assertions.assertFalse(predicate.doContinue());
 
-        Thread.sleep(2_300L);
+        start.addAndGet(4_000L);
         Assertions.assertTrue(predicate.doContinue());
 
         predicate.onNext(true);
@@ -73,5 +78,6 @@ class ContinuePredicateTest {
             }
         }
     }
+
 
 }
