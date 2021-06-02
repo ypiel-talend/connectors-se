@@ -228,7 +228,7 @@ spec:
             }
         }
         stage('Push to Xtm') {
-            when {
+            when { // when is like a allOf
                 anyOf {
                     expression { params.Action == 'PUSH_TO_XTM' }
                     allOf {
@@ -238,7 +238,10 @@ spec:
                 }
                 anyOf {
                     branch 'master'
-                    expression { env.BRANCH_NAME.startsWith('maintenance/') }
+                    allOf {
+                        expression { env.BRANCH_NAME.startsWith('maintenance/') }
+                        triggeredBy cause: "UserIdCause" // PUSH_TO_XTM on maintenance branches only accept manual trigger
+                    }
                 }
             }
             steps {
