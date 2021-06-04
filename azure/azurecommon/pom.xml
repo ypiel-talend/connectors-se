@@ -132,6 +132,11 @@
     </dependency>
     <!-- PARQUET -->
     <dependency>
+      <groupId>org.talend.components</groupId>
+      <artifactId>stream-parquet</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!--<dependency>
       <groupId>org.apache.parquet</groupId>
       <artifactId>parquet-avro</artifactId>
       <version>${parquet.version}</version>
@@ -149,7 +154,7 @@
           <groupId>it.unimi.dsi</groupId>
         </exclusion>
       </exclusions>
-    </dependency>
+    </dependency>-->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>

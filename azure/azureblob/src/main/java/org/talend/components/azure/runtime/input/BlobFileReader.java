@@ -42,9 +42,11 @@ public abstract class BlobFileReader {
     @Getter(AccessLevel.PROTECTED)
     private RecordBuilderFactory recordBuilderFactory;
 
-    private ItemRecordIterator iterator;
+    private Iterator<Record> iterator;
 
     private final AzureBlobDataset config;
+
+    private final AzureBlobComponentServices connectionServices;
 
     public BlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
             AzureBlobComponentServices connectionServices, MessageService messageService)
@@ -52,30 +54,25 @@ public abstract class BlobFileReader {
         this.recordBuilderFactory = recordBuilderFactory;
         this.config = config;
         this.messageService = messageService;
+        this.connectionServices = connectionServices;
+    }
+
+    public void initialize() throws URISyntaxException, StorageException {
         CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
         CloudBlobClient blobClient = connectionServices
                 .getConnectionService()
                 .createCloudBlobClient(connection,
                         AzureComponentServices.DEFAULT_RETRY_POLICY);
-        CloudBlobContainer container = checkBlobContainer(config, blobClient);
+        final CloudBlobContainer container = checkBlobContainer(config, blobClient);
 
-        String directoryName = config.getDirectory();
-        if (directoryName == null) {
-            directoryName = "";
-        } else if (!directoryName.endsWith("/")) {
-            directoryName += "/";
-        }
-
-        Iterable<ListBlobItem> blobItems = container
-                .listBlobs(directoryName, false, EnumSet.noneOf(BlobListingDetails.class),
-                        null, AzureComponentServices.getTalendOperationContext());
+        final Iterable<ListBlobItem> blobItems = this.findBlobs(container);
         if (!blobItems.iterator().hasNext()) {
             throw new RuntimeException("Folder doesn't exist/is empty");
         }
-        this.iterator = initItemRecordIterator(blobItems);
+        this.iterator = this.initItemRecordIterator(blobItems);;
     }
 
-    public CloudBlobContainer checkBlobContainer(AzureBlobDataset config, CloudBlobClient blobClient)
+    protected CloudBlobContainer checkBlobContainer(AzureBlobDataset config, CloudBlobClient blobClient)
             throws URISyntaxException, StorageException {
         CloudBlobContainer container = blobClient.getContainerReference(config.getContainerName());
 
@@ -89,7 +86,18 @@ public abstract class BlobFileReader {
         return container;
     }
 
-    protected abstract ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems);
+    protected Iterable<ListBlobItem> findBlobs(final CloudBlobContainer container) {
+        String directoryName = config.getDirectory();
+        if (directoryName == null) {
+            directoryName = "";
+        } else if (!directoryName.endsWith("/")) {
+            directoryName += "/";
+        }
+        return container.listBlobs(directoryName, false, EnumSet.noneOf(BlobListingDetails.class),
+                        null, AzureComponentServices.getTalendOperationContext());
+    }
+
+    protected abstract Iterator<Record> initItemRecordIterator(Iterable<ListBlobItem> blobItems);
 
     public Record readRecord() {
         return iterator.next();
@@ -103,30 +111,37 @@ public abstract class BlobFileReader {
 
         public static BlobFileReader getReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
                 AzureBlobComponentServices connectionServices, MessageService messageService) throws Exception {
+
+            final BlobFileReader reader;
             switch (config.getFileFormat()) {
             case CSV:
-                return new CSVBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                reader = new CSVBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                break;
             case AVRO:
-                return new AvroBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
-
+                reader = new AvroBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                break;
             case EXCEL:
                 if (config.getExcelOptions().getExcelFormat() == ExcelFormat.HTML) {
-                    return new ExcelHTMLBlobFileReader(config, recordBuilderFactory, connectionServices,
+                    reader = new ExcelHTMLBlobFileReader(config, recordBuilderFactory, connectionServices,
                             messageService);
                 } else {
-                    return new ExcelBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                    reader = new ExcelBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
                 }
+                break;
             case PARQUET:
-                return new ParquetBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                reader = new ParquetBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                break;
             case JSON:
-                return new JsonBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                reader = new JsonBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
             default:
                 throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
             }
+            reader.initialize();
+            return reader;
         }
     }
 
-    protected abstract class ItemRecordIterator<T> implements Iterator<Record> {
+    protected static abstract class ItemRecordIterator<T> implements Iterator<Record> {
 
         private Iterator<ListBlobItem> blobItems;
 

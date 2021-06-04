@@ -12,28 +12,27 @@
  */
 package org.talend.components.azure.runtime.input;
 
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.ListBlobItem;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.parquet.avro.AvroParquetReader;
-import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.util.HadoopInputFile;
 import org.apache.parquet.io.InputFile;
-import org.talend.components.common.connection.azureblob.AzureAuthType;
-import org.talend.components.common.connection.azureblob.Protocol;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.common.converters.ParquetConverter;
+import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.components.azure.service.RegionUtils;
+import org.talend.components.common.connection.azureblob.AzureAuthType;
+import org.talend.components.common.connection.azureblob.Protocol;
+import org.talend.components.common.stream.input.parquet.ParquetRecordReader;
 import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,18 +46,18 @@ public class ParquetBlobFileReader extends BlobFileReader {
     }
 
     @Override
-    protected ItemRecordIterator initItemRecordIterator(Iterable<ListBlobItem> blobItems) {
-        return new ParquetRecordIterator(blobItems, getRecordBuilderFactory());
+    protected Iterator<Record> initItemRecordIterator(Iterable<ListBlobItem> blobItems) {
+        final ParquetRecordIterator parquetIterator = new ParquetRecordIterator(blobItems, getRecordBuilderFactory(), this.getConfig(), this.getMessageService());
+        parquetIterator.initialize();
+        return parquetIterator;
     }
 
-    private class ParquetRecordIterator extends ItemRecordIterator<GenericRecord> {
+    protected static class ParquetRecordIterator extends ItemRecordIterator<Record> {
 
         private final static String AZURE_FILESYSTEM_PROPERTY_KEY = "fs.azure";
 
         private final static String AZURE_FILESYSTEM_PROPERTY_VALUE =
                 "org.apache.hadoop.fs.azure.NativeAzureFileSystem";
-
-        private ParquetConverter converter;
 
         private Configuration hadoopConfig;
 
@@ -66,100 +65,90 @@ public class ParquetBlobFileReader extends BlobFileReader {
 
         private String endpointSuffix;
 
-        private ParquetReader<GenericRecord> reader;
+        private Iterator<Record> currentRecords;
 
-        private GenericRecord currentRecord;
+        private final AzureBlobDataset dataset;
 
-        private ParquetRecordIterator(Iterable<ListBlobItem> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
+        private final MessageService messageService;
+
+        protected ParquetRecordIterator(final Iterable<ListBlobItem> blobItemsList,
+                                      final RecordBuilderFactory recordBuilderFactory,
+                                      final AzureBlobDataset dataset,
+                                      final MessageService messageService) {
             super(blobItemsList, recordBuilderFactory);
-            initConfig();
+            this.messageService = messageService;
+            this.dataset = dataset;
+        }
+
+        public void initialize() {
+            initConfig(dataset);
             takeFirstItem();
         }
 
-        private void initConfig() {
+        private void initConfig(final AzureBlobDataset dataset) {
             hadoopConfig = new Configuration();
             hadoopConfig.set(AZURE_FILESYSTEM_PROPERTY_KEY, AZURE_FILESYSTEM_PROPERTY_VALUE);
-            if (getConfig().getConnection().isUseAzureSharedSignature()) {
-                RegionUtils ru = new RegionUtils(getConfig().getConnection().getSignatureConnection());
+            final AzureCloudConnection connection = dataset.getConnection();
+            if (connection.isUseAzureSharedSignature()) {
+                RegionUtils ru = new RegionUtils(connection.getSignatureConnection());
                 accountName = ru.getAccountName4SignatureAuth();
                 endpointSuffix = ru.getEndpointSuffix4SignatureAuth();
                 String sasKey = RegionUtils
-                        .getSasKey4SignatureAuth(getConfig().getContainerName(), accountName, endpointSuffix);
+                        .getSasKey4SignatureAuth(dataset.getContainerName(), accountName, endpointSuffix);
                 String token = ru.getToken4SignatureAuth();
                 hadoopConfig.set(sasKey, token);
-            } else if (getConfig().getConnection().getAccountConnection().getAuthType() == AzureAuthType.BASIC) {
-                accountName = getConfig().getConnection().getAccountConnection().getAccountName();
-                endpointSuffix = getConfig().getConnection().getEndpointSuffix();
+            } else if (connection.getAccountConnection().getAuthType() == AzureAuthType.BASIC) {
+                accountName = connection.getAccountConnection().getAccountName();
+                endpointSuffix = connection.getEndpointSuffix();
                 String accountCredKey = RegionUtils.getAccountCredKey4AccountAuth(accountName, endpointSuffix);
-                hadoopConfig.set(accountCredKey, getConfig().getConnection().getAccountConnection().getAccountKey());
+                hadoopConfig.set(accountCredKey, connection.getAccountConnection().getAccountKey());
             } else {
                 /*
                  * Azure Active Directory auth doesn't supported by hadoop-azure lib for now.
                  * We do not support it in the component either
                  * https://issues.apache.org/jira/browse/HADOOP-17973
                  */
-                throw new ComponentException(getMessageService().authTypeNotSupportedForParquet());
+                throw new ComponentException(this.messageService.authTypeNotSupportedForParquet());
             }
         }
 
         @Override
-        protected Record convertToRecord(GenericRecord next) {
-            if (converter == null) {
-                converter = ParquetConverter.of(getRecordBuilderFactory());
-            }
-
-            return converter.toRecord(next);
+        protected Record convertToRecord(Record next) {
+            return next;
         }
 
         @Override
         protected void readItem() {
-            closePreviousInputStream();
-
-            boolean isHttpsConnectionUsed = getConfig().getConnection().isUseAzureSharedSignature()
-                    || getConfig().getConnection().getAccountConnection().getProtocol().equals(Protocol.HTTPS);
-            String blobURI = RegionUtils
-                    .getBlobURI(isHttpsConnectionUsed, getConfig().getContainerName(), accountName,
-                            endpointSuffix, getCurrentItem().getName());
+            final String blobURI = this.extractPath();
             try {
-                InputFile file = HadoopInputFile.fromPath(new org.apache.hadoop.fs.Path(blobURI), hadoopConfig);
-                reader = AvroParquetReader.<GenericRecord> builder(file).build();
-                currentRecord = reader.read();
+                final InputFile file = HadoopInputFile.fromPath(new org.apache.hadoop.fs.Path(blobURI), hadoopConfig);
+
+                this.currentRecords = new ParquetRecordReader(this.getRecordBuilderFactory()).read(file);
             } catch (IOException e) {
                 log.error("Can't read item", e);
             }
         }
 
-        @Override
-        protected boolean hasNextRecordTaken() {
-            return currentRecord != null;
+        protected String extractPath() {
+            boolean isHttpsConnectionUsed = this.dataset.getConnection().isUseAzureSharedSignature()
+                    || this.dataset.getConnection().getAccountConnection().getProtocol().equals(Protocol.HTTPS);
+            return RegionUtils
+                    .getBlobURI(isHttpsConnectionUsed, this.dataset.getContainerName(), accountName,
+                            endpointSuffix, getCurrentItem().getName());
         }
 
         @Override
-        protected GenericRecord takeNextRecord() {
-            GenericRecord currentRecord = this.currentRecord;
-            try {
-                // read next line for next method call
-                this.currentRecord = reader.read();
-            } catch (IOException e) {
-                log.error("Can't read record from file " + getCurrentItem().getName(), e);
-            }
+        protected boolean hasNextRecordTaken() {
+            return this.currentRecords != null && this.currentRecords.hasNext();
+        }
 
-            return currentRecord;
+        @Override
+        protected Record takeNextRecord() {
+            return this.currentRecords.next();
         }
 
         @Override
         protected void complete() {
-            closePreviousInputStream();
-        }
-
-        private void closePreviousInputStream() {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    log.warn("Can't close stream", e);
-                }
-            }
         }
     }
 

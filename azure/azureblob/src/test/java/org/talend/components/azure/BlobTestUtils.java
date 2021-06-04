@@ -40,9 +40,12 @@ import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.common.converters.CSVConverter;
 import org.talend.components.azure.source.BlobInputProperties;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.injector.Injector;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.container.Container;
 import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
+import org.talend.sdk.component.runtime.manager.ComponentManager;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -175,5 +178,18 @@ public class BlobTestUtils {
             testRecords.add(testRecord);
         }
         return testRecords;
+    }
+
+    public static <T> void inject(final ComponentManager manager, Class<T> clazz, final T service) {
+        final Container container = manager.findPlugin("classes").orElse(null);
+        final ComponentManager.AllServices allServices = container.get(ComponentManager.AllServices.class);
+
+        // put fake as real
+        allServices.getServices().put(clazz, service);
+
+        // inject fake on all others services that use it
+        final T instance = (T) allServices.getServices().get(clazz);
+        final Injector injector = Injector.class.cast(allServices.getServices().get(Injector.class));
+        injector.inject(instance);
     }
 }

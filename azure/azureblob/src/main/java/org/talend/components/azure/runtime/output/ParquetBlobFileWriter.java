@@ -12,38 +12,33 @@
  */
 package org.talend.components.azure.runtime.output;
 
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlob;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.fs.Path;
-import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetFileWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
-import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.common.converters.ParquetConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.common.service.azureblob.AzureComponentServices;
+import org.talend.components.common.stream.output.parquet.TCKParquetWriterBuilder;
 import org.talend.sdk.component.api.record.Record;
-
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlob;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class ParquetBlobFileWriter extends BlobFileWriter {
 
     private BlobOutputConfiguration config;
 
-    private ParquetConverter converter;
-
     public ParquetBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
             throws Exception {
         super(config, connectionServices);
         this.config = config;
-        this.converter = ParquetConverter.of(null);
     }
 
     @Override
@@ -81,20 +76,17 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
         try {
             tempFilePath = File.createTempFile("tempFile", ".parquet");
             Path tempFile = new org.apache.hadoop.fs.Path(tempFilePath.getPath());
-            ParquetWriter<GenericRecord> writer = AvroParquetWriter
-                    .<GenericRecord> builder(tempFile)
-                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
-                    .withSchema(converter.inferAvroSchema(getSchema()))
-                    .build();
-            for (Record r : getBatch()) {
-                writer.write(converter.fromRecord(r));
+            final TCKParquetWriterBuilder builder = new TCKParquetWriterBuilder(tempFile);
+            builder.withSchema(this.getSchema()).withWriteMode(ParquetFileWriter.Mode.OVERWRITE);
+            try (final ParquetWriter<Record> writer = builder.build()) {
+                for (Record r : getBatch()) {
+                    writer.write(r);
+                }
             }
 
-            writer.close();
-            OutputStream blobOutputStream = ((CloudBlockBlob) getCurrentItem()).openOutputStream();
-            Files.copy(tempFilePath.toPath(), blobOutputStream);
-            blobOutputStream.flush();
-            blobOutputStream.close();
+            try (OutputStream blobOutputStream = this.currentOutputStream()) {
+                Files.copy(tempFilePath.toPath(), blobOutputStream);
+            }
         } catch (IOException | StorageException e) {
             throw new RuntimeException(e);
         } finally {
@@ -103,5 +95,9 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
                 tempFilePath.delete();
             }
         }
+    }
+
+    protected OutputStream currentOutputStream() throws StorageException {
+        return ((CloudBlockBlob) getCurrentItem()).openOutputStream();
     }
 }
