@@ -40,6 +40,6 @@ public class Output implements Serializable {
     @ElementListener
     public void process(final Record input) {
         final Version v = new Version();
-        log.info("C2 output, Record with version '%s' for version '%s'", input.getString("version"), v.getVersion());
+        log.info("C2 output, Record with version '{}' for version '{}'", input.getString("version"), v.getVersion());
     }
 }

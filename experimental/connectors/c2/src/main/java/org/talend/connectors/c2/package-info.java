@@ -1,4 +1,4 @@
-@Components(family = "POC", categories = "TestC2")
+@Components(family = "POC2", categories = "Test")
 @Icon(value = Icon.IconType.STAR)
 package org.talend.connectors.c2;
 
