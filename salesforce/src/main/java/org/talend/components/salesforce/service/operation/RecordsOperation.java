@@ -10,22 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.salesforce.configuration;
+package org.talend.components.salesforce.service.operation;
 
-import org.talend.components.salesforce.dataset.SOQLQueryDataSet;
-import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.meta.Documentation;
+import java.io.IOException;
+import java.util.List;
 
-import lombok.Data;
+import org.talend.sdk.component.api.record.Record;
 
-@Data
-@GridLayout(value = { @GridLayout.Row({ "dataSet" }) })
-@Documentation("Query input configuration")
-public class InputSOQLConfig implements InputConfig {
+public interface RecordsOperation {
 
-    @Option
-    @Documentation("SQL query dataset")
-    private SOQLQueryDataSet dataSet;
+    List<Result> execute(List<Record> records) throws IOException;
 
+    String name();
 }
