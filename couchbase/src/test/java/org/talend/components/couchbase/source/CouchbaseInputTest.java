@@ -12,25 +12,16 @@
  */
 package org.talend.components.couchbase.source;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.couchbase.client.deps.io.netty.buffer.ByteBuf;
 import com.couchbase.client.deps.io.netty.buffer.Unpooled;
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.analytics.AnalyticsQuery;
+import com.couchbase.client.java.analytics.AnalyticsQueryResult;
 import com.couchbase.client.java.document.BinaryDocument;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.StringDocument;
 import com.couchbase.client.java.document.json.JsonObject;
-
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +34,14 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import lombok.extern.slf4j.Slf4j;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @Slf4j
 @WithComponents("org.talend.components.couchbase")
@@ -148,6 +146,51 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         assertEquals(2, res.size());
         assertEquals(3, res.get(0).getSchema().getEntries().size());
         assertEquals(3, res.get(1).getSchema().getEntries().size());
+    }
+
+    @Test
+    @DisplayName("Execution of Analytics query")
+    void analyticsQueryInputDBTest() {
+        log.info("Test start: analyticsQueryInputDBTest");
+        String idPrefix = "analyticsQueryInputDBTest";
+        insertTestDataToDBAndPrepareAnalytics(idPrefix);
+        CouchbaseInputConfiguration configurationWithAnalytics = getInputConfiguration();
+        configurationWithAnalytics.setSelectAction(SelectAction.ANALYTICS);
+        configurationWithAnalytics
+                .setQuery("SELECT * FROM " + ANALYTICS_DATASET + " WHERE meta().id LIKE \"" + idPrefix + "%\" ORDER BY name");
+        executeJob(configurationWithAnalytics);
+        final List<Record> res = componentsHandler.getCollectedData(Record.class);
+        assertNotNull(res);
+        assertEquals(2, res.size());
+    }
+
+    private void insertTestDataToDBAndPrepareAnalytics(String idPrefix) {
+        Bucket bucket = couchbaseCluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
+
+        List<JsonObject> jsonObjects = createJsonObjects();
+        for (int i = 0; i < 2; i++) {
+            bucket.insert(JsonDocument.create(generateDocId(idPrefix, i), jsonObjects.get(i)));
+        }
+
+        // Bucket needs some time to index newly created entries; analytics dataset will be based on those entries.
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        AnalyticsQuery analyticsQuery = AnalyticsQuery
+                .simple("CREATE BUCKET " + ANALYTICS_BUCKET + " WITH {\"name\":\"" + BUCKET_NAME + "\"}");
+        AnalyticsQueryResult result = bucket.query(analyticsQuery);
+        assertEquals("success", result.status());
+        analyticsQuery = AnalyticsQuery
+                .simple("CREATE DATASET " + ANALYTICS_DATASET + " ON " + ANALYTICS_BUCKET + " WHERE `t_string` LIKE \"id%\"");
+        result = bucket.query(analyticsQuery);
+        assertEquals("success", result.status());
+        analyticsQuery = AnalyticsQuery.simple("CONNECT BUCKET " + ANALYTICS_BUCKET);
+        result = bucket.query(analyticsQuery);
+        assertEquals("success", result.status());
+
+        bucket.close();
     }
 
     @Test
