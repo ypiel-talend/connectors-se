@@ -12,6 +12,9 @@
  */
 package org.talend.components.couchbase.source;
 
+import com.couchbase.client.core.message.internal.PingReport;
+import com.couchbase.client.core.message.internal.PingServiceHealth;
+import com.couchbase.client.core.service.ServiceType;
 import com.couchbase.client.deps.io.netty.buffer.ByteBuf;
 import com.couchbase.client.deps.io.netty.buffer.Unpooled;
 import com.couchbase.client.java.Bucket;
@@ -22,6 +25,7 @@ import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.StringDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +40,7 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -165,22 +170,41 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
     }
 
     private void insertTestDataToDBAndPrepareAnalytics(String idPrefix) {
+        int insertCount = 2;
         Bucket bucket = couchbaseCluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
 
-        List<JsonObject> jsonObjects = createJsonObjects();
-        for (int i = 0; i < 2; i++) {
-            bucket.insert(JsonDocument.create(generateDocId(idPrefix, i), jsonObjects.get(i)));
+        // We need to wait until ping state is OK for Analytics Service. We'll limit it with 10 seconds. Usually
+        // it should take less time.
+        long waitingStartTime = System.currentTimeMillis();
+        PingReport pingReport = bucket.ping(Collections.singletonList(ServiceType.ANALYTICS));
+        while(pingReport.services().get(0).state() != PingServiceHealth.PingState.OK) {
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(System.currentTimeMillis() - waitingStartTime > 10000) {
+                break;
+            }
+            pingReport = bucket.ping(Collections.singletonList(ServiceType.ANALYTICS));
         }
 
-        // Bucket needs some time to index newly created entries; analytics dataset will be based on those entries.
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Now let's try to create the analytics bucket. We'll retry until the status is not success.
+        // 10 seconds limit.
         AnalyticsQuery analyticsQuery = AnalyticsQuery
                 .simple("CREATE BUCKET " + ANALYTICS_BUCKET + " WITH {\"name\":\"" + BUCKET_NAME + "\"}");
-        AnalyticsQueryResult result = bucket.query(analyticsQuery);
+        AnalyticsQueryResult result;
+        waitingStartTime = System.currentTimeMillis();
+        while(!(result = bucket.query(analyticsQuery)).status().equalsIgnoreCase("success")) {
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(System.currentTimeMillis() - waitingStartTime > 10000) {
+                break;
+            }
+        }
         assertEquals("success", result.status());
         analyticsQuery = AnalyticsQuery
                 .simple("CREATE DATASET " + ANALYTICS_DATASET + " ON " + ANALYTICS_BUCKET + " WHERE `t_string` LIKE \"id%\"");
@@ -189,6 +213,26 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         analyticsQuery = AnalyticsQuery.simple("CONNECT BUCKET " + ANALYTICS_BUCKET);
         result = bucket.query(analyticsQuery);
         assertEquals("success", result.status());
+
+        int itemsCountBeforeInsert = bucket.bucketManager().info().raw().getObject("basicStats").getInt("itemCount");
+        List<JsonObject> jsonObjects = createJsonObjects();
+        for (int i = 0; i < insertCount; i++) {
+            bucket.insert(JsonDocument.create(generateDocId(idPrefix, i), jsonObjects.get(i)));
+        }
+
+        // Bucket needs some time to index newly created entries; analytics dataset will be based on those entries.
+        // We will wait until the data is correct in the statistics. Limit it with 10 seconds.
+
+        while(bucket.bucketManager().info().raw().getObject("basicStats").getInt("itemCount") != itemsCountBeforeInsert + insertCount) {
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(System.currentTimeMillis() - waitingStartTime > 10000) {
+                break;
+            }
+        }
 
         bucket.close();
     }
