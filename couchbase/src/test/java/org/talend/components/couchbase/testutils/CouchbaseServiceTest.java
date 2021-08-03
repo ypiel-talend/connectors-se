@@ -47,7 +47,6 @@ public class CouchbaseServiceTest extends CouchbaseUtilTest {
         couchbaseDataStoreWrongPass.setBootstrapNodes(couchbaseDataStore.getBootstrapNodes());
         couchbaseDataStoreWrongPass.setUsername(couchbaseDataStore.getUsername());
         couchbaseDataStoreWrongPass.setPassword(wrongPassword);
-        couchbaseDataStoreWrongPass.setConnectTimeout(couchbaseDataStore.getConnectTimeout());
 
         assertEquals(HealthCheckStatus.Status.KO, couchbaseService.healthCheck(couchbaseDataStoreWrongPass).getStatus());
     }

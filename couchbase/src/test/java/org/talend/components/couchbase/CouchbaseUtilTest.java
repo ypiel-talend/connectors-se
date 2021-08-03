@@ -76,7 +76,6 @@ public abstract class CouchbaseUtilTest {
         couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
         couchbaseDataStore.setUsername(CLUSTER_USERNAME);
         couchbaseDataStore.setPassword(CLUSTER_PASSWORD);
-        couchbaseDataStore.setConnectTimeout(DEFAULT_TIMEOUT_IN_SEC);
 
         couchbaseCluster = COUCHBASE_CONTAINER.getCouchbaseCluster();
     }

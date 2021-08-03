@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.talend.components.couchbase.configuration.ConnectionParameter;
 import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.components.couchbase.source.CouchbaseInput;
@@ -53,6 +54,7 @@ import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
+import com.couchbase.client.java.env.DefaultCouchbaseEnvironment.Builder;
 import com.couchbase.client.java.error.InvalidPasswordException;
 
 import lombok.Getter;
@@ -85,13 +87,16 @@ public class CouchbaseService {
         String bootStrapNodes = dataStore.getBootstrapNodes();
         String username = dataStore.getUsername();
         String password = dataStore.getPassword();
-        int connectTimeout = dataStore.getConnectTimeout() * 1000; // convert to sec
 
         String[] urls = resolveAddresses(bootStrapNodes);
         try {
             ClusterHolder holder = clustersPool.computeIfAbsent(dataStore, ds -> {
-                CouchbaseEnvironment environment = new DefaultCouchbaseEnvironment.Builder().connectTimeout(connectTimeout)
-                        .build();
+                Builder envBuilder = new DefaultCouchbaseEnvironment.Builder();
+                if (dataStore.isUseConnectionParameters()) {
+                    dataStore.getConnectionParametersList().forEach(
+                            conf -> setTimeout(envBuilder, conf.getParameterName(), parseValue(conf.getParameterValue())));
+                }
+                CouchbaseEnvironment environment = envBuilder.build();
                 Cluster cluster = CouchbaseCluster.create(environment, urls);
                 cluster.authenticate(username, password);
                 return new ClusterHolder(environment, cluster);
@@ -106,6 +111,26 @@ public class CouchbaseService {
             throw new ComponentException(e);
         }
 
+    }
+
+    private void setTimeout(Builder envBuilder, ConnectionParameter parameterName, long value) {
+        if (parameterName == ConnectionParameter.CONNECTION_TIMEOUT) {
+            envBuilder.connectTimeout(value);
+        } else if (parameterName == ConnectionParameter.QUERY_TIMEOUT) {
+            envBuilder.queryTimeout(value);
+        } else if (parameterName == ConnectionParameter.ANALYTICS_TIMEOUT) {
+            envBuilder.analyticsTimeout(value);
+        } else {
+            envBuilder.maxRequestLifetime(value);
+        }
+    }
+
+    private long parseValue(String value) {
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            throw new ComponentException(i18n.unexpectedValue(value));
+        }
     }
 
     @HealthCheck("healthCheck")
