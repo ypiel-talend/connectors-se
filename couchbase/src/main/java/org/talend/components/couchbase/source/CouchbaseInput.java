@@ -95,8 +95,9 @@ public class CouchbaseInput implements Serializable {
     public void init() {
         Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
         bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
-        bucket.bucketManager().createN1qlPrimaryIndex(true, false);
-
+        if (configuration.isCreatePrimaryIndex()) {
+            bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+        }
         columnsSet = new HashSet<>();
 
         if (configuration.getSelectAction() == SelectAction.ANALYTICS) {

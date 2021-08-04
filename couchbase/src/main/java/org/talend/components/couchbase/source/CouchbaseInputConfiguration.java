@@ -19,7 +19,6 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -27,11 +26,10 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@GridLayouts({
-        @GridLayout({ @GridLayout.Row({ "dataSet" }), @GridLayout.Row("selectAction"), @GridLayout.Row("documentId"),
-                @GridLayout.Row("query") }),
-        @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }),
-                @GridLayout.Row({ "limit" }) }) })
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("dataSet"), @GridLayout.Row("selectAction"),
+        @GridLayout.Row("documentId"), @GridLayout.Row("query") })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "limit" }),
+        @GridLayout.Row("createPrimaryIndex") })
 
 @Documentation("Couchbase input Mapper Configuration")
 public class CouchbaseInputConfiguration implements Serializable {
@@ -44,6 +42,10 @@ public class CouchbaseInputConfiguration implements Serializable {
     @Documentation("Select action")
     @DefaultValue(value = "ALL")
     private SelectAction selectAction = SelectAction.ALL;
+
+    @Option
+    @Documentation("Defines whether Primary index should be created.")
+    private boolean createPrimaryIndex = false;
 
     @Option
     @TextArea

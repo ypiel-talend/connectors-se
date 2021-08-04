@@ -12,21 +12,24 @@
  */
 package org.talend.components.couchbase.source;
 
-import org.talend.sdk.component.api.component.MigrationHandler;
-
 import java.util.Map;
+
+import org.talend.sdk.component.api.component.MigrationHandler;
 
 public class CouchbaseInputMigrationHandler implements MigrationHandler {
 
     @Override
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
         if (incomingVersion == 1) {
-            boolean useN1QLQuery = Boolean.valueOf(incomingData.get("configuration.useN1QLQuery"));
+            boolean useN1QLQuery = Boolean.parseBoolean(incomingData.get("configuration.useN1QLQuery"));
             if (useN1QLQuery) {
                 incomingData.put("configuration.selectAction", "N1QL");
             } else {
                 incomingData.put("configuration.selectAction", "ALL");
             }
+        }
+        if (incomingVersion < 3) {
+            incomingData.put("configuration.createPrimaryIndex", "true");
         }
         return incomingData;
     }
