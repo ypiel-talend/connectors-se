@@ -9,4 +9,12 @@
     </parent>
 
     <artifactId>common-io</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.talend.components</groupId>
+            <artifactId>common-io-locales</artifactId>
+            <version>${locales.version}</version>
+        </dependency>
+    </dependencies>
 </project>
