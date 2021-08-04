@@ -150,6 +150,41 @@ class JsonToRecordTest {
         });
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void fieldAreNullable2(final boolean forceDouble) {
+        start(forceDouble);
+
+        String source = "{\"a_string\" : \"string1\", \"a_null\" : null, \"b_null\" : {},\"a_long\" : 123, \"a_double\" : 123.123, \"a_boolean\" : true, \"an_object\" : {\"att_a\" : \"aaa\", \"att_b\" : \"bbb\"}, \"an_array\" : [\"aaa\", \"bbb\", \"ccc\"]}";
+        JsonObject json = getJsonObject(source);
+        final Record record = toRecord.toRecordWithFixedSchema(json, null, true);
+        Assertions.assertNotNull(record.getSchema().getEntry("a_null"));
+        Assertions.assertNotNull(record.getSchema().getEntry("b_null"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void emptyRecordAsNullTest(final boolean cases) {
+        start(cases);
+
+        String source = "{\n" + "            \"url\": \"https://talend7247.zendesk.com/api/v2/tickets/11.json\",\n"
+                + "            \"id\": 11,\n" + "            \"external_id\": null,\n" + "            \"via\": {\n"
+                + "                \"channel\": \"web\",\n" + "                \"source\": {\n"
+                + "                    \"from\": {},\n" + "                    \"to\": {},\n"
+                + "                    \"rel\": null\n" + "                }\n" + "            },\n"
+                + "            \"created_at\": \"2021-06-30T06:49:36Z\"\n" + "\t\t\t}";
+        JsonObject json = getJsonObject(source);
+        final Record record = toRecord.toRecordWithFixedSchema(json, null, cases);
+        if (cases) {
+            Assertions.assertEquals("{\"from\":\"{}\",\"to\":\"{}\"}", record.getRecord("via").getRecord("source").toString());
+        } else {
+            Assertions.assertEquals("{\"from\":{},\"to\":{}}", record.getRecord("via").getRecord("source").toString());
+        }
+        record.getSchema().getEntries().stream().forEach(e -> {
+            Assertions.assertTrue(e.isNullable(), e.getName() + " of type " + e.getType() + " should be nullable.");
+        });
+    }
+
     private Entry findEntry(Schema schema, String entryName) {
         return schema.getEntries().stream().filter((Entry e) -> entryName.equals(e.getName())).findFirst().orElse(null);
     }

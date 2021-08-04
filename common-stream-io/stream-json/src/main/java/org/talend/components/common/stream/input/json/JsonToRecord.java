@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
@@ -94,6 +95,122 @@ public class JsonToRecord {
             }
         });
         return builder.build();
+    }
+
+    /**
+     * This method is a workaround to fit in dynamic schema into fixed schema
+     * which the only way we have to make it work in TPD。
+     *
+     * @param object
+     * The source jsonObject
+     *
+     * @param schema
+     * The fixed schema which will be apply into jsonObject.
+     *
+     * @param emptyRecordAsString
+     * Whether convert empty record to a String type "{}", as TPD does not allowed empty record {}
+     */
+    protected Schema schema;
+
+    public Record toRecordWithFixedSchema(final JsonObject object, @Nullable Schema schema, boolean emptyRecordAsString) {
+        if (emptyRecordAsString && object.size() == 0) {
+            return null;
+        }
+
+        if (this.schema == null && schema == null) {
+            final Record.Builder builder = factory.newRecordBuilder();
+            object.forEach((String key, JsonValue value) -> {
+                final Schema.Entry.Builder entryBuilder = this.factory.newEntryBuilder().withName(key).withNullable(true);
+                switch (value.getValueType()) {
+                case ARRAY: {
+                    final List<Object> items = value.asJsonArray().stream().map(this::mapJson).collect(toList());
+                    builder.withArray(entryBuilder.withType(Schema.Type.ARRAY)
+                            .withElementSchema(getArrayElementSchema(factory, items)).build(), items);
+                    break;
+                }
+                case OBJECT: {
+                    final Record record = new JsonToRecord(factory).toRecordWithFixedSchema(value.asJsonObject(), null,
+                            emptyRecordAsString);
+                    if (record != null && (record.getSchema().getEntries().size() > 0 || !emptyRecordAsString)) {
+                        builder.withRecord(
+                                entryBuilder.withType(Schema.Type.RECORD).withElementSchema(record.getSchema()).build(), record);
+                    } else {
+                        builder.withString(key, "{}");// For Avro compatibility of TFD
+                    }
+                    break;
+                }
+                case TRUE:
+                case FALSE:
+                    final Schema.Entry entry = entryBuilder.withType(Schema.Type.BOOLEAN).build();
+                    builder.withBoolean(entry, JsonValue.TRUE.equals(value));
+                    break;
+                case STRING:
+                    builder.withString(key, JsonString.class.cast(value).getString());
+                    break;
+                case NUMBER:
+                    final JsonNumber number = JsonNumber.class.cast(value);
+                    this.numberOption.setNumber(builder, entryBuilder, number);
+                    break;
+                case NULL:
+                    builder.withString(key, null);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported value type: " + value);
+                }
+            });
+            Record record = builder.build();
+            this.schema = record.getSchema();
+            return record;
+        } else {
+            Schema currentSchema = schema == null ? this.schema : schema;
+            final Record.Builder builder = factory.newRecordBuilder(currentSchema);
+            List<Schema.Entry> entries = currentSchema.getEntries();
+            for (Schema.Entry entry : entries) {
+                JsonValue entryValue = object.get(entry.getName());
+                if (entryValue == null || JsonValue.NULL.equals(entryValue)) {
+                    continue;
+                }
+                switch (entry.getType()) {
+                case STRING:
+                    if (entryValue.getValueType() == JsonValue.ValueType.STRING) {
+                        builder.withString(entry, object.getString(entry.getName()));
+                    } else {
+                        builder.withString(entry, String.valueOf(entryValue));
+                    }
+                    break;
+                case INT:
+                    builder.withInt(entry, object.getInt(entry.getName()));
+                    break;
+                case LONG:
+                    builder.withLong(entry, object.getJsonNumber(entry.getName()).longValue());
+                    break;
+                case ARRAY:
+                    builder.withArray(entry, object.getJsonArray(entry.getName()).stream().map(this::mapJson).collect(toList()));
+                    break;
+                case FLOAT:
+                    builder.withFloat(entry, (float) object.getJsonNumber(entry.getName()).doubleValue());
+                    break;
+                case DOUBLE:
+                    builder.withDouble(entry, object.getJsonNumber(entry.getName()).doubleValue());
+                    break;
+                case RECORD:
+                    builder.withRecord(entry, toRecordWithFixedSchema(object.getJsonObject(entry.getName()),
+                            entry.getElementSchema(), emptyRecordAsString));
+                    break;
+                case BOOLEAN:
+                    builder.withBoolean(entry, object.getBoolean(entry.getName()));
+                    break;
+                case DATETIME:
+                    builder.withDateTime(entry, ZonedDateTime.parse(object.getString(entry.getName())));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported value type: " + entry.getType());
+
+                }
+
+            }
+            return builder.build();
+        }
     }
 
     private Object mapJson(final JsonValue it) {
