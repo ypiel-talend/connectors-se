@@ -13,15 +13,12 @@
 package org.talend.components.adlsgen2.common.format.json;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.Optional;
 
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonString;
-import javax.json.JsonValue;
+import javax.json.*;
 
 import org.talend.components.adlsgen2.common.converter.RecordConverter;
 import org.talend.components.adlsgen2.common.format.FileFormatRuntimeException;
@@ -100,7 +97,7 @@ public class JsonConverter implements RecordConverter<JsonObject>, Serializable 
                 json.add(fieldName, record.getString(fieldName));
                 break;
             case BYTES:
-                json.add(fieldName, record.getBytes(fieldName).toString());
+                json.add(fieldName, new String(record.getBytes(fieldName)));
                 break;
             case INT:
                 json.add(fieldName, record.getInt(fieldName));
@@ -260,8 +257,8 @@ public class JsonConverter implements RecordConverter<JsonObject>, Serializable 
                         .ifPresent(value -> builder.withBoolean(entry, value));
                 break;
             case BYTES:
-                Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v)).map(JsonNumber.class::cast)
-                        .map(JsonString.class::cast).ifPresent(value -> builder.withBytes(entry, value.toString().getBytes()));
+                Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v)).map(JsonString.class::cast)
+                        .ifPresent(value -> builder.withBytes(entry, value.getString().getBytes()));
                 break;
             case DATETIME:
                 try {
