@@ -41,18 +41,28 @@ public class Insert extends QueryManagerImpl {
 
     @Override
     public String buildQuery(final List<Record> records) {
-        final List<Schema.Entry> entries = records.stream().flatMap(r -> r.getSchema().getEntries().stream()).distinct()
+        final List<Schema.Entry> entries = records
+                .stream()
+                .flatMap(r -> r.getSchema().getEntries().stream())
+                .distinct()
                 .collect(toList());
         return queries.computeIfAbsent(entries.stream().map(Schema.Entry::getName).collect(joining("::")), key -> {
             final AtomicInteger index = new AtomicInteger(0);
             namedParams = new HashMap<>();
             entries.forEach(name -> namedParams.put(index.incrementAndGet(), name));
-            final List<Map.Entry<Integer, Schema.Entry>> params = namedParams.entrySet().stream()
-                    .sorted(comparing(Map.Entry::getKey)).collect(toList());
+            final List<Map.Entry<Integer, Schema.Entry>> params = namedParams
+                    .entrySet()
+                    .stream()
+                    .sorted(comparing(Map.Entry::getKey))
+                    .collect(toList());
             final StringBuilder query = new StringBuilder("INSERT INTO ")
                     .append(getPlatform().identifier(getConfiguration().getDataset().getTableName()));
-            query.append(params.stream().map(e -> e.getValue().getName()).map(name -> getPlatform().identifier(name))
-                    .collect(joining(",", "(", ")")));
+            query
+                    .append(params
+                            .stream()
+                            .map(e -> e.getValue().getName())
+                            .map(name -> getPlatform().identifier(name))
+                            .collect(joining(",", "(", ")")));
             query.append(" VALUES");
             query.append(params.stream().map(e -> "?").collect((joining(",", "(", ")"))));
             return query.toString();
@@ -61,7 +71,11 @@ public class Insert extends QueryManagerImpl {
 
     @Override
     public boolean validateQueryParam(final Record record) {
-        return namedParams.values().stream().filter(e -> !e.isNullable()).map(e -> valueOf(record, e))
+        return namedParams
+                .values()
+                .stream()
+                .filter(e -> !e.isNullable())
+                .map(e -> valueOf(record, e))
                 .allMatch(Optional::isPresent);
     }
 

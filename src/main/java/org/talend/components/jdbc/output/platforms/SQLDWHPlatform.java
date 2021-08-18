@@ -36,13 +36,16 @@ public class SQLDWHPlatform extends MSSQLPlatform {
 
     @Override
     public void createTableIfNotExist(final Connection connection, final String name, final List<String> keys,
-            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys, final DistributionStrategy distributionStrategy,
-            final List<String> distributionKeys, final int varcharLength, final List<Record> records) throws SQLException {
+            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys,
+            final DistributionStrategy distributionStrategy,
+            final List<String> distributionKeys, final int varcharLength, final List<Record> records)
+            throws SQLException {
         if (records.isEmpty()) {
             return;
         }
-        final Table tableModel = getTableModel(connection, name, keys, null, sortKeys, distributionStrategy, distributionKeys,
-                varcharLength, records);
+        final Table tableModel =
+                getTableModel(connection, name, keys, null, sortKeys, distributionStrategy, distributionKeys,
+                        varcharLength, records);
         final String sql = buildQuery(connection, tableModel);
 
         try (final Statement statement = connection.createStatement()) {
@@ -53,7 +56,9 @@ public class SQLDWHPlatform extends MSSQLPlatform {
                 throw e;
             }
 
-            log.trace("create table issue was ignored. The table and it's name space has been created by an other worker", e);
+            log
+                    .trace("create table issue was ignored. The table and it's name space has been created by an other worker",
+                            e);
         }
     }
 

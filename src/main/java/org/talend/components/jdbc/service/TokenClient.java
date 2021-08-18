@@ -23,6 +23,7 @@ import org.talend.sdk.component.api.service.http.Response;
 public interface TokenClient extends HttpClient {
 
     @Request(method = "POST")
-    Response<JsonObject> getAccessToken(@Base String base, @Header("Authorization") String authorization, String payload);
+    Response<JsonObject> getAccessToken(@Base String base, @Header("Authorization") String authorization,
+            String payload);
 
 }

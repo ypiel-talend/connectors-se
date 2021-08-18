@@ -106,33 +106,53 @@ public class UIActionService {
 
     @DynamicValues(ACTION_LIST_SUPPORTED_DB)
     public Values loadSupportedDataBaseTypes() {
-        return new Values(jdbcConfiguration.get().getDrivers().stream().filter(d -> jdbcService.driverNotDisabled(d))
+        return new Values(jdbcConfiguration
+                .get()
+                .getDrivers()
+                .stream()
+                .filter(d -> jdbcService.driverNotDisabled(d))
                 .sorted(comparingInt(JdbcConfiguration.Driver::getOrder))
-                .map(driver -> new Values.Item(driver.getId(), driver.getDisplayName())).collect(toList()));
+                .map(driver -> new Values.Item(driver.getId(), driver.getDisplayName()))
+                .collect(toList()));
     }
 
     @Suggestions(ACTION_SUGGESTION_ACTION_ON_DATA)
     public SuggestionValues getActionOnData(@Option final TableNameDataset dataset) {
-        final Iterator<ActionOnDataProvider> serviceIterator = ServiceLoader.load(ActionOnDataProvider.class).iterator();
+        final Iterator<ActionOnDataProvider> serviceIterator =
+                ServiceLoader.load(ActionOnDataProvider.class).iterator();
         if (serviceIterator.hasNext()) {
-            return new SuggestionValues(true, Stream.of(serviceIterator.next().getActions(dataset))
-                    .map(e -> new SuggestionValues.Item(e.name(), e.label(i18n))).collect(toList()));
+            return new SuggestionValues(true, Stream
+                    .of(serviceIterator.next().getActions(dataset))
+                    .map(e -> new SuggestionValues.Item(e.name(), e.label(i18n)))
+                    .collect(toList()));
         }
 
         return new SuggestionValues(true,
-                Stream.of(OutputConfig.ActionOnData.values()).filter(e -> !OutputConfig.ActionOnData.BULK_LOAD.equals(e))
-                        .map(e -> new SuggestionValues.Item(e.name(), e.label(i18n))).collect(toList()));
+                Stream
+                        .of(OutputConfig.ActionOnData.values())
+                        .filter(e -> !OutputConfig.ActionOnData.BULK_LOAD.equals(e))
+                        .map(e -> new SuggestionValues.Item(e.name(), e.label(i18n)))
+                        .collect(toList()));
     }
 
     @Suggestions(ACTION_LIST_HANDLERS_DB)
     public SuggestionValues getHandlersDataBaseTypes(@Option final String dbType) {
-        List<JdbcConfiguration.Driver> drivers = jdbcConfiguration.get().getDrivers().stream()
-                .filter(d -> jdbcService.driverNotDisabled(d)).collect(toList());
-        return new SuggestionValues(false, drivers.stream().filter(d -> jdbcService.driverNotDisabled(d))
-                .filter(db -> db.getId().equals(dbType) && !db.getHandlers().isEmpty()).flatMap(db -> db.getHandlers().stream())
-                .flatMap(handler -> drivers.stream().filter(d -> d.getId().equals(handler))).distinct()
+        List<JdbcConfiguration.Driver> drivers = jdbcConfiguration
+                .get()
+                .getDrivers()
+                .stream()
+                .filter(d -> jdbcService.driverNotDisabled(d))
+                .collect(toList());
+        return new SuggestionValues(false, drivers
+                .stream()
+                .filter(d -> jdbcService.driverNotDisabled(d))
+                .filter(db -> db.getId().equals(dbType) && !db.getHandlers().isEmpty())
+                .flatMap(db -> db.getHandlers().stream())
+                .flatMap(handler -> drivers.stream().filter(d -> d.getId().equals(handler)))
+                .distinct()
                 .sorted(comparingInt(JdbcConfiguration.Driver::getOrder))
-                .map(driver -> new SuggestionValues.Item(driver.getId(), driver.getDisplayName())).collect(toList()));
+                .map(driver -> new SuggestionValues.Item(driver.getId(), driver.getDisplayName()))
+                .collect(toList()));
     }
 
     @HealthCheck(ACTION_BASIC_HEALTH_CHECK)
@@ -159,7 +179,10 @@ public class UIActionService {
     public SuggestionValues getTableColumns(@Option final TableNameDataset dataset) {
         List<String> listColumns = dataset.getListColumns();
         return listColumns != null && !listColumns.isEmpty() ? new SuggestionValues(true,
-                listColumns.stream().map(columnName -> new SuggestionValues.Item(columnName, columnName)).collect(toList()))
+                listColumns
+                        .stream()
+                        .map(columnName -> new SuggestionValues.Item(columnName, columnName))
+                        .collect(toList()))
                 : getListColumns(dataset.getConnection(), dataset.getTableName());
     }
 
@@ -179,8 +202,9 @@ public class UIActionService {
                 Connection connection = dataSource.getConnection()) {
 
             final DatabaseMetaData dbMetaData = connection.getMetaData();
-            try (ResultSet tables = dbMetaData.getTables(connection.getCatalog(), JdbcService.getSchema(connection), null,
-                    getAvailableTableTypes(dbMetaData).toArray(new String[0]))) {
+            try (ResultSet tables = dbMetaData
+                    .getTables(connection.getCatalog(), JdbcService.getSchema(connection), null,
+                            getAvailableTableTypes(dbMetaData).toArray(new String[0]))) {
 
                 while (tables.next()) {
                     String name = tables.getString("TABLE_NAME");
@@ -205,7 +229,10 @@ public class UIActionService {
     public SuggestionValues getTableFromDatabase(@Option final JdbcConnection datastore) {
         List<Item> items;
         try {
-            items = listTables(datastore).stream().filter(e -> e != null).map(e -> new Item(e.getName(), e.getName()))
+            items = listTables(datastore)
+                    .stream()
+                    .filter(e -> e != null)
+                    .map(e -> new Item(e.getName(), e.getName()))
                     .collect(toList());
         } catch (SQLException e) {
             items = Collections.emptyList();
@@ -218,9 +245,11 @@ public class UIActionService {
         Set<String> result = new HashSet<>();
         try (ResultSet tables = dbMetaData.getTableTypes()) {
             while (tables.next()) {
-                ofNullable(tables.getString("TABLE_TYPE")).map(String::trim)
+                ofNullable(tables.getString("TABLE_TYPE"))
+                        .map(String::trim)
                         .map(t -> ("BASE TABLE".equalsIgnoreCase(t)) ? "TABLE" : t)
-                        .filter(t -> jdbcConfiguration.get().getSupportedTableTypes().contains(t)).ifPresent(result::add);
+                        .filter(t -> jdbcConfiguration.get().getSupportedTableTypes().contains(t))
+                        .ifPresent(result::add);
             }
         }
         return result;
@@ -244,7 +273,8 @@ public class UIActionService {
             try (final ResultSet result = statement.executeQuery(dataset.getQuery())) {
                 final ResultSetMetaData meta = result.getMetaData();
                 final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
-                IntStream.rangeClosed(1, meta.getColumnCount())
+                IntStream
+                        .rangeClosed(1, meta.getColumnCount())
                         .forEach(index -> jdbcService.addField(schemaBuilder, meta, index));
                 return schemaBuilder.build();
             }
@@ -262,16 +292,19 @@ public class UIActionService {
                 final Statement statement = conn.createStatement()) {
             statement.setMaxRows(1);
             try (final ResultSet result = statement.executeQuery("select * from " + indetifier)) {
-                return new SuggestionValues(true, IntStream.rangeClosed(1, result.getMetaData().getColumnCount()).mapToObj(i -> {
-                    try {
-                        return result.getMetaData().getColumnName(i);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                return new SuggestionValues(true,
+                        IntStream.rangeClosed(1, result.getMetaData().getColumnCount()).mapToObj(i -> {
+                            try {
+                                return result.getMetaData().getColumnName(i);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
 
-                    return null;
-                }).filter(Objects::nonNull).map(columnName -> new SuggestionValues.Item(columnName, columnName))
-                        .collect(toSet()));
+                            return null;
+                        })
+                                .filter(Objects::nonNull)
+                                .map(columnName -> new SuggestionValues.Item(columnName, columnName))
+                                .collect(toSet()));
             }
         } catch (final Exception unexpected) {
             // catch all exceptions for this ui label to return empty list

@@ -62,15 +62,21 @@ public class RedshiftPlatform extends Platform {
         sql.append(identifier(table.getName()));
         sql.append("(");
         List<Column> columns = table.getColumns();
-        sql.append(createColumns(columns, table.getSortStrategy(), columns.stream().filter(Column::isSortKey).collect(toList())));
-        sql.append(createPKs(connection.getMetaData(), table.getName(),
-                columns.stream().filter(Column::isPrimaryKey).collect(toList())));
+        sql
+                .append(createColumns(columns, table.getSortStrategy(),
+                        columns.stream().filter(Column::isSortKey).collect(toList())));
+        sql
+                .append(createPKs(connection.getMetaData(), table.getName(),
+                        columns.stream().filter(Column::isPrimaryKey).collect(toList())));
         sql.append(")");
-        sql.append(createDistributionKeys(table.getDistributionStrategy(),
-                columns.stream().filter(Column::isDistributionKey).collect(toList())));
+        sql
+                .append(createDistributionKeys(table.getDistributionStrategy(),
+                        columns.stream().filter(Column::isDistributionKey).collect(toList())));
         if (RedshiftSortStrategy.COMPOUND.equals(table.getSortStrategy())
                 || RedshiftSortStrategy.INTERLEAVED.equals(table.getSortStrategy())) {
-            sql.append(createSortKeys(table.getSortStrategy(), columns.stream().filter(Column::isSortKey).collect(toList())));
+            sql
+                    .append(createSortKeys(table.getSortStrategy(),
+                            columns.stream().filter(Column::isSortKey).collect(toList())));
         }
 
         log.info("Database - create table query ");
@@ -80,7 +86,8 @@ public class RedshiftPlatform extends Platform {
 
     private String createSortKeys(final RedshiftSortStrategy sortStrategy, final List<Column> columns) {
         return columns.isEmpty() ? ""
-                : sortStrategy.name() + " sortkey" + columns.stream().map(Column::getName).collect(joining(",", "(", ")"));
+                : sortStrategy.name() + " sortkey"
+                        + columns.stream().map(Column::getName).collect(joining(",", "(", ")"));
     }
 
     private String createDistributionKeys(final DistributionStrategy distributionStrategy, final List<Column> columns) {
@@ -110,7 +117,8 @@ public class RedshiftPlatform extends Platform {
         return columns.stream().map(c -> createColumn(c, sortStrategy, sortKeys)).collect(Collectors.joining(","));
     }
 
-    private String createColumn(final Column column, final RedshiftSortStrategy sortStrategy, final List<Column> sortKeys) {
+    private String createColumn(final Column column, final RedshiftSortStrategy sortStrategy,
+            final List<Column> sortKeys) {
         return identifier(column.getName())//
                 + " " + toDBType(column)//
                 + " " + isRequired(column)//

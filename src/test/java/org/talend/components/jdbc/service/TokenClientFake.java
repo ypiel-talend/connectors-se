@@ -46,16 +46,20 @@ public class TokenClientFake implements TokenClient {
         String encodedAuth = authorization.substring(authorization.indexOf(" ") + 1);
         String[] authDetails = new String(Base64.getDecoder().decode(encodedAuth), StandardCharsets.UTF_8).split(":");
         if (!CORRECT_PARAMETER.equals(authDetails[0])) {
-            return new ResponseImpl(401, null, createJsonObject(ERROR_SUMMARY, "Invalid value for 'client_id' parameter."));
+            return new ResponseImpl(401, null,
+                    createJsonObject(ERROR_SUMMARY, "Invalid value for 'client_id' parameter."));
         }
         if (!CORRECT_PARAMETER.equals(authDetails[1])) {
             return new ResponseImpl(401, null,
-                    createJsonObject(ERROR_DESCRIPTION, "The client secret supplied for a confidential client is invalid."));
+                    createJsonObject(ERROR_DESCRIPTION,
+                            "The client secret supplied for a confidential client is invalid."));
         }
 
         if (payload.contains("grant_type=password")
-                && !(payload.contains("username=" + CORRECT_PARAMETER) && payload.contains("password=" + CORRECT_PARAMETER))) {
-            return new ResponseImpl(401, null, createJsonObject(ERROR_DESCRIPTION, "The credentials provided were invalid."));
+                && !(payload.contains("username=" + CORRECT_PARAMETER)
+                        && payload.contains("password=" + CORRECT_PARAMETER))) {
+            return new ResponseImpl(401, null,
+                    createJsonObject(ERROR_DESCRIPTION, "The credentials provided were invalid."));
         }
 
         if (!payload.contains("scope=" + CORRECT_PARAMETER)) {

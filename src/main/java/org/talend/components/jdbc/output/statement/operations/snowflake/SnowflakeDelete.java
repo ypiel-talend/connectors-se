@@ -38,7 +38,8 @@ public class SnowflakeDelete extends Delete {
     }
 
     @Override
-    public List<Reject> execute(final List<Record> records, final JdbcService.JdbcDatasource dataSource) throws SQLException {
+    public List<Reject> execute(final List<Record> records, final JdbcService.JdbcDatasource dataSource)
+            throws SQLException {
         buildQuery(records);
         final List<Reject> rejects = new ArrayList<>();
         try (final Connection connection = dataSource.getConnection()) {
@@ -50,9 +51,15 @@ public class SnowflakeDelete extends Delete {
             rejects.addAll(snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName, fqTmpTableName));
             if (records.size() != rejects.size()) {
                 try (final Statement statement = connection.createStatement()) {
-                    statement.execute("delete from " + fqTableName + " target using " + fqTmpTableName + " as source where "
-                            + getConfiguration().getKeys().stream().map(key -> getPlatform().identifier(key))
-                                    .map(key -> "source." + key + "= target." + key).collect(joining(" AND ")));
+                    statement
+                            .execute("delete from " + fqTableName + " target using " + fqTmpTableName
+                                    + " as source where "
+                                    + getConfiguration()
+                                            .getKeys()
+                                            .stream()
+                                            .map(key -> getPlatform().identifier(key))
+                                            .map(key -> "source." + key + "= target." + key)
+                                            .collect(joining(" AND ")));
                 }
             }
             connection.commit();

@@ -60,8 +60,9 @@ public class SnowflakePlatform extends Platform {
         sql.append(identifier(table.getName()));
         sql.append("(");
         sql.append(createColumns(table.getColumns()));
-        sql.append(createPKs(connection.getMetaData(), table.getName(),
-                table.getColumns().stream().filter(Column::isPrimaryKey).collect(Collectors.toList())));
+        sql
+                .append(createPKs(connection.getMetaData(), table.getName(),
+                        table.getColumns().stream().filter(Column::isPrimaryKey).collect(Collectors.toList())));
         sql.append(")");
         // todo create index
 
@@ -107,7 +108,8 @@ public class SnowflakePlatform extends Platform {
             return "BINARY";
         case DATETIME:
             /*
-             * TIMESTAMP_LTZ internally stores UTC time with a specified precision. However, all operations are performed in the
+             * TIMESTAMP_LTZ internally stores UTC time with a specified precision. However, all operations are
+             * performed in the
              * current session’s time zone,
              * controlled by the TIMEZONE session parameter.
              * The following data types are aliases for TIMESTAMP_LTZ:

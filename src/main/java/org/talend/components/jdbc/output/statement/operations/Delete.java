@@ -59,17 +59,25 @@ public class Delete extends QueryManagerImpl {
         if (!namedParamsResolved) {
             queryParams = new HashMap<>();
             final AtomicInteger index = new AtomicInteger(0);
-            final List<Schema.Entry> entries = records.stream().flatMap(r -> r.getSchema().getEntries().stream()).distinct()
+            final List<Schema.Entry> entries = records
+                    .stream()
+                    .flatMap(r -> r.getSchema().getEntries().stream())
+                    .distinct()
                     .collect(toList());
-            keys.stream().map(key -> entries.stream().filter(e -> key.equals(e.getName())).findFirst())
-                    .filter(Optional::isPresent).map(Optional::get)
+            keys
+                    .stream()
+                    .map(key -> entries.stream().filter(e -> key.equals(e.getName())).findFirst())
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
                     .forEach(entry -> queryParams.put(index.incrementAndGet(), entry));
             /* can't handle this group without all the named params */
             if (queryParams.size() != keys.size()) {
-                final String missingParams = keys.stream()
+                final String missingParams = keys
+                        .stream()
                         .filter(key -> queryParams.values().stream().noneMatch(e -> e.getName().equals(key)))
                         .collect(joining(","));
-                throw new IllegalStateException(new IllegalStateException(getI18n().errorNoFieldForQueryParam(missingParams)));
+                throw new IllegalStateException(
+                        new IllegalStateException(getI18n().errorNoFieldForQueryParam(missingParams)));
             }
 
             namedParamsResolved = true;
@@ -81,8 +89,12 @@ public class Delete extends QueryManagerImpl {
     public boolean validateQueryParam(final Record record) {
         final Set<Schema.Entry> entries = new HashSet<>(record.getSchema().getEntries());
         return keys.stream().allMatch(k -> entries.stream().anyMatch(entry -> entry.getName().equals(k)))
-                && entries.stream().filter(entry -> keys.contains(entry.getName())).filter(entry -> !entry.isNullable())
-                        .map(entry -> valueOf(record, entry)).allMatch(Optional::isPresent);
+                && entries
+                        .stream()
+                        .filter(entry -> keys.contains(entry.getName()))
+                        .filter(entry -> !entry.isNullable())
+                        .map(entry -> valueOf(record, entry))
+                        .allMatch(Optional::isPresent);
     }
 
     @Override

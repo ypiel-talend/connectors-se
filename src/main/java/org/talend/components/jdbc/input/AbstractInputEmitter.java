@@ -96,13 +96,15 @@ public abstract class AbstractInputEmitter implements Serializable {
             final ResultSetMetaData metaData = resultSet.getMetaData();
             if (schema == null) {
                 final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
-                IntStream.rangeClosed(1, metaData.getColumnCount())
+                IntStream
+                        .rangeClosed(1, metaData.getColumnCount())
                         .forEach(index -> jdbcDriversService.addField(schemaBuilder, metaData, index));
                 schema = schemaBuilder.build();
             }
 
             final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);
-            IntStream.rangeClosed(1, metaData.getColumnCount())
+            IntStream
+                    .rangeClosed(1, metaData.getColumnCount())
                     .forEach(index -> jdbcDriversService.addColumn(recordBuilder, metaData, index, resultSet));
             return recordBuilder.build();
         } catch (final SQLException e) {

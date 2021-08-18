@@ -35,7 +35,8 @@ public class Reject {
 
     @Override
     public String toString() {
-        return "{\"sqlState\": \"" + sqlState + "\", \"errorCode\":" + errorCode + ", \"msg\": \"" + msg + "\", \"record\":"
+        return "{\"sqlState\": \"" + sqlState + "\", \"errorCode\":" + errorCode + ", \"msg\": \"" + msg
+                + "\", \"record\":"
                 + record + "}";
     }
 }

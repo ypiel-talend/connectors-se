@@ -39,7 +39,8 @@ public class SnowflakeUpsert extends UpsertDefault {
     }
 
     @Override
-    public List<Reject> execute(final List<Record> records, final JdbcService.JdbcDatasource dataSource) throws SQLException {
+    public List<Reject> execute(final List<Record> records, final JdbcService.JdbcDatasource dataSource)
+            throws SQLException {
         buildQuery(records);
         getInsert().buildQuery(records);
         getUpdate().buildQuery(records);
@@ -53,21 +54,40 @@ public class SnowflakeUpsert extends UpsertDefault {
             rejects.addAll(snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName, fqTmpTableName));
             if (records.size() != rejects.size()) {
                 try (final Statement statement = connection.createStatement()) {
-                    statement.execute("merge into " + fqTableName + " target using " + fqTmpTableName + " as source on "
-                            + getConfiguration().getKeys().stream().map(key -> getPlatform().identifier(key))
-                                    .map(key -> "source." + key + "= target." + key).collect(joining(" AND "))
-                            + " when matched then update set "
-                            + getUpdate().getQueryParams().values().stream()
-                                    .filter(p -> !getUpdate().getIgnoreColumns().contains(p.getName())
-                                            && !getKeys().contains(p.getName()))
-                                    .map(e -> getPlatform().identifier(e.getName()))
-                                    .map(name -> "target." + name + "= source." + name).collect(joining(",", "", " "))
-                            + " when not matched then " + "insert"
-                            + getInsert().getQueryParams().values().stream().map(e -> getPlatform().identifier(e.getName()))
-                                    .map(name -> "target." + name).collect(Collectors.joining(",", "(", ")"))
-                            + " values"
-                            + getInsert().getQueryParams().values().stream().map(e -> getPlatform().identifier(e.getName()))
-                                    .map(name -> "source." + name).collect(Collectors.joining(",", "(", ")")));
+                    statement
+                            .execute("merge into " + fqTableName + " target using " + fqTmpTableName + " as source on "
+                                    + getConfiguration()
+                                            .getKeys()
+                                            .stream()
+                                            .map(key -> getPlatform().identifier(key))
+                                            .map(key -> "source." + key + "= target." + key)
+                                            .collect(joining(" AND "))
+                                    + " when matched then update set "
+                                    + getUpdate()
+                                            .getQueryParams()
+                                            .values()
+                                            .stream()
+                                            .filter(p -> !getUpdate().getIgnoreColumns().contains(p.getName())
+                                                    && !getKeys().contains(p.getName()))
+                                            .map(e -> getPlatform().identifier(e.getName()))
+                                            .map(name -> "target." + name + "= source." + name)
+                                            .collect(joining(",", "", " "))
+                                    + " when not matched then " + "insert"
+                                    + getInsert()
+                                            .getQueryParams()
+                                            .values()
+                                            .stream()
+                                            .map(e -> getPlatform().identifier(e.getName()))
+                                            .map(name -> "target." + name)
+                                            .collect(Collectors.joining(",", "(", ")"))
+                                    + " values"
+                                    + getInsert()
+                                            .getQueryParams()
+                                            .values()
+                                            .stream()
+                                            .map(e -> getPlatform().identifier(e.getName()))
+                                            .map(name -> "source." + name)
+                                            .collect(Collectors.joining(",", "(", ")")));
                     connection.commit();
                 } finally {
                     snowflakeCopy.cleanTmpFiles();

@@ -48,16 +48,21 @@ public final class OAuth2Utils {
     }
 
     static String getAccessToken(JdbcConnection connection, TokenClient tokentClient, I18nMessage i18n) {
-        Response<JsonObject> response = tokentClient.getAccessToken(connection.getOauthTokenEndpoint(),
-                getAuthorization(connection), getPayload(connection));
+        Response<JsonObject> response = tokentClient
+                .getAccessToken(connection.getOauthTokenEndpoint(),
+                        getAuthorization(connection), getPayload(connection));
         checkResponse(response, i18n);
 
         return response.body().getString(ACCESS_TOKEN_NAME);
     }
 
     private static void checkResponse(Response<JsonObject> response, I18nMessage i18n) {
-        of(response).filter(r -> r.status() != 200).map(r -> r.error(JsonObject.class)).map(OAuth2Utils::getErrorDescription)
-                .map(i18n::errorAccessTokenResponse).ifPresent(OAuth2Utils::throwComponentException);
+        of(response)
+                .filter(r -> r.status() != 200)
+                .map(r -> r.error(JsonObject.class))
+                .map(OAuth2Utils::getErrorDescription)
+                .map(i18n::errorAccessTokenResponse)
+                .ifPresent(OAuth2Utils::throwComponentException);
     }
 
     private static String getErrorDescription(JsonObject errorResponse) {
@@ -70,19 +75,33 @@ public final class OAuth2Utils {
     }
 
     private static String getPayload(JdbcConnection connection) {
-        StringBuilder builder = new StringBuilder().append(GRANT_TYPE).append(VALUE_SEPARATOR)
-                .append(connection.getGrantType().name().toLowerCase()).append(PARAMETER_SEPARATOR).append(SCOPE)
-                .append(VALUE_SEPARATOR).append(connection.getScope());
+        StringBuilder builder = new StringBuilder()
+                .append(GRANT_TYPE)
+                .append(VALUE_SEPARATOR)
+                .append(connection.getGrantType().name().toLowerCase())
+                .append(PARAMETER_SEPARATOR)
+                .append(SCOPE)
+                .append(VALUE_SEPARATOR)
+                .append(connection.getScope());
 
         if (connection.getGrantType() == GrantType.PASSWORD) {
-            builder.append(PARAMETER_SEPARATOR).append(USERNAME).append(VALUE_SEPARATOR).append(connection.getOauthUsername())
-                    .append(PARAMETER_SEPARATOR).append(PASSWORD).append(VALUE_SEPARATOR).append(connection.getOauthPassword());
+            builder
+                    .append(PARAMETER_SEPARATOR)
+                    .append(USERNAME)
+                    .append(VALUE_SEPARATOR)
+                    .append(connection.getOauthUsername())
+                    .append(PARAMETER_SEPARATOR)
+                    .append(PASSWORD)
+                    .append(VALUE_SEPARATOR)
+                    .append(connection.getOauthPassword());
         }
         return builder.toString();
     }
 
     private static String getAuthorization(JdbcConnection connection) {
-        return AUTHORIZATION_PREFIX + Base64.getEncoder()
-                .encodeToString((connection.getClientId() + ':' + connection.getClientSecret()).getBytes(StandardCharsets.UTF_8));
+        return AUTHORIZATION_PREFIX + Base64
+                .getEncoder()
+                .encodeToString((connection.getClientId() + ':' + connection.getClientSecret())
+                        .getBytes(StandardCharsets.UTF_8));
     }
 }

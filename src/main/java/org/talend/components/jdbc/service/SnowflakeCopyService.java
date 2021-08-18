@@ -78,8 +78,12 @@ public class SnowflakeCopyService implements Serializable {
             final String fqTableName) {
         final List<RecordChunk> chunks = splitRecords(createWorkDir(), records);
         final List<Reject> rejects = new ArrayList<>();
-        final List<RecordChunk> copy = chunks.stream().parallel().map(chunk -> doPUT(fqStageName, connection, chunk, rejects))
-                .filter(Objects::nonNull).collect(toList());
+        final List<RecordChunk> copy = chunks
+                .stream()
+                .parallel()
+                .map(chunk -> doPUT(fqStageName, connection, chunk, rejects))
+                .filter(Objects::nonNull)
+                .collect(toList());
         rejects.addAll(toReject(chunks, doCopy(fqStageName, fqTableName, connection, copy)));
         return rejects;
     }
@@ -106,12 +110,17 @@ public class SnowflakeCopyService implements Serializable {
     }
 
     private List<Reject> toReject(final List<RecordChunk> chunks, final List<CopyError> errors) {
-        return errors.stream().flatMap(error -> chunks.stream()
-                .filter(chunk -> error.getFile().startsWith(chunk.getChunk().getFileName().toString()))
-                .map(chunk -> new Reject(
-                        error.getError() + (error.getErrorColumnName() == null || error.getErrorColumnName().isEmpty() ? ""
-                                : ", columnName=" + error.getErrorColumnName()),
-                        chunk.getRecords().get(error.getErrorLine() - 1))))
+        return errors
+                .stream()
+                .flatMap(error -> chunks
+                        .stream()
+                        .filter(chunk -> error.getFile().startsWith(chunk.getChunk().getFileName().toString()))
+                        .map(chunk -> new Reject(
+                                error.getError()
+                                        + (error.getErrorColumnName() == null || error.getErrorColumnName().isEmpty()
+                                                ? ""
+                                                : ", columnName=" + error.getErrorColumnName()),
+                                chunk.getRecords().get(error.getErrorLine() - 1))))
                 .collect(toList());
     }
 
@@ -119,7 +128,8 @@ public class SnowflakeCopyService implements Serializable {
             final List<Reject> rejects) {
         try (final Statement statement = connection.createStatement()) {
             try (final ResultSet result = statement
-                    .executeQuery("PUT '" + chunk.getChunk().toUri() + "' '@" + fqStageName + "/' AUTO_COMPRESS=TRUE")) {
+                    .executeQuery(
+                            "PUT '" + chunk.getChunk().toUri() + "' '@" + fqStageName + "/' AUTO_COMPRESS=TRUE")) {
                 result.next();
                 if (!"uploaded".equalsIgnoreCase(result.getString("status"))) {
                     String error = result.getString("message");
@@ -140,9 +150,11 @@ public class SnowflakeCopyService implements Serializable {
 
     private List<CopyError> doCopy(final String fqStageName, final String fqTableName, final Connection connection,
             final List<RecordChunk> chunks) {
-        final String query = String.format(COPY_INTO_QUERY, fqTableName, getColumnNamesList(chunks), fqStageName,
-                joinFileNamesString(chunks));
-        try (final Statement statement = connection.createStatement(); final ResultSet result = statement.executeQuery(query)) {
+        final String query = String
+                .format(COPY_INTO_QUERY, fqTableName, getColumnNamesList(chunks), fqStageName,
+                        joinFileNamesString(chunks));
+        try (final Statement statement = connection.createStatement();
+                final ResultSet result = statement.executeQuery(query)) {
             final List<CopyError> errors = new ArrayList<>();
             while (result.next()) {
                 final String status = result.getString("status");
@@ -158,8 +170,10 @@ public class SnowflakeCopyService implements Serializable {
                     final String errorColumnName = result.getString("first_error_column_name");
                     final int rowsLoaded = result.getInt("rows_loaded");
                     final int rowsParsed = result.getInt("rows_parsed");
-                    errors.add(new CopyError(file, errorsSeen, errorLimit, error, errorLine, errorCharacter, errorColumnName,
-                            rowsLoaded, rowsParsed));
+                    errors
+                            .add(new CopyError(file, errorsSeen, errorLimit, error, errorLine, errorCharacter,
+                                    errorColumnName,
+                                    rowsLoaded, rowsParsed));
                     break;
                 case "loaded":
                     break;
@@ -172,11 +186,13 @@ public class SnowflakeCopyService implements Serializable {
     }
 
     /**
-     * Retrieves a record schema columns from chunks. This column names are case sensitive due to the Snowflake quote identifier.
+     * Retrieves a record schema columns from chunks. This column names are case sensitive due to the Snowflake quote
+     * identifier.
      * </br>
      * <ul>
      * <li>incoming chunks list is empty - return <b>""</b></li>
-     * <li>incoming chunks contain record(-s) with single column <b>firstName</b> - return value <b>("firstName")</b></li>
+     * <li>incoming chunks contain record(-s) with single column <b>firstName</b> - return value
+     * <b>("firstName")</b></li>
      * <li>incoming chunks contain record(-s) with multiple columns:
      * <b>firstName</b>, <b>lastName</b>, <b>AGE</b> - return value <b>("firstName","lastName","AGE")</b></li>
      * </ul>
@@ -185,10 +201,16 @@ public class SnowflakeCopyService implements Serializable {
      * @return column names joined as a String with comma as a separator
      */
     private String getColumnNamesList(List<RecordChunk> chunks) {
-        return ofNullable(chunks).filter(chunk -> !chunk.isEmpty()).flatMap(chunk -> ofNullable(chunk.get(0).getRecords()))
-                .filter(records -> !records.isEmpty()).flatMap(records -> ofNullable(records.get(0).getSchema().getEntries()))
+        return ofNullable(chunks)
+                .filter(chunk -> !chunk.isEmpty())
+                .flatMap(chunk -> ofNullable(chunk.get(0).getRecords()))
+                .filter(records -> !records.isEmpty())
+                .flatMap(records -> ofNullable(records.get(0).getSchema().getEntries()))
                 .filter(schemaEntries -> !schemaEntries.isEmpty())
-                .map(schemaEntries -> schemaEntries.stream().map(Schema.Entry::getName).collect(joining("\",\"", "(\"", "\")")))
+                .map(schemaEntries -> schemaEntries
+                        .stream()
+                        .map(Schema.Entry::getName)
+                        .collect(joining("\",\"", "(\"", "\")")))
                 .orElse("");
     }
 
@@ -206,7 +228,10 @@ public class SnowflakeCopyService implements Serializable {
      * @return file names joined as a String with comma as a separator
      */
     private String joinFileNamesString(List<RecordChunk> chunks) {
-        return chunks.stream().map(chunk -> "'" + chunk.getChunk().getFileName() + ".gz'").collect(joining(",", "(", ")"));
+        return chunks
+                .stream()
+                .map(chunk -> "'" + chunk.getChunk().getFileName() + ".gz'")
+                .collect(joining(",", "(", ")"));
     }
 
     @Data
@@ -236,8 +261,14 @@ public class SnowflakeCopyService implements Serializable {
         final AtomicInteger count = new AtomicInteger(0);
         final AtomicInteger recordCounter = new AtomicInteger(0);
         final Map<Integer, RecordChunk> chunks = new HashMap<>();
-        records.stream()
-                .map(record -> record.getSchema().getEntries().stream().map(entry -> format(record, entry)).collect(joining(",")))
+        records
+                .stream()
+                .map(record -> record
+                        .getSchema()
+                        .getEntries()
+                        .stream()
+                        .map(entry -> format(record, entry))
+                        .collect(joining(",")))
                 .forEach(line -> {
                     if (size.addAndGet(line.getBytes(StandardCharsets.UTF_8).length) > MAX_CHUNK) {
                         // this writer can be closed now. to early free of memory
@@ -245,7 +276,9 @@ public class SnowflakeCopyService implements Serializable {
                         size.set(line.getBytes(StandardCharsets.UTF_8).length);
                     }
                     final int recordNumber = recordCounter.getAndIncrement();
-                    chunks.computeIfAbsent(count.get(), key -> new RecordChunk(records, key, recordNumber, directoryPath))
+                    chunks
+                            .computeIfAbsent(count.get(),
+                                    key -> new RecordChunk(records, key, recordNumber, directoryPath))
                             .writer(line);
                 });
         chunks.get(count.get()).close(); // close the last writer
@@ -280,7 +313,8 @@ public class SnowflakeCopyService implements Serializable {
         void writer(final String line) {
             if (writer == null) {
                 end = start;
-                final String suffix = LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+                final String suffix =
+                        LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
                 try {
                     chunk = Files.createTempFile(tmpDir, "part_" + part + "_", "_" + suffix + ".csv");
                     log.debug("Temp file {} created", chunk);
@@ -323,8 +357,10 @@ public class SnowflakeCopyService implements Serializable {
         case BYTES:
             return QueryManagerImpl.valueOf(record, entry).map(v -> Hex.encodeHexString((byte[]) v)).orElse("");
         case DATETIME:
-            return QueryManagerImpl.valueOf(record, entry)
-                    .map(v -> ((ZonedDateTime) v).format(DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT_PATTERN))).orElse("");
+            return QueryManagerImpl
+                    .valueOf(record, entry)
+                    .map(v -> ((ZonedDateTime) v).format(DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT_PATTERN)))
+                    .orElse("");
         case STRING:
             return escape(record.getString(entry.getName()));
         case ARRAY:
@@ -342,7 +378,8 @@ public class SnowflakeCopyService implements Serializable {
         if (value.isEmpty()) {
             return "\"\"";
         }
-        if (value.indexOf('"') >= 0 || value.indexOf('\n') >= 0 || value.indexOf(',') >= 0 || value.indexOf('\\') >= 0) {
+        if (value.indexOf('"') >= 0 || value.indexOf('\n') >= 0 || value.indexOf(',') >= 0
+                || value.indexOf('\\') >= 0) {
             return '"' + value.replaceAll("\"", "\"\"") + '"';
         } else {
             return value;

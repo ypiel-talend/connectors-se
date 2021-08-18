@@ -40,7 +40,8 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
 @Data
 @Version(value = 2, migrationHandler = JdbcConnectionMigrationHandler.class)
 @ToString(exclude = { "password", "privateKey", "privateKeyPassword" })
-@GridLayout({ @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("jdbcUrl"), @GridLayout.Row("authenticationType"),
+@GridLayout({ @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("jdbcUrl"),
+        @GridLayout.Row("authenticationType"),
         @GridLayout.Row("userId"), @GridLayout.Row("password"), @GridLayout.Row("privateKey"),
         @GridLayout.Row("privateKeyPassword"), @GridLayout.Row("oauthTokenEndpoint"), @GridLayout.Row("clientId"),
         @GridLayout.Row("clientSecret"), @GridLayout.Row("grantType"), @GridLayout.Row("oauthUsername"),
@@ -103,17 +104,20 @@ public class JdbcConnection implements Serializable {
     private String privateKeyPassword;
 
     @Option
-    @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"), @ActiveIf(target = "authenticationType", value = "OAUTH") })
+    @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"),
+            @ActiveIf(target = "authenticationType", value = "OAUTH") })
     @Documentation("Oauth token endpoint.")
     private String oauthTokenEndpoint;
 
     @Option
-    @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"), @ActiveIf(target = "authenticationType", value = "OAUTH") })
+    @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"),
+            @ActiveIf(target = "authenticationType", value = "OAUTH") })
     @Documentation("Client ID.")
     private String clientId;
 
     @Option
-    @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"), @ActiveIf(target = "authenticationType", value = "OAUTH") })
+    @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"),
+            @ActiveIf(target = "authenticationType", value = "OAUTH") })
     @Credential
     @Documentation("Client secret.")
     private String clientSecret;
@@ -141,7 +145,8 @@ public class JdbcConnection implements Serializable {
     private String oauthPassword;
 
     @Option
-    @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"), @ActiveIf(target = "authenticationType", value = "OAUTH") })
+    @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"),
+            @ActiveIf(target = "authenticationType", value = "OAUTH") })
     @Documentation("Scope.")
     private String scope;
 

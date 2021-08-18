@@ -114,9 +114,15 @@ public abstract class JDBCBaseContainerTest {
     }
 
     public String getTestTableName(final TestInfo info) {
-        return info.getTestClass().map(Class::getSimpleName).map(name -> name.substring(0, Math.min(5, name.length())))
+        return info
+                .getTestClass()
+                .map(Class::getSimpleName)
+                .map(name -> name.substring(0, Math.min(5, name.length())))
                 .orElse("TEST") + "_"
-                + info.getTestMethod().map(Method::getName).map(name -> name.substring(0, Math.min(10, name.length())))
+                + info
+                        .getTestMethod()
+                        .map(Method::getName)
+                        .map(name -> name.substring(0, Math.min(10, name.length())))
                         .orElse("TABLE");
     }
 
@@ -127,7 +133,8 @@ public abstract class JDBCBaseContainerTest {
     @WithComponents("org.talend.components.jdbc")
     public class PlatformTests extends AbstractBaseJDBC {
 
-        private final ZonedDateTime date = ZonedDateTime.of(LocalDateTime.of(2018, 12, 6, 12, 0, 0), ZoneId.systemDefault());
+        private final ZonedDateTime date =
+                ZonedDateTime.of(LocalDateTime.of(2018, 12, 6, 12, 0, 0), ZoneId.systemDefault());
 
         private final Date datetime = new Date();
 
@@ -143,10 +150,18 @@ public abstract class JDBCBaseContainerTest {
         @BeforeEach
         void beforeEach() {
             records = new ArrayList<>();
-            Record.Builder recordBuilder = this.getRecordBuilderFactory().newRecordBuilder().withInt("id", 1)
-                    .withString("email", "user@talend.com").withString("t_text", RandomStringUtils.randomAlphabetic(300))
-                    .withLong("t_long", 10000000000L).withDouble("t_double", 1000.85d).withFloat("t_float", 15.50f)
-                    .withDateTime("t_date", date).withDateTime("t_datetime", datetime).withDateTime("t_time", time);
+            Record.Builder recordBuilder = this
+                    .getRecordBuilderFactory()
+                    .newRecordBuilder()
+                    .withInt("id", 1)
+                    .withString("email", "user@talend.com")
+                    .withString("t_text", RandomStringUtils.randomAlphabetic(300))
+                    .withLong("t_long", 10000000000L)
+                    .withDouble("t_double", 1000.85d)
+                    .withFloat("t_float", 15.50f)
+                    .withDateTime("t_date", date)
+                    .withDateTime("t_datetime", datetime)
+                    .withDateTime("t_time", time);
 
             if (!JDBCBaseContainerTest.this.getContainer().getDatabaseType().equalsIgnoreCase("oracle")) {
                 recordBuilder.withBoolean("t_boolean", true);
@@ -167,8 +182,11 @@ public abstract class JDBCBaseContainerTest {
 
             try (final JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(dataStore)) {
                 try (final Connection connection = dataSource.getConnection()) {
-                    PlatformFactory.get(dataStore, getI18nMessage()).createTableIfNotExist(connection, testTable, asList("id"),
-                            RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(), -1, records);
+                    PlatformFactory
+                            .get(dataStore, getI18nMessage())
+                            .createTableIfNotExist(connection, testTable, asList("id"),
+                                    RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(),
+                                    -1, records);
                 }
             }
         }
@@ -183,9 +201,12 @@ public abstract class JDBCBaseContainerTest {
             try (final JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(dataStore)) {
 
                 try (final Connection connection = dataSource.getConnection()) {
-                    PlatformFactory.get(dataStore, getI18nMessage()).createTableIfNotExist(connection, testTable,
-                            asList("id", "email"), RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS,
-                            emptyList(), -1, records);
+                    PlatformFactory
+                            .get(dataStore, getI18nMessage())
+                            .createTableIfNotExist(connection, testTable,
+                                    asList("id", "email"), RedshiftSortStrategy.COMPOUND, emptyList(),
+                                    DistributionStrategy.KEYS,
+                                    emptyList(), -1, records);
                 }
             }
         }
@@ -199,11 +220,15 @@ public abstract class JDBCBaseContainerTest {
             try (final JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(dataStore)) {
                 try (final Connection connection = dataSource.getConnection()) {
                     Platform platform = PlatformFactory.get(dataStore, getI18nMessage());
-                    platform.createTableIfNotExist(connection, testTable, asList("id", "email"), RedshiftSortStrategy.COMPOUND,
-                            emptyList(), DistributionStrategy.KEYS, emptyList(), -1, records);
+                    platform
+                            .createTableIfNotExist(connection, testTable, asList("id", "email"),
+                                    RedshiftSortStrategy.COMPOUND,
+                                    emptyList(), DistributionStrategy.KEYS, emptyList(), -1, records);
                     // recreate the table should not fail
-                    platform.createTableIfNotExist(connection, testTable, asList("id", "email"), RedshiftSortStrategy.COMPOUND,
-                            emptyList(), DistributionStrategy.KEYS, emptyList(), -1, records);
+                    platform
+                            .createTableIfNotExist(connection, testTable, asList("id", "email"),
+                                    RedshiftSortStrategy.COMPOUND,
+                                    emptyList(), DistributionStrategy.KEYS, emptyList(), -1, records);
                 }
             }
         }
@@ -245,7 +270,8 @@ public abstract class JDBCBaseContainerTest {
         void healthCheckWithBadDataBaseName() {
             final JdbcConnection datastore = new JdbcConnection();
             datastore.setDbType(JDBCBaseContainerTest.this.getContainer().getDatabaseType());
-            datastore.setJdbcUrl(JDBCBaseContainerTest.this.getContainer().getJdbcUrl() + "DontExistUnlessyouCreatedDB");
+            datastore
+                    .setJdbcUrl(JDBCBaseContainerTest.this.getContainer().getJdbcUrl() + "DontExistUnlessyouCreatedDB");
             datastore.setUserId("bad");
             datastore.setPassword("az");
             final HealthCheckStatus status = this.getUiActionService().validateBasicDataStore(datastore);
@@ -281,10 +307,17 @@ public abstract class JDBCBaseContainerTest {
         private void createTestTable(String testTableName, JdbcConnection datastore) throws SQLException {
             try (JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(datastore, false)) {
                 try (final Connection connection = dataSource.getConnection()) {
-                    PlatformFactory.get(datastore, getI18nMessage()).createTableIfNotExist(connection, testTableName,
-                            singletonList("id"), RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS,
-                            emptyList(), -1,
-                            singletonList(this.getRecordBuilderFactory().newRecordBuilder().withInt("id", 1).build()));
+                    PlatformFactory
+                            .get(datastore, getI18nMessage())
+                            .createTableIfNotExist(connection, testTableName,
+                                    singletonList("id"), RedshiftSortStrategy.COMPOUND, emptyList(),
+                                    DistributionStrategy.KEYS,
+                                    emptyList(), -1,
+                                    singletonList(this
+                                            .getRecordBuilderFactory()
+                                            .newRecordBuilder()
+                                            .withInt("id", 1)
+                                            .build()));
                     connection.commit();
                 }
             }
@@ -312,8 +345,13 @@ public abstract class JDBCBaseContainerTest {
             final SuggestionValues values = this.getUiActionService().getTableColumns(tableNameDataset);
             assertNotNull(values);
             assertEquals(1, values.getItems().size());
-            assertEquals(Stream.of("ID").collect(toSet()), values.getItems().stream().map(SuggestionValues.Item::getLabel)
-                    .map(l -> l.toUpperCase(Locale.ROOT)).collect(toSet()));
+            assertEquals(Stream.of("ID").collect(toSet()),
+                    values
+                            .getItems()
+                            .stream()
+                            .map(SuggestionValues.Item::getLabel)
+                            .map(l -> l.toUpperCase(Locale.ROOT))
+                            .collect(toSet()));
         }
 
         @Test
@@ -352,25 +390,36 @@ public abstract class JDBCBaseContainerTest {
             final JdbcConnection dataStore = tableNameDataset.getConnection();
             final ArrayList<Record> records = new ArrayList<>();
 
-            Record.Builder recordBuilder = this.getRecordBuilderFactory().newRecordBuilder().withInt("id", 1)
-                    .withString("email", "user@talend.com").withString("t_text", RandomStringUtils.randomAlphabetic(300))
-                    .withLong("t_long", 10000000000L).withDouble("t_double", 1000.85d).withFloat("t_float", 15.50f)
-                    .withDateTime("t_date", ZonedDateTime.now()).withDateTime("t_datetime", new Date())
+            Record.Builder recordBuilder = this
+                    .getRecordBuilderFactory()
+                    .newRecordBuilder()
+                    .withInt("id", 1)
+                    .withString("email", "user@talend.com")
+                    .withString("t_text", RandomStringUtils.randomAlphabetic(300))
+                    .withLong("t_long", 10000000000L)
+                    .withDouble("t_double", 1000.85d)
+                    .withFloat("t_float", 15.50f)
+                    .withDateTime("t_date", ZonedDateTime.now())
+                    .withDateTime("t_datetime", new Date())
                     .withDateTime("t_time", new Date(1000 * 60 * 60 * 15 + 1000 * 60 * 20 + 39000));
             records.add(recordBuilder.build());
 
             try (final JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(dataStore)) {
                 try (final Connection connection = dataSource.getConnection()) {
                     Platform platform = PlatformFactory.get(tableNameDataset.getConnection(), getI18nMessage());
-                    platform.createTableIfNotExist(connection, testTableName, asList("id", "email"),
-                            RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(), -1, records);
+                    platform
+                            .createTableIfNotExist(connection, testTableName, asList("id", "email"),
+                                    RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(),
+                                    -1, records);
                 }
             }
             final Schema guessed = getUiActionService().guessSchema(tableNameDataset);
             assertNotNull(guessed);
             assertEquals(9, guessed.getEntries().size());
             assertEquals(
-                    Arrays.asList("id", "email", "t_text", "t_long", "t_double", "t_float", "t_date", "t_datetime", "t_time"),
+                    Arrays
+                            .asList("id", "email", "t_text", "t_long", "t_double", "t_float", "t_date", "t_datetime",
+                                    "t_time"),
                     guessed.getEntries().stream().map(e -> e.getName()).collect(toList()));
         }
 
@@ -407,12 +456,20 @@ public abstract class JDBCBaseContainerTest {
             sqlQueryDataset.setConnection(connection);
             sqlQueryDataset.setFetchSize(rowCount / 3);
             sqlQueryDataset
-                    .setSqlQuery("select * from " + PlatformFactory.get(connection, getI18nMessage()).identifier(testTableName));
+                    .setSqlQuery("select * from "
+                            + PlatformFactory.get(connection, getI18nMessage()).identifier(testTableName));
             final InputQueryConfig config = new InputQueryConfig();
             config.setDataSet(sqlQueryDataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI).component("collector", "test://collector")
-                    .connections().from("jdbcInput").to("collector").build().run();
+            Job
+                    .components()
+                    .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                    .component("collector", "test://collector")
+                    .connections()
+                    .from("jdbcInput")
+                    .to("collector")
+                    .build()
+                    .run();
 
             final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
             assertEquals(rowCount, collectedData.size());
@@ -430,8 +487,14 @@ public abstract class JDBCBaseContainerTest {
             config.setDataSet(sqlQueryDataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
             assertThrows(IllegalStateException.class,
-                    () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                            .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build()
+                    () -> Job
+                            .components()
+                            .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                            .component("collector", "test://collector")
+                            .connections()
+                            .from("jdbcInput")
+                            .to("collector")
+                            .build()
                             .run());
         }
 
@@ -445,8 +508,14 @@ public abstract class JDBCBaseContainerTest {
             config.setDataSet(dataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
             assertThrows(IllegalArgumentException.class,
-                    () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                            .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build()
+                    () -> Job
+                            .components()
+                            .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                            .component("collector", "test://collector")
+                            .connections()
+                            .from("jdbcInput")
+                            .to("collector")
+                            .build()
                             .run());
         }
 
@@ -460,8 +529,14 @@ public abstract class JDBCBaseContainerTest {
             config.setDataSet(dataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
             assertThrows(IllegalArgumentException.class,
-                    () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                            .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build()
+                    () -> Job
+                            .components()
+                            .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                            .component("collector", "test://collector")
+                            .connections()
+                            .from("jdbcInput")
+                            .to("collector")
+                            .build()
                             .run());
         }
 
@@ -474,8 +549,15 @@ public abstract class JDBCBaseContainerTest {
             final InputTableNameConfig config = new InputTableNameConfig();
             config.setDataSet(newTableNameDataset(testTableName));
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
-                    .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build().run();
+            Job
+                    .components()
+                    .component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
+                    .component("collector", "test://collector")
+                    .connections()
+                    .from("jdbcInput")
+                    .to("collector")
+                    .build()
+                    .run();
 
             final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
             assertEquals(rowCount, collectedData.size());
@@ -492,8 +574,14 @@ public abstract class JDBCBaseContainerTest {
             config.setDataSet(dataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
             assertThrows(IllegalStateException.class,
-                    () -> Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
-                            .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build()
+                    () -> Job
+                            .components()
+                            .component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
+                            .component("collector", "test://collector")
+                            .connections()
+                            .from("jdbcInput")
+                            .to("collector")
+                            .build()
                             .run());
         }
 
@@ -506,8 +594,15 @@ public abstract class JDBCBaseContainerTest {
             final InputTableNameConfig config = new InputTableNameConfig();
             config.setDataSet(newTableNameDataset(testTableName));
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
-                    .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build().run();
+            Job
+                    .components()
+                    .component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
+                    .component("collector", "test://collector")
+                    .connections()
+                    .from("jdbcInput")
+                    .to("collector")
+                    .build()
+                    .run();
 
             final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
             assertEquals(rowCount, collectedData.size());
@@ -547,11 +642,17 @@ public abstract class JDBCBaseContainerTest {
             configuration.setKeys(asList("id"));
             final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
             final int rowCount = 50;
-            Job.components()
+            Job
+                    .components()
                     .component("rowGenerator",
-                            "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
-                    .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("rowGenerator").to("jdbcOutput")
-                    .build().run();
+                            "jdbcTest://RowGenerator?"
+                                    + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
+                    .component("jdbcOutput", "Jdbc://Output?" + config)
+                    .connections()
+                    .from("rowGenerator")
+                    .to("jdbcOutput")
+                    .build()
+                    .run();
             Assertions.assertEquals(rowCount, countAll(testTableName));
         }
 
@@ -566,10 +667,15 @@ public abstract class JDBCBaseContainerTest {
             configuration.setKeys(asList("id", "string_id"));
             final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
             final int rowCount = 50;
-            Job.ExecutorBuilder job = Job.components()
+            Job.ExecutorBuilder job = Job
+                    .components()
                     .component("rowGenerator",
-                            "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
-                    .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("rowGenerator").to("jdbcOutput")
+                            "jdbcTest://RowGenerator?"
+                                    + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
+                    .component("jdbcOutput", "Jdbc://Output?" + config)
+                    .connections()
+                    .from("rowGenerator")
+                    .to("jdbcOutput")
                     .build();
             job.run();
             Assertions.assertEquals(rowCount, countAll(testTableName));
@@ -586,11 +692,17 @@ public abstract class JDBCBaseContainerTest {
             configuration.setKeys(singletonList("id"));
             final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
             final int rowCount = 2;
-            Job.components()
+            Job
+                    .components()
                     .component("rowGenerator",
-                            "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, true, null, withBoolean, withBytes))
-                    .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("rowGenerator").to("jdbcOutput")
-                    .build().run();
+                            "jdbcTest://RowGenerator?"
+                                    + rowGeneratorConfig(rowCount, true, null, withBoolean, withBytes))
+                    .component("jdbcOutput", "Jdbc://Output?" + config)
+                    .connections()
+                    .from("rowGenerator")
+                    .to("jdbcOutput")
+                    .build()
+                    .run();
             Assertions.assertEquals(rowCount, countAll(testTableName));
         }
 
@@ -601,28 +713,54 @@ public abstract class JDBCBaseContainerTest {
             final Date datetime = new Date();
             final Date time = new Date(1000 * 60 * 60 * 15 + 1000 * 60 * 20 + 39000); // 15:20:39
             final RecordBuilderFactory recordBuilderFactory = this.getRecordBuilderFactory();
-            final Record.Builder builder = recordBuilderFactory.newRecordBuilder()
-                    .withInt(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.INT).withNullable(true).withName("id")
+            final Record.Builder builder = recordBuilderFactory
+                    .newRecordBuilder()
+                    .withInt(recordBuilderFactory
+                            .newEntryBuilder()
+                            .withType(Schema.Type.INT)
+                            .withNullable(true)
+                            .withName("id")
                             .build(), 1)
-                    .withLong(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.LONG).withNullable(true)
-                            .withName("t_long").build(), 10L)
-                    .withDouble(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.DOUBLE).withNullable(true)
-                            .withName("t_double").build(), 20.02d)
-                    .withFloat(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.FLOAT).withNullable(true)
-                            .withName("t_float").build(), 30.03f)
-                    .withDateTime("date", date).withDateTime("datetime", datetime).withDateTime("time", time);
+                    .withLong(recordBuilderFactory
+                            .newEntryBuilder()
+                            .withType(Schema.Type.LONG)
+                            .withNullable(true)
+                            .withName("t_long")
+                            .build(), 10L)
+                    .withDouble(recordBuilderFactory
+                            .newEntryBuilder()
+                            .withType(Schema.Type.DOUBLE)
+                            .withNullable(true)
+                            .withName("t_double")
+                            .build(), 20.02d)
+                    .withFloat(recordBuilderFactory
+                            .newEntryBuilder()
+                            .withType(Schema.Type.FLOAT)
+                            .withNullable(true)
+                            .withName("t_float")
+                            .build(), 30.03f)
+                    .withDateTime("date", date)
+                    .withDateTime("datetime", datetime)
+                    .withDateTime("time", time);
             if (!JDBCBaseContainerTest.this.getContainer().getDatabaseType().equalsIgnoreCase("oracle")) {
-                builder.withBoolean(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.BOOLEAN).withNullable(true)
-                        .withName("t_boolean").build(), false);
+                builder
+                        .withBoolean(recordBuilderFactory
+                                .newEntryBuilder()
+                                .withType(Schema.Type.BOOLEAN)
+                                .withNullable(true)
+                                .withName("t_boolean")
+                                .build(), false);
             }
 
             // create a table from valid record
             final JdbcConnection dataStore = newConnection();
             final String testTableName = getTestTableName(testInfo);
             try (final Connection connection = getJdbcService().createDataSource(dataStore).getConnection()) {
-                PlatformFactory.get(dataStore, getI18nMessage()).createTableIfNotExist(connection, testTableName, emptyList(),
-                        RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(), -1,
-                        Collections.singletonList(builder.build()));
+                PlatformFactory
+                        .get(dataStore, getI18nMessage())
+                        .createTableIfNotExist(connection, testTableName, emptyList(),
+                                RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(), -1,
+                                Collections.singletonList(builder.build()));
             }
             runWithBad("id", "bad id", testTableName);
             runWithBad("t_long", "bad long", testTableName);
@@ -647,11 +785,18 @@ public abstract class JDBCBaseContainerTest {
             configuration.setCreateTableIfNotExists(false);
             final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
             try {
-                Job.components().component("emitter", "test://emitter")
-                        .component("jdbcOutput", "Jdbc://Output?$configuration.$maxBatchSize=4&" + config).connections()
-                        .from("emitter").to("jdbcOutput").build().run();
+                Job
+                        .components()
+                        .component("emitter", "test://emitter")
+                        .component("jdbcOutput", "Jdbc://Output?$configuration.$maxBatchSize=4&" + config)
+                        .connections()
+                        .from("emitter")
+                        .to("jdbcOutput")
+                        .build()
+                        .run();
             } catch (final Throwable e) {
-                // those 2 database don't comply with jdbc spec and don't return a batch update exception when there is a batch
+                // those 2 database don't comply with jdbc spec and don't return a batch update exception when there is
+                // a batch
                 // error.
                 final String databaseType = JDBCBaseContainerTest.this.getContainer().getDatabaseType();
                 if (!"mssql".equalsIgnoreCase(databaseType) && !"snowflake".equalsIgnoreCase(databaseType)) {
@@ -684,11 +829,17 @@ public abstract class JDBCBaseContainerTest {
             deleteConfig.setActionOnData(OutputConfig.ActionOnData.DELETE.name());
             deleteConfig.setKeys(singletonList("id"));
             final String updateConfig = configurationByExample().forInstance(deleteConfig).configured().toQueryString();
-            Job.components()
+            Job
+                    .components()
                     .component("userGenerator",
-                            "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
-                    .component("jdbcOutput", "Jdbc://Output?" + updateConfig).connections().from("userGenerator").to("jdbcOutput")
-                    .build().run();
+                            "jdbcTest://RowGenerator?"
+                                    + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
+                    .component("jdbcOutput", "Jdbc://Output?" + updateConfig)
+                    .connections()
+                    .from("userGenerator")
+                    .to("jdbcOutput")
+                    .build()
+                    .run();
 
             // check the update
             Assertions.assertEquals(0L, countAll(testTableName));
@@ -705,11 +856,17 @@ public abstract class JDBCBaseContainerTest {
                 deleteConfig.setDataset(newTableNameDataset(testTableName));
                 deleteConfig.setActionOnData(OutputConfig.ActionOnData.DELETE.name());
                 final String config = configurationByExample().forInstance(deleteConfig).configured().toQueryString();
-                Job.components()
+                Job
+                        .components()
                         .component("userGenerator",
-                                "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
-                        .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("userGenerator").to("jdbcOutput")
-                        .build().run();
+                                "jdbcTest://RowGenerator?"
+                                        + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
+                        .component("jdbcOutput", "Jdbc://Output?" + config)
+                        .connections()
+                        .from("userGenerator")
+                        .to("jdbcOutput")
+                        .build()
+                        .run();
             });
             assertTrue(error.getMessage().contains(getI18nMessage().errorNoKeyForDeleteQuery()));
             Assertions.assertEquals(rowCount, countAll(testTableName));
@@ -727,11 +884,17 @@ public abstract class JDBCBaseContainerTest {
                 deleteConfig.setActionOnData(OutputConfig.ActionOnData.DELETE.name());
                 deleteConfig.setKeys(singletonList("aMissingColumn"));
                 final String config = configurationByExample().forInstance(deleteConfig).configured().toQueryString();
-                Job.components()
+                Job
+                        .components()
                         .component("userGenerator",
-                                "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
-                        .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("userGenerator").to("jdbcOutput")
-                        .build().run();
+                                "jdbcTest://RowGenerator?"
+                                        + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
+                        .component("jdbcOutput", "Jdbc://Output?" + config)
+                        .connections()
+                        .from("userGenerator")
+                        .to("jdbcOutput")
+                        .build()
+                        .run();
             });
             assertTrue(error.getMessage().contains(getI18nMessage().errorNoFieldForQueryParam("aMissingColumn")));
             Assertions.assertEquals(rowCount, countAll(testTableName));
@@ -749,19 +912,30 @@ public abstract class JDBCBaseContainerTest {
             configuration.setDataset(newTableNameDataset(testTableName));
             configuration.setActionOnData(OutputConfig.ActionOnData.UPDATE.name());
             configuration.setKeys(singletonList("id"));
-            final String updateConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
-            Job.components()
+            final String updateConfig =
+                    configurationByExample().forInstance(configuration).configured().toQueryString();
+            Job
+                    .components()
                     .component("userGenerator",
-                            "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, "updated", withBoolean, withBytes))
-                    .component("jdbcOutput", "Jdbc://Output?" + updateConfig).connections().from("userGenerator").to("jdbcOutput")
-                    .build().run();
+                            "jdbcTest://RowGenerator?"
+                                    + rowGeneratorConfig(rowCount, false, "updated", withBoolean, withBytes))
+                    .component("jdbcOutput", "Jdbc://Output?" + updateConfig)
+                    .connections()
+                    .from("userGenerator")
+                    .to("jdbcOutput")
+                    .build()
+                    .run();
 
             // check the update
             final List<Record> users = readAll(testTableName, this.getComponentsHandler());
             Assertions.assertEquals(rowCount, users.size());
-            Assertions.assertEquals(IntStream.rangeClosed(1, rowCount).mapToObj(i -> "updated" + i).collect(toSet()),
-                    users.stream().map(r -> ofNullable(r.getString("T_STRING")).orElseGet(() -> r.getString("t_string")))
-                            .collect(toSet()));
+            Assertions
+                    .assertEquals(IntStream.rangeClosed(1, rowCount).mapToObj(i -> "updated" + i).collect(toSet()),
+                            users
+                                    .stream()
+                                    .map(r -> ofNullable(r.getString("T_STRING"))
+                                            .orElseGet(() -> r.getString("t_string")))
+                                    .collect(toSet()));
         }
 
         @Test
@@ -771,13 +945,21 @@ public abstract class JDBCBaseContainerTest {
                 final OutputConfig updateConfiguration = new OutputConfig();
                 updateConfiguration.setDataset(newTableNameDataset(getTestTableName(testInfo)));
                 updateConfiguration.setActionOnData(OutputConfig.ActionOnData.UPDATE.name());
-                final String updateConfig = configurationByExample().forInstance(updateConfiguration).configured()
+                final String updateConfig = configurationByExample()
+                        .forInstance(updateConfiguration)
+                        .configured()
                         .toQueryString();
-                Job.components()
+                Job
+                        .components()
                         .component("userGenerator",
-                                "jdbcTest://RowGenerator?" + rowGeneratorConfig(1, false, "updated", withBoolean, withBytes))
-                        .component("jdbcOutput", "Jdbc://Output?" + updateConfig).connections().from("userGenerator")
-                        .to("jdbcOutput").build().run();
+                                "jdbcTest://RowGenerator?"
+                                        + rowGeneratorConfig(1, false, "updated", withBoolean, withBytes))
+                        .component("jdbcOutput", "Jdbc://Output?" + updateConfig)
+                        .connections()
+                        .from("userGenerator")
+                        .to("jdbcOutput")
+                        .build()
+                        .run();
             });
             assertTrue(error.getMessage().contains(getI18nMessage().errorNoKeyForUpdateQuery()));
         }
@@ -794,20 +976,31 @@ public abstract class JDBCBaseContainerTest {
             configuration.setDataset(newTableNameDataset(testTableName));
             configuration.setActionOnData(OutputConfig.ActionOnData.UPSERT.name());
             configuration.setKeys(singletonList("id"));
-            final String updateConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
+            final String updateConfig =
+                    configurationByExample().forInstance(configuration).configured().toQueryString();
             final int newRecords = existingRecords * 2;
-            Job.components()
+            Job
+                    .components()
                     .component("rowGenerator",
-                            "jdbcTest://RowGenerator?" + rowGeneratorConfig(newRecords, false, "updated", withBoolean, withBytes))
-                    .component("jdbcOutput", "Jdbc://Output?" + updateConfig).connections().from("rowGenerator").to("jdbcOutput")
-                    .build().run();
+                            "jdbcTest://RowGenerator?"
+                                    + rowGeneratorConfig(newRecords, false, "updated", withBoolean, withBytes))
+                    .component("jdbcOutput", "Jdbc://Output?" + updateConfig)
+                    .connections()
+                    .from("rowGenerator")
+                    .to("jdbcOutput")
+                    .build()
+                    .run();
 
             // check the update
             final List<Record> users = readAll(testTableName, this.getComponentsHandler());
             Assertions.assertEquals(newRecords, users.size());
-            Assertions.assertEquals(IntStream.rangeClosed(1, newRecords).mapToObj(i -> "updated" + i).collect(toSet()),
-                    users.stream().map(r -> ofNullable(r.getString("t_string")).orElseGet(() -> r.getString("T_STRING")))
-                            .collect(toSet()));
+            Assertions
+                    .assertEquals(IntStream.rangeClosed(1, newRecords).mapToObj(i -> "updated" + i).collect(toSet()),
+                            users
+                                    .stream()
+                                    .map(r -> ofNullable(r.getString("t_string"))
+                                            .orElseGet(() -> r.getString("T_STRING")))
+                                    .collect(toSet()));
         }
 
         @Test
@@ -818,8 +1011,13 @@ public abstract class JDBCBaseContainerTest {
             final ZonedDateTime datetime = ZonedDateTime.of(2018, 12, 26, 11, 47, 15, 0, utc);
             final ZonedDateTime time = ZonedDateTime
                     .ofInstant(Instant.ofEpochMilli(LocalTime.of(15, 20, 39).toSecondOfDay() * 1000), utc); // 15:20:39
-            final Record record = this.getRecordBuilderFactory().newRecordBuilder().withDateTime("date", date)
-                    .withDateTime("datetime", datetime).withDateTime("time", time).build();
+            final Record record = this
+                    .getRecordBuilderFactory()
+                    .newRecordBuilder()
+                    .withDateTime("date", date)
+                    .withDateTime("datetime", datetime)
+                    .withDateTime("time", time)
+                    .build();
             final List<Record> data = new ArrayList<>();
             data.add(record);
             getComponentsHandler().setInputData(data);
@@ -829,21 +1027,34 @@ public abstract class JDBCBaseContainerTest {
             configuration.setActionOnData(OutputConfig.ActionOnData.INSERT.name());
             configuration.setCreateTableIfNotExists(true);
             final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
-            Job.components().component("emitter", "test://emitter").component("jdbcOutput", "Jdbc://Output?" + config)
-                    .connections().from("emitter").to("jdbcOutput").build().run();
+            Job
+                    .components()
+                    .component("emitter", "test://emitter")
+                    .component("jdbcOutput", "Jdbc://Output?" + config)
+                    .connections()
+                    .from("emitter")
+                    .to("jdbcOutput")
+                    .build()
+                    .run();
             List<Record> inserted = readAll(testTableName, this.getComponentsHandler());
             Assertions.assertEquals(1, inserted.size());
             final Record result = inserted.iterator().next();
-            Assertions.assertEquals(date.toInstant().toEpochMilli(), result.getDateTime("date").toInstant().toEpochMilli());
-            Assertions.assertEquals(datetime.toInstant().toEpochMilli(),
-                    result.getDateTime("datetime").toInstant().toEpochMilli());
-            Assertions.assertEquals(time.toInstant().toEpochMilli(), result.getDateTime("time").toInstant().toEpochMilli());
+            Assertions
+                    .assertEquals(date.toInstant().toEpochMilli(),
+                            result.getDateTime("date").toInstant().toEpochMilli());
+            Assertions
+                    .assertEquals(datetime.toInstant().toEpochMilli(),
+                            result.getDateTime("datetime").toInstant().toEpochMilli());
+            Assertions
+                    .assertEquals(time.toInstant().toEpochMilli(),
+                            result.getDateTime("time").toInstant().toEpochMilli());
         }
 
         @Test
         @DisplayName("Table handling - Not exist and No creation requested")
         void tableNotExistCase() {
-            final Record record = this.getRecordBuilderFactory().newRecordBuilder().withString("data", "some data").build();
+            final Record record =
+                    this.getRecordBuilderFactory().newRecordBuilder().withString("data", "some data").build();
             getComponentsHandler().setInputData(singletonList(record));
             final OutputConfig configuration = new OutputConfig();
             configuration.setDataset(newTableNameDataset("AlienTableThatNeverExist999"));
@@ -851,9 +1062,15 @@ public abstract class JDBCBaseContainerTest {
             configuration.setCreateTableIfNotExists(false);
             final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
             final Exception error = assertThrows(Exception.class,
-                    () -> Job.components().component("emitter", "test://emitter")
-                            .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("emitter").to("jdbcOutput")
-                            .build().run());
+                    () -> Job
+                            .components()
+                            .component("emitter", "test://emitter")
+                            .component("jdbcOutput", "Jdbc://Output?" + config)
+                            .connections()
+                            .from("emitter")
+                            .to("jdbcOutput")
+                            .build()
+                            .run());
 
             final String errorMessage = error.getMessage();
             final String tableName = configuration.getDataset().getTableName();
@@ -883,16 +1100,23 @@ public abstract class JDBCBaseContainerTest {
             configuration.setKeys(asList("id"));
             final String config = getOldComponentConfigString4MigrationTest(configuration, old);
             final int rowCount = 50;
-            Job.components()
+            Job
+                    .components()
                     .component("rowGenerator",
-                            "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
-                    .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("rowGenerator").to("jdbcOutput")
-                    .build().run();
+                            "jdbcTest://RowGenerator?"
+                                    + rowGeneratorConfig(rowCount, false, null, withBoolean, withBytes))
+                    .component("jdbcOutput", "Jdbc://Output?" + config)
+                    .connections()
+                    .from("rowGenerator")
+                    .to("jdbcOutput")
+                    .build()
+                    .run();
             Assertions.assertEquals(rowCount, countAll(testTableName));
         }
 
         private String getOldComponentConfigString4MigrationTest(OutputConfig configuration, boolean old) {
-            String config = configurationByExample().forInstance(configuration).configured().toQueryString() + "&__version=1";
+            String config =
+                    configurationByExample().forInstance(configuration).configured().toQueryString() + "&__version=1";
             if (old) {
                 config = config.replace("configuration.keys.keys[", "configuration.keys[");
             }

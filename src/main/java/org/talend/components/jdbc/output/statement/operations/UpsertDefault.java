@@ -60,24 +60,41 @@ public class UpsertDefault extends QueryManagerImpl {
     public String buildQuery(final List<Record> records) {
         this.queryParams = new HashMap<>();
         final AtomicInteger index = new AtomicInteger(0);
-        final List<Schema.Entry> entries = records.stream().flatMap(r -> r.getSchema().getEntries().stream()).distinct()
+        final List<Schema.Entry> entries = records
+                .stream()
+                .flatMap(r -> r.getSchema().getEntries().stream())
+                .distinct()
                 .collect(toList());
 
-        return "SELECT COUNT(*) AS RECORD_EXIST FROM " + getPlatform().identifier(getConfiguration().getDataset().getTableName())
+        return "SELECT COUNT(*) AS RECORD_EXIST FROM "
+                + getPlatform().identifier(getConfiguration().getDataset().getTableName())
                 + " WHERE "
-                + getConfiguration().getKeys().stream()
-                        .peek(key -> queryParams.put(index.incrementAndGet(),
-                                entries.stream().filter(e -> e.getName().equals(key)).findFirst()
-                                        .orElseThrow(() -> new IllegalStateException(getI18n().errorNoFieldForQueryParam(key)))))
-                        .map(c -> getPlatform().identifier(c)).map(c -> c + " = ?").collect(joining(" AND "));
+                + getConfiguration()
+                        .getKeys()
+                        .stream()
+                        .peek(key -> queryParams
+                                .put(index.incrementAndGet(),
+                                        entries
+                                                .stream()
+                                                .filter(e -> e.getName().equals(key))
+                                                .findFirst()
+                                                .orElseThrow(() -> new IllegalStateException(
+                                                        getI18n().errorNoFieldForQueryParam(key)))))
+                        .map(c -> getPlatform().identifier(c))
+                        .map(c -> c + " = ?")
+                        .collect(joining(" AND "));
     }
 
     @Override
     public boolean validateQueryParam(final Record record) {
         final Set<Schema.Entry> entries = new HashSet<>(record.getSchema().getEntries());
         return keys.stream().allMatch(k -> entries.stream().anyMatch(entry -> entry.getName().equals(k)))
-                && entries.stream().filter(entry -> keys.contains(entry.getName())).filter(entry -> !entry.isNullable())
-                        .map(entry -> valueOf(record, entry)).allMatch(Optional::isPresent);
+                && entries
+                        .stream()
+                        .filter(entry -> keys.contains(entry.getName()))
+                        .filter(entry -> !entry.isNullable())
+                        .map(entry -> valueOf(record, entry))
+                        .allMatch(Optional::isPresent);
     }
 
     @Override
@@ -86,7 +103,8 @@ public class UpsertDefault extends QueryManagerImpl {
     }
 
     @Override
-    public List<Reject> execute(final List<Record> records, final JdbcService.JdbcDatasource dataSource) throws SQLException {
+    public List<Reject> execute(final List<Record> records, final JdbcService.JdbcDatasource dataSource)
+            throws SQLException {
         if (records.isEmpty()) {
             return emptyList();
         }
@@ -103,8 +121,10 @@ public class UpsertDefault extends QueryManagerImpl {
                         continue;
                     }
                     for (final Map.Entry<Integer, Schema.Entry> entry : getQueryParams().entrySet()) {
-                        RecordToSQLTypeConverter.valueOf(entry.getValue().getType().name()).setValue(statement, entry.getKey(),
-                                entry.getValue(), record);
+                        RecordToSQLTypeConverter
+                                .valueOf(entry.getValue().getType().name())
+                                .setValue(statement, entry.getKey(),
+                                        entry.getValue(), record);
                     }
                     try (final ResultSet result = statement.executeQuery()) {
                         if (result.next() && result.getInt("RECORD_EXIST") > 0) {
