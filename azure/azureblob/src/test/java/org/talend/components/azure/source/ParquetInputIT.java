@@ -63,12 +63,20 @@ class ParquetInputIT extends BaseIT {
         final byte[] bytesValue = new byte[] { 1, 2, 3 };
 
         blobInputProperties.getDataset().setDirectory("parquet");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet1Record.parquet",
-                "testParquet1Record.parquet");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet1Record.parquet",
+                        "testParquet1Record.parquet");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -78,8 +86,9 @@ class ParquetInputIT extends BaseIT {
         Assertions.assertEquals(longValue, firstRecord.getLong("longValue"));
         Assertions.assertEquals(intValue, firstRecord.getInt("intValue"));
         Assertions.assertEquals(doubleValue, firstRecord.getDouble("doubleValue"), 0.01);
-        Assertions.assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateValue), ZoneId.of("UTC")),
-                firstRecord.getDateTime("dateValue"));
+        Assertions
+                .assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateValue), ZoneId.of("UTC")),
+                        firstRecord.getDateTime("dateValue"));
         Assertions.assertArrayEquals(bytesValue, firstRecord.getBytes("byteArray"));
     }
 
@@ -87,12 +96,20 @@ class ParquetInputIT extends BaseIT {
     void testInput1FileMultipleRecords() throws StorageException, IOException, URISyntaxException {
         final int recordSize = 6;
         blobInputProperties.getDataset().setDirectory("parquet");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet6Records.parquet",
-                "testParquet6Records.parquet");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet6Records.parquet",
+                        "testParquet6Records.parquet");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -102,14 +119,23 @@ class ParquetInputIT extends BaseIT {
     void testInputMultipleFiles() throws Exception {
         final int recordSize = 1 + 6;
         blobInputProperties.getDataset().setDirectory("parquet");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet1Record.parquet",
-                "testParquet1Record.parquet");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet6Records.parquet",
-                "testParquet6Records.parquet");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet1Record.parquet",
+                        "testParquet1Record.parquet");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet6Records.parquet",
+                        "testParquet6Records.parquet");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -120,15 +146,24 @@ class ParquetInputIT extends BaseIT {
         final int recordSize = 1;
         // ignored dir
         blobInputProperties.getDataset().setDirectory("parquet_ignored");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet6Records.parquet",
-                "testParquet6Records.parquet");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet6Records.parquet",
+                        "testParquet6Records.parquet");
         blobInputProperties.getDataset().setDirectory("parquet");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet1Record.parquet",
-                "testParquet1Record.parquet");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquet1Record.parquet",
+                        "testParquet1Record.parquet");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -138,12 +173,20 @@ class ParquetInputIT extends BaseIT {
     void testInputFileWithNullValues() throws Exception {
         final int recordSize = 1;
         final int columnSize = 9;
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquetNullRecord.parquet",
-                "testParquetNullRecord.parquet");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "parquet/testParquetNullRecord.parquet",
+                        "testParquetNullRecord.parquet");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");

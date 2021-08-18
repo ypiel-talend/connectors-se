@@ -51,14 +51,16 @@ class CsvBlobReaderTest extends AdlsGen2TestBase {
         this.dataSet.getCsvConfiguration().setCsvSchema("field1,field2");
         final ComponentManager manager = componentsHandler.asManager();
 
-        final JsonObject object1 = Json.createObjectBuilder() //
+        final JsonObject object1 = Json
+                .createObjectBuilder() //
                 .add("etag", "0x8D89D1980D8BD4B") //
                 .add("name", "/paht1/file1.txt") //
                 .add("contentLength", "120") //
                 .add("lastModified", "2021-01-13") //
                 .add("owner", "admin") //
                 .build();
-        final JsonObject object2 = Json.createObjectBuilder() //
+        final JsonObject object2 = Json
+                .createObjectBuilder() //
                 .add("etag", "0x8D89D1980D8BD4B") //
                 .add("name", "/paht1/file2.txt") //
                 .add("contentLength", "120") //
@@ -66,14 +68,19 @@ class CsvBlobReaderTest extends AdlsGen2TestBase {
                 .add("owner", "admin") //
                 .build();
 
-        final JsonObject paths = Json.createObjectBuilder().add("paths", Json.createArrayBuilder() //
-                .add(object1) //
-                .add(object2) //
-                .build()).build();
+        final JsonObject paths = Json
+                .createObjectBuilder()
+                .add("paths", Json
+                        .createArrayBuilder() //
+                        .add(object1) //
+                        .add(object2) //
+                        .build())
+                .build();
         ClientGen2Fake fake = new ClientGen2Fake(new FakeResponse<>(200, paths, null, null)) {
 
             @Override
-            public Response<InputStream> pathRead(Map<String, String> headers, String filesystem, String path, Integer timeout,
+            public Response<InputStream> pathRead(Map<String, String> headers, String filesystem, String path,
+                    Integer timeout,
                     Map<String, String> sas) {
                 final InputStream input;
                 if ("/paht1/file1.txt".equals(path)) {

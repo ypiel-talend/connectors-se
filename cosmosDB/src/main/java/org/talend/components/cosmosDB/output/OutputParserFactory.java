@@ -96,7 +96,8 @@ public class OutputParserFactory {
         Delete() {
             String partitionKeyForDelete = configuration.getPartitionKeyForDelete();
             if (StringUtils.isNotEmpty(partitionKeyForDelete)) {
-                partitionKey = partitionKeyForDelete.startsWith("/") ? partitionKeyForDelete.substring(1) : partitionKeyForDelete;
+                partitionKey = partitionKeyForDelete.startsWith("/") ? partitionKeyForDelete.substring(1)
+                        : partitionKeyForDelete;
             }
         }
 

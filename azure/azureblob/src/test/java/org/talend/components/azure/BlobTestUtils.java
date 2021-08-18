@@ -81,7 +81,8 @@ public class BlobTestUtils {
 
     public static void uploadTestFile(CloudStorageAccount storageAccount, BlobInputProperties blobInputProperties,
             String resourceName, String targetName) throws URISyntaxException, StorageException, IOException {
-        CloudBlobContainer container = storageAccount.createCloudBlobClient()
+        CloudBlobContainer container = storageAccount
+                .createCloudBlobClient()
                 .getContainerReference(blobInputProperties.getDataset().getContainerName());
         CloudBlockBlob blockBlob = container
                 .getBlockBlobReference(blobInputProperties.getDataset().getDirectory() + "/" + targetName);
@@ -92,14 +93,17 @@ public class BlobTestUtils {
         }
     }
 
-    public static void createAndPopulateFileInStorage(CloudStorageAccount connectionAccount, AzureBlobDataset fileOptions,
+    public static void createAndPopulateFileInStorage(CloudStorageAccount connectionAccount,
+            AzureBlobDataset fileOptions,
             List<String> recordSchema, int recordsSize) throws Exception {
         String fileName = "file" + RandomStringUtils.randomAlphabetic(5);
         String directory = fileOptions.getDirectory();
         if (directory != null) {
             fileName = directory + "/" + fileName;
         }
-        CloudBlockBlob file = connectionAccount.createCloudBlobClient().getContainerReference(fileOptions.getContainerName())
+        CloudBlockBlob file = connectionAccount
+                .createCloudBlobClient()
+                .getContainerReference(fileOptions.getContainerName())
                 .getBlockBlobReference(fileName);
         byte[] content;
         if (fileOptions.getFileFormat() == FileFormat.CSV) {
@@ -141,7 +145,9 @@ public class BlobTestUtils {
     private static List<CSVRecord> readCSVRecords(String directoryName, CloudStorageAccount connectionAccount,
             AzureBlobDataset config, CSVFormat format) throws URISyntaxException, StorageException {
         List<CSVRecord> records = new ArrayList<>();
-        CloudBlobDirectory directory = connectionAccount.createCloudBlobClient().getContainerReference(config.getContainerName())
+        CloudBlobDirectory directory = connectionAccount
+                .createCloudBlobClient()
+                .getContainerReference(config.getContainerName())
                 .getDirectoryReference(directoryName);
 
         Iterator<ListBlobItem> blobs = directory.listBlobs().iterator();

@@ -33,13 +33,17 @@ public class RecordSerializerLineHelper {
 
         for (Entry entry : record.getSchema().getEntries()) {
             if (entry.getType() == Schema.Type.RECORD) {
-                record.getOptionalRecord(entry.getName()).map(RecordSerializerLineHelper::valuesFrom)
-                        .orElse(Collections.emptyList()).forEach(result::add);
+                record
+                        .getOptionalRecord(entry.getName())
+                        .map(RecordSerializerLineHelper::valuesFrom)
+                        .orElse(Collections.emptyList())
+                        .forEach(result::add);
             } else if (entry.getType() == Type.ARRAY) {
                 // can't translate array to Line.
                 log.warn("Can't translate array in line format ({}).", entry.getName());
             } else if (entry.getType() == Type.BYTES) {
-                final String value = record.getOptionalBytes(entry.getName()) //
+                final String value = record
+                        .getOptionalBytes(entry.getName()) //
                         .map(Base64.getEncoder()::encodeToString) //
                         .orElse(null);
                 result.add(value);

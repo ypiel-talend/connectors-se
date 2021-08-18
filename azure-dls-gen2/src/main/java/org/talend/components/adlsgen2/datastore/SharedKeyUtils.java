@@ -38,7 +38,8 @@ import lombok.extern.slf4j.Slf4j;
  * recommended practice is using {@link TokenCredentials}.
  *
  *
- * How you construct the signature string depends on which service and version you are authorizing against and which authorization
+ * How you construct the signature string depends on which service and version you are authorizing against and which
+ * authorization
  * scheme you are using. When constructing the signature string, keep in mind the following:
  *
  * - The VERB portion of the string is the HTTP verb, such as GET or PUT, and must be uppercase.
@@ -47,7 +48,8 @@ import lombok.extern.slf4j.Slf4j;
  * may appear only once. If any header is duplicated, the service returns status code 400 (Bad Request).
  *
  * - The values of all standard HTTP headers must be included in the string in the order shown in the signature
- * format, without the header names. These headers may be empty if they are not being specified as part of the request; in that
+ * format, without the header names. These headers may be empty if they are not being specified as part of the request;
+ * in that
  * case, only the new-line character is required.
  *
  * - If the x-ms-date header is specified, you may ignore the Date header, regardless of whether it is specified on
@@ -62,8 +64,10 @@ import lombok.extern.slf4j.Slf4j;
  * - All new-line characters (\n) shown are required within the signature string.
  *
  * - The signature string includes canonicalized headers and canonicalized resource strings. Canonicalizing these
- * strings puts them into a standard format that is recognized by Azure Storage. For detailed information on constructing the
- * CanonicalizedHeaders and CanonicalizedResource strings that make up part of the signature string, see the appropriate sections
+ * strings puts them into a standard format that is recognized by Azure Storage. For detailed information on
+ * constructing the
+ * CanonicalizedHeaders and CanonicalizedResource strings that make up part of the signature string, see the appropriate
+ * sections
  * later in this topic.
  *
  *
@@ -106,22 +110,23 @@ public final class SharedKeyUtils {
         String contentLength = getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_LENGTH);
         contentLength = contentLength.equals("") ? Constants.EMPTY_STRING : contentLength;
 
-        return String.join("\n", //
-                method, //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_ENCODING), //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_LANGUAGE), //
-                contentLength, //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_MD5), //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_TYPE), //
-                // x-ms-date header exists, so don't sign date header
-                Constants.EMPTY_STRING, //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.IF_MODIFIED_SINCE), //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.IF_MATCH), //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.IF_NONE_MATCH), //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.IF_UNMODIFIED_SINCE), //
-                getStandardHeaderValue(headers, Constants.HeaderConstants.RANGE), //
-                getAdditionalXmsHeaders(headers), //
-                getCanonicalizedResource(url));
+        return String
+                .join("\n", //
+                        method, //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_ENCODING), //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_LANGUAGE), //
+                        contentLength, //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_MD5), //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.CONTENT_TYPE), //
+                        // x-ms-date header exists, so don't sign date header
+                        Constants.EMPTY_STRING, //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.IF_MODIFIED_SINCE), //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.IF_MATCH), //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.IF_NONE_MATCH), //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.IF_UNMODIFIED_SINCE), //
+                        getStandardHeaderValue(headers, Constants.HeaderConstants.RANGE), //
+                        getAdditionalXmsHeaders(headers), //
+                        getCanonicalizedResource(url));
     }
 
     private String getAdditionalXmsHeaders(final Map<String, String> headers) {
@@ -178,7 +183,10 @@ public final class SharedKeyUtils {
             final List<String> queryParamValues = queryParams.get(queryParamName);
             Collections.sort(queryParamValues);
             String queryParamValuesStr = String.join(",", queryParamValues.toArray(new String[] {}));
-            canonicalizedResource.append("\n").append(queryParamName.toLowerCase(Locale.ROOT)).append(":")
+            canonicalizedResource
+                    .append("\n")
+                    .append(queryParamName.toLowerCase(Locale.ROOT))
+                    .append(":")
                     .append(queryParamValuesStr);
         }
         // append to main string builder the join of completed params with new line

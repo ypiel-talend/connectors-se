@@ -63,7 +63,8 @@ public interface OpportunityClient extends HttpClient {
      * @param filterType The Opportunities field to filter on. Searchable fields can be retrieved with the Describe call
      * @param filterValues Comma-separated list of values to match against query
      * @param fields Comma-separated list of fields to include in the response query
-     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
+     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size
+     * and
      * can be passed in a subsequent call through this parameter
      * @return opportunity records
      */
@@ -96,13 +97,15 @@ public interface OpportunityClient extends HttpClient {
     );
 
     /**
-     * Deletes a list of opportunity records from the target instance. Input records should only have one member, based on
+     * Deletes a list of opportunity records from the target instance. Input records should only have one member, based
+     * on
      * the value of 'dedupeBy'.
      *
      * @param accessToken Marketo authorization token for API
      * @param payload is json object containing the following parameters
      * <ul>
-     * <li>@param deleteBy Field to delete records by. Permissible values are idField or dedupeFields as indicated by the
+     * <li>@param deleteBy Field to delete records by. Permissible values are idField or dedupeFields as indicated by
+     * the
      * result of the corresponding describe record.</li>
      * <li>@param input List of input records value</li>
      * </ul>
@@ -134,10 +137,12 @@ public interface OpportunityClient extends HttpClient {
      * Returns a list of opportunity roles based on a filter and set of values.
      *
      * @param accessToken Marketo authorization token for API
-     * @param filterType The OpportunityRoles field to filter on. Searchable fields can be retrieved with the Describe call
+     * @param filterType The OpportunityRoles field to filter on. Searchable fields can be retrieved with the Describe
+     * call
      * @param filterValues Comma-separated list of values to match against query
      * @param fields Comma-separated list of fields to include in the response query
-     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
+     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size
+     * and
      * can be passed in a subsequent call through this parameter
      * @return opportunity records
      */
@@ -184,7 +189,8 @@ public interface OpportunityClient extends HttpClient {
      * @param accessToken Marketo authorization token for API
      * @param payload is json object containing the following parameters
      * <ul>
-     * <li>@param deleteBy Field to delete records by. Permissible values are idField or dedupeFields as indicated by the
+     * <li>@param deleteBy Field to delete records by. Permissible values are idField or dedupeFields as indicated by
+     * the
      * result of the corresponding describe record.</li>
      * <li>@param input List of input records value</li>
      * </ul>

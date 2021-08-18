@@ -95,7 +95,8 @@ public class BigQueryOutput implements Serializable {
 
     private transient boolean isTruncateDone;
 
-    public BigQueryOutput(@Option("configuration") final BigQueryOutputConfig configuration, BigQueryService bigQueryService,
+    public BigQueryOutput(@Option("configuration") final BigQueryOutputConfig configuration,
+            BigQueryService bigQueryService,
             GoogleStorageService storageService, RecordIORepository ioRepository, I18nMessage i18n) {
         this.configuration = configuration;
         this.connection = configuration.getDataSet().getConnection();
@@ -119,8 +120,9 @@ public class BigQueryOutput implements Serializable {
     @PostConstruct
     public void init() {
         bigQuery = service.createClient(connection);
-        tableId = TableId.of(connection.getProjectName(), configuration.getDataSet().getBqDataset(),
-                configuration.getDataSet().getTableName());
+        tableId = TableId
+                .of(connection.getProjectName(), configuration.getDataSet().getBqDataset(),
+                        configuration.getDataSet().getTableName());
         if (BigQueryOutputConfig.TableOperation.TRUNCATE == configuration.getTableOperation()) {
             storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
         }
@@ -139,8 +141,10 @@ public class BigQueryOutput implements Serializable {
         } else {
             Blob blob = getNewBlob();
             String sourceUri = "gs://" + blob.getBlobId().getBucket() + "/" + blob.getBlobId().getName();
-            LoadJobConfiguration loadConfiguration = LoadJobConfiguration.newBuilder(tableId, sourceUri)
-                    .setWriteDisposition(JobInfo.WriteDisposition.WRITE_TRUNCATE).build();
+            LoadJobConfiguration loadConfiguration = LoadJobConfiguration
+                    .newBuilder(tableId, sourceUri)
+                    .setWriteDisposition(JobInfo.WriteDisposition.WRITE_TRUNCATE)
+                    .build();
             JobInfo jobInfo = JobInfo.newBuilder(loadConfiguration).setJobId(jobId).build();
             Job job = bigQuery.create(jobInfo);
             try {
@@ -185,7 +189,8 @@ public class BigQueryOutput implements Serializable {
     private RecordWriter buildWriter(WriteChannel writerChannel) throws IOException {
         final ContentFormat contentFormat = new CSVConfiguration();
         final RecordWriterSupplier recordWriterSupplier = this.ioRepository.findWriter(contentFormat.getClass());
-        final RecordWriter writer = recordWriterSupplier.getWriter(() -> Channels.newOutputStream(writerChannel), contentFormat);
+        final RecordWriter writer =
+                recordWriterSupplier.getWriter(() -> Channels.newOutputStream(writerChannel), contentFormat);
         writer.init(contentFormat);
         return writer;
     }
@@ -204,8 +209,10 @@ public class BigQueryOutput implements Serializable {
         if (table != null) {
             tableSchema = table.getDefinition().getSchema();
         } else if (configuration.getTableOperation() != BigQueryOutputConfig.TableOperation.CREATE_IF_NOT_EXISTS) {
-            throw new BigQueryConnectorException(i18n.infoTableNoExists(
-                    configuration.getDataSet().getBqDataset() + "." + configuration.getDataSet().getTableName()));
+            throw new BigQueryConnectorException(i18n
+                    .infoTableNoExists(
+                            configuration.getDataSet().getBqDataset() + "."
+                                    + configuration.getDataSet().getTableName()));
         }
     }
 
@@ -269,7 +276,12 @@ public class BigQueryOutput implements Serializable {
         while (nbRecordsSent < nbRecordsToSend) {
 
             recordsBuffer.clear();
-            records.stream().skip(nbRecordsSent).limit(MAX_BATCH_SIZE).map(converter::apply).forEach(recordsBuffer::add);
+            records
+                    .stream()
+                    .skip(nbRecordsSent)
+                    .limit(MAX_BATCH_SIZE)
+                    .map(converter::apply)
+                    .forEach(recordsBuffer::add);
 
             InsertAllRequest.Builder insertAllRequestBuilder = InsertAllRequest.newBuilder(tableId);
             recordsBuffer.stream().forEach(insertAllRequestBuilder::addRow);
@@ -319,8 +331,11 @@ public class BigQueryOutput implements Serializable {
 
     private JobInfo buildJobInfo() {
         String sourceUri = "gs://" + blobInfo.getBucket() + "/" + blobInfo.getName();
-        LoadJobConfiguration loadConfiguration = LoadJobConfiguration.newBuilder(tableId, sourceUri)
-                .setFormatOptions(FormatOptions.csv()).setSchema(tableSchema).build();
+        LoadJobConfiguration loadConfiguration = LoadJobConfiguration
+                .newBuilder(tableId, sourceUri)
+                .setFormatOptions(FormatOptions.csv())
+                .setSchema(tableSchema)
+                .build();
         return JobInfo.of(loadConfiguration);
     }
 

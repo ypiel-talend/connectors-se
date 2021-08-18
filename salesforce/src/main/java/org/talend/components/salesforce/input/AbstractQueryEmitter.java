@@ -59,7 +59,8 @@ public abstract class AbstractQueryEmitter implements Serializable {
 
     private boolean preBuildSchema;
 
-    public AbstractQueryEmitter(final InputConfig inputConfig, final SalesforceService service, LocalConfiguration configuration,
+    public AbstractQueryEmitter(final InputConfig inputConfig, final SalesforceService service,
+            LocalConfiguration configuration,
             final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
         this.service = service;
         this.inputConfig = inputConfig;
@@ -71,8 +72,9 @@ public abstract class AbstractQueryEmitter implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            final BulkConnection bulkConnection = service.bulkConnect(inputConfig.getDataSet().getDataStore(),
-                    localConfiguration);
+            final BulkConnection bulkConnection = service
+                    .bulkConnect(inputConfig.getDataSet().getDataStore(),
+                            localConfiguration);
             bulkQueryService = new BulkQueryService(bulkConnection, recordBuilderFactory, messages);
             bulkQueryService.doBulkQuery(getModuleName(), getQuery());
         } catch (ConnectionException e) {
@@ -89,8 +91,9 @@ public abstract class AbstractQueryEmitter implements Serializable {
         try {
             if (!preBuildSchema) {
                 this.preBuildSchema = true;
-                Map<String, IField> fieldMap = service.getFieldMap(inputConfig.getDataSet().getDataStore(), getModuleName(),
-                        localConfiguration);
+                Map<String, IField> fieldMap = service
+                        .getFieldMap(inputConfig.getDataSet().getDataStore(), getModuleName(),
+                                localConfiguration);
                 bulkQueryService.setFieldMap(fieldMap);
                 Schema schema = service.guessSchema(getColumnNames(), fieldMap, recordBuilderFactory);
                 bulkQueryService.setRecordSchema(schema);

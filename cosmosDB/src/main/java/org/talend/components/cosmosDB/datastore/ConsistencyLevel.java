@@ -13,6 +13,7 @@
 package org.talend.components.cosmosDB.datastore;
 
 public enum ConsistencyLevel {
+
     Strong,
     BoundedStaleness,
     Session,

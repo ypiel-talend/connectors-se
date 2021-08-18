@@ -58,13 +58,16 @@ class AbstractTestMigrationHandlerTest {
 
         final String incoming = "{\n" + "\t\"configuration.level1.level2.legacy\" : \"legacy data\",\n"
                 + "\t\"configuration.outgoing_conf\" : \"\",\n" + "\t\"configuration.incoming_conf\" : \"\",\n"
-                + "\t\"configuration.level1.level2.duplication\" : \"\",\n" + "\t\"configuration.test_callback\" : \"\"\n" + "}";
+                + "\t\"configuration.level1.level2.duplication\" : \"\",\n"
+                + "\t\"configuration.test_callback\" : \"\"\n" + "}";
         assertEquals(migrated.get("configuration.incoming_conf"), incoming);
 
         final String outgoing = "{\n" + "\t\"configuration.level1.level2.legacy\" : \"legacy data\",\n"
                 + "\t\"configuration.outgoing_conf\" : \"\",\n" + "\t\"configuration.incoming_conf\" : \"{\n"
-                + "\t\"configuration.level1.level2.legacy\" : \"legacy data\",\n" + "\t\"configuration.outgoing_conf\" : \"\",\n"
-                + "\t\"configuration.incoming_conf\" : \"\",\n" + "\t\"configuration.level1.level2.duplication\" : \"\",\n"
+                + "\t\"configuration.level1.level2.legacy\" : \"legacy data\",\n"
+                + "\t\"configuration.outgoing_conf\" : \"\",\n"
+                + "\t\"configuration.incoming_conf\" : \"\",\n"
+                + "\t\"configuration.level1.level2.duplication\" : \"\",\n"
                 + "\t\"configuration.test_callback\" : \"\"\n" + "}\",\n"
                 + "\t\"configuration.level1.level2.duplication\" : \"legacy data\",\n"
                 + "\t\"configuration.test_callback\" : \"1 -> " + AbstractConfig.VERSION + " | " + sDate + "\"\n" + "}";

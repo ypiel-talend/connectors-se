@@ -44,15 +44,18 @@ public class DynamicsCrmService {
     @Service
     private I18n i18n;
 
-    public DynamicsCRMClient createClient(DynamicsCrmConnection connection, String entitySet) throws AuthenticationException {
+    public DynamicsCRMClient createClient(DynamicsCrmConnection connection, String entitySet)
+            throws AuthenticationException {
         ClientConfiguration clientConfig;
         if (connection.getAppType() == AppType.NATIVE) {
-            clientConfig = ClientConfigurationFactory.buildOAuthNativeClientConfiguration(connection.getClientId(),
-                    connection.getUsername(), connection.getPassword(), connection.getAuthorizationEndpoint());
+            clientConfig = ClientConfigurationFactory
+                    .buildOAuthNativeClientConfiguration(connection.getClientId(),
+                            connection.getUsername(), connection.getPassword(), connection.getAuthorizationEndpoint());
         } else {
-            clientConfig = ClientConfigurationFactory.buildOAuthWebClientConfiguration(connection.getClientId(),
-                    connection.getClientSecret(), connection.getUsername(), connection.getPassword(),
-                    connection.getAuthorizationEndpoint(), ClientConfiguration.WebAppPermission.DELEGATED);
+            clientConfig = ClientConfigurationFactory
+                    .buildOAuthWebClientConfiguration(connection.getClientId(),
+                            connection.getClientSecret(), connection.getUsername(), connection.getPassword(),
+                            connection.getAuthorizationEndpoint(), ClientConfiguration.WebAppPermission.DELEGATED);
         }
         clientConfig.setTimeout(connection.getTimeout());
         clientConfig.setMaxRetry(connection.getMaxRetries(), INTERVAL_TIME);
@@ -66,7 +69,10 @@ public class DynamicsCrmService {
             ODataEntitySetRequest<ClientEntitySet> request = client.createEndpointsNamesRequest();
             ODataRetrieveResponse<ClientEntitySet> response = request.execute();
             ClientEntitySet entitySet = response.getBody();
-            return entitySet.getEntities().stream().map(e -> e.getProperty("name").getValue().asPrimitive().toString())
+            return entitySet
+                    .getEntities()
+                    .stream()
+                    .map(e -> e.getProperty("name").getValue().asPrimitive().toString())
                     .collect(Collectors.toList());
         } catch (AuthenticationException e) {
             throw new DynamicsCrmException(i18n.authenticationFailed(e.getMessage()), e);
@@ -95,19 +101,27 @@ public class DynamicsCrmService {
 
     protected URIBuilder createUriBuilderForValidProps(DynamicsCRMClient client, DynamicsCrmConnection datastore,
             String entitySetName) {
-        return client.getClient().newURIBuilder(datastore.getServiceRootUrl()).appendEntitySetSegment("EntityDefinitions")
-                .appendKeySegment(Collections.singletonMap("LogicalName", entitySetName)).appendEntitySetSegment("Attributes")
+        return client
+                .getClient()
+                .newURIBuilder(datastore.getServiceRootUrl())
+                .appendEntitySetSegment("EntityDefinitions")
+                .appendKeySegment(Collections.singletonMap("LogicalName", entitySetName))
+                .appendEntitySetSegment("Attributes")
                 .select("LogicalName", "IsValidForRead", "IsValidForUpdate", "IsValidForCreate");
     }
 
-    public List<PropertyValidationData> getPropertiesValidationData(DynamicsCRMClient client, DynamicsCrmConnection datastore,
+    public List<PropertyValidationData> getPropertiesValidationData(DynamicsCRMClient client,
+            DynamicsCrmConnection datastore,
             String logicalTypeName) {
         ODataEntitySetRequest<ClientEntitySet> validationDataRequest = client
                 .createRequest(createUriBuilderForValidProps(client, datastore, logicalTypeName));
         ODataRetrieveResponse<ClientEntitySet> validationDataResponse = validationDataRequest.execute();
         ClientEntitySet validationDataSet = validationDataResponse.getBody();
-        return validationDataSet.getEntities().stream()
-                .map(e -> new PropertyValidationData((String) e.getProperty("LogicalName").getPrimitiveValue().toValue(),
+        return validationDataSet
+                .getEntities()
+                .stream()
+                .map(e -> new PropertyValidationData(
+                        (String) e.getProperty("LogicalName").getPrimitiveValue().toValue(),
                         (boolean) e.getProperty("IsValidForCreate").getPrimitiveValue().toValue(),
                         (boolean) e.getProperty("IsValidForUpdate").getPrimitiveValue().toValue(),
                         (boolean) e.getProperty("IsValidForRead").getPrimitiveValue().toValue()))

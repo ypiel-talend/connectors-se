@@ -62,7 +62,8 @@ public interface AuthorizationClient extends HttpClient {
     }
 
     /**
-     * Checks in returned errors if access token is expired (602 Access token expired The Access Token included in the call
+     * Checks in returned errors if access token is expired (602 Access token expired The Access Token included in the
+     * call
      * is no longer valid due to expiration.)
      * 
      * @param errors list of API errors
@@ -88,13 +89,16 @@ public interface AuthorizationClient extends HttpClient {
      * exponential backoff.</li>
      * <li>604 Request timed out The request was running for too long, or exceeded the time-out period specified in the
      * header of the call.</li>
-     * <li>606 Max rate limit ‘%s’ exceeded with in ‘%s’ secs The number of calls in the past 20 seconds was greater than
+     * <li>606 Max rate limit ‘%s’ exceeded with in ‘%s’ secs The number of calls in the past 20 seconds was greater
+     * than
      * 100</li>
      * <li>608 API Temporarily Unavailable</li>
      * <li>611 System error All unhandled exceptions</li>
-     * <li>614 Invalid Subscription The destination subscription cannot be found or is unreachable. This usually indicates
+     * <li>614 Invalid Subscription The destination subscription cannot be found or is unreachable. This usually
+     * indicates
      * temporary inaccessibility.</li>
-     * <li>615 Concurrent access limit reached At most 10 requests can be processed by any subscription at a time. This will
+     * <li>615 Concurrent access limit reached At most 10 requests can be processed by any subscription at a time. This
+     * will
      * be returned if there are already 10 requests for the subscription ongoing.</li>
      *
      * @param errors list of API errors

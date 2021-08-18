@@ -52,7 +52,8 @@ class IteratorMapTest {
     @Test
     void nullComputed() {
         final List<String> strings = Arrays.asList("Hello", null, "all", null, "of", null, "you");
-        final IteratorMap<String, Integer> it = new IteratorMap<>(strings.iterator(), s -> s == null ? -1 : s.length(), true);
+        final IteratorMap<String, Integer> it =
+                new IteratorMap<>(strings.iterator(), s -> s == null ? -1 : s.length(), true);
 
         Assertions.assertEquals(5, it.next());
         Assertions.assertEquals(-1, it.next());

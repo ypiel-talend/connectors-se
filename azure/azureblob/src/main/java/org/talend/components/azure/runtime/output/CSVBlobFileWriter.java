@@ -45,7 +45,8 @@ public class CSVBlobFileWriter extends BlobFileWriter {
 
     private boolean fileIsEmpty = true;
 
-    public CSVBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
+    public CSVBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
+            throws Exception {
         super(config, connectionServices);
         this.config = config;
         this.configCSV = config.getDataset().getCsvOptions();
@@ -92,8 +93,9 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         }
 
         byte[] contentBytes = content.getBytes(FormatUtils.getUsedEncodingValue(config.getDataset()));
-        ((CloudAppendBlob) getCurrentItem()).appendFromByteArray(contentBytes, 0, contentBytes.length, null, null,
-                AzureComponentServices.getTalendOperationContext());
+        ((CloudAppendBlob) getCurrentItem())
+                .appendFromByteArray(contentBytes, 0, contentBytes.length, null, null,
+                        AzureComponentServices.getTalendOperationContext());
 
         fileIsEmpty = false;
 
@@ -110,7 +112,9 @@ public class CSVBlobFileWriter extends BlobFileWriter {
 
         headerBuilder.append(getSchema().getEntries().get(0).getName());
         for (int i = 1; i < getSchema().getEntries().size(); i++) {
-            headerBuilder.append(FormatUtils.getFieldDelimiterValue(configCSV)).append(getSchema().getEntries().get(i).getName());
+            headerBuilder
+                    .append(FormatUtils.getFieldDelimiterValue(configCSV))
+                    .append(getSchema().getEntries().get(i).getName());
         }
         ((CloudAppendBlob) getCurrentItem())
                 .appendText(headerBuilder.toString() + FormatUtils.getRecordDelimiterValue(configCSV));

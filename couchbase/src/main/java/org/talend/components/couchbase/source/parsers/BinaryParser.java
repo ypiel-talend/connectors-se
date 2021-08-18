@@ -33,9 +33,11 @@ public class BinaryParser implements DocumentParser {
 
     public BinaryParser(RecordBuilderFactory builderFactory) {
         this.builderFactory = builderFactory;
-        schemaBinaryDocument = builderFactory.newSchemaBuilder(Schema.Type.RECORD)
+        schemaBinaryDocument = builderFactory
+                .newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(builderFactory.newEntryBuilder().withName("id").withType(Schema.Type.STRING).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("content").withType(Schema.Type.BYTES).build()).build();
+                .withEntry(builderFactory.newEntryBuilder().withName("content").withType(Schema.Type.BYTES).build())
+                .build();
     }
 
     @Override

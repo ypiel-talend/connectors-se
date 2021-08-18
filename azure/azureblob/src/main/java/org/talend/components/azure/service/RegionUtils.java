@@ -62,8 +62,9 @@ public class RegionUtils {
 
     public static String getBlobURI(boolean isHttpsConnectionUsed, String containerName, String accountName,
             String endpointSuffix, String itemName) {
-        String blobURI = String.format(AZURE_URI_FORMAT, isHttpsConnectionUsed ? "s" : "", containerName, accountName,
-                endpointSuffix, itemName);
+        String blobURI = String
+                .format(AZURE_URI_FORMAT, isHttpsConnectionUsed ? "s" : "", containerName, accountName,
+                        endpointSuffix, itemName);
         return blobURI;
 
     }

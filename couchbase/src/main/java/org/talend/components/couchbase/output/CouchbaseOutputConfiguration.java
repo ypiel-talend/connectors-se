@@ -35,7 +35,7 @@ import lombok.Data;
         @GridLayout.Row({ "useN1QLQuery" }), //
         @GridLayout.Row({ "query" }), //
         @GridLayout.Row({ "queryParams" }), //
-        }), @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
+}), @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
 @Documentation("Couchbase output configuration")
 public class CouchbaseOutputConfiguration implements Serializable {
 

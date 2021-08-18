@@ -72,7 +72,8 @@ public class BigQueryTableExtractInput implements Serializable {
     private transient AvroConverter converter;
 
     public BigQueryTableExtractInput(BigQueryTableExtractInputConfig configuration, final BigQueryService service,
-            final GoogleStorageService storageService, final I18nMessage i18n, final RecordBuilderFactory builderFactory,
+            final GoogleStorageService storageService, final I18nMessage i18n,
+            final RecordBuilderFactory builderFactory,
             final String gsBlob, Schema tckSchema) {
         this.bucket = configuration.getTableDataset().getGsBucket();
         this.connection = configuration.getDataStore();

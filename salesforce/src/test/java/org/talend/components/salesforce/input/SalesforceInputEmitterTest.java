@@ -93,9 +93,15 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(records);
-        Job.components().component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config).connections().from("emitter")
-                .to("salesforce-output").build().run();
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
         getComponentsHandler().resetState();
         // 2. prepare Contact data
 
@@ -106,15 +112,27 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         configuration.setBatchMode(false);
         configuration.setExceptionForErrors(true);
 
-        Record record = factory.newRecordBuilder().withString("FirstName", "F_test_types_" + UNIQUE_ID)
-                .withString("LastName", "L_test_types_" + UNIQUE_ID).withString("Email", "testalltype_" + UNIQUE_ID + "@test.com")
-                .withDouble("MailingLongitude", 115.7).withDouble("MailingLatitude", 39.4).withDateTime("Birthdate", new Date())
+        Record record = factory
+                .newRecordBuilder()
+                .withString("FirstName", "F_test_types_" + UNIQUE_ID)
+                .withString("LastName", "L_test_types_" + UNIQUE_ID)
+                .withString("Email", "testalltype_" + UNIQUE_ID + "@test.com")
+                .withDouble("MailingLongitude", 115.7)
+                .withDouble("MailingLatitude", 39.4)
+                .withDateTime("Birthdate", new Date())
                 .build();
-        final String outputContactConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
+        final String outputContactConfig =
+                configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(asList(record));
-        Job.components().component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputContactConfig).connections()
-                .from("emitter").to("salesforce-output").build().run();
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputContactConfig)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
         getComponentsHandler().resetState();
     }
 
@@ -132,8 +150,15 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         assertEquals(300, records.size());
         Record record = records.get(0);
@@ -149,15 +174,24 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         moduleDataSet.setModuleName("Account");
         moduleDataSet.setSelectColumnNames(Arrays.asList("Id", "Name", "NumberOfEmployees", "AnnualRevenue"));
         moduleDataSet.setDataStore(getDataStore());
-        moduleDataSet.setCondition(
-                "NumberOfEmployees = null and AnnualRevenue = null and Name Like 'TestName_%" + UNIQUE_ID + "%' limit 5");
+        moduleDataSet
+                .setCondition(
+                        "NumberOfEmployees = null and AnnualRevenue = null and Name Like 'TestName_%" + UNIQUE_ID
+                                + "%' limit 5");
 
         final InputModuleConfig inputConfig = new InputModuleConfig();
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         assertEquals(5, records.size());
         Record record = records.get(0);
@@ -183,8 +217,15 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(10, records.size());
 
@@ -196,14 +237,22 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     public void testQueryAllType() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
-        moduleDataSet.setSelectColumnNames(Arrays.asList("Id", "IsDeleted", "MasterRecordId", "Name", "Type", "ParentId",
-                "BillingStreet", "BillingCity", "BillingState", "BillingPostalCode", "BillingCountry", "BillingLatitude",
-                "BillingLongitude", "ShippingStreet", "ShippingCity", "ShippingState", "ShippingPostalCode", "ShippingCountry",
-                "ShippingLatitude", "ShippingLongitude", "Phone", "Fax", "AccountNumber", "Website", "PhotoUrl", "Sic",
-                "Industry", "AnnualRevenue", "NumberOfEmployees", "Ownership", "TickerSymbol", "Description", "Rating", "Site",
-                "OwnerId", "CreatedDate", "CreatedById", "LastModifiedDate", "LastModifiedById", "SystemModstamp",
-                "LastActivityDate", "LastViewedDate", "LastReferencedDate", "Jigsaw", "JigsawCompanyId", "AccountSource",
-                "SicDesc"));
+        moduleDataSet
+                .setSelectColumnNames(Arrays
+                        .asList("Id", "IsDeleted", "MasterRecordId", "Name", "Type", "ParentId",
+                                "BillingStreet", "BillingCity", "BillingState", "BillingPostalCode", "BillingCountry",
+                                "BillingLatitude",
+                                "BillingLongitude", "ShippingStreet", "ShippingCity", "ShippingState",
+                                "ShippingPostalCode", "ShippingCountry",
+                                "ShippingLatitude", "ShippingLongitude", "Phone", "Fax", "AccountNumber", "Website",
+                                "PhotoUrl", "Sic",
+                                "Industry", "AnnualRevenue", "NumberOfEmployees", "Ownership", "TickerSymbol",
+                                "Description", "Rating", "Site",
+                                "OwnerId", "CreatedDate", "CreatedById", "LastModifiedDate", "LastModifiedById",
+                                "SystemModstamp",
+                                "LastActivityDate", "LastViewedDate", "LastReferencedDate", "Jigsaw", "JigsawCompanyId",
+                                "AccountSource",
+                                "SicDesc"));
         moduleDataSet.setDataStore(getDataStore());
         moduleDataSet.setCondition("Name Like 'TestName_%" + UNIQUE_ID + "%' and NumberOfEmployees != null");
 
@@ -211,8 +260,15 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(8, records.size());
         Record record = records.get(0);
@@ -236,8 +292,14 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
         final IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> Job.components().component("salesforce-input", "Salesforce://Input?" + config)
-                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
+                () -> Job
+                        .components()
+                        .component("salesforce-input", "Salesforce://Input?" + config)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("salesforce-input")
+                        .to("collector")
+                        .build()
                         .run());
     }
 
@@ -253,8 +315,14 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
         Pipeline.PipelineExecutionException ex = assertThrows(Pipeline.PipelineExecutionException.class,
-                () -> Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
+                () -> Job
+                        .components()
+                        .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("salesforce-input")
+                        .to("collector")
+                        .build()
                         .run());
         assertTrue(ex.getMessage().contains("java.lang.IllegalStateException"), ex.getMessage());
     }
@@ -272,8 +340,14 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
         Pipeline.PipelineExecutionException ex = assertThrows(Pipeline.PipelineExecutionException.class,
-                () -> Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
+                () -> Job
+                        .components()
+                        .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("salesforce-input")
+                        .to("collector")
+                        .build()
                         .run());
         assertEquals(IllegalStateException.class, ex.getCause().getClass());
     }
@@ -283,15 +357,23 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     @DisplayName("Test basic SOQL query")
     public void testSOQLQueryBasicCase() {
         final SOQLQueryDataSet soqlQueryDataSet = new SOQLQueryDataSet();
-        soqlQueryDataSet.setQuery("select Id,Name,IsDeleted from account where Name Like 'TestName_%" + UNIQUE_ID + "%'");
+        soqlQueryDataSet
+                .setQuery("select Id,Name,IsDeleted from account where Name Like 'TestName_%" + UNIQUE_ID + "%'");
         soqlQueryDataSet.setDataStore(getDataStore());
 
         final InputSOQLConfig inputConfig = new InputSOQLConfig();
         inputConfig.setDataSet(soqlQueryDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(300, records.size());
         Record record = records.get(0);
@@ -312,8 +394,15 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(soqlQueryDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(0, records.size());
     }
@@ -330,8 +419,14 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
         Pipeline.PipelineExecutionException ex = assertThrows(Pipeline.PipelineExecutionException.class,
-                () -> Job.components().component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
+                () -> Job
+                        .components()
+                        .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("salesforce-input")
+                        .to("collector")
+                        .build()
                         .run());
         assertEquals(IllegalStateException.class, ex.getCause().getClass());
     }
@@ -340,15 +435,24 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     @DisplayName("Test SOQL query with relationship")
     public void testSOQLQueryChildToParent() {
         final SOQLQueryDataSet soqlQueryDataSet = new SOQLQueryDataSet();
-        soqlQueryDataSet.setQuery("select Id,Name,CreatedBy.Name from Account where Name Like 'TestName_100%" + UNIQUE_ID + "%'");
+        soqlQueryDataSet
+                .setQuery(
+                        "select Id,Name,CreatedBy.Name from Account where Name Like 'TestName_100%" + UNIQUE_ID + "%'");
         soqlQueryDataSet.setDataStore(getDataStore());
 
         final InputSOQLConfig inputConfig = new InputSOQLConfig();
         inputConfig.setDataSet(soqlQueryDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(1, records.size());
         Record record = records.get(0);
@@ -359,17 +463,25 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
     @DisplayName("Test SOQL query with relationship without name")
     public void testSOQLQueryChildToParentWithoutName() {
         final SOQLQueryDataSet soqlQueryDataSet = new SOQLQueryDataSet();
-        soqlQueryDataSet.setQuery(
-                "select Contact.Name, Account.Name from Contact where MailingLongitude != null and MailingLongitude !=null and Birthdate !=null and Name Like 'F_test_types_%"
-                        + UNIQUE_ID + "%'");
+        soqlQueryDataSet
+                .setQuery(
+                        "select Contact.Name, Account.Name from Contact where MailingLongitude != null and MailingLongitude !=null and Birthdate !=null and Name Like 'F_test_types_%"
+                                + UNIQUE_ID + "%'");
         soqlQueryDataSet.setDataStore(getDataStore());
 
         final InputSOQLConfig inputConfig = new InputSOQLConfig();
         inputConfig.setDataSet(soqlQueryDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(1, records.size());
         Record record = records.get(0);
@@ -390,8 +502,15 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(10, records.size());
         Schema schema = records.iterator().next().getSchema();

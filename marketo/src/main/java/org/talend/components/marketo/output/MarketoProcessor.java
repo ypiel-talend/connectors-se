@@ -85,15 +85,21 @@ public class MarketoProcessor extends MarketoSourceOrProcessor {
             return;
         }
         if (records.size() > REST_API_LIMIT) {
-            String msg = String.format("[flush] Max batch size is set above API limit (%d): %d.", REST_API_LIMIT, records.size());
+            String msg = String
+                    .format("[flush] Max batch size is set above API limit (%d): %d.", REST_API_LIMIT, records.size());
             log.error(msg);
             throw new MarketoRuntimeException(msg);
         }
         JsonObject payload = strategy.getPayload(records);
         JsonObject result = strategy.runAction(payload);
-        result.getJsonArray(ATTR_RESULT).getValuesAs(JsonObject.class).stream().filter(strategy::isRejected).forEach(e -> {
-            log.error(getErrors(e.getJsonArray(ATTR_REASONS)));
-        });
+        result
+                .getJsonArray(ATTR_RESULT)
+                .getValuesAs(JsonObject.class)
+                .stream()
+                .filter(strategy::isRejected)
+                .forEach(e -> {
+                    log.error(getErrors(e.getJsonArray(ATTR_REASONS)));
+                });
     }
 
 }

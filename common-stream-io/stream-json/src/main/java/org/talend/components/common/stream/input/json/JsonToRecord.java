@@ -55,7 +55,8 @@ public class JsonToRecord {
     /*
      * Copy from TCK RecordConverters.java
      * Just removing dependency to JsonLorg.apache.johnzon.core.JsonLongImpl
-     * https://github.com/Talend/component-runtime/blob/0597e8dc0498559528a65cde64eccfe1cfea2913/component-runtime-impl/src/main/
+     * https://github.com/Talend/component-runtime/blob/0597e8dc0498559528a65cde64eccfe1cfea2913/component-runtime-impl/
+     * src/main/
      * java/org/talend/sdk/component/runtime/record/RecordConverters.java#L134
      */
     public Record toRecord(final JsonObject object) {
@@ -65,15 +66,21 @@ public class JsonToRecord {
             switch (value.getValueType()) {
             case ARRAY: {
                 final List<Object> items = value.asJsonArray().stream().map(this::mapJson).collect(toList());
-                builder.withArray(
-                        entryBuilder.withType(Schema.Type.ARRAY).withElementSchema(getArrayElementSchema(factory, items)).build(),
-                        items);
+                builder
+                        .withArray(
+                                entryBuilder
+                                        .withType(Schema.Type.ARRAY)
+                                        .withElementSchema(getArrayElementSchema(factory, items))
+                                        .build(),
+                                items);
                 break;
             }
             case OBJECT: {
                 final Record record = toRecord(value.asJsonObject());
-                builder.withRecord(entryBuilder.withType(Schema.Type.RECORD).withElementSchema(record.getSchema()).build(),
-                        record);
+                builder
+                        .withRecord(
+                                entryBuilder.withType(Schema.Type.RECORD).withElementSchema(record.getSchema()).build(),
+                                record);
                 break;
             }
             case TRUE:
@@ -112,7 +119,8 @@ public class JsonToRecord {
      */
     protected Schema schema;
 
-    public Record toRecordWithFixedSchema(final JsonObject object, @Nullable Schema schema, boolean emptyRecordAsString) {
+    public Record toRecordWithFixedSchema(final JsonObject object, @Nullable Schema schema,
+            boolean emptyRecordAsString) {
         if (emptyRecordAsString && object.size() == 0) {
             return null;
         }
@@ -120,20 +128,30 @@ public class JsonToRecord {
         if (this.schema == null && schema == null) {
             final Record.Builder builder = factory.newRecordBuilder();
             object.forEach((String key, JsonValue value) -> {
-                final Schema.Entry.Builder entryBuilder = this.factory.newEntryBuilder().withName(key).withNullable(true);
+                final Schema.Entry.Builder entryBuilder =
+                        this.factory.newEntryBuilder().withName(key).withNullable(true);
                 switch (value.getValueType()) {
                 case ARRAY: {
                     final List<Object> items = value.asJsonArray().stream().map(this::mapJson).collect(toList());
-                    builder.withArray(entryBuilder.withType(Schema.Type.ARRAY)
-                            .withElementSchema(getArrayElementSchema(factory, items)).build(), items);
+                    builder
+                            .withArray(entryBuilder
+                                    .withType(Schema.Type.ARRAY)
+                                    .withElementSchema(getArrayElementSchema(factory, items))
+                                    .build(), items);
                     break;
                 }
                 case OBJECT: {
-                    final Record record = new JsonToRecord(factory).toRecordWithFixedSchema(value.asJsonObject(), null,
-                            emptyRecordAsString);
+                    final Record record = new JsonToRecord(factory)
+                            .toRecordWithFixedSchema(value.asJsonObject(), null,
+                                    emptyRecordAsString);
                     if (record != null && (record.getSchema().getEntries().size() > 0 || !emptyRecordAsString)) {
-                        builder.withRecord(
-                                entryBuilder.withType(Schema.Type.RECORD).withElementSchema(record.getSchema()).build(), record);
+                        builder
+                                .withRecord(
+                                        entryBuilder
+                                                .withType(Schema.Type.RECORD)
+                                                .withElementSchema(record.getSchema())
+                                                .build(),
+                                        record);
                     } else {
                         builder.withString(key, "{}");// For Avro compatibility of TFD
                     }
@@ -185,7 +203,9 @@ public class JsonToRecord {
                     builder.withLong(entry, object.getJsonNumber(entry.getName()).longValue());
                     break;
                 case ARRAY:
-                    builder.withArray(entry, object.getJsonArray(entry.getName()).stream().map(this::mapJson).collect(toList()));
+                    builder
+                            .withArray(entry,
+                                    object.getJsonArray(entry.getName()).stream().map(this::mapJson).collect(toList()));
                     break;
                 case FLOAT:
                     builder.withFloat(entry, (float) object.getJsonNumber(entry.getName()).doubleValue());
@@ -194,8 +214,9 @@ public class JsonToRecord {
                     builder.withDouble(entry, object.getJsonNumber(entry.getName()).doubleValue());
                     break;
                 case RECORD:
-                    builder.withRecord(entry, toRecordWithFixedSchema(object.getJsonObject(entry.getName()),
-                            entry.getElementSchema(), emptyRecordAsString));
+                    builder
+                            .withRecord(entry, toRecordWithFixedSchema(object.getJsonObject(entry.getName()),
+                                    entry.getElementSchema(), emptyRecordAsString));
                     break;
                 case BOOLEAN:
                     builder.withBoolean(entry, object.getBoolean(entry.getName()));
@@ -308,7 +329,10 @@ public class JsonToRecord {
             if (collection.isEmpty()) {
                 return factory.newSchemaBuilder(Schema.Type.STRING).build();
             }
-            return factory.newSchemaBuilder(Schema.Type.ARRAY).withElementSchema(toSchema(collection.iterator().next())).build();
+            return factory
+                    .newSchemaBuilder(Schema.Type.ARRAY)
+                    .withElementSchema(toSchema(collection.iterator().next()))
+                    .build();
         }
         if (Record.class.isInstance(next)) {
             return Record.class.cast(next).getSchema();
@@ -317,6 +341,7 @@ public class JsonToRecord {
     }
 
     private enum NumberOption {
+
         ForceDoubleType {
 
             public Number getNumber(JsonNumber number) {

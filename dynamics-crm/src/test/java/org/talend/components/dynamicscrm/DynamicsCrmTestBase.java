@@ -93,8 +93,9 @@ public abstract class DynamicsCrmTestBase {
     }
 
     public void init() throws AuthenticationException {
-        ClientConfiguration clientConfig = ClientConfigurationFactory.buildOAuthWebClientConfiguration(getClientId(),
-                getClientSecret(), getUsername(), getPassword(), authEndpoint, WebAppPermission.DELEGATED);
+        ClientConfiguration clientConfig = ClientConfigurationFactory
+                .buildOAuthWebClientConfiguration(getClientId(),
+                        getClientSecret(), getUsername(), getPassword(), authEndpoint, WebAppPermission.DELEGATED);
         clientConfig.setTimeout(60);
         clientConfig.setMaxRetry(5, 1000);
         clientConfig.setReuseHttpClient(false);
@@ -115,8 +116,10 @@ public abstract class DynamicsCrmTestBase {
         QueryOptionConfig queryOptionConfig = new QueryOptionConfig();
         FilterFactory filterFactory = new FilterFactoryImpl();
         queryOptionConfig.setFilter(filterFactory.eq("company", company).build());
-        queryOptionConfig.setReturnEntityProperties(new String[] { "contactid", "annualincome", "assistantname", "business2",
-                "callback", "childrensnames", "company", "creditonhold", "_transactioncurrencyid_value", "birthdate" });
+        queryOptionConfig
+                .setReturnEntityProperties(new String[] { "contactid", "annualincome", "assistantname", "business2",
+                        "callback", "childrensnames", "company", "creditonhold", "_transactioncurrencyid_value",
+                        "birthdate" });
         ODataEntitySetRequest<ClientEntitySet> request = client.createEntityRetrieveRequest(queryOptionConfig);
         ODataRetrieveResponse<ClientEntitySet> response = request.execute();
         return response.getBody().getEntities();
@@ -152,30 +155,74 @@ public abstract class DynamicsCrmTestBase {
     }
 
     protected Record createTestRecord() {
-        Schema schema = builderFactory.newSchemaBuilder(Type.RECORD)
-                .withEntry(builderFactory.newEntryBuilder().withName("annualincome").withType(Type.FLOAT)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.FLOAT).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("assistantname").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("business2").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("callback").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("childrensnames").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("company").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("creditonhold").withType(Type.BOOLEAN)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.BOOLEAN).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("_transactioncurrencyid_value").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("birthdate").withType(Type.INT)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.INT).build()).build())
+        Schema schema = builderFactory
+                .newSchemaBuilder(Type.RECORD)
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("annualincome")
+                        .withType(Type.FLOAT)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.FLOAT).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("assistantname")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("business2")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("callback")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("childrensnames")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("company")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("creditonhold")
+                        .withType(Type.BOOLEAN)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.BOOLEAN).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("_transactioncurrencyid_value")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("birthdate")
+                        .withType(Type.INT)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.INT).build())
+                        .build())
                 .build();
-        Record record = builderFactory.newRecordBuilder(schema).withFloat("annualincome", 2.0f)
-                .withString("assistantname", "assistant").withString("business2", "business2").withString("callback", "callback")
-                .withString("childrensnames", "childrensnames").withString("company", company).withBoolean("creditonhold", false)
-                .withInt("birthdate", 6720).withString("_transactioncurrencyid_value", "dca1714c-6d1a-e311-a5fb-b4b52f67b688")
+        Record record = builderFactory
+                .newRecordBuilder(schema)
+                .withFloat("annualincome", 2.0f)
+                .withString("assistantname", "assistant")
+                .withString("business2", "business2")
+                .withString("callback", "callback")
+                .withString("childrensnames", "childrensnames")
+                .withString("company", company)
+                .withBoolean("creditonhold", false)
+                .withInt("birthdate", 6720)
+                .withString("_transactioncurrencyid_value", "dca1714c-6d1a-e311-a5fb-b4b52f67b688")
                 .build();
         return record;
     }

@@ -36,8 +36,10 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("Salesforce soql query input ")
 public class SOQLQueryEmitter extends AbstractQueryEmitter implements Serializable {
 
-    public SOQLQueryEmitter(@Option("configuration") final InputSOQLConfig inputSOQLConfig, final SalesforceService service,
-            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
+    public SOQLQueryEmitter(@Option("configuration") final InputSOQLConfig inputSOQLConfig,
+            final SalesforceService service,
+            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory,
+            final Messages messages) {
         super(inputSOQLConfig, service, configuration, recordBuilderFactory, messages);
     }
 

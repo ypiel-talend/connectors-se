@@ -48,9 +48,12 @@ class UIActionServiceTest extends AdlsGen2TestBase {
         super.setUp();
 
         final ComponentManager manager = componentsHandler.asManager();
-        final JsonObject filesystems = Json.createObjectBuilder()
-                .add("filesystems", Json.createArrayBuilder()
-                        .add(Json.createObjectBuilder().add("etag", "0x8D89D1980D8BD4B").add("name", "ct1").build()).build())
+        final JsonObject filesystems = Json
+                .createObjectBuilder()
+                .add("filesystems", Json
+                        .createArrayBuilder()
+                        .add(Json.createObjectBuilder().add("etag", "0x8D89D1980D8BD4B").add("name", "ct1").build())
+                        .build())
                 .build();
         ClientGen2Fake fake = new ClientGen2Fake(new FakeResponse<>(200, filesystems, null, null));
         ClientGen2Fake.inject(manager, fake);
@@ -86,10 +89,12 @@ class UIActionServiceTest extends AdlsGen2TestBase {
 
         final ComponentManager manager = componentsHandler.asManager();
         FakeActiveDirectoryService fakeActiveDirectoryService = new FakeActiveDirectoryService();
-        ClientGen2Fake fake = new ClientGen2Fake(new FakeResponse<>(403, null, Collections.emptyMap(), null)); // auth permission
+        ClientGen2Fake fake = new ClientGen2Fake(new FakeResponse<>(403, null, Collections.emptyMap(), null)); // auth
+                                                                                                               // permission
                                                                                                                // mismatch
         ClientGen2Fake.inject(manager, fake);
-        ClientGen2Fake.inject(manager, AdlsActiveDirectoryService.class, UIActionService.class, fakeActiveDirectoryService);
+        ClientGen2Fake
+                .inject(manager, AdlsActiveDirectoryService.class, UIActionService.class, fakeActiveDirectoryService);
 
         this.uiActionService = this.componentsHandler.findService(UIActionService.class);
 

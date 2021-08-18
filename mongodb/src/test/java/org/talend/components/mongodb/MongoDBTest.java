@@ -101,10 +101,18 @@ public class MongoDBTest {
     public static void beforeClass(@TempDir Path tempDir) throws Exception {
         port = getAvailableLocalPort();
         log.info("Starting MongoDB on port {}", port);
-        IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION).configServer(false)
+        IMongodConfig mongodConfig = new MongodConfigBuilder()
+                .version(Version.Main.PRODUCTION)
+                .configServer(false)
                 .replication(new Storage(tempDir.toFile().getPath(), null, 0))
-                .net(new Net("localhost", port, Network.localhostIsIPv6())).cmdOptions(new MongoCmdOptionsBuilder().syncDelay(10)
-                        .useNoPrealloc(true).useSmallFiles(true).useNoJournal(true).verbose(false).build())
+                .net(new Net("localhost", port, Network.localhostIsIPv6()))
+                .cmdOptions(new MongoCmdOptionsBuilder()
+                        .syncDelay(10)
+                        .useNoPrealloc(true)
+                        .useSmallFiles(true)
+                        .useNoJournal(true)
+                        .verbose(false)
+                        .build())
                 .build();
         mongodExecutable = MongodStarter.getDefaultInstance().prepare(mongodConfig);
         mongodProcess = mongodExecutable.start();
@@ -160,8 +168,9 @@ public class MongoDBTest {
 
     private static List<Document> createTestDocuments() {
         List<Document> result = new ArrayList<>();
-        String[] names = new String[] { "Wang Wei", "Xia Liang", "Qi Yan", "Zhao Jin", "Yuan Wei", "Peng Yu", "Xue Jing",
-                "Zi Heng", "Wei Zhao", "Pierre" };
+        String[] names =
+                new String[] { "Wang Wei", "Xia Liang", "Qi Yan", "Zhao Jin", "Yuan Wei", "Peng Yu", "Xue Jing",
+                        "Zi Heng", "Wei Zhao", "Pierre" };
 
         for (int i = 1; i < 11; i++) {
             Document doc = new Document();
@@ -339,8 +348,10 @@ public class MongoDBTest {
     void testMultiServers() {
         MongoDBDataStore datastore = new MongoDBDataStore();
         datastore.setAddressType(AddressType.REPLICA_SET);
-        datastore.setReplicaSetAddress(Arrays.asList(new Address("192.168.31.228", 27017), new Address("192.168.31.228", 27018),
-                new Address("192.168.31.228", 27019)));
+        datastore
+                .setReplicaSetAddress(Arrays
+                        .asList(new Address("192.168.31.228", 27017), new Address("192.168.31.228", 27018),
+                                new Address("192.168.31.228", 27019)));
         datastore.setDatabase("admin");
         datastore.setAuth(new Auth());
 
@@ -370,8 +381,9 @@ public class MongoDBTest {
     @Test
     void testGetOptions() {
         MongoDBDataStore datastore = new MongoDBDataStore();
-        List<ConnectionParameter> cp = Arrays.asList(new ConnectionParameter("connectTimeoutMS", "300000"),
-                new ConnectionParameter("appName", "myapp"));
+        List<ConnectionParameter> cp = Arrays
+                .asList(new ConnectionParameter("connectTimeoutMS", "300000"),
+                        new ConnectionParameter("appName", "myapp"));
         datastore.setConnectionParameter(cp);
         MongoClientOptions options = mongoDBService.getOptions(datastore);
         Assertions.assertEquals(300000, options.getConnectTimeout());
@@ -383,15 +395,22 @@ public class MongoDBTest {
     }
 
     private void executeSourceTestJob(BaseSourceConfiguration configuration) {
-        String sourceConfig = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
+        String sourceConfig =
+                SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
         if (configuration.getSampleLimit() != null) {
             sourceConfig = sourceConfig + "&configuration.sampleLimit=" + configuration.getSampleLimit();
         }
 
-        Job.components().component("MongoDB_CollectionQuerySource", "MongoDB://CollectionQuerySource?" + sourceConfig)
-                .component("collector", "test://collector").connections().from("MongoDB_CollectionQuerySource").to("collector")
-                .build().run();
+        Job
+                .components()
+                .component("MongoDB_CollectionQuerySource", "MongoDB://CollectionQuerySource?" + sourceConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("MongoDB_CollectionQuerySource")
+                .to("collector")
+                .build()
+                .run();
     }
 
     @Test
@@ -660,9 +679,15 @@ public class MongoDBTest {
     private List<Record> getTestData() {
         List<Record> testRecords = new ArrayList<>();
         for (int i = 1; i < 11; i++) {
-            Record record = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("id", i)
-                    .withString("name", "God" + i).withInt("score", 100).withDouble("high", 178.5)
-                    .withDateTime("birth", new Date()).build();
+            Record record = componentsHandler
+                    .findService(RecordBuilderFactory.class)
+                    .newRecordBuilder()
+                    .withInt("id", i)
+                    .withString("name", "God" + i)
+                    .withInt("score", 100)
+                    .withDouble("high", 178.5)
+                    .withDateTime("birth", new Date())
+                    .build();
             testRecords.add(record);
         }
         return testRecords;
@@ -671,9 +696,15 @@ public class MongoDBTest {
     private List<Record> getDuplicatedKeyTestData() {
         List<Record> testRecords = new ArrayList<>();
         for (int i = 1; i < 11; i++) {
-            Record record = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("_id", i)
-                    .withString("name", "God" + i).withInt("score", 100).withDouble("high", 178.5)
-                    .withDateTime("birth", new Date()).build();
+            Record record = componentsHandler
+                    .findService(RecordBuilderFactory.class)
+                    .newRecordBuilder()
+                    .withInt("_id", i)
+                    .withString("name", "God" + i)
+                    .withInt("score", 100)
+                    .withDouble("high", 178.5)
+                    .withDateTime("birth", new Date())
+                    .build();
             testRecords.add(record);
         }
         return testRecords;
@@ -683,8 +714,11 @@ public class MongoDBTest {
         RecordToJson rtj = new RecordToJson();
         List<Record> testRecords = new ArrayList<>();
         for (Record record : records) {
-            Record r = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder()
-                    .withString("content", rtj.fromRecord(record).toString()).build();
+            Record r = componentsHandler
+                    .findService(RecordBuilderFactory.class)
+                    .newRecordBuilder()
+                    .withString("content", rtj.fromRecord(record).toString())
+                    .build();
             testRecords.add(r);
         }
         return testRecords;
@@ -693,8 +727,14 @@ public class MongoDBTest {
     private List<Record> getUpdateData() {
         List<Record> testRecords = new ArrayList<>();
         for (int i = 1; i < 11; i++) {
-            Record record = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("id", i)
-                    .withString("name", "God").withInt("score", 100).withDouble("high", 180.5).withDateTime("birth", new Date())
+            Record record = componentsHandler
+                    .findService(RecordBuilderFactory.class)
+                    .newRecordBuilder()
+                    .withInt("id", i)
+                    .withString("name", "God")
+                    .withInt("score", 100)
+                    .withDouble("high", 180.5)
+                    .withDateTime("birth", new Date())
                     .build();
             testRecords.add(record);
         }
@@ -704,8 +744,14 @@ public class MongoDBTest {
     private List<Record> getUpdateDataForDifferentPath() {
         List<Record> testRecords = new ArrayList<>();
         for (int i = 1; i < 11; i++) {
-            Record record = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("myid", i)
-                    .withString("name", "God").withInt("score", 100).withDouble("high", 180.5).withDateTime("birth", new Date())
+            Record record = componentsHandler
+                    .findService(RecordBuilderFactory.class)
+                    .newRecordBuilder()
+                    .withInt("myid", i)
+                    .withString("name", "God")
+                    .withInt("score", 100)
+                    .withDouble("high", 180.5)
+                    .withDateTime("birth", new Date())
                     .build();
             testRecords.add(record);
         }
@@ -715,8 +761,14 @@ public class MongoDBTest {
     private List<Record> getUpsertDataForDifferentPath() {
         List<Record> testRecords = new ArrayList<>();
         for (int i = 1; i < 21; i++) {
-            Record record = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("myid", i)
-                    .withString("name", "God").withInt("score", 100).withDouble("high", 180.5).withDateTime("birth", new Date())
+            Record record = componentsHandler
+                    .findService(RecordBuilderFactory.class)
+                    .newRecordBuilder()
+                    .withInt("myid", i)
+                    .withString("name", "God")
+                    .withInt("score", 100)
+                    .withDouble("high", 180.5)
+                    .withDateTime("birth", new Date())
                     .build();
             testRecords.add(record);
         }
@@ -726,8 +778,14 @@ public class MongoDBTest {
     private List<Record> getUpsertData() {
         List<Record> testRecords = new ArrayList<>();
         for (int i = 1; i < 21; i++) {
-            Record record = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("id", i)
-                    .withString("name", "God").withInt("score", 100).withDouble("high", 180.5).withDateTime("birth", new Date())
+            Record record = componentsHandler
+                    .findService(RecordBuilderFactory.class)
+                    .newRecordBuilder()
+                    .withInt("id", i)
+                    .withString("name", "God")
+                    .withInt("score", 100)
+                    .withDouble("high", 180.5)
+                    .withDateTime("birth", new Date())
                     .build();
             testRecords.add(record);
         }
@@ -735,23 +793,40 @@ public class MongoDBTest {
     }
 
     private void executeSinkTestJob(MongoDBSinkConfiguration configuration) {
-        final String sinkConfig = SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
-        Job.components().component("emitter", "test://emitter").component("MongoDB_Sink", "MongoDB://Sink?" + sinkConfig)
-                .connections().from("emitter").to("MongoDB_Sink").build().run();
+        final String sinkConfig =
+                SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("MongoDB_Sink", "MongoDB://Sink?" + sinkConfig)
+                .connections()
+                .from("emitter")
+                .to("MongoDB_Sink")
+                .build()
+                .run();
     }
 
-    private void executeSourceAndSinkTestJob(BaseSourceConfiguration source_config, MongoDBSinkConfiguration sink_config) {
-        String sourceConfig = SimpleFactory.configurationByExample().forInstance(source_config).configured().toQueryString();
+    private void executeSourceAndSinkTestJob(BaseSourceConfiguration source_config,
+            MongoDBSinkConfiguration sink_config) {
+        String sourceConfig =
+                SimpleFactory.configurationByExample().forInstance(source_config).configured().toQueryString();
 
         if (source_config.getSampleLimit() != null) {
             sourceConfig = sourceConfig + "&configuration.sampleLimit=" + source_config.getSampleLimit();
         }
 
-        final String sinkConfig = SimpleFactory.configurationByExample().forInstance(sink_config).configured().toQueryString();
+        final String sinkConfig =
+                SimpleFactory.configurationByExample().forInstance(sink_config).configured().toQueryString();
 
-        Job.components().component("MongoDB_CollectionQuerySource", "MongoDB://CollectionQuerySource?" + sourceConfig)
-                .component("MongoDB_Sink", "MongoDB://Sink?" + sinkConfig).connections().from("MongoDB_CollectionQuerySource")
-                .to("MongoDB_Sink").build().run();
+        Job
+                .components()
+                .component("MongoDB_CollectionQuerySource", "MongoDB://CollectionQuerySource?" + sourceConfig)
+                .component("MongoDB_Sink", "MongoDB://Sink?" + sinkConfig)
+                .connections()
+                .from("MongoDB_CollectionQuerySource")
+                .to("MongoDB_Sink")
+                .build()
+                .run();
     }
 
     @Test
@@ -796,7 +871,8 @@ public class MongoDBTest {
         MongoDBReadDataSet dataset = getMongoDBDataSet("basic");
         final List<Record> res = getRecords(dataset);
 
-        // the json string should be readable, no too much convert as not only for mongodb, the sink also for other target type
+        // the json string should be readable, no too much convert as not only for mongodb, the sink also for other
+        // target type
         // like database
         Record record = res.get(0);
 
@@ -819,7 +895,8 @@ public class MongoDBTest {
         MongoDBSinkConfiguration sink_config = new MongoDBSinkConfiguration();
         sink_config.setDataset(sink_dataset);
 
-        // the json string should be readable, no too much convert as not only for mongodb, the sink also for other target type
+        // the json string should be readable, no too much convert as not only for mongodb, the sink also for other
+        // target type
         // like database
         executeSourceAndSinkTestJob(source_config, sink_config);
 

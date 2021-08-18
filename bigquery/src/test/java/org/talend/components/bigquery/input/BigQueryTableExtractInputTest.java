@@ -75,16 +75,25 @@ public class BigQueryTableExtractInputTest {
         @Override
         public Schema getSchema() {
             if (schema == null) {
-                schema = SchemaBuilder.record("X").fields()
+                schema = SchemaBuilder
+                        .record("X")
+                        .fields()
 
-                        .name("f1").type(Schema.create(Schema.Type.STRING)).noDefault()
+                        .name("f1")
+                        .type(Schema.create(Schema.Type.STRING))
+                        .noDefault()
 
-                        .name("f2").type(Schema.create(Schema.Type.INT)).withDefault(0)
+                        .name("f2")
+                        .type(Schema.create(Schema.Type.INT))
+                        .withDefault(0)
 
-                        .name("f3").type(LogicalTypes.decimal(10, 3).addToSchema(Schema.create(Schema.Type.BYTES))).noDefault()
+                        .name("f3")
+                        .type(LogicalTypes.decimal(10, 3).addToSchema(Schema.create(Schema.Type.BYTES)))
+                        .noDefault()
 
                         .name("f4")
-                        .type(Schema.createArray(LogicalTypes.decimal(10, 3).addToSchema(Schema.create(Schema.Type.BYTES))))
+                        .type(Schema
+                                .createArray(LogicalTypes.decimal(10, 3).addToSchema(Schema.create(Schema.Type.BYTES))))
                         .noDefault()
 
                         .endRecord();
@@ -131,12 +140,21 @@ public class BigQueryTableExtractInputTest {
         service = Mockito.mock(BigQueryService.class);
         storageService = Mockito.mock(GoogleStorageService.class);
 
-        Mockito.doCallRealMethod().when(service).convertToTckField(Mockito.any(FieldValueList.class),
-                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class),
-                Mockito.any(com.google.cloud.bigquery.Schema.class));
-        Mockito.doCallRealMethod().when(service).convertToTckSchema(Mockito.any(com.google.cloud.bigquery.Schema.class));
-        Mockito.doCallRealMethod().when(service).convertToTckType(Mockito.any(LegacySQLTypeName.class),
-                Mockito.any(com.google.cloud.bigquery.Field.Mode.class));
+        Mockito
+                .doCallRealMethod()
+                .when(service)
+                .convertToTckField(Mockito.any(FieldValueList.class),
+                        Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class),
+                        Mockito.any(com.google.cloud.bigquery.Schema.class));
+        Mockito
+                .doCallRealMethod()
+                .when(service)
+                .convertToTckSchema(Mockito.any(com.google.cloud.bigquery.Schema.class));
+        Mockito
+                .doCallRealMethod()
+                .when(service)
+                .convertToTckType(Mockito.any(LegacySQLTypeName.class),
+                        Mockito.any(com.google.cloud.bigquery.Field.Mode.class));
 
         Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
         rbField.setAccessible(true);
@@ -152,8 +170,11 @@ public class BigQueryTableExtractInputTest {
         storage = Mockito.mock(Storage.class);
         Mockito.when(storageService.getStorage(credentials)).thenReturn(storage);
         dataStream = Mockito.mock(DataFileStream.class);
-        Mockito.when(storageService.getDataFileStream(Mockito.eq(storage), Mockito.eq(tableDataSet.getGsBucket()),
-                Mockito.anyString())).thenReturn(dataStream);
+        Mockito
+                .when(storageService
+                        .getDataFileStream(Mockito.eq(storage), Mockito.eq(tableDataSet.getGsBucket()),
+                                Mockito.anyString()))
+                .thenReturn(dataStream);
     }
 
     @Test
@@ -163,8 +184,9 @@ public class BigQueryTableExtractInputTest {
         Mockito.when(dataStream.next()).thenReturn(getGenericRecord(), null);
 
         String gsBlob = "aBlob";
-        BigQueryTableExtractInput beanUnderTest = new BigQueryTableExtractInput(configuration, service, storageService, i18n,
-                builderFactory, gsBlob, getTckSchema());
+        BigQueryTableExtractInput beanUnderTest =
+                new BigQueryTableExtractInput(configuration, service, storageService, i18n,
+                        builderFactory, gsBlob, getTckSchema());
         beanUnderTest.init();
 
         Record record1 = beanUnderTest.next();
@@ -178,34 +200,64 @@ public class BigQueryTableExtractInputTest {
         Assertions.assertNull(record2);
 
         beanUnderTest.release();
-        Mockito.verify(storageService, Mockito.times(1)).deleteBlob(storage, configuration.getTableDataset().getGsBucket(),
-                gsBlob);
+        Mockito
+                .verify(storageService, Mockito.times(1))
+                .deleteBlob(storage, configuration.getTableDataset().getGsBucket(),
+                        gsBlob);
     }
 
     private org.talend.sdk.component.api.record.Schema getTckSchema() {
         org.talend.sdk.component.api.record.Schema.Builder schemaBuilder = builderFactory
                 .newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
 
-        schemaBuilder.withEntry(builderFactory.newEntryBuilder().withName("f1")
-                .withType(org.talend.sdk.component.api.record.Schema.Type.STRING).withNullable(true).build());
-        schemaBuilder.withEntry(builderFactory.newEntryBuilder().withName("f2")
-                .withType(org.talend.sdk.component.api.record.Schema.Type.INT).withNullable(true).build());
-        schemaBuilder.withEntry(builderFactory.newEntryBuilder().withName("f3")
-                .withType(org.talend.sdk.component.api.record.Schema.Type.STRING).withNullable(true).build());
-        schemaBuilder.withEntry(
-                builderFactory.newEntryBuilder().withName("f4").withType(org.talend.sdk.component.api.record.Schema.Type.ARRAY)
-                        .withElementSchema(schemaBuilder.withEntry(builderFactory.newEntryBuilder().withName("element")
-                                .withType(org.talend.sdk.component.api.record.Schema.Type.STRING).withNullable(true).build())
-                                .build())
-                        .withNullable(true).build());
+        schemaBuilder
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("f1")
+                        .withType(org.talend.sdk.component.api.record.Schema.Type.STRING)
+                        .withNullable(true)
+                        .build());
+        schemaBuilder
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("f2")
+                        .withType(org.talend.sdk.component.api.record.Schema.Type.INT)
+                        .withNullable(true)
+                        .build());
+        schemaBuilder
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("f3")
+                        .withType(org.talend.sdk.component.api.record.Schema.Type.STRING)
+                        .withNullable(true)
+                        .build());
+        schemaBuilder
+                .withEntry(
+                        builderFactory
+                                .newEntryBuilder()
+                                .withName("f4")
+                                .withType(org.talend.sdk.component.api.record.Schema.Type.ARRAY)
+                                .withElementSchema(
+                                        schemaBuilder
+                                                .withEntry(builderFactory
+                                                        .newEntryBuilder()
+                                                        .withName("element")
+                                                        .withType(
+                                                                org.talend.sdk.component.api.record.Schema.Type.STRING)
+                                                        .withNullable(true)
+                                                        .build())
+                                                .build())
+                                .withNullable(true)
+                                .build());
 
         return schemaBuilder.build();
     }
 
     @Test
     public void ifBlobNullCallDelegate() throws Exception {
-        BigQueryTableExtractInput beanUnderTest = new BigQueryTableExtractInput(configuration, service, storageService, i18n,
-                builderFactory, null, null);
+        BigQueryTableExtractInput beanUnderTest =
+                new BigQueryTableExtractInput(configuration, service, storageService, i18n,
+                        builderFactory, null, null);
         beanUnderTest.init();
 
         // Inject delegate mock

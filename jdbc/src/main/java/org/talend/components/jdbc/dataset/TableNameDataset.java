@@ -64,8 +64,10 @@ public class TableNameDataset implements BaseDataSet {
     @Override
     public String getQuery() {
         Platform platform = get(connection, null);
-        String columns = ofNullable(getListColumns()).filter(list -> !list.isEmpty())
-                .map(l -> l.stream().map(platform::identifier).collect(Collectors.joining(","))).orElse("*");
+        String columns = ofNullable(getListColumns())
+                .filter(list -> !list.isEmpty())
+                .map(l -> l.stream().map(platform::identifier).collect(Collectors.joining(",")))
+                .orElse("*");
         // No need for the i18n service for this instance
         return String.format(QUERY_TEMPLATE, columns, platform.identifier(getTableName()));
     }

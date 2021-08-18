@@ -44,8 +44,10 @@ public class Insert implements RecordsOperation {
 
         try {
             final ISaveResult[] saveResults = connection.create(accs);
-            return Stream.of(saveResults) //
-                    .map(this::toResult).collect(Collectors.toList());
+            return Stream
+                    .of(saveResults) //
+                    .map(this::toResult)
+                    .collect(Collectors.toList());
         } catch (ConnectionException e) {
             throw new IOException(e);
         }
@@ -60,7 +62,8 @@ public class Insert implements RecordsOperation {
         if (saveResult.isSuccess()) {
             return Result.OK;
         }
-        final List<String> errors = Stream.of(saveResult.getErrors()) //
+        final List<String> errors = Stream
+                .of(saveResult.getErrors()) //
                 .map(IError::getMessage) //
                 .collect(Collectors.toList());
         return new Result(errors);

@@ -43,10 +43,13 @@ public abstract class BlobFileWriter {
 
     private String directoryName;
 
-    public BlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
+    public BlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
+            throws Exception {
         CloudStorageAccount connection = connectionServices.createStorageAccount(config.getDataset().getConnection());
-        CloudBlobClient blobClient = connectionServices.getConnectionService().createCloudBlobClient(connection,
-                AzureComponentServices.DEFAULT_RETRY_POLICY);
+        CloudBlobClient blobClient = connectionServices
+                .getConnectionService()
+                .createCloudBlobClient(connection,
+                        AzureComponentServices.DEFAULT_RETRY_POLICY);
         container = blobClient.getContainerReference(config.getDataset().getContainerName());
 
         directoryName = config.getDataset().getDirectory();

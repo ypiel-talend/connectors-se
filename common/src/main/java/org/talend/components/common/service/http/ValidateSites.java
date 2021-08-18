@@ -24,14 +24,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ValidateSites {
 
-    public final static boolean CAN_ACCESS_LOCAL = Boolean.valueOf(System.getProperty("connectors.enable_local_network_access",
-            System.getenv().getOrDefault("CONNECTORS_ENABLE_LOCAL_NETWORK_ACCESS", "true")));
+    public final static boolean CAN_ACCESS_LOCAL = Boolean
+            .valueOf(System
+                    .getProperty("connectors.enable_local_network_access",
+                            System.getenv().getOrDefault("CONNECTORS_ENABLE_LOCAL_NETWORK_ACCESS", "true")));
 
     public final static boolean ENABLE_MULTICAST_ACCESS = Boolean
-            .valueOf(System.getProperty("connectors.enable_multicast_network_access",
-                    System.getenv().getOrDefault("CONNECTORS_ENABLE_MULTICAST_NETWORK_ACCESS", "true")));
+            .valueOf(System
+                    .getProperty("connectors.enable_multicast_network_access",
+                            System.getenv().getOrDefault("CONNECTORS_ENABLE_MULTICAST_NETWORK_ACCESS", "true")));
 
-    private final static List<String> ADDITIONAL_LOCAL_HOSTS = Arrays.asList(new String[] { "224.0.0." // local multicast : from
+    private final static List<String> ADDITIONAL_LOCAL_HOSTS = Arrays.asList(new String[] { "224.0.0." // local
+                                                                                                       // multicast :
+                                                                                                       // from
             // 224.0.0.0 to 224.0.0.255
     });
 
@@ -51,7 +56,8 @@ public class ValidateSites {
      * @param enable_multicast_access
      * @return
      */
-    public static boolean isValidSite(final String surl, final boolean can_access_local, final boolean enable_multicast_access) {
+    public static boolean isValidSite(final String surl, final boolean can_access_local,
+            final boolean enable_multicast_access) {
         try {
             final URL url = new URL(surl);
             final String host = url.getHost();

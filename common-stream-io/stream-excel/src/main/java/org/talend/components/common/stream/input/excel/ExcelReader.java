@@ -50,8 +50,12 @@ public class ExcelReader implements FormatReader {
                 this.parseHeaderRow(rowIterator, headers);
             }
 
-            return IteratorComposer.of(rowIterator).skipFooter(configuration.calcFooter())
-                    .map((Row row) -> this.toRecord.toRecord(row)).closeable(currentWorkBook).build();
+            return IteratorComposer
+                    .of(rowIterator)
+                    .skipFooter(configuration.calcFooter())
+                    .map((Row row) -> this.toRecord.toRecord(row))
+                    .closeable(currentWorkBook)
+                    .build();
         } catch (IOException exIO) {
             log.error("Error while reading excel input", exIO);
             throw new UncheckedIOException("Error while reading excel input", exIO);

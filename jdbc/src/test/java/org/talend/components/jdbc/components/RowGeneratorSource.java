@@ -55,36 +55,89 @@ public class RowGeneratorSource implements Serializable {
     @PostConstruct
     public void init() {
         currentCount = config.start + 1;
-        Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("id").withType(INT).withNullable(false).build())
+        Schema.Builder schemaBuilder = recordBuilderFactory
+                .newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(
-                        recordBuilderFactory.newEntryBuilder().withName("string_id").withType(STRING).withNullable(false).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_string").withType(STRING)
-                        .withNullable(config.withNullValues).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_string2").withType(STRING)
-                        .withNullable(config.withNullValues).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_text").withType(STRING)
-                        .withNullable(config.withNullValues).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_date").withType(DATETIME)
-                        .withNullable(config.withNullValues).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_datetime").withType(DATETIME)
-                        .withNullable(config.withNullValues).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_time").withType(DATETIME)
-                        .withNullable(config.withNullValues).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_double").withType(DOUBLE)
-                        .withNullable(config.withNullValues).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_long").withType(LONG)
-                        .withNullable(config.withNullValues).build())
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName("t_float").withType(FLOAT)
-                        .withNullable(config.withNullValues).build());
+                        recordBuilderFactory.newEntryBuilder().withName("id").withType(INT).withNullable(false).build())
+                .withEntry(
+                        recordBuilderFactory
+                                .newEntryBuilder()
+                                .withName("string_id")
+                                .withType(STRING)
+                                .withNullable(false)
+                                .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_string")
+                        .withType(STRING)
+                        .withNullable(config.withNullValues)
+                        .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_string2")
+                        .withType(STRING)
+                        .withNullable(config.withNullValues)
+                        .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_text")
+                        .withType(STRING)
+                        .withNullable(config.withNullValues)
+                        .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_date")
+                        .withType(DATETIME)
+                        .withNullable(config.withNullValues)
+                        .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_datetime")
+                        .withType(DATETIME)
+                        .withNullable(config.withNullValues)
+                        .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_time")
+                        .withType(DATETIME)
+                        .withNullable(config.withNullValues)
+                        .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_double")
+                        .withType(DOUBLE)
+                        .withNullable(config.withNullValues)
+                        .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_long")
+                        .withType(LONG)
+                        .withNullable(config.withNullValues)
+                        .build())
+                .withEntry(recordBuilderFactory
+                        .newEntryBuilder()
+                        .withName("t_float")
+                        .withType(FLOAT)
+                        .withNullable(config.withNullValues)
+                        .build());
         if (config.withBytes) {
-            schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder().withName("t_bytes").withType(BYTES)
-                    .withNullable(config.withNullValues).build());
+            schemaBuilder
+                    .withEntry(recordBuilderFactory
+                            .newEntryBuilder()
+                            .withName("t_bytes")
+                            .withType(BYTES)
+                            .withNullable(config.withNullValues)
+                            .build());
         }
 
         if (config.withBoolean) {
-            schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder().withName("t_boolean").withType(BOOLEAN)
-                    .withNullable(config.withNullValues).build());
+            schemaBuilder
+                    .withEntry(recordBuilderFactory
+                            .newEntryBuilder()
+                            .withName("t_boolean")
+                            .withType(BOOLEAN)
+                            .withNullable(config.withNullValues)
+                            .build());
         }
 
         schema = schemaBuilder.build();

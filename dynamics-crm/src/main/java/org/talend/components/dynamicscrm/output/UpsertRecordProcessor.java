@@ -46,9 +46,11 @@ public class UpsertRecordProcessor extends AbstractToEntityRecordProcessor {
             if (!columnNames.contains(lookupEntry.getKey())) {
                 continue;
             }
-            if (!client.addOrSkipEntityNavigationLink(entity, lookupEntry.getValue(),
-                    client.extractNavigationLinkName(lookupEntry.getKey()), record.getString(lookupEntry.getKey()),
-                    configuration.isEmptyStringToNull(), configuration.isIgnoreNull())) {
+            if (!client
+                    .addOrSkipEntityNavigationLink(entity, lookupEntry.getValue(),
+                            client.extractNavigationLinkName(lookupEntry.getKey()),
+                            record.getString(lookupEntry.getKey()),
+                            configuration.isEmptyStringToNull(), configuration.isIgnoreNull())) {
                 navigationLinksToDelete.add(client.extractNavigationLinkName(lookupEntry.getKey()));
             }
         }

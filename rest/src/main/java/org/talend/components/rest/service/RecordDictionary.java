@@ -37,9 +37,11 @@ public class RecordDictionary implements UnaryOperator<String> {
         try {
             final Object value = rp.getValue(record, Object.class);
 
-            return ofNullable(value).filter(v -> !(Record.class.isInstance(v) || Collection.class.isInstance(v)))
-                    .map(String::valueOf).orElse(null); // If other than null, then ':-' default syntax in place holder
-                                                        // is not taken into account
+            return ofNullable(value)
+                    .filter(v -> !(Record.class.isInstance(v) || Collection.class.isInstance(v)))
+                    .map(String::valueOf)
+                    .orElse(null); // If other than null, then ':-' default syntax in place holder
+                                   // is not taken into account
         } catch (IllegalArgumentException ex) {
             return null;
         }

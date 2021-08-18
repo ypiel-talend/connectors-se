@@ -74,7 +74,8 @@ public class BigQueryTableExtractMapper implements Serializable {
     }
 
     protected BigQueryTableExtractMapper(BigQueryTableExtractInputConfig configuration, final BigQueryService service,
-            final GoogleStorageService storageService, final I18nMessage i18n, final RecordBuilderFactory builderFactory,
+            final GoogleStorageService storageService, final I18nMessage i18n,
+            final RecordBuilderFactory builderFactory,
             String gsBlob) {
         this.i18n = i18n;
         this.builderFactory = builderFactory;
@@ -89,12 +90,15 @@ public class BigQueryTableExtractMapper implements Serializable {
         // Connect and get table metadata
         BigQueryConnection connection = configuration.getDataStore();
         bigQuery = service.createClient(connection);
-        TableId tableId = TableId.of(connection.getProjectName(), configuration.getTableDataset().getBqDataset(),
-                configuration.getTableDataset().getTableName());
+        TableId tableId = TableId
+                .of(connection.getProjectName(), configuration.getTableDataset().getBqDataset(),
+                        configuration.getTableDataset().getTableName());
         table = bigQuery.getTable(tableId);
         if (table == null) {
-            throw new BigQueryConnectorException(i18n.infoTableNoExists(
-                    configuration.getTableDataset().getBqDataset() + "." + configuration.getTableDataset().getTableName()));
+            throw new BigQueryConnectorException(i18n
+                    .infoTableNoExists(
+                            configuration.getTableDataset().getBqDataset() + "."
+                                    + configuration.getTableDataset().getTableName()));
         }
         Schema gSchema = table.getDefinition().getSchema();
         tckSchema = service.convertToTckSchema(gSchema);
@@ -111,19 +115,25 @@ public class BigQueryTableExtractMapper implements Serializable {
         try {
             // extract table to Google Storage
             String uuid = UUID.randomUUID().toString();
-            String blobGenericName = "gs://" + configuration.getTableDataset().getGsBucket() + "/tmp/" + uuid + "/f_*.avro";
+            String blobGenericName =
+                    "gs://" + configuration.getTableDataset().getGsBucket() + "/tmp/" + uuid + "/f_*.avro";
 
             service.extractTable(bigQuery, table, blobGenericName);
 
             Storage storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
             String prefix = "tmp/" + uuid + "/f_";
             log.info(i18n.blobsPrefix(), prefix);
-            Page<Blob> blobs = storage.list(configuration.getTableDataset().getGsBucket(), Storage.BlobListOption.prefix(prefix));
+            Page<Blob> blobs =
+                    storage.list(configuration.getTableDataset().getGsBucket(), Storage.BlobListOption.prefix(prefix));
 
             // Create and return mapper
             List<BigQueryTableExtractMapper> mappers = new ArrayList<>();
-            blobs.iterateAll().forEach(b -> mappers.add(
-                    new BigQueryTableExtractMapper(configuration, service, storageService, i18n, builderFactory, b.getName())));
+            blobs
+                    .iterateAll()
+                    .forEach(b -> mappers
+                            .add(
+                                    new BigQueryTableExtractMapper(configuration, service, storageService, i18n,
+                                            builderFactory, b.getName())));
 
             log.info(i18n.nbMappers(), mappers.size());
             return mappers;
@@ -136,7 +146,8 @@ public class BigQueryTableExtractMapper implements Serializable {
 
     @Emitter
     public BigQueryTableExtractInput createSource() {
-        return new BigQueryTableExtractInput(configuration, service, storageService, i18n, builderFactory, gsBlob, tckSchema);
+        return new BigQueryTableExtractInput(configuration, service, storageService, i18n, builderFactory, gsBlob,
+                tckSchema);
     }
 
     @PreDestroy

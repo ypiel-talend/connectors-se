@@ -45,8 +45,9 @@ class DefaultLineReaderTest {
     }
 
     static Stream<Arguments> lineProvider() {
-        return Stream.of(Arguments.arguments("\n", "Hello\nWorld\nTDI", Arrays.asList("Hello", "World", "TDI")),
-                Arguments.arguments("\r\n", "Hello\r\nWorld\r\nTDI", Arrays.asList("Hello", "World", "TDI")));
+        return Stream
+                .of(Arguments.arguments("\n", "Hello\nWorld\nTDI", Arrays.asList("Hello", "World", "TDI")),
+                        Arguments.arguments("\r\n", "Hello\r\nWorld\r\nTDI", Arrays.asList("Hello", "World", "TDI")));
     }
 
 }

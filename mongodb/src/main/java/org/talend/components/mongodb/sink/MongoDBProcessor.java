@@ -67,7 +67,8 @@ public class MongoDBProcessor implements Serializable {
 
     private transient RecordToDocument recordToDocument;
 
-    public MongoDBProcessor(@Option("configuration") final MongoDBSinkConfiguration configuration, final MongoDBService service,
+    public MongoDBProcessor(@Option("configuration") final MongoDBSinkConfiguration configuration,
+            final MongoDBService service,
             final I18nMessage i18n) {
         this.configuration = configuration;
         this.service = service;
@@ -364,53 +365,72 @@ public class MongoDBProcessor implements Serializable {
         case SET:
             if (configuration.isBulkWrite()) {
                 if (configuration.isUpdateAllDocuments()) {
-                    writeModels.add(new UpdateManyModel<Document>(
-                            getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(), record, document),
-                            new Document("$set", document)));
+                    writeModels
+                            .add(new UpdateManyModel<Document>(
+                                    getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
+                                            record, document),
+                                    new Document("$set", document)));
                 } else {
-                    writeModels.add(new UpdateOneModel<Document>(
-                            getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(), record, document),
-                            new Document("$set", document)));
+                    writeModels
+                            .add(new UpdateOneModel<Document>(
+                                    getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
+                                            record, document),
+                                    new Document("$set", document)));
                 }
             } else {
                 if (configuration.isUpdateAllDocuments()) {
-                    collection.updateMany(
-                            getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(), record, document),
-                            new Document("$set", document));
+                    collection
+                            .updateMany(
+                                    getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
+                                            record, document),
+                                    new Document("$set", document));
                 } else {
-                    collection.updateOne(
-                            getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(), record, document),
-                            new Document("$set", document));
+                    collection
+                            .updateOne(
+                                    getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
+                                            record, document),
+                                    new Document("$set", document));
                 }
             }
             break;
         case UPSERT_WITH_SET:
-            // though mongodb support to set "_id" key self, not auto-generate, but when do upsert with "_id" or other key, it
+            // though mongodb support to set "_id" key self, not auto-generate, but when do upsert with "_id" or other
+            // key, it
             // mean if not match, should do insert,
-            // but mongo here will throw : Performing an update on the path '_id' would modify the immutable field '_id', i think
+            // but mongo here will throw : Performing an update on the path '_id' would modify the immutable field
+            // '_id', i think
             // it's a limit of mongodb as i did't change the value of "_id"
-            // why update can works, upsert not work? As not match, should insert, i can't just remove "_id" column to make it
+            // why update can works, upsert not work? As not match, should insert, i can't just remove "_id" column to
+            // make it
             // right, as that is not expected as lose "_id", and auto-generated when insert.
             // TODO show a more clear exception here
             if (configuration.isBulkWrite()) {
                 if (configuration.isUpdateAllDocuments()) {
-                    writeModels.add(new UpdateManyModel<Document>(
-                            getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(), record, document),
-                            new Document("$set", document), new UpdateOptions().upsert(true)));
+                    writeModels
+                            .add(new UpdateManyModel<Document>(
+                                    getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
+                                            record, document),
+                                    new Document("$set", document), new UpdateOptions().upsert(true)));
                 } else {
-                    writeModels.add(new UpdateOneModel<Document>(
-                            getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(), record, document),
-                            new Document("$set", document), new UpdateOptions().upsert(true)));
+                    writeModels
+                            .add(new UpdateOneModel<Document>(
+                                    getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
+                                            record, document),
+                                    new Document("$set", document), new UpdateOptions().upsert(true)));
                 }
             } else {
                 if (configuration.isUpdateAllDocuments()) {
-                    collection.updateMany(
-                            getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(), record, document),
-                            new Document("$set", document), new UpdateOptions().upsert(true));
+                    collection
+                            .updateMany(
+                                    getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
+                                            record, document),
+                                    new Document("$set", document), new UpdateOptions().upsert(true));
                 } else {
-                    collection.updateOne(
-                            getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(), record, document),
-                            new Document("$set", document), new UpdateOptions().upsert(true));
+                    collection
+                            .updateOne(
+                                    getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
+                                            record, document),
+                                    new Document("$set", document), new UpdateOptions().upsert(true));
                 }
             }
             break;

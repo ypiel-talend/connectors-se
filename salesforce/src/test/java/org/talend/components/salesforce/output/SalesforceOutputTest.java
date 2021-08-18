@@ -99,16 +99,25 @@ class SalesforceOutputTest {
     }
 
     private Record buildRecord(final Schema schema, final String e1Value, final int e2Value) {
-        return this.factory.newRecordBuilder(schema) //
+        return this.factory
+                .newRecordBuilder(schema) //
                 .withString("e1", e1Value) //
                 .withInt("e2", e2Value) //
                 .build();
     }
 
     private Schema buildSchema() {
-        final Schema.Entry e1 = this.factory.newEntryBuilder().withName("e1").withNullable(true).withType(Schema.Type.STRING)
+        final Schema.Entry e1 = this.factory
+                .newEntryBuilder()
+                .withName("e1")
+                .withNullable(true)
+                .withType(Schema.Type.STRING)
                 .build();
-        final Schema.Entry e2 = this.factory.newEntryBuilder().withName("e2").withNullable(true).withType(Schema.Type.INT)
+        final Schema.Entry e2 = this.factory
+                .newEntryBuilder()
+                .withName("e2")
+                .withNullable(true)
+                .withType(Schema.Type.INT)
                 .build();
         return factory.newSchemaBuilder(Schema.Type.RECORD).withEntry(e1).withEntry(e2).build();
     }
@@ -119,7 +128,8 @@ class SalesforceOutputTest {
         private final ISaveResult model;
 
         @Override
-        public ConnectionFacade buildConnection(final BasicDataStore datastore, final LocalConfiguration localConfiguration)
+        public ConnectionFacade buildConnection(final BasicDataStore datastore,
+                final LocalConfiguration localConfiguration)
                 throws ConnectionException {
             return new FakeCnxFacade(this.model);
         }

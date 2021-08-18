@@ -34,8 +34,9 @@ class IteratorFilterTest {
         } catch (NoSuchElementException ex) {
         }
 
-        final IteratorFilter<String> it2 = new IteratorFilter<>(Arrays.asList(null, "V1", null, "V2", null, null).iterator(),
-                Objects::nonNull);
+        final IteratorFilter<String> it2 =
+                new IteratorFilter<>(Arrays.asList(null, "V1", null, "V2", null, null).iterator(),
+                        Objects::nonNull);
         List<String> ls = new ArrayList<>(2);
         it2.forEachRemaining(ls::add);
         Assertions.assertEquals(2, ls.size());

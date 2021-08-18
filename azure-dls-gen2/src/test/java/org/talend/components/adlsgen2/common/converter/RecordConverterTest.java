@@ -26,11 +26,13 @@ class RecordConverterTest {
 
         Assertions.assertEquals("CA_HT", RecordConverter.getCorrectSchemaFieldName("CA HT", 0, Collections.emptySet()));
 
-        Assertions.assertEquals("column___Name",
-                RecordConverter.getCorrectSchemaFieldName("column?!^Name", 0, Collections.emptySet()));
+        Assertions
+                .assertEquals("column___Name",
+                        RecordConverter.getCorrectSchemaFieldName("column?!^Name", 0, Collections.emptySet()));
 
-        Assertions.assertEquals("P1_Vente_Qt_",
-                RecordConverter.getCorrectSchemaFieldName("P1_Vente_Qté", 0, Collections.emptySet()));
+        Assertions
+                .assertEquals("P1_Vente_Qt_",
+                        RecordConverter.getCorrectSchemaFieldName("P1_Vente_Qté", 0, Collections.emptySet()));
 
     }
 

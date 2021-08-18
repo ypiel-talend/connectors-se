@@ -37,7 +37,8 @@ import java.util.List;
 @Slf4j
 public class SplitUtil {
 
-    public static List<String> getQueries4Split(final BaseSourceConfiguration configuration, final MongoDBService service,
+    public static List<String> getQueries4Split(final BaseSourceConfiguration configuration,
+            final MongoDBService service,
             final int splitCount) {
         List<String> result = new ArrayList<>();
 
@@ -61,7 +62,8 @@ public class SplitUtil {
         return result;
     }
 
-    public static long getEstimatedSizeBytes(final BaseSourceConfiguration configuration, final MongoDBService service) {
+    public static long getEstimatedSizeBytes(final BaseSourceConfiguration configuration,
+            final MongoDBService service) {
         BaseDataSet dataset = configuration.getDataset();
         MongoDBDataStore datastore = dataset.getDatastore();
 
@@ -104,8 +106,9 @@ public class SplitUtil {
             Object min = id_document.get("min");
             Object max = id_document.get("max");
 
-            Bson filters = Filters.and(Filters.gte("_id", min),
-                    iterator.hasNext() ? Filters.lt("_id", max) : Filters.lte("_id", max));
+            Bson filters = Filters
+                    .and(Filters.gte("_id", min),
+                            iterator.hasNext() ? Filters.lt("_id", max) : Filters.lte("_id", max));
             String filtersShellJson = filtersToJson(filters);
             result.add(filtersShellJson);
         }

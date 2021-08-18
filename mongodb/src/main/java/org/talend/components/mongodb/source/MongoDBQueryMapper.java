@@ -54,7 +54,8 @@ public class MongoDBQueryMapper implements Serializable {
     private String query4Split;
 
     public MongoDBQueryMapper(@Option("configuration") final MongoDBQuerySourceConfiguration configuration,
-            final MongoDBService service, final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
+            final MongoDBService service, final RecordBuilderFactory recordBuilderFactory,
+            final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
@@ -90,7 +91,9 @@ public class MongoDBQueryMapper implements Serializable {
                 return singletonList(this);
             }
 
-            return queries4Split.stream().map(query4Split -> cloneMapperAndSetSplitParameter4Reader(query4Split))
+            return queries4Split
+                    .stream()
+                    .map(query4Split -> cloneMapperAndSetSplitParameter4Reader(query4Split))
                     .collect(Collectors.toList());
         }
 

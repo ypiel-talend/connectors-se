@@ -46,7 +46,8 @@ class ParquetBlobReaderTest extends AdlsGen2TestBase {
         this.dataSet.setParquetConfiguration(new ParquetConfiguration());
         final ComponentManager manager = componentsHandler.asManager();
 
-        final JsonObject object1 = Json.createObjectBuilder() //
+        final JsonObject object1 = Json
+                .createObjectBuilder() //
                 .add("etag", "0x8D89D1980D8BD4B") //
                 .add("name", "/paht1/file1.txt") //
                 .add("contentLength", "120") //
@@ -54,7 +55,8 @@ class ParquetBlobReaderTest extends AdlsGen2TestBase {
                 .add("owner", "admin") //
                 .build();
 
-        final JsonObject object2 = Json.createObjectBuilder() //
+        final JsonObject object2 = Json
+                .createObjectBuilder() //
                 .add("etag", "0x8D89D1980D8BD4B") //
                 .add("name", "/paht1/file2.txt") //
                 .add("contentLength", "120") //
@@ -62,21 +64,30 @@ class ParquetBlobReaderTest extends AdlsGen2TestBase {
                 .add("owner", "admin") //
                 .build();
 
-        final JsonObject paths = Json.createObjectBuilder().add("paths", Json.createArrayBuilder() //
-                .add(object1) //
-                .add(object2) //
-                .build()).build();
+        final JsonObject paths = Json
+                .createObjectBuilder()
+                .add("paths", Json
+                        .createArrayBuilder() //
+                        .add(object1) //
+                        .add(object2) //
+                        .build())
+                .build();
         ClientGen2Fake fake = new ClientGen2Fake(new FakeResponse<>(200, paths, null, null)) {
 
             @Override
-            public Response<InputStream> pathRead(Map<String, String> headers, String filesystem, String path, Integer timeout,
+            public Response<InputStream> pathRead(Map<String, String> headers, String filesystem, String path,
+                    Integer timeout,
                     Map<String, String> sas) {
                 final InputStream input;
                 if ("/paht1/file1.txt".equals(path)) {
-                    input = Thread.currentThread().getContextClassLoader()
+                    input = Thread
+                            .currentThread()
+                            .getContextClassLoader()
                             .getResourceAsStream("./common/format/parquet/sample.parquet");
                 } else if ("/paht1/file2.txt".equals(path)) {
-                    input = Thread.currentThread().getContextClassLoader()
+                    input = Thread
+                            .currentThread()
+                            .getContextClassLoader()
                             .getResourceAsStream("./common/format/parquet/sample.parquet");
                 } else {
                     throw new RuntimeException("Path '" + path + "' not expected here");
@@ -87,8 +98,9 @@ class ParquetBlobReaderTest extends AdlsGen2TestBase {
         ClientGen2Fake.inject(manager, fake);
         final AdlsGen2Service gen2Service = this.componentsHandler.findService(AdlsGen2Service.class);
 
-        final ParquetBlobReader reader = new ParquetBlobReader(this.inputConfiguration, this.recordBuilderFactory, gen2Service,
-                new FakeActiveDirectoryService());
+        final ParquetBlobReader reader =
+                new ParquetBlobReader(this.inputConfiguration, this.recordBuilderFactory, gen2Service,
+                        new FakeActiveDirectoryService());
 
         final Record record1 = reader.readRecord();
         Assertions.assertEquals("Spark-H20", record1.getString("name"));

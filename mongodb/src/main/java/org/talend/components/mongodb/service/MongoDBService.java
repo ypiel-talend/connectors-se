@@ -61,7 +61,8 @@ public class MongoDBService {
         try {
             switch (datastore.getAddressType()) {
             case STANDALONE:
-                ServerAddress address = new ServerAddress(datastore.getAddress().getHost(), datastore.getAddress().getPort());
+                ServerAddress address =
+                        new ServerAddress(datastore.getAddress().getHost(), datastore.getAddress().getPort());
                 if (mc != null) {
                     return new MongoClient(address, mc, getOptions(datastore));
                 } else {
@@ -71,16 +72,19 @@ public class MongoDBService {
                 // TODO check if it's right, not miss parameter like "replicaSet=myRepl"?
                 // https://docs.mongodb.com/manual/reference/connection-string/
                 if (mc != null) {
-                    return new MongoClient(getServerAddresses(datastore.getReplicaSetAddress()), mc, getOptions(datastore));
+                    return new MongoClient(getServerAddresses(datastore.getReplicaSetAddress()), mc,
+                            getOptions(datastore));
                 } else {
                     return new MongoClient(getServerAddresses(datastore.getReplicaSetAddress()), getOptions(datastore));
                 }
                 /*
                  * case SHARDED_CLUSTER:
                  * if (mc != null) {
-                 * return new MongoClient(getServerAddresses(datastore.getShardedClusterAddress()), mc, getOptions(datastore));
+                 * return new MongoClient(getServerAddresses(datastore.getShardedClusterAddress()), mc,
+                 * getOptions(datastore));
                  * } else {
-                 * return new MongoClient(getServerAddresses(datastore.getShardedClusterAddress()), getOptions(datastore));
+                 * return new MongoClient(getServerAddresses(datastore.getShardedClusterAddress()),
+                 * getOptions(datastore));
                  * }
                  */
             }
@@ -104,10 +108,12 @@ public class MongoDBService {
             return MongoCredential.createCredential(auth.getUsername(), authDatabase, auth.getPassword().toCharArray());
         /*
          * case PLAIN_SASL:
-         * return MongoCredential.createPlainCredential(auth.getUsername(), "$external", auth.getPassword().toCharArray());
+         * return MongoCredential.createPlainCredential(auth.getUsername(), "$external",
+         * auth.getPassword().toCharArray());
          */
         case SCRAM_SHA_1_SASL:
-            return MongoCredential.createScramSha1Credential(auth.getUsername(), authDatabase, auth.getPassword().toCharArray());
+            return MongoCredential
+                    .createScramSha1Credential(auth.getUsername(), authDatabase, auth.getPassword().toCharArray());
         }
 
         return null;
@@ -123,7 +129,8 @@ public class MongoDBService {
 
     // https://docs.mongodb.com/manual/reference/connection-string/#connection-string-options
     public MongoClientOptions getOptions(MongoDBDataStore datastore) {
-        StringBuilder uri = new StringBuilder("mongodb://noexist:27017/");// a fake uri, only work for get the options from key
+        StringBuilder uri = new StringBuilder("mongodb://noexist:27017/");// a fake uri, only work for get the options
+                                                                          // from key
                                                                           // value string
         boolean first = true;
         for (ConnectionParameter parameter : datastore.getConnectionParameter()) {
@@ -175,7 +182,8 @@ public class MongoDBService {
     }
 
     private Document getDatabaseStats(MongoDatabase database) {
-        BsonDocument commandDocument = (new BsonDocument("dbStats", new BsonInt32(1))).append("scale", new BsonInt32(1));
+        BsonDocument commandDocument =
+                (new BsonDocument("dbStats", new BsonInt32(1))).append("scale", new BsonInt32(1));
         return database.runCommand(commandDocument);
     }
 
@@ -222,7 +230,8 @@ public class MongoDBService {
         Set<String> elements = document.keySet();
         for (String element : elements) {
             // TODO make the column name in schema is valid without special char that make invalid to schema
-            // para1 : column name in schema, para2 : key in document of mongodb, para3 : path to locate parent node in document
+            // para1 : column name in schema, para2 : key in document of mongodb, para3 : path to locate parent node in
+            // document
             // of
             // mongodb
             // here we only iterate the root level, not go deep, keep it easy
@@ -234,7 +243,8 @@ public class MongoDBService {
     public Schema createSchema(Document document, List<PathMapping> pathMappings) {
         Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
 
-        if (pathMappings == null || pathMappings.isEmpty()) {// work for the next level element when RECORD, not necessary now,
+        if (pathMappings == null || pathMappings.isEmpty()) {// work for the next level element when RECORD, not
+                                                             // necessary now,
                                                              // but keep it
             pathMappings = guessPathMappingsFromDocument(document);
         }
@@ -312,11 +322,19 @@ public class MongoDBService {
         Schema.Type type = guessFieldTypeFromValueFromBSON(firstValueInArray);
         schemaBuilder.withType(type);
         if (type == RECORD) {
-            schemaBuilder.withEntry(
-                    builderFactory.newEntryBuilder().withElementSchema(createSchema((Document) firstValueInArray, null)).build());
+            schemaBuilder
+                    .withEntry(
+                            builderFactory
+                                    .newEntryBuilder()
+                                    .withElementSchema(createSchema((Document) firstValueInArray, null))
+                                    .build());
         } else if (type == ARRAY) {
-            schemaBuilder.withEntry(
-                    builderFactory.newEntryBuilder().withElementSchema(defineSchemaForArray((List) firstValueInArray)).build());
+            schemaBuilder
+                    .withEntry(
+                            builderFactory
+                                    .newEntryBuilder()
+                                    .withElementSchema(defineSchemaForArray((List) firstValueInArray))
+                                    .build());
         }
         return schemaBuilder.withType(type).build();
     }

@@ -24,12 +24,14 @@ class RegisterExtensionTest {
     void run() throws ClassNotFoundException {
         try (final ComponentManager manager = ComponentManager.instance()) {
             final String plugin = manager.addPlugin("target/test-classes");
-            final Container anyContainer = manager.findPlugin(plugin)
+            final Container anyContainer = manager
+                    .findPlugin(plugin)
                     .orElseThrow(() -> new IllegalStateException("No container so test"));
 
             // Needed since the TestExtensionState.class in the anyContainer class loader
             // is not the same as the current one.
-            final Class<?> extensionClass = anyContainer.getLoader().loadClass(TestExtension.TestExtensionState.class.getName());
+            final Class<?> extensionClass =
+                    anyContainer.getLoader().loadClass(TestExtension.TestExtensionState.class.getName());
 
             assertNotNull(anyContainer.get(extensionClass));
         }

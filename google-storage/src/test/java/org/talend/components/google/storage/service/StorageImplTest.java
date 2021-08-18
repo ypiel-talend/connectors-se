@@ -117,7 +117,8 @@ class StorageImplTest {
         this.storeContent("bucket", b2, "Bonjour");
         this.storeContent("bucket", b3, "Pryvit");
 
-        final List<String> blobsName = st.findBlobsName("bucket", "blob") //
+        final List<String> blobsName = st
+                .findBlobsName("bucket", "blob") //
                 .collect(Collectors.toList());
         Assertions.assertEquals(3, blobsName.size());
         blobsName.stream().allMatch((String n) -> builder.isGenerated("blob", n));
@@ -141,7 +142,8 @@ class StorageImplTest {
         this.storeContent("bucket", b4, "Wrong");
         this.storeContent("bucket", b5, "Wrong2");
 
-        final List<String> blobsName = st.findBlobsName("bucket", "blob.csv") //
+        final List<String> blobsName = st
+                .findBlobsName("bucket", "blob.csv") //
                 .collect(Collectors.toList());
         Assertions.assertEquals(3, blobsName.size());
         blobsName.stream().allMatch((String n) -> builder.isGenerated("blob", n));
@@ -154,7 +156,8 @@ class StorageImplTest {
         return new String(Files.readAllBytes(ficJWT.toPath()));
     }
 
-    private GSDataSet storeContent(final String bucketName, final String blobName, final String content) throws IOException {
+    private GSDataSet storeContent(final String bucketName, final String blobName, final String content)
+            throws IOException {
         final BlobInfo blobInfo = BlobInfo.newBuilder(BlobId.of(bucketName, blobName)).build();
         this.storage.create(blobInfo, content.getBytes(StandardCharsets.UTF_8));
 

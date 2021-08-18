@@ -45,13 +45,19 @@ public class RedirectService {
 
         // Retrieve redirection url
         Map<String, List<String>> headers = context.getResponse().headers();
-        String location = Optional.ofNullable(headers).map(m -> m.get(LOCATION_HEADER)).filter(l -> !l.isEmpty())
-                .map(l -> l.get(0)).orElseThrow(() -> new IllegalArgumentException(LOCATION_HEADER
-                        + " header is not available after redirection code '" + status + "':\n" + redirectioHistory(context)));
+        String location = Optional
+                .ofNullable(headers)
+                .map(m -> m.get(LOCATION_HEADER))
+                .filter(l -> !l.isEmpty())
+                .map(l -> l.get(0))
+                .orElseThrow(() -> new IllegalArgumentException(LOCATION_HEADER
+                        + " header is not available after redirection code '" + status + "':\n"
+                        + redirectioHistory(context)));
 
         if (location.isEmpty()) {
             throw new IllegalArgumentException(
-                    LOCATION_HEADER + " header is empty after redirection code '" + status + "':\n" + redirectioHistory(context));
+                    LOCATION_HEADER + " header is empty after redirection code '" + status + "':\n"
+                            + redirectioHistory(context));
         }
 
         String rawLocation = location;
@@ -62,8 +68,9 @@ public class RedirectService {
         }
 
         if (!isValidUrl(location)) {
-            throw new IllegalArgumentException(LOCATION_HEADER + " header is not valid after redirection code '" + status + "',  "
-                    + rawLocation + "':\n" + redirectioHistory(context));
+            throw new IllegalArgumentException(
+                    LOCATION_HEADER + " header is not valid after redirection code '" + status + "',  "
+                            + rawLocation + "':\n" + redirectioHistory(context));
         }
 
         context.setNewUrlAndIncreaseNbRedirection(location);
@@ -80,7 +87,8 @@ public class RedirectService {
                 String currentHost = new URL(context.getHistory().get(0).getBase()).getHost();
                 String redirectDomain = new URL(context.getNextUrl()).getHost();
                 if (!currentHost.equals(redirectDomain)) {
-                    throw new IllegalArgumentException("Redirect to another domain is forbidden from '" + currentHost + "' to '"
+                    throw new IllegalArgumentException("Redirect to another domain is forbidden from '" + currentHost
+                            + "' to '"
                             + redirectDomain + "':\nLast one has not been followed:\n" + redirectioHistory(context));
                 }
             } catch (MalformedURLException e) {
@@ -111,8 +119,14 @@ public class RedirectService {
         StringBuilder sb = new StringBuilder();
 
         context.getHistory().stream().forEach(r -> {
-            sb.append("\tLocation[").append(r.getNbRedirect()).append("] : ").append(r.getMethod()).append(" ")
-                    .append(r.getNextUrl()).append("\n");
+            sb
+                    .append("\tLocation[")
+                    .append(r.getNbRedirect())
+                    .append("] : ")
+                    .append(r.getMethod())
+                    .append(" ")
+                    .append(r.getNextUrl())
+                    .append("\n");
         });
 
         return sb.toString();

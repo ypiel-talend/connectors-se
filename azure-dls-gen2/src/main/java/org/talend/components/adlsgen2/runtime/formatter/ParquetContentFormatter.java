@@ -55,8 +55,11 @@ public class ParquetContentFormatter extends AbstractContentFormatter {
         try {
             tempFilePath = File.createTempFile("adslgen2-tempFile", ".parquet");
             Path tempFile = new org.apache.hadoop.fs.Path(tempFilePath.getPath());
-            ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord> builder(tempFile)
-                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE).withSchema(avroSchema).build();
+            ParquetWriter<GenericRecord> writer = AvroParquetWriter
+                    .<GenericRecord> builder(tempFile)
+                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
+                    .withSchema(avroSchema)
+                    .build();
             for (Record r : records) {
                 writer.write(converter.fromRecord(r));
             }

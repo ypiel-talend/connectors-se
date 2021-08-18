@@ -43,7 +43,8 @@ import org.talend.sdk.component.api.service.http.Response;
 public interface CustomObjectClient extends HttpClient {
 
     /**
-     * Returns a list of Custom Object types available in the target instance, along with id and deduplication information
+     * Returns a list of Custom Object types available in the target instance, along with id and deduplication
+     * information
      * for each type.
      * 
      * @param accessToken Marketo authorization token for API.
@@ -71,7 +72,8 @@ public interface CustomObjectClient extends HttpClient {
 
     // TODO should normally execute a fake get request when using Compound Key
     /**
-     * Retrieves a list of custom objects records based on filter and set of values. When action is createOnly, idField may
+     * Retrieves a list of custom objects records based on filter and set of values. When action is createOnly, idField
+     * may
      * not be used as a key and marketoGUID cannot be a member of any object records.
      * 
      * @param accessToken Marketo authorization token for API.
@@ -80,7 +82,8 @@ public interface CustomObjectClient extends HttpClient {
      * @param filterValues Comma-separated list of field values to match against.
      * @param fields Comma-separated list of fields to return for each record. If unset marketoGuid, dedupeFields,
      * updatedAt, createdAt will be returned.
-     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
+     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size
+     * and
      * can be passed in a subsequent call through this parameter.
      * @return
      */
@@ -133,7 +136,8 @@ public interface CustomObjectClient extends HttpClient {
      * @param customObjectName custom Object Name.
      * @param payload is json object containing the following parameters
      * <ul>
-     * <li>@param deleteBy Field to delete records by. Permissible values are idField or dedupeFields as indicated by the
+     * <li>@param deleteBy Field to delete records by. Permissible values are idField or dedupeFields as indicated by
+     * the
      * result of the corresponding describe record.</li>
      * <li>@param input List of input records.</li>
      * </ul>

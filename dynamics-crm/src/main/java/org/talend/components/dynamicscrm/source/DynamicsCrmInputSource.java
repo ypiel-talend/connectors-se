@@ -70,7 +70,8 @@ public class DynamicsCrmInputSource implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            client = service.createClient(configuration.getDataset().getDatastore(), configuration.getDataset().getEntitySet());
+            client = service
+                    .createClient(configuration.getDataset().getDatastore(), configuration.getDataset().getEntitySet());
         } catch (AuthenticationException e) {
             throw new DynamicsCrmException(i18n.authenticationFailed(e.getMessage()));
         }
@@ -80,16 +81,22 @@ public class DynamicsCrmInputSource implements Serializable {
         Set<String> readableColumns = service
                 .getPropertiesValidationData(client, configuration.getDataset().getDatastore(),
                         entitySet.getEntityType().getName())
-                .stream().filter(PropertyValidationData::isValidForRead).map(PropertyValidationData::getName)
+                .stream()
+                .filter(PropertyValidationData::isValidForRead)
+                .map(PropertyValidationData::getName)
                 .collect(Collectors.toSet());
 
         List<String> columnNames = configuration.getColumns();
         if (columnNames == null || columnNames.isEmpty()) {
             columnNames = entitySet.getEntityType().getPropertyNames();
         }
-        columnNames = columnNames.stream().filter(s -> readableColumns.contains(client.extractNavigationLinkName(s)))
+        columnNames = columnNames
+                .stream()
+                .filter(s -> readableColumns.contains(client.extractNavigationLinkName(s)))
                 .collect(Collectors.toList());
-        schema = helper.getSchemaFromMetadata(metadata, configuration.getDataset().getEntitySet(), columnNames, builderFactory);
+        schema = helper
+                .getSchemaFromMetadata(metadata, configuration.getDataset().getEntitySet(), columnNames,
+                        builderFactory);
         iterator = service.getEntitySetIterator(client, helper.createQueryOptionConfig(schema, configuration));
     }
 

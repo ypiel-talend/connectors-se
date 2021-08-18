@@ -77,7 +77,8 @@ class UiActionServiceUnitTest {
     static class SalesforceServiceFake extends SalesforceService {
 
         @Override
-        public ConnectionFacade buildConnection(final BasicDataStore datastore, final LocalConfiguration localConfiguration)
+        public ConnectionFacade buildConnection(final BasicDataStore datastore,
+                final LocalConfiguration localConfiguration)
                 throws ConnectionException {
             return new ConnectionFacadeTest();
         }

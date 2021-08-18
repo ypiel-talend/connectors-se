@@ -97,20 +97,30 @@ class GoogleStorageOutputTest {
         output.release();
 
         final File[] filesRes = target.listFiles();
-        final Optional<File> first = Stream.of(filesRes) //
+        final Optional<File> first = Stream
+                .of(filesRes) //
                 .filter((File f) -> f.getName().startsWith("blob")) //
                 .findFirst(); //
         Assertions.assertTrue(first.isPresent());
     }
 
     private Collection<Record> buildRecords() {
-        final Record record1 = factory.newRecordBuilder().withString("Hello", "World")
-                .withRecord("sub1", factory.newRecordBuilder().withInt("max", 200).withBoolean("uniq", false).build()).build();
+        final Record record1 = factory
+                .newRecordBuilder()
+                .withString("Hello", "World")
+                .withRecord("sub1", factory.newRecordBuilder().withInt("max", 200).withBoolean("uniq", false).build())
+                .build();
 
-        final Record record2 = factory.newRecordBuilder().withString("xx", "zz")
+        final Record record2 = factory
+                .newRecordBuilder()
+                .withString("xx", "zz")
                 .withArray(
-                        factory.newEntryBuilder().withName("array").withType(Schema.Type.ARRAY)
-                                .withElementSchema(factory.newSchemaBuilder(Schema.Type.STRING).build()).build(),
+                        factory
+                                .newEntryBuilder()
+                                .withName("array")
+                                .withType(Schema.Type.ARRAY)
+                                .withElementSchema(factory.newSchemaBuilder(Schema.Type.STRING).build())
+                                .build(),
                         Arrays.asList("v1", "v2"))
                 .build();
 

@@ -28,7 +28,8 @@ public class FormatUtils {
         // FIXME uncomment it when excel will be ready to integrate
         /*
          * case EXCEL:
-         * return dataset.getExcelOptions().getEncoding() == Encoding.OTHER ? dataset.getExcelOptions().getCustomEncoding()
+         * return dataset.getExcelOptions().getEncoding() == Encoding.OTHER ?
+         * dataset.getExcelOptions().getCustomEncoding()
          * : dataset.getExcelOptions().getEncoding().getEncodingValue();
          */
         default:

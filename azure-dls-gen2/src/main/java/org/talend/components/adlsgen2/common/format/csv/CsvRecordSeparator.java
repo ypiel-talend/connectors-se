@@ -18,6 +18,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum CsvRecordSeparator {
+
     LF("\n"),
     CR("\r"),
     CRLF("\r\n"),

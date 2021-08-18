@@ -31,7 +31,8 @@ public interface CustomComponentExtension {
 
     /**
      * @param container the family currently deployed.
-     * @return an optional list of close tasks to be executed by the register extension when the container (mostly one family, but
+     * @return an optional list of close tasks to be executed by the register extension when the container (mostly one
+     * family, but
      * can be several) is undeployed.
      */
     default Optional<Stream<Runnable>> onCreate(final Container container) {

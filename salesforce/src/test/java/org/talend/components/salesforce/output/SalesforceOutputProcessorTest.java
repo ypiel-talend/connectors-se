@@ -76,9 +76,15 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(records);
-        Job.components().component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config).connections().from("emitter")
-                .to("salesforce-output").build().run();
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
         getComponentsHandler().resetState();
         checkModuleData("Account", "Name Like '%" + UNIQUE_ID + "%'", 10);
     }
@@ -95,15 +101,26 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         configuration.setBatchMode(false);
         configuration.setExceptionForErrors(true);
 
-        Record record = factory.newRecordBuilder().withString("FirstName", "F_test_types_" + UNIQUE_ID)
-                .withString("LastName", "F_test_types_" + UNIQUE_ID).withString("Email", "testalltype_" + UNIQUE_ID + "@test.com")
-                .withDouble("MailingLongitude", 115.7).withDouble("MailingLatitude", 39.4).withDateTime("Birthdate", new Date())
+        Record record = factory
+                .newRecordBuilder()
+                .withString("FirstName", "F_test_types_" + UNIQUE_ID)
+                .withString("LastName", "F_test_types_" + UNIQUE_ID)
+                .withString("Email", "testalltype_" + UNIQUE_ID + "@test.com")
+                .withDouble("MailingLongitude", 115.7)
+                .withDouble("MailingLatitude", 39.4)
+                .withDateTime("Birthdate", new Date())
                 .build();
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(asList(record));
-        Job.components().component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config).connections().from("emitter")
-                .to("salesforce-output").build().run();
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
         getComponentsHandler().resetState();
         checkModuleData("Contact",
                 "MailingLongitude != null and MailingLongitude !=null and Birthdate !=null and Name Like 'F_test_types_%"
@@ -129,14 +146,21 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         configuration.setExceptionForErrors(false);
 
         // create a record with no field match module fields
-        Record record = factory.newRecordBuilder().withString("Wrong_Field_Name", "test_Wrong_Field_Name_" + UNIQUE_ID).build();
+        Record record =
+                factory.newRecordBuilder().withString("Wrong_Field_Name", "test_Wrong_Field_Name_" + UNIQUE_ID).build();
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
 
         getComponentsHandler().setInputData(asList(record));
-        Job.components().component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config).connections().from("emitter")
-                .to("salesforce-output").build().run();
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
         getComponentsHandler().resetState();
         checkModuleData("Account", "Name Like 'test_Wrong_Field_Name_%" + UNIQUE_ID + "%'", 0);
     }
@@ -159,9 +183,15 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         getComponentsHandler().setInputData(asList(record));
         // run the pipeline and ensure the execution was successful
         assertThrows(IllegalStateException.class,
-                () -> Job.components().component("emitter", "test://emitter")
-                        .component("salesforce-output", "Salesforce://SalesforceOutput?" + config).connections().from("emitter")
-                        .to("salesforce-output").build().run());
+                () -> Job
+                        .components()
+                        .component("emitter", "test://emitter")
+                        .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
+                        .connections()
+                        .from("emitter")
+                        .to("salesforce-output")
+                        .build()
+                        .run());
         getComponentsHandler().resetState();
     }
 
@@ -178,14 +208,27 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         InputModuleConfig inputModuleConfig = new InputModuleConfig();
         inputModuleConfig.setDataSet(inputDataSet);
         final String inputConfig = configurationByExample().forInstance(inputModuleConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + inputConfig)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
 
         // 2. update record
         final List<Record> updateRecord = new ArrayList<>();
-        records.stream().forEach(record -> updateRecord.add(factory.newRecordBuilder().withString("Id", record.getString("Id"))
-                .withString("Name", record.getString("Name").replace("TestName", "TestName_update")).build()));
+        records
+                .stream()
+                .forEach(record -> updateRecord
+                        .add(factory
+                                .newRecordBuilder()
+                                .withString("Id", record.getString("Id"))
+                                .withString("Name", record.getString("Name").replace("TestName", "TestName_update"))
+                                .build()));
 
         getComponentsHandler().resetState();
         // 3.write updated records to salesforce
@@ -198,9 +241,15 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(updateRecord);
-        Job.components().component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig).connections().from("emitter")
-                .to("salesforce-output").build().run();
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
         getComponentsHandler().resetState();
 
         // 4. check the update
@@ -219,14 +268,24 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         configuration.setModuleDataSet(moduleDataSet);
         configuration.setBatchMode(false);
 
-        Record record = factory.newRecordBuilder().withString("Email", "aaa_" + UNIQUE_ID + "@test.com")
-                .withString("FirstName", "F1_UPDATE_" + UNIQUE_ID).withString("LastName", "L1_UPDATE_" + UNIQUE_ID).build();
+        Record record = factory
+                .newRecordBuilder()
+                .withString("Email", "aaa_" + UNIQUE_ID + "@test.com")
+                .withString("FirstName", "F1_UPDATE_" + UNIQUE_ID)
+                .withString("LastName", "L1_UPDATE_" + UNIQUE_ID)
+                .build();
 
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(asList(record));
-        Job.components().component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig).connections().from("emitter")
-                .to("salesforce-output").build().run();
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
 
         getComponentsHandler().resetState();
         checkModuleData("Contact", "FirstName = 'F1_UPDATE_" + UNIQUE_ID + "'", 1);
@@ -246,15 +305,23 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         configuration.setCommitLevel(2);
 
         Record record_1 = factory.newRecordBuilder().withString("Name", "test_batch_1_" + UNIQUE_ID).build();
-        Record record_2 = factory.newRecordBuilder().withString("Wrong_Field_Name", "test_batch_2_" + UNIQUE_ID).build();
-        Record record_3 = factory.newRecordBuilder().withString("Wrong_Field_Name", "test_batch_3_" + UNIQUE_ID).build();
+        Record record_2 =
+                factory.newRecordBuilder().withString("Wrong_Field_Name", "test_batch_2_" + UNIQUE_ID).build();
+        Record record_3 =
+                factory.newRecordBuilder().withString("Wrong_Field_Name", "test_batch_3_" + UNIQUE_ID).build();
 
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(asList(record_1, record_2, record_3));
         assertThrows(Pipeline.PipelineExecutionException.class,
-                () -> Job.components().component("emitter", "test://emitter")
-                        .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig).connections()
-                        .from("emitter").to("salesforce-output").build().run());
+                () -> Job
+                        .components()
+                        .component("emitter", "test://emitter")
+                        .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig)
+                        .connections()
+                        .from("emitter")
+                        .to("salesforce-output")
+                        .build()
+                        .run());
 
         checkModuleData("Account", "Name Like 'test_batch_%" + UNIQUE_ID + "%'", 1);
         getComponentsHandler().resetState();

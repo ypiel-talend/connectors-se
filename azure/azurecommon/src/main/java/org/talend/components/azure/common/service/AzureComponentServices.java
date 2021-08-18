@@ -61,11 +61,13 @@ public class AzureComponentServices {
     @Service
     private MessageService i18nService;
 
-    public CloudStorageAccount createStorageAccount(AzureStorageConnectionAccount azureConnection) throws URISyntaxException {
+    public CloudStorageAccount createStorageAccount(AzureStorageConnectionAccount azureConnection)
+            throws URISyntaxException {
         return createStorageAccount(azureConnection, null);
     }
 
-    public CloudStorageAccount createStorageAccount(AzureStorageConnectionAccount azureConnection, String endpointSuffix)
+    public CloudStorageAccount createStorageAccount(AzureStorageConnectionAccount azureConnection,
+            String endpointSuffix)
             throws URISyntaxException {
         if (azureConnection == null || StringUtils.isEmpty(azureConnection.getAccountName())) {
             throw new IllegalArgumentException(i18nService.connectionIsNull());
@@ -81,7 +83,8 @@ public class AzureComponentServices {
         }
     }
 
-    public CloudStorageAccount createStorageAccount(AzureStorageConnectionSignature azureConnection) throws URISyntaxException {
+    public CloudStorageAccount createStorageAccount(AzureStorageConnectionSignature azureConnection)
+            throws URISyntaxException {
         if (azureConnection == null || StringUtils.isEmpty(azureConnection.getAzureSharedAccessSignature())) {
             throw new IllegalArgumentException(i18nService.connectionIsNull());
         }
@@ -92,7 +95,8 @@ public class AzureComponentServices {
 
         StorageCredentials credentials = new StorageCredentialsSharedAccessSignature(matcher.group(5));
 
-        return new CloudStorageAccount(credentials, "https".equals(matcher.group(1)), matcher.group(4), matcher.group(2));
+        return new CloudStorageAccount(credentials, "https".equals(matcher.group(1)), matcher.group(4),
+                matcher.group(2));
     }
 
     public CloudBlobClient createCloudBlobClient(CloudStorageAccount connection, RetryPolicy retryPolicy) {
@@ -138,22 +142,25 @@ public class AzureComponentServices {
         try {
             StorageCredentials credentials = new StorageCredentialsAccountAndKey(connectionProperties.getAccountName(),
                     connectionProperties.getAccountKey());
-            return new CloudStorageAccount(credentials, connectionProperties.getProtocol() == Protocol.HTTPS, endpointSuffix,
+            return new CloudStorageAccount(credentials, connectionProperties.getProtocol() == Protocol.HTTPS,
+                    endpointSuffix,
                     null);
         } catch (IndexOutOfBoundsException e) {
             throw new IllegalArgumentException(i18nService.invalidAccountKeyFormat(e.getMessage()), e);
         }
     }
 
-    private CloudStorageAccount createStorageAccountAD(AzureStorageConnectionAccount azureConnection, String endpointSuffix) {
+    private CloudStorageAccount createStorageAccountAD(AzureStorageConnectionAccount azureConnection,
+            String endpointSuffix) {
         AzureConnectionActiveDir activeDirProperties = azureConnection.getActiveDirProperties();
         if (activeDirProperties == null || StringUtils.isEmpty(activeDirProperties.getClientId())
                 || StringUtils.isEmpty(activeDirProperties.getTenantId())
                 || StringUtils.isEmpty(activeDirProperties.getClientSecret())) {
             throw new IllegalArgumentException(i18nService.connectionIsNull());
         }
-        AzureActiveDirectoryTokenGetter tokenGetter = new AzureActiveDirectoryTokenGetter(activeDirProperties.getTenantId(),
-                activeDirProperties.getClientId(), activeDirProperties.getClientSecret());
+        AzureActiveDirectoryTokenGetter tokenGetter =
+                new AzureActiveDirectoryTokenGetter(activeDirProperties.getTenantId(),
+                        activeDirProperties.getClientId(), activeDirProperties.getClientSecret());
         try {
             String token = tokenGetter.retrieveAccessToken();
 

@@ -83,7 +83,8 @@ public class Contextual implements InvocationHandler, Serializable {
     }
 
     Object writeReplace() throws ObjectStreamException {
-        return new SerializableInstance(plugin, toBytes(delegate), methodsHandler == null ? null : toBytes(methodsHandler));
+        return new SerializableInstance(plugin, toBytes(delegate),
+                methodsHandler == null ? null : toBytes(methodsHandler));
     }
 
     private byte[] toBytes(final Object delegate) {
@@ -100,9 +101,14 @@ public class Contextual implements InvocationHandler, Serializable {
             final ResultWrapper methodsHandler) {
         final Stream<Class<?>> additionalImpl = Delegated.class.isInstance(delegate) ? Stream.of(Delegated.class)
                 : Stream.empty();
-        return type.cast(Proxy.newProxyInstance(ofNullable(type.getClassLoader()).orElseGet(ClassLoader::getSystemClassLoader),
-                Stream.concat(Stream.of(type, Serializable.class), additionalImpl).toArray(Class<?>[]::new),
-                new Contextual(plugin, delegate, methodsHandler)));
+        return type
+                .cast(Proxy
+                        .newProxyInstance(
+                                ofNullable(type.getClassLoader()).orElseGet(ClassLoader::getSystemClassLoader),
+                                Stream
+                                        .concat(Stream.of(type, Serializable.class), additionalImpl)
+                                        .toArray(Class<?>[]::new),
+                                new Contextual(plugin, delegate, methodsHandler)));
     }
 
     @RequiredArgsConstructor
@@ -130,7 +136,8 @@ public class Contextual implements InvocationHandler, Serializable {
         }
 
         private <T> T load(final byte[] bytes, final ClassLoader loader, final Class<T> expected) {
-            try (final ObjectInputStream stream = new EnhancedObjectInputStream(new ByteArrayInputStream(bytes), loader)) {
+            try (final ObjectInputStream stream =
+                    new EnhancedObjectInputStream(new ByteArrayInputStream(bytes), loader)) {
                 return expected.cast(stream.readObject());
             } catch (final ClassNotFoundException | IOException e) {
                 throw new IllegalStateException(e);

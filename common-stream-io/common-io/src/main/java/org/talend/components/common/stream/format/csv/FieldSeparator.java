@@ -29,6 +29,7 @@ public class FieldSeparator implements Serializable {
     private static final long serialVersionUID = 6180133661517097088L;
 
     public enum Type {
+
         SEMICOLON(';'),
         COMMA(','),
         TABULATION('\t'),

@@ -25,7 +25,8 @@ import java.util.regex.Pattern;
  * Replace in String "${hello} ${world:-tdi}" with "hi tdi" with a function that convert 'hello' to 'hi'.
  * you choose delimiters (prefix / suffix) with limitations due to regexp usage :
  * suffix can't start with ':' or '-' (':-' separate key and default value. (can't translate "[:hello:]")
- * a word can't contains first symbole of a suffix, means that a suffix can't start with letter [Starthelloend] is not possible.
+ * a word can't contains first symbole of a suffix, means that a suffix can't start with letter [Starthelloend] is not
+ * possible.
  * 
  * this class doesn't treat embraced substitution '${word${number}}' isn't translate to 'third'
  * with a function that give '3' for 'number' and 'third' for 'word3'
@@ -111,8 +112,14 @@ public class Substitutor {
          * @return expression with reg exp compatibility.
          */
         private String escapeChars(String val) {
-            val = val.replace("{", "\\{").replace("}", "\\}").replace("(", "\\(").replace(")", "\\)").replace("[", "\\[")
-                    .replace("]", "\\]").replace("$", "\\$");
+            val = val
+                    .replace("{", "\\{")
+                    .replace("}", "\\}")
+                    .replace("(", "\\(")
+                    .replace(")", "\\)")
+                    .replace("[", "\\[")
+                    .replace("]", "\\]")
+                    .replace("$", "\\$");
 
             return val;
         }

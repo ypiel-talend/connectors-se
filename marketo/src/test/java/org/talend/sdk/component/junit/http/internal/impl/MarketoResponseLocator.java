@@ -73,8 +73,12 @@ public class MarketoResponseLocator extends DefaultResponseLocator {
     @Override
     public void addModel(final Model model) {
         if (model.getRequest().getUri().matches(MARKETO_FIND_PATTERN_IDENTITY_OAUTH_TOKEN)) {
-            model.getRequest()
-                    .setUri(model.getRequest().getUri().replaceAll(MARKTO_REPLACE_IDENTITY_OAUTH_TOKEN, "/identity/oauth/token"));
+            model
+                    .getRequest()
+                    .setUri(model
+                            .getRequest()
+                            .getUri()
+                            .replaceAll(MARKTO_REPLACE_IDENTITY_OAUTH_TOKEN, "/identity/oauth/token"));
         }
         getCapturingBuffer().add(model);
     }

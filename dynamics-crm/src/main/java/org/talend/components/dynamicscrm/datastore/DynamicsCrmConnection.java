@@ -31,8 +31,10 @@ import lombok.Data;
 @Data
 @Checkable(ACTION_HEALTHCHECK_DYNAMICS365)
 @DataStore("DynamicsCrmConnection")
-@GridLayout({ @GridLayout.Row({ "appType" }), @GridLayout.Row({ "username", "password" }), @GridLayout.Row({ "serviceRootUrl" }),
-        @GridLayout.Row({ "clientId" }), @GridLayout.Row({ "clientSecret" }), @GridLayout.Row({ "authorizationEndpoint" }) })
+@GridLayout({ @GridLayout.Row({ "appType" }), @GridLayout.Row({ "username", "password" }),
+        @GridLayout.Row({ "serviceRootUrl" }),
+        @GridLayout.Row({ "clientId" }), @GridLayout.Row({ "clientSecret" }),
+        @GridLayout.Row({ "authorizationEndpoint" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("timeout"), @GridLayout.Row("maxRetries") })
 @Documentation("Dynamics CRM connection")
 public class DynamicsCrmConnection implements Serializable {

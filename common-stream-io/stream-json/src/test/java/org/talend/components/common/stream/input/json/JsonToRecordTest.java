@@ -34,15 +34,22 @@ import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 
 class JsonToRecordTest {
 
-    final JsonObject jsonObject = Json.createObjectBuilder().add("Hello", "World")
+    final JsonObject jsonObject = Json
+            .createObjectBuilder()
+            .add("Hello", "World")
             .add("array", Json.createArrayBuilder().add("First"))
             .add("arrayOfObject",
-                    Json.createArrayBuilder().add(Json.createObjectBuilder().add("f1", "v1"))
+                    Json
+                            .createArrayBuilder()
+                            .add(Json.createObjectBuilder().add("f1", "v1"))
                             .add(Json.createObjectBuilder().add("f1", "v2").add("f2", "v2f2").addNull("f3")))
             .add("arrayOfArray",
-                    Json.createArrayBuilder().add(Json.createArrayBuilder().add(20.0).add(30.0).add(40.0))
+                    Json
+                            .createArrayBuilder()
+                            .add(Json.createArrayBuilder().add(20.0).add(30.0).add(40.0))
                             .add(Json.createArrayBuilder().add(11.0).add(12.0).add(13.0)))
-            .add("subRecord", Json.createObjectBuilder().add("field_1", "val1").add("field_2", "val2")).build();
+            .add("subRecord", Json.createObjectBuilder().add("field_1", "val1").add("field_2", "val2"))
+            .build();
 
     private JsonToRecord toRecord;
 
@@ -82,9 +89,15 @@ class JsonToRecordTest {
         final JsonArray array = this.jsonObject.getJsonArray("arrayOfObject");
         final JsonArray resultArray = jsonResult.getJsonArray("arrayOfObject");
 
-        Assertions.assertEquals(array.get(0).asJsonObject().getString("f1"), resultArray.get(0).asJsonObject().getString("f1"));
-        Assertions.assertEquals(array.get(1).asJsonObject().getString("f1"), resultArray.get(1).asJsonObject().getString("f1"));
-        Assertions.assertEquals(array.get(1).asJsonObject().getString("f2"), resultArray.get(1).asJsonObject().getString("f2"));
+        Assertions
+                .assertEquals(array.get(0).asJsonObject().getString("f1"),
+                        resultArray.get(0).asJsonObject().getString("f1"));
+        Assertions
+                .assertEquals(array.get(1).asJsonObject().getString("f1"),
+                        resultArray.get(1).asJsonObject().getString("f1"));
+        Assertions
+                .assertEquals(array.get(1).asJsonObject().getString("f2"),
+                        resultArray.get(1).asJsonObject().getString("f2"));
     }
 
     @Test
@@ -141,7 +154,8 @@ class JsonToRecordTest {
     void fieldAreNullable(final boolean forceDouble) {
         start(forceDouble);
 
-        String source = "{\"a_string\" : \"string1\", \"a_long\" : 123, \"a_double\" : 123.123, \"a_boolean\" : true, \"an_object\" : {\"att_a\" : \"aaa\", \"att_b\" : \"bbb\"}, \"an_array\" : [\"aaa\", \"bbb\", \"ccc\"]}";
+        String source =
+                "{\"a_string\" : \"string1\", \"a_long\" : 123, \"a_double\" : 123.123, \"a_boolean\" : true, \"an_object\" : {\"att_a\" : \"aaa\", \"att_b\" : \"bbb\"}, \"an_array\" : [\"aaa\", \"bbb\", \"ccc\"]}";
         JsonObject json = getJsonObject(source);
         final Record record = toRecord.toRecord(json);
 
@@ -155,7 +169,8 @@ class JsonToRecordTest {
     void fieldAreNullable2(final boolean forceDouble) {
         start(forceDouble);
 
-        String source = "{\"a_string\" : \"string1\", \"a_null\" : null, \"b_null\" : {},\"a_long\" : 123, \"a_double\" : 123.123, \"a_boolean\" : true, \"an_object\" : {\"att_a\" : \"aaa\", \"att_b\" : \"bbb\"}, \"an_array\" : [\"aaa\", \"bbb\", \"ccc\"]}";
+        String source =
+                "{\"a_string\" : \"string1\", \"a_null\" : null, \"b_null\" : {},\"a_long\" : 123, \"a_double\" : 123.123, \"a_boolean\" : true, \"an_object\" : {\"att_a\" : \"aaa\", \"att_b\" : \"bbb\"}, \"an_array\" : [\"aaa\", \"bbb\", \"ccc\"]}";
         JsonObject json = getJsonObject(source);
         final Record record = toRecord.toRecordWithFixedSchema(json, null, true);
         Assertions.assertNotNull(record.getSchema().getEntry("a_null"));
@@ -176,7 +191,9 @@ class JsonToRecordTest {
         JsonObject json = getJsonObject(source);
         final Record record = toRecord.toRecordWithFixedSchema(json, null, cases);
         if (cases) {
-            Assertions.assertEquals("{\"from\":\"{}\",\"to\":\"{}\"}", record.getRecord("via").getRecord("source").toString());
+            Assertions
+                    .assertEquals("{\"from\":\"{}\",\"to\":\"{}\"}",
+                            record.getRecord("via").getRecord("source").toString());
         } else {
             Assertions.assertEquals("{\"from\":{},\"to\":{}}", record.getRecord("via").getRecord("source").toString());
         }

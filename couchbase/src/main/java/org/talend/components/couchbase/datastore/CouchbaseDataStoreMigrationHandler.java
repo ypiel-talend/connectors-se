@@ -25,7 +25,8 @@ public class CouchbaseDataStoreMigrationHandler implements MigrationHandler {
             long timeoutValue = Long.parseLong(incomingData.get("connectTimeout")) * 1000;
             incomingData.remove("connectTimeout");
             incomingData.put("useConnectionParameters", "true");
-            incomingData.put("connectionParametersList[0].parameterName", ConnectionParameter.CONNECTION_TIMEOUT.name());
+            incomingData
+                    .put("connectionParametersList[0].parameterName", ConnectionParameter.CONNECTION_TIMEOUT.name());
             incomingData.put("connectionParametersList[0].parameterValue", String.valueOf(timeoutValue));
         }
         return incomingData;

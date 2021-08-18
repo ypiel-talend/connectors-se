@@ -29,8 +29,9 @@ import lombok.Data;
 @Data
 @DataStore("CosmosDBDataStore")
 @Checkable("healthCheck")
-@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "serviceEndpoint" }), @GridLayout.Row({ "primaryKey" }),
-        @GridLayout.Row({ "databaseID" }) })
+@GridLayout(names = GridLayout.FormType.MAIN,
+        value = { @GridLayout.Row({ "serviceEndpoint" }), @GridLayout.Row({ "primaryKey" }),
+                @GridLayout.Row({ "databaseID" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectionMode" }),
         @GridLayout.Row({ "maxConnectionPoolSize" }), @GridLayout.Row({ "consistencyLevel" }) })
 

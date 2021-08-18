@@ -41,8 +41,11 @@ public class MapperResultWrapper implements Contextual.ResultWrapper, Serializab
             return Contextual.proxy(Input.class, plugin, Input.class.cast(value), null);
         } else if (Collection.class.isInstance(value)) { // split()
             final Collection<Mapper> mappers = Collection.class.cast(value);
-            return mappers.stream().map(Mapper.class::cast)
-                    .map(mapper -> isAlreadyWrapped(mapper) ? mapper : Contextual.proxy(Mapper.class, plugin, mapper, this))
+            return mappers
+                    .stream()
+                    .map(Mapper.class::cast)
+                    .map(mapper -> isAlreadyWrapped(mapper) ? mapper
+                            : Contextual.proxy(Mapper.class, plugin, mapper, this))
                     .collect(toList());
         } else if (value == null) {
             return null;

@@ -43,7 +43,8 @@ public class JsonContentFormatter extends AbstractContentFormatter {
         this.recordBuilderFactory = recordBuilderFactory;
         this.jsonBuilderFactory = jsonBuilderFactory;
         this.configuration = configuration;
-        converter = JsonConverter.of(recordBuilderFactory, jsonBuilderFactory, configuration.getDataSet().getJsonConfiguration());
+        converter = JsonConverter
+                .of(recordBuilderFactory, jsonBuilderFactory, configuration.getDataSet().getJsonConfiguration());
     }
 
     @Override

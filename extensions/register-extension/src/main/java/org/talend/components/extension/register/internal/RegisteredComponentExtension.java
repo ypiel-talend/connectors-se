@@ -53,8 +53,13 @@ public class RegisteredComponentExtension implements ContainerListenerExtension 
     public void onCreate(final Container container) {
         log.info("RegisteredComponentExtension extension will load CustomComponentExtension...");
         final List<CustomComponentExtension> extensions = loadExtensions(container);
-        container.set(Closeables.class, new Closeables(extensions.stream().map(it -> it.onCreate(container))
-                .filter(Optional::isPresent).flatMap(Optional::get).collect(toList())));
+        container
+                .set(Closeables.class, new Closeables(extensions
+                        .stream()
+                        .map(it -> it.onCreate(container))
+                        .filter(Optional::isPresent)
+                        .flatMap(Optional::get)
+                        .collect(toList())));
     }
 
     @Override
@@ -76,7 +81,9 @@ public class RegisteredComponentExtension implements ContainerListenerExtension 
         final List<CustomComponentExtension> extensions = StreamSupport
                 .stream(ServiceLoader.load(CustomComponentExtension.class, container.getLoader()).spliterator(), false)
                 .sorted(comparing(
-                        it -> ofNullable(it.getClass().getAnnotation(Priority.class)).map(Priority::value).orElse(1000)))
+                        it -> ofNullable(it.getClass().getAnnotation(Priority.class))
+                                .map(Priority::value)
+                                .orElse(1000)))
                 .collect(toList());
 
         extensions.forEach(c -> log.info("New loaded CustomComponentExtension : " + c.getClass().getName()));
@@ -123,8 +130,9 @@ public class RegisteredComponentExtension implements ContainerListenerExtension 
 
         @Override
         public Stream<String> containerClassesAndPackages() {
-            return Stream.of("org.talend.components.extension.register.api", "org.talend.sdk.component.container",
-                    "org.talend.sdk.component.design.");
+            return Stream
+                    .of("org.talend.components.extension.register.api", "org.talend.sdk.component.container",
+                            "org.talend.sdk.component.design.");
         }
     }
 

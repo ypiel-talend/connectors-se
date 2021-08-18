@@ -42,7 +42,8 @@ class DSOMigrationHandlerTest {
         assertEquals(migrated.get("dso_duplication"), "legacy data");
         assertFalse(migrated.get("dso_migration_handler_callback").isEmpty());
         assertEquals(migrated.get("dso_incoming"),
-                "{\n" + "\t\"dso_outgoing\" : \"\",\n" + "\t\"dso_legacy\" : \"legacy data\",\n" + "\t\"dso_incoming\" : \"\",\n"
+                "{\n" + "\t\"dso_outgoing\" : \"\",\n" + "\t\"dso_legacy\" : \"legacy data\",\n"
+                        + "\t\"dso_incoming\" : \"\",\n"
                         + "\t\"dso_migration_handler_callback\" : \"\"\n" + "}");
         assertFalse(migrated.get("dso_outgoing").isEmpty());
 

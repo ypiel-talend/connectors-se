@@ -45,10 +45,12 @@ public class RecordIORepository {
     private Messages i18n;
 
     /** all readers suppliers */
-    private final ConcurrentMap<Class<? extends ContentFormat>, RecordReaderSupplier> readers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class<? extends ContentFormat>, RecordReaderSupplier> readers =
+            new ConcurrentHashMap<>();
 
     /** all writers suppliers */
-    private final ConcurrentMap<Class<? extends ContentFormat>, RecordWriterSupplier> writers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class<? extends ContentFormat>, RecordWriterSupplier> writers =
+            new ConcurrentHashMap<>();
 
     /**
      * Load json file to get reader/writer class.
@@ -61,7 +63,9 @@ public class RecordIORepository {
     public void init() {
         final ClassLoader loader = RecordIORepository.class.getClassLoader();
         try {
-            Collections.list(loader.getResources("TALEND-INF/components/format.json")).stream() //
+            Collections
+                    .list(loader.getResources("TALEND-INF/components/format.json"))
+                    .stream() //
                     .map(this::readJson) // url -> json object
                     .forEach((JsonObject json) -> this.loadJson(loader, json)); // load json to update readers & writers
         } catch (IOException exIO) {
@@ -91,8 +95,9 @@ public class RecordIORepository {
      */
     private void loadClasses(ClassLoader loader, String contentFormatClasses, JsonValue value) {
 
-        final Class<? extends ContentFormat> contentFormatClass = this.loadClass(ContentFormat.class, loader,
-                contentFormatClasses);
+        final Class<? extends ContentFormat> contentFormatClass = this
+                .loadClass(ContentFormat.class, loader,
+                        contentFormatClasses);
         if (value.getValueType() != JsonValue.ValueType.OBJECT) {
             throw new IllegalArgumentException("json pb : " + value.toString() + " is not a json object");
         }

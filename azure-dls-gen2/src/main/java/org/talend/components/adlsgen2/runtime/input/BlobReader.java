@@ -44,7 +44,8 @@ public abstract class BlobReader {
 
     protected final AdlsDatasetRuntimeInfo datasetRuntimeInfo;
 
-    public BlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory, AdlsGen2Service service,
+    public BlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
+            AdlsGen2Service service,
             AdlsActiveDirectoryService tokenProviderService) {
         this.recordBuilderFactory = recordBuilderFactory;
         this.configuration = configuration;
@@ -67,7 +68,8 @@ public abstract class BlobReader {
         private static JsonBuilderFactory jsonFactory;
 
         public static BlobReader getReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
-                JsonBuilderFactory jsonFactory, AdlsGen2Service service, AdlsActiveDirectoryService tokenProviderService) {
+                JsonBuilderFactory jsonFactory, AdlsGen2Service service,
+                AdlsActiveDirectoryService tokenProviderService) {
             switch (configuration.getDataSet().getFormat()) {
             case CSV:
                 return new CsvBlobReader(configuration, recordBuilderFactory, service, tokenProviderService);
@@ -76,7 +78,8 @@ public abstract class BlobReader {
             case PARQUET:
                 return new ParquetBlobReader(configuration, recordBuilderFactory, service, tokenProviderService);
             case JSON:
-                return new JsonBlobReader(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
+                return new JsonBlobReader(configuration, recordBuilderFactory, jsonFactory, service,
+                        tokenProviderService);
             default:
                 throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
             }

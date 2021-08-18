@@ -110,6 +110,7 @@ public class MarketoDataSet implements Serializable {
     }
 
     public enum DateTimeRelative {
+
         PERIOD_AGO_1W("P7D"), //
         PERIOD_AGO_2W("P14D"), //
         PERIOD_AGO_1M("P1M"), //

@@ -41,10 +41,12 @@ public class SoqlParser extends Parser {
 
     protected static final PredictionContextCache _sharedContextCache = new PredictionContextCache();
 
-    public static final int WS = 1, COMMA = 2, DOT = 3, LPAR = 4, RPAR = 5, FROM = 6, SELECT = 7, NAME = 8, ANYCHAR = 9, BY = 10;
+    public static final int WS = 1, COMMA = 2, DOT = 3, LPAR = 4, RPAR = 5, FROM = 6, SELECT = 7, NAME = 8, ANYCHAR = 9,
+            BY = 10;
 
     public static final int RULE_query = 0, RULE_selectClause = 1, RULE_fromClause = 2, RULE_anythingClause = 3,
-            RULE_fieldList = 4, RULE_subqueryList = 5, RULE_field = 6, RULE_object = 7, RULE_objectPrefix = 8, RULE_subquery = 9,
+            RULE_fieldList = 4, RULE_subqueryList = 5, RULE_field = 6, RULE_object = 7, RULE_objectPrefix = 8,
+            RULE_subquery = 9,
             RULE_subSelectClause = 10, RULE_anyword = 11, RULE_anything = 12;
 
     public static final String[] ruleNames = { "query", "selectClause", "fromClause", "anythingClause", "fieldList",
@@ -52,8 +54,9 @@ public class SoqlParser extends Parser {
 
     private static final String[] _LITERAL_NAMES = { null, null, "','", "'.'", "'('", "')'" };
 
-    private static final String[] _SYMBOLIC_NAMES = { null, "WS", "COMMA", "DOT", "LPAR", "RPAR", "FROM", "SELECT", "NAME",
-            "ANYCHAR", "BY" };
+    private static final String[] _SYMBOLIC_NAMES =
+            { null, "WS", "COMMA", "DOT", "LPAR", "RPAR", "FROM", "SELECT", "NAME",
+                    "ANYCHAR", "BY" };
 
     public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -363,8 +366,9 @@ public class SoqlParser extends Parser {
                     setState(43);
                     _errHandler.sync(this);
                     _la = _input.LA(1);
-                } while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << COMMA) | (1L << DOT) | (1L << LPAR) | (1L << RPAR)
-                        | (1L << NAME) | (1L << ANYCHAR) | (1L << BY))) != 0));
+                } while ((((_la) & ~0x3f) == 0
+                        && ((1L << _la) & ((1L << COMMA) | (1L << DOT) | (1L << LPAR) | (1L << RPAR)
+                                | (1L << NAME) | (1L << ANYCHAR) | (1L << BY))) != 0));
             }
         } catch (RecognitionException re) {
             _localctx.exception = re;

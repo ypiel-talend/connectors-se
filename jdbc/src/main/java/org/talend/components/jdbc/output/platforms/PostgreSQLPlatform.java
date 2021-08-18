@@ -57,8 +57,9 @@ public class PostgreSQLPlatform extends Platform {
         sql.append(identifier(table.getName()));
         sql.append("(");
         sql.append(createColumns(table.getColumns()));
-        sql.append(createPKs(connection.getMetaData(), table.getName(),
-                table.getColumns().stream().filter(Column::isPrimaryKey).collect(Collectors.toList())));
+        sql
+                .append(createPKs(connection.getMetaData(), table.getName(),
+                        table.getColumns().stream().filter(Column::isPrimaryKey).collect(Collectors.toList())));
         sql.append(")");
         // todo create index
 

@@ -49,8 +49,9 @@ public class DigestAuthService {
                     // if WWW-Authenticate exists
                     BasicHeader authChallenge = new BasicHeader("WWW-Authenticate", lwa.get(0));
                     DigestScheme scheme = new DigestScheme();
-                    String digest = scheme.createDigestResponse(context.getCredentials().getUser(),
-                            context.getCredentials().getPassword(), authChallenge, context); // compute header
+                    String digest = scheme
+                            .createDigestResponse(context.getCredentials().getUser(),
+                                    context.getCredentials().getPassword(), authChallenge, context); // compute header
                     context.setDigestAuthHeader(digest);
 
                     response = supplier.get();

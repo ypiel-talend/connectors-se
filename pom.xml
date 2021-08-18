@@ -128,7 +128,7 @@
     <yarn.version>v1.15.2</yarn.version>
     <spotbugs.version>4.0.0</spotbugs.version>
     <spotbugs-maven-plugin.version>3.1.12.2</spotbugs-maven-plugin.version>
-    <spotless.version>1.24.0</spotless.version>
+    <spotless.version>2.4.0</spotless.version>
 
     <!-- The XTM customer id that manage the translation of this project-->
     <xtm.customer.id>12240076</xtm.customer.id>
@@ -809,7 +809,7 @@
           <dependency>
             <groupId>org.talend.tools</groupId>
             <artifactId>java-formatter</artifactId>
-            <version>0.1.0</version>
+            <version>0.2.2</version>
           </dependency>
         </dependencies>
       </plugin>

@@ -89,9 +89,15 @@ public class SalesforceTestBase implements Serializable {
         configuration.setModuleDataSet(outDataSet);
 
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + inputConfig)
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig).connections()
-                .from("salesforce-input").to("salesforce-output").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + inputConfig)
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig)
+                .connections()
+                .from("salesforce-input")
+                .to("salesforce-output")
+                .build()
+                .run();
         getComponentsHandler().resetState();
     }
 
@@ -105,8 +111,15 @@ public class SalesforceTestBase implements Serializable {
         InputModuleConfig inputModuleConfig = new InputModuleConfig();
         inputModuleConfig.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputModuleConfig).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> res = componentsHandler.getCollectedData(Record.class);
         assertEquals(expected, res.size());
         getComponentsHandler().resetState();

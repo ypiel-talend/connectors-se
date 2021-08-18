@@ -26,7 +26,8 @@ import java.io.Serializable;
 @Version(1)
 @Data
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataset" }), //
-        }), @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }),
+}), @GridLayout(names = GridLayout.FormType.ADVANCED,
+        value = { @GridLayout.Row({ "dataset" }),
                 @GridLayout.Row({ "jsonForceDouble" }) }) })
 @Documentation("cosmosDB input Mapper Configuration")
 public class CosmosDBInputConfiguration implements Serializable {

@@ -43,7 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 // @Environment
 @Environment(SparkRunnerEnvironment.class)
 @EnvironmentConfiguration(environment = "Spark", systemProperties = {
-        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
+        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner",
+                value = "org.apache.beam.runners.spark.SparkRunner"),
         @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
         @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false") })
 
@@ -82,7 +83,8 @@ class DummySourceTest {
         config.getDse().getDso().setDso_shouldNotBeEmpty("set !");
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "Tester://dummySource?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -101,7 +103,8 @@ class DummySourceTest {
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
 
         try {
-            Job.components() //
+            Job
+                    .components() //
                     .component("emitter", "Tester://dummySource?" + configStr) //
                     .component("out", "test://collector") //
                     .connections() //

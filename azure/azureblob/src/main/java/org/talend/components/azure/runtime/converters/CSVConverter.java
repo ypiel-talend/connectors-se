@@ -49,7 +49,8 @@ public class CSVConverter implements RecordConverter<CSVRecord> {
                 csvFormatOptions.getEscapeCharacter());
     }
 
-    private CSVFormat createCSVFormat(char fieldDelimiter, String recordDelimiter, String textEnclosure, String escapeChar) {
+    private CSVFormat createCSVFormat(char fieldDelimiter, String recordDelimiter, String textEnclosure,
+            String escapeChar) {
         // CSVFormat.RFC4180 use " as quote and no escape char and "," as field
         // delimiter and only quote if quote is set and necessary
         CSVFormat format = CSVFormat.RFC4180.withDelimiter(fieldDelimiter);

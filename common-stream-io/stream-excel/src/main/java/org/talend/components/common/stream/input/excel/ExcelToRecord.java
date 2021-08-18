@@ -134,7 +134,8 @@ public class ExcelToRecord {
     private Schema.Type toRecordType(CellType cellType, int indexCol) {
 
         if (cellType == CellType.ERROR) {
-            throw new UnsupportedOperationException("Error cell exists in excel document in the " + indexCol + " column");
+            throw new UnsupportedOperationException(
+                    "Error cell exists in excel document in the " + indexCol + " column");
         }
 
         if (cellType == CellType.STRING || cellType == CellType.BLANK || cellType == null) {
@@ -148,8 +149,11 @@ public class ExcelToRecord {
     }
 
     public List<Column> inferSchemaColumns(Row excelRecord, boolean isHeader) {
-        return StreamSupport.stream(excelRecord.spliterator(), false).filter(Objects::nonNull)
-                .map((Cell cell) -> this.buildColumn(cell, isHeader)).collect(Collectors.toList());
+        return StreamSupport
+                .stream(excelRecord.spliterator(), false)
+                .filter(Objects::nonNull)
+                .map((Cell cell) -> this.buildColumn(cell, isHeader))
+                .collect(Collectors.toList());
     }
 
     private Column buildColumn(Cell cell, boolean isHeader) {

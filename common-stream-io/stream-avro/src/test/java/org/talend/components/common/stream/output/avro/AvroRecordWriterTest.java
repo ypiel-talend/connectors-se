@@ -62,7 +62,8 @@ class AvroRecordWriterTest {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         AvroConfiguration cfg = new AvroConfiguration();
         cfg.setAttachSchema(false);
-        final Schema avroSchema = SchemaBuilder.builder() //
+        final Schema avroSchema = SchemaBuilder
+                .builder() //
                 .record("testRecord") //
                 .namespace("org.talend.test") //
                 .fields() //
@@ -72,11 +73,13 @@ class AvroRecordWriterTest {
         cfg.setAvroSchema(avroSchema.toString(true));
         final RecordWriterSupplier writerSupplier = new AvroWriterSupplier();
 
-        final Record record1 = factory.newRecordBuilder() //
+        final Record record1 = factory
+                .newRecordBuilder() //
                 .withInt("ID", 125) //
                 .withString("content", "Hello") //
                 .build();
-        final Record record2 = factory.newRecordBuilder() //
+        final Record record2 = factory
+                .newRecordBuilder() //
                 .withInt("ID", 140) //
                 .withString("content", "World") //
                 .build();
@@ -93,7 +96,8 @@ class AvroRecordWriterTest {
 
     private void prepareTestRecords() {
         // some demo records
-        versatileRecord = factory.newRecordBuilder() //
+        versatileRecord = factory
+                .newRecordBuilder() //
                 .withString("string1", "Bonjour") //
                 .withString("string2", "Olà") //
                 .withInt("int", 71) //
@@ -104,16 +108,26 @@ class AvroRecordWriterTest {
                 .withDouble("double", 20.5) //
                 .build();
 
-        Entry er = factory.newEntryBuilder().withName("record").withType(Type.RECORD)
-                .withElementSchema(versatileRecord.getSchema()).build();
-        Entry ea = factory.newEntryBuilder().withName("array").withType(Type.ARRAY)
-                .withElementSchema(factory.newSchemaBuilder(Type.ARRAY).withType(Type.STRING).build()).build();
+        Entry er = factory
+                .newEntryBuilder()
+                .withName("record")
+                .withType(Type.RECORD)
+                .withElementSchema(versatileRecord.getSchema())
+                .build();
+        Entry ea = factory
+                .newEntryBuilder()
+                .withName("array")
+                .withType(Type.ARRAY)
+                .withElementSchema(factory.newSchemaBuilder(Type.ARRAY).withType(Type.STRING).build())
+                .build();
 
-        complexRecord = factory.newRecordBuilder() //
+        complexRecord = factory
+                .newRecordBuilder() //
                 .withString("name", "ComplexR") //
                 .withRecord(er, versatileRecord) //
                 .withDateTime("now", ZonedDateTime.now()) //
-                .withArray(ea, Arrays.asList("ary1", "ary2", "ary3")).build();
+                .withArray(ea, Arrays.asList("ary1", "ary2", "ary3"))
+                .build();
     }
 
     @Test
@@ -123,27 +137,61 @@ class AvroRecordWriterTest {
         final RecordWriterSupplier writerSupplier = new AvroWriterSupplier();
 
         final RecordWriter writer = writerSupplier.getWriter(() -> out, cfg);
-        final org.talend.sdk.component.api.record.Schema schemaSub = this.factory.newSchemaBuilder(Type.RECORD)
-                .withEntry(factory.newEntryBuilder().withName("rec_string").withType(Type.STRING).withNullable(true).build())
-                .withEntry(factory.newEntryBuilder().withName("rec_int").withType(Type.INT).withNullable(true).build()).build();
-        final Record recordSub = this.factory.newRecordBuilder(schemaSub).withString("rec_string", "rec_string_1")
-                .withInt("rec_int", 1).build();
-        final Record recordSub1 = this.factory.newRecordBuilder(schemaSub).withString("rec_string", "rec_string_2")
-                .withInt("rec_int", 2).build();
+        final org.talend.sdk.component.api.record.Schema schemaSub = this.factory
+                .newSchemaBuilder(Type.RECORD)
+                .withEntry(factory
+                        .newEntryBuilder()
+                        .withName("rec_string")
+                        .withType(Type.STRING)
+                        .withNullable(true)
+                        .build())
+                .withEntry(factory.newEntryBuilder().withName("rec_int").withType(Type.INT).withNullable(true).build())
+                .build();
+        final Record recordSub = this.factory
+                .newRecordBuilder(schemaSub)
+                .withString("rec_string", "rec_string_1")
+                .withInt("rec_int", 1)
+                .build();
+        final Record recordSub1 = this.factory
+                .newRecordBuilder(schemaSub)
+                .withString("rec_string", "rec_string_2")
+                .withInt("rec_int", 2)
+                .build();
 
-        final Entry entrySub = this.factory.newEntryBuilder().withName("sub").withNullable(true).withType(Type.RECORD)
-                .withElementSchema(schemaSub).build();
-        final org.talend.sdk.component.api.record.Schema schema = this.factory.newSchemaBuilder(Type.RECORD)
-                .withEntry(this.factory.newEntryBuilder().withName("field1").withType(Type.STRING).withNullable(true).build())
-                .withEntry(entrySub).build();
+        final Entry entrySub = this.factory
+                .newEntryBuilder()
+                .withName("sub")
+                .withNullable(true)
+                .withType(Type.RECORD)
+                .withElementSchema(schemaSub)
+                .build();
+        final org.talend.sdk.component.api.record.Schema schema = this.factory
+                .newSchemaBuilder(Type.RECORD)
+                .withEntry(this.factory
+                        .newEntryBuilder()
+                        .withName("field1")
+                        .withType(Type.STRING)
+                        .withNullable(true)
+                        .build())
+                .withEntry(entrySub)
+                .build();
 
-        final Record record = this.factory.newRecordBuilder(schema).withRecord(entrySub, recordSub).withString("field1", "value1")
+        final Record record = this.factory
+                .newRecordBuilder(schema)
+                .withRecord(entrySub, recordSub)
+                .withString("field1", "value1")
                 .build();
         final Record record1 = this.factory.newRecordBuilder(schema).withString("field1", "value2").build();
-        final Record record2 = this.factory.newRecordBuilder(schema).withString("field1", "value3").withRecord(entrySub, null)
+        final Record record2 = this.factory
+                .newRecordBuilder(schema)
+                .withString("field1", "value3")
+                .withRecord(entrySub, null)
                 .build();
-        final Record record3 = this.factory.newRecordBuilder(schema).withRecord(entrySub, recordSub1)
-                .withString("field1", "value2").build();
+        final Record record3 = this.factory
+                .newRecordBuilder(schema)
+                .withRecord(entrySub, recordSub1)
+                .withString("field1", "value2")
+                .build();
 
         writer.add(Arrays.asList(record2, record, record1));
         writer.add(record3);

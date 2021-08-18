@@ -64,11 +64,13 @@ public class LeadStrategy extends OutputComponentStrategy implements ProcessorSt
     public JsonObject getPayload(List<JsonObject> incomingData) {
         JsonArray input = jsonFactory.createArrayBuilder(incomingData).build();
         if (delete.equals(configuration.getAction())) {
-            return jsonFactory.createObjectBuilder() //
+            return jsonFactory
+                    .createObjectBuilder() //
                     .add(ATTR_INPUT, input) //
                     .build();
         } else {
-            return jsonFactory.createObjectBuilder() //
+            return jsonFactory
+                    .createObjectBuilder() //
                     .add(ATTR_ACTION, configuration.getAction().name()) //
                     .add(ATTR_LOOKUP_FIELD, configuration.getLookupField()) //
                     .add(ATTR_INPUT, input) //
@@ -95,27 +97,41 @@ public class LeadStrategy extends OutputComponentStrategy implements ProcessorSt
             builder.add(jsonFactory.createObjectBuilder().add(ATTR_ID, lead.getInt(ATTR_ID)));
         }
         JsonObject listPayload = jsonFactory.createObjectBuilder().add(ATTR_INPUT, builder.build()).build();
-        handleListResponse(listClient.addToList(HEADER_CONTENT_TYPE_APPLICATION_JSON, accessToken, listId, listPayload));
+        handleListResponse(
+                listClient.addToList(HEADER_CONTENT_TYPE_APPLICATION_JSON, accessToken, listId, listPayload));
     }
 
     private void handleListResponse(Response<JsonObject> response) {
         if (response.status() == MarketoApiConstants.HTTP_STATUS_OK) {
             if (!response.body().getBoolean(ATTR_SUCCESS)) {
-                log.error("[handleListResponse] Error during adding leads to list {}: {}", listId,
-                        getErrors(response.body().getJsonArray(ATTR_ERRORS)));
+                log
+                        .error("[handleListResponse] Error during adding leads to list {}: {}", listId,
+                                getErrors(response.body().getJsonArray(ATTR_ERRORS)));
             } else {
-                response.body().getJsonArray(ATTR_RESULT).getValuesAs(JsonObject.class).stream().filter(this::isRejected)
-                        .forEach(e -> log.error("[handleListResponse] Lead add to List {}: {}", listId,
-                                getErrors(e.getJsonArray(ATTR_REASONS))));
+                response
+                        .body()
+                        .getJsonArray(ATTR_RESULT)
+                        .getValuesAs(JsonObject.class)
+                        .stream()
+                        .filter(this::isRejected)
+                        .forEach(e -> log
+                                .error("[handleListResponse] Lead add to List {}: {}", listId,
+                                        getErrors(e.getJsonArray(ATTR_REASONS))));
             }
         }
     }
 
     private JsonObject syncLeads(JsonObject payload) {
-        Response<JsonObject> response = leadClient.syncLeads(HEADER_CONTENT_TYPE_APPLICATION_JSON, accessToken, payload);
+        Response<JsonObject> response =
+                leadClient.syncLeads(HEADER_CONTENT_TYPE_APPLICATION_JSON, accessToken, payload);
         if (response.status() == MarketoApiConstants.HTTP_STATUS_OK && response.body().getBoolean(ATTR_SUCCESS)) {
-            addLeadsInList(response.body().getJsonArray(ATTR_RESULT).stream().map(JsonValue::asJsonObject)
-                    .filter(lead -> !isRejected(lead)).collect(Collectors.toList()));
+            addLeadsInList(response
+                    .body()
+                    .getJsonArray(ATTR_RESULT)
+                    .stream()
+                    .map(JsonValue::asJsonObject)
+                    .filter(lead -> !isRejected(lead))
+                    .collect(Collectors.toList()));
         }
         // return main action status
         return handleResponse(response);

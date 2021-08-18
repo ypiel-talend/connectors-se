@@ -49,7 +49,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Environment(SparkRunnerEnvironment.class)
 @EnvironmentConfiguration(environment = "Spark", systemProperties = {
-        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
+        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner",
+                value = "org.apache.beam.runners.spark.SparkRunner"),
         @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
         @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false") })
 
@@ -106,7 +107,8 @@ class JsonFormatTest {
 
         // Test Array level
         Assertions.assertEquals(Schema.Type.ARRAY, record.getSchema().getEntries().get(0).getType());
-        Assertions.assertEquals(Schema.Type.RECORD, record.getSchema().getEntries().get(0).getElementSchema().getType());
+        Assertions
+                .assertEquals(Schema.Type.RECORD, record.getSchema().getEntries().get(0).getElementSchema().getType());
 
         Assertions.assertEquals(true, record.getBoolean("_cacheHit"));
 
@@ -194,7 +196,8 @@ class JsonFormatTest {
 
         final Record record = records.get(0);
         Assertions.assertEquals(Schema.Type.ARRAY, record.getSchema().getEntries().get(0).getType());
-        Assertions.assertEquals(Schema.Type.RECORD, record.getSchema().getEntries().get(0).getElementSchema().getType());
+        Assertions
+                .assertEquals(Schema.Type.RECORD, record.getSchema().getEntries().get(0).getElementSchema().getType());
         Assertions.assertEquals(3, record.getSchema().getEntries().get(0).getElementSchema().getEntries().size());
     }
 
@@ -206,11 +209,15 @@ class JsonFormatTest {
 
         final Record record = records.get(0);
         Assertions.assertEquals(Schema.Type.ARRAY, record.getSchema().getEntries().get(0).getType());
-        Assertions.assertEquals(Schema.Type.RECORD, record.getSchema().getEntries().get(0).getElementSchema().getType());
+        Assertions
+                .assertEquals(Schema.Type.RECORD, record.getSchema().getEntries().get(0).getElementSchema().getType());
         Assertions.assertEquals(4, record.getSchema().getEntries().get(0).getElementSchema().getEntries().size());
-        Assertions.assertEquals(Schema.Type.STRING,
-                record.getSchema().getEntries().get(0).getElementSchema().getEntries().get(2).getType());
-        Assertions.assertEquals("ddd", record.getSchema().getEntries().get(0).getElementSchema().getEntries().get(2).getName());
+        Assertions
+                .assertEquals(Schema.Type.STRING,
+                        record.getSchema().getEntries().get(0).getElementSchema().getEntries().get(2).getType());
+        Assertions
+                .assertEquals("ddd",
+                        record.getSchema().getEntries().get(0).getElementSchema().getEntries().get(2).getName());
     }
 
     @EnvironmentalTest
@@ -247,7 +254,9 @@ class JsonFormatTest {
 
         Assertions.assertEquals("is_array_of_int", entries.get(5).getName());
         Assertions.assertEquals(Schema.Type.ARRAY, entries.get(5).getType());
-        Assertions.assertEquals(forceDouble ? Schema.Type.DOUBLE : Schema.Type.LONG, entries.get(5).getElementSchema().getType());
+        Assertions
+                .assertEquals(forceDouble ? Schema.Type.DOUBLE : Schema.Type.LONG,
+                        entries.get(5).getElementSchema().getType());
 
         Assertions.assertEquals("is_array_of_double", entries.get(6).getName());
         Assertions.assertEquals(Schema.Type.ARRAY, entries.get(6).getType());
@@ -256,20 +265,27 @@ class JsonFormatTest {
         final Object is_int = record.get(Object.class, "is_int");
         Assertions.assertEquals(forceDouble ? Double.class : Long.class, is_int.getClass());
 
-        final List<Object> is_array_of_int = record.getArray(Object.class, "is_array_of_int").stream()
+        final List<Object> is_array_of_int = record
+                .getArray(Object.class, "is_array_of_int")
+                .stream()
                 .collect(Collectors.toList());
-        Assertions.assertEquals(Double.class, is_array_of_int.get(2).getClass()); // must be instance of Double, not BigInteger
+        Assertions.assertEquals(Double.class, is_array_of_int.get(2).getClass()); // must be instance of Double, not
+                                                                                  // BigInteger
 
-        final List<Object> is_array_of_double = record.getArray(Object.class, "is_array_of_double").stream()
+        final List<Object> is_array_of_double = record
+                .getArray(Object.class, "is_array_of_double")
+                .stream()
                 .collect(Collectors.toList());
-        Assertions.assertEquals(Double.class, is_array_of_double.get(2).getClass()); // must be instance of Double, not BigInteger
+        Assertions.assertEquals(Double.class, is_array_of_double.get(2).getClass()); // must be instance of Double, not
+                                                                                     // BigInteger
 
     }
 
     private List<Record> runPipeline() {
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
 
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "jsonFamily://jsonInput?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //

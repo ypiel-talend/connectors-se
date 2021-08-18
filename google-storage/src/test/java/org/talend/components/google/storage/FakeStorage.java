@@ -47,7 +47,12 @@ public class FakeStorage implements StorageRpc {
         final StorageRpc rpc = (StorageRpc) options.getRpc();
         final StorageRpc fake = new FakeStorage(rpc);
 
-        return LocalStorageHelper.getOptions().toBuilder().setServiceRpcFactory((StorageOptions so) -> fake).build().getService();
+        return LocalStorageHelper
+                .getOptions()
+                .toBuilder()
+                .setServiceRpcFactory((StorageOptions so) -> fake)
+                .build()
+                .getService();
     }
 
     public Bucket create(Bucket bucket, Map<Option, ?> options) {
@@ -122,7 +127,8 @@ public class FakeStorage implements StorageRpc {
         storageRpc.write(uploadId, toWrite, toWriteOffset, destOffset, length, last);
     }
 
-    public StorageObject writeWithResponse(String uploadId, byte[] toWrite, int toWriteOffset, long destOffset, int length,
+    public StorageObject writeWithResponse(String uploadId, byte[] toWrite, int toWriteOffset, long destOffset,
+            int length,
             boolean last) {
         storageRpc.write(uploadId, toWrite, toWriteOffset, destOffset, length, last);
         return null;
@@ -224,7 +230,8 @@ public class FakeStorage implements StorageRpc {
         return storageRpc.setIamPolicy(bucket, policy, options);
     }
 
-    public TestIamPermissionsResponse testIamPermissions(String bucket, List<String> permissions, Map<Option, ?> options) {
+    public TestIamPermissionsResponse testIamPermissions(String bucket, List<String> permissions,
+            Map<Option, ?> options) {
         return storageRpc.testIamPermissions(bucket, permissions, options);
     }
 

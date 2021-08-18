@@ -50,7 +50,8 @@ public class BatchSource implements Serializable {
 
         if (currentRow < PollingComponentExtensionTest.TEST_NB_EXPECTED_ROWS) {
             currentRow++;
-            return new Data("Data/" + config.getParam1() + currentRow + "/" + resumeInc, config.getParam0() + currentRow);
+            return new Data("Data/" + config.getParam1() + currentRow + "/" + resumeInc,
+                    config.getParam0() + currentRow);
         }
 
         return null;

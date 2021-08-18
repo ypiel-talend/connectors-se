@@ -74,6 +74,7 @@ public class InputMapper implements Serializable {
 
     @Emitter
     public AdlsGen2Input createWorker() {
-        return new AdlsGen2Input(configuration, service, recordBuilderFactory, jsonBuilderFactory, tokenProviderService);
+        return new AdlsGen2Input(configuration, service, recordBuilderFactory, jsonBuilderFactory,
+                tokenProviderService);
     }
 }

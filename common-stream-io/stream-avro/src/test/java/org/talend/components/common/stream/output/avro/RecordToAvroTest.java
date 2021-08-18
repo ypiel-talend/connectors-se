@@ -60,7 +60,8 @@ class RecordToAvroTest {
     void withNullSubrecord() {
         final RecordToAvro converter = new RecordToAvro("test");
 
-        final Entry entryField1 = factory.newEntryBuilder() //
+        final Entry entryField1 = factory
+                .newEntryBuilder() //
                 .withType(Type.STRING) //
                 .withNullable(true) //
                 .withName("field") //
@@ -69,11 +70,13 @@ class RecordToAvroTest {
                 .newSchemaBuilder(Type.RECORD) //
                 .withEntry(entryField1) //
                 .build();
-        final Record subRecord = factory.newRecordBuilder(subRecordSchema) //
+        final Record subRecord = factory
+                .newRecordBuilder(subRecordSchema) //
                 .withString(entryField1, "Hello") //
                 .build();
 
-        final Entry entryRecord = factory.newEntryBuilder() //
+        final Entry entryRecord = factory
+                .newEntryBuilder() //
                 .withType(Type.RECORD) //
                 .withNullable(true) //
                 .withName("sub") //
@@ -85,7 +88,8 @@ class RecordToAvroTest {
                 .withEntry(entryRecord) //
                 .build();
 
-        final Record firstRecord = factory.newRecordBuilder(recordSchema) //
+        final Record firstRecord = factory
+                .newRecordBuilder(recordSchema) //
                 .withRecord(entryRecord, subRecord) //
                 .build();
         final GenericRecord genericRecord1 = converter.fromRecord(firstRecord);
@@ -94,7 +98,8 @@ class RecordToAvroTest {
         Assertions.assertNotNull("sub");
         Assertions.assertTrue(sub instanceof GenericRecord, "sub is of " + sub.getClass().getName());
 
-        final Record secondRecord = factory.newRecordBuilder(recordSchema) //
+        final Record secondRecord = factory
+                .newRecordBuilder(recordSchema) //
                 .build();
         final GenericRecord genericRecord2 = converter.fromRecord(secondRecord);
         Assertions.assertNotNull(genericRecord2);
@@ -105,7 +110,8 @@ class RecordToAvroTest {
     void withArrayOfRecord() {
         final RecordToAvro converter = new RecordToAvro("test");
 
-        final Entry entryField1 = factory.newEntryBuilder() //
+        final Entry entryField1 = factory
+                .newEntryBuilder() //
                 .withType(Type.BYTES) //
                 .withNullable(true) //
                 .withName("field") //
@@ -114,16 +120,20 @@ class RecordToAvroTest {
                 .newSchemaBuilder(Type.RECORD) //
                 .withEntry(entryField1) //
                 .build();
-        final Record subRecord1 = factory.newRecordBuilder(subRecordSchema) //
+        final Record subRecord1 = factory
+                .newRecordBuilder(subRecordSchema) //
                 .withBytes(entryField1, "Hello1".getBytes()) //
                 .build();
-        final Record subRecord2 = factory.newRecordBuilder(subRecordSchema) //
+        final Record subRecord2 = factory
+                .newRecordBuilder(subRecordSchema) //
                 .withBytes(entryField1, "Hello2".getBytes()) //
                 .build();
-        final Record subRecord3 = factory.newRecordBuilder(subRecordSchema) //
+        final Record subRecord3 = factory
+                .newRecordBuilder(subRecordSchema) //
                 .build();
 
-        final Entry entryRecord = factory.newEntryBuilder() //
+        final Entry entryRecord = factory
+                .newEntryBuilder() //
                 .withType(Type.ARRAY) //
                 .withNullable(true) //
                 .withName("sub") //
@@ -135,7 +145,8 @@ class RecordToAvroTest {
                 .withEntry(entryRecord) //
                 .build();
 
-        final Record firstRecord = factory.newRecordBuilder(recordSchema) //
+        final Record firstRecord = factory
+                .newRecordBuilder(recordSchema) //
                 .withArray(entryRecord, Arrays.asList(subRecord1, subRecord2, subRecord3)) //
                 .build();
         final GenericRecord genericRecord1 = converter.fromRecord(firstRecord);
@@ -207,59 +218,72 @@ class RecordToAvroTest {
 
     @Test
     void testInnerNull() {
-        final Entry field = this.factory.newEntryBuilder() //
+        final Entry field = this.factory
+                .newEntryBuilder() //
                 .withName("field") //
                 .withType(Type.STRING) //
                 .withNullable(true) //
                 .build();
-        final Entry sf = this.factory.newEntryBuilder() //
+        final Entry sf = this.factory
+                .newEntryBuilder() //
                 .withName("subfield") //
                 .withType(Type.INT) //
                 .withNullable(true) //
                 .build();
 
-        final Schema subRecordSchema = this.factory.newSchemaBuilder(Type.RECORD) //
+        final Schema subRecordSchema = this.factory
+                .newSchemaBuilder(Type.RECORD) //
                 .withEntry(field) //
-                .withEntry(sf).build();
+                .withEntry(sf)
+                .build();
 
-        final Entry sub = this.factory.newEntryBuilder() //
+        final Entry sub = this.factory
+                .newEntryBuilder() //
                 .withName("sub") //
                 .withType(Type.RECORD) //
                 .withElementSchema(subRecordSchema) //
                 .withNullable(true) //
                 .build();
 
-        final Entry field1 = this.factory.newEntryBuilder() //
+        final Entry field1 = this.factory
+                .newEntryBuilder() //
                 .withName("field1") //
                 .withType(Type.STRING) //
                 .withNullable(true) //
                 .build();
-        final Entry field2 = this.factory.newEntryBuilder() //
+        final Entry field2 = this.factory
+                .newEntryBuilder() //
                 .withName("field2") //
                 .withType(Type.STRING) //
                 .withNullable(true) //
                 .build();
 
-        final Schema schema = this.factory.newSchemaBuilder(Type.RECORD) //
+        final Schema schema = this.factory
+                .newSchemaBuilder(Type.RECORD) //
                 .withEntry(field1) //
-                .withEntry(field2).withEntry(sub) //
+                .withEntry(field2)
+                .withEntry(sub) //
                 .build();
 
         // Non null value
-        final Record record1 = this.factory.newRecordBuilder(schema) //
+        final Record record1 = this.factory
+                .newRecordBuilder(schema) //
                 .withRecord(sub, //
-                        this.factory.newRecordBuilder(subRecordSchema) //
+                        this.factory
+                                .newRecordBuilder(subRecordSchema) //
                                 .withString(field, "Hello") //
                                 .withInt(sf, 45) //
                                 .build()) //
                 .build();
 
         // implicit null
-        final Record record2 = this.factory.newRecordBuilder(schema) //
+        final Record record2 = this.factory
+                .newRecordBuilder(schema) //
                 .build();
 
         // explicit null
-        final Record record3 = this.factory.newRecordBuilder(schema) //
+        final Record record3 = this.factory
+                .newRecordBuilder(schema) //
                 .withRecord(sub, null) //
                 .build();
 
@@ -295,7 +319,8 @@ class RecordToAvroTest {
 
     private void prepareTestRecords() {
         // some demo records
-        versatileRecord = factory.newRecordBuilder() //
+        versatileRecord = factory
+                .newRecordBuilder() //
                 .withString("string1", "Bonjour") //
                 .withString("string2", "Olà") //
                 .withInt("int", 71) //
@@ -306,16 +331,26 @@ class RecordToAvroTest {
                 .withDouble("double", 20.5) //
                 .build();
 
-        Entry er = factory.newEntryBuilder().withName("record").withType(Type.RECORD)
-                .withElementSchema(versatileRecord.getSchema()).build();
-        Entry ea = factory.newEntryBuilder().withName("array").withType(Type.ARRAY)
-                .withElementSchema(factory.newSchemaBuilder(Type.ARRAY).withType(Type.STRING).build()).build();
+        Entry er = factory
+                .newEntryBuilder()
+                .withName("record")
+                .withType(Type.RECORD)
+                .withElementSchema(versatileRecord.getSchema())
+                .build();
+        Entry ea = factory
+                .newEntryBuilder()
+                .withName("array")
+                .withType(Type.ARRAY)
+                .withElementSchema(factory.newSchemaBuilder(Type.ARRAY).withType(Type.STRING).build())
+                .build();
 
-        complexRecord = factory.newRecordBuilder() //
+        complexRecord = factory
+                .newRecordBuilder() //
                 .withString("name", "ComplexR") //
                 .withRecord(er, versatileRecord) //
                 .withDateTime("now", now) //
-                .withArray(ea, Arrays.asList("ary1", "ary2", "ary3")).build();
+                .withArray(ea, Arrays.asList("ary1", "ary2", "ary3"))
+                .build();
     }
 
     @ParameterizedTest

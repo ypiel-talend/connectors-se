@@ -33,7 +33,7 @@ import lombok.Data;
         @GridLayout.Row({ "createCollection" }), //
         @GridLayout.Row({ "dataAction" }), //
         @GridLayout.Row({ "autoIDGeneration" }), //
-        }),
+}),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }),
                 @GridLayout.Row({ "offerThroughput" }), @GridLayout.Row({ "partitionKey" }),
                 @GridLayout.Row({ "partitionKeyForDelete" }) }) })

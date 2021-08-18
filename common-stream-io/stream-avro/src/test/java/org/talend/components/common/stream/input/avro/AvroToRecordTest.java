@@ -43,16 +43,51 @@ class AvroToRecordTest {
     protected void setUp() throws Exception {
         recordBuilderFactory = new RecordBuilderFactoryImpl("test");
 
-        final org.apache.avro.Schema schema = SchemaBuilder.builder().record("sample").fields() //
-                .name("string").type().stringType().noDefault() //
-                .name("int").type().intType().noDefault() //
-                .name("long").type().longType().noDefault() //
-                .name("double").type().doubleType().noDefault() //
-                .name("boolean").type().booleanType().noDefault() //
-                .name("array").type().array().items().intType().noDefault() // Array of int
-                .name("object").type().record("obj") // sub obj
-                .fields().name("f1").type().intType().noDefault() //
-                .name("f2").type().stringType().noDefault().endRecord().noDefault().endRecord();
+        final org.apache.avro.Schema schema = SchemaBuilder
+                .builder()
+                .record("sample")
+                .fields() //
+                .name("string")
+                .type()
+                .stringType()
+                .noDefault() //
+                .name("int")
+                .type()
+                .intType()
+                .noDefault() //
+                .name("long")
+                .type()
+                .longType()
+                .noDefault() //
+                .name("double")
+                .type()
+                .doubleType()
+                .noDefault() //
+                .name("boolean")
+                .type()
+                .booleanType()
+                .noDefault() //
+                .name("array")
+                .type()
+                .array()
+                .items()
+                .intType()
+                .noDefault() // Array of int
+                .name("object")
+                .type()
+                .record("obj") // sub obj
+                .fields()
+                .name("f1")
+                .type()
+                .intType()
+                .noDefault() //
+                .name("f2")
+                .type()
+                .stringType()
+                .noDefault()
+                .endRecord()
+                .noDefault()
+                .endRecord();
 
         avro = new GenericData.Record(schema);
         avro.put("string", "a string sample");
@@ -76,8 +111,13 @@ class AvroToRecordTest {
         assertNotNull(s);
         assertEquals(7, s.getEntries().size());
         assertTrue(s.getType().equals(Type.RECORD));
-        assertTrue(s.getEntries().stream().map(Entry::getName).collect(toList())
-                .containsAll(Stream.of("string", "int", "long", "double", "boolean", "array", "object").collect(toList())));
+        assertTrue(s
+                .getEntries()
+                .stream()
+                .map(Entry::getName)
+                .collect(toList())
+                .containsAll(
+                        Stream.of("string", "int", "long", "double", "boolean", "array", "object").collect(toList())));
     }
 
     @Test

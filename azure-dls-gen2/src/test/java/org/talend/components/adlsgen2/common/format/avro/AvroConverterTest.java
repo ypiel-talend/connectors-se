@@ -64,12 +64,30 @@ class AvroConverterTest extends AdlsGen2TestBase {
         super.setUp();
         converter = AvroConverter.of(recordBuilderFactory, avroConfiguration);
         avro = new GenericData.Record( //
-                SchemaBuilder.builder().record("sample").fields() //
-                        .name("string").type().stringType().noDefault() //
-                        .name("int").type().intType().noDefault() //
-                        .name("long").type().longType().noDefault() //
-                        .name("double").type().doubleType().noDefault() //
-                        .name("boolean").type().booleanType().noDefault() //
+                SchemaBuilder
+                        .builder()
+                        .record("sample")
+                        .fields() //
+                        .name("string")
+                        .type()
+                        .stringType()
+                        .noDefault() //
+                        .name("int")
+                        .type()
+                        .intType()
+                        .noDefault() //
+                        .name("long")
+                        .type()
+                        .longType()
+                        .noDefault() //
+                        .name("double")
+                        .type()
+                        .doubleType()
+                        .noDefault() //
+                        .name("boolean")
+                        .type()
+                        .booleanType()
+                        .noDefault() //
                         .endRecord());
         avro.put("string", "a string sample");
         avro.put("int", 710);
@@ -89,7 +107,11 @@ class AvroConverterTest extends AdlsGen2TestBase {
         assertNotNull(s);
         assertEquals(5, s.getEntries().size());
         assertTrue(s.getType().equals(Type.RECORD));
-        assertTrue(s.getEntries().stream().map(Entry::getName).collect(toList())
+        assertTrue(s
+                .getEntries()
+                .stream()
+                .map(Entry::getName)
+                .collect(toList())
                 .containsAll(Stream.of("string", "int", "long", "double", "boolean").collect(toList())));
     }
 
@@ -138,7 +160,9 @@ class AvroConverterTest extends AdlsGen2TestBase {
         assertEquals(20.5, subrecord.get("double"));
 
         assertEquals(now.withZoneSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli(), ZonedDateTime
-                .ofInstant(Instant.ofEpochMilli((long) record.get("now")), ZoneOffset.UTC).toInstant().toEpochMilli());
+                .ofInstant(Instant.ofEpochMilli((long) record.get("now")), ZoneOffset.UTC)
+                .toInstant()
+                .toEpochMilli());
         assertEquals(Arrays.asList("ary1", "ary2", "ary3"), record.get("array"));
     }
 
@@ -162,12 +186,30 @@ class AvroConverterTest extends AdlsGen2TestBase {
     @Test
     void withNullFieldsInIcomingRecord() {
         avro = new GenericData.Record( //
-                SchemaBuilder.builder().record("sample").fields() //
-                        .name("string").type().stringType().noDefault() //
-                        .name("int").type().intType().noDefault() //
-                        .name("long").type().longType().noDefault() //
-                        .name("double").type().doubleType().noDefault() //
-                        .name("boolean").type().booleanType().noDefault() //
+                SchemaBuilder
+                        .builder()
+                        .record("sample")
+                        .fields() //
+                        .name("string")
+                        .type()
+                        .stringType()
+                        .noDefault() //
+                        .name("int")
+                        .type()
+                        .intType()
+                        .noDefault() //
+                        .name("long")
+                        .type()
+                        .longType()
+                        .noDefault() //
+                        .name("double")
+                        .type()
+                        .doubleType()
+                        .noDefault() //
+                        .name("boolean")
+                        .type()
+                        .booleanType()
+                        .noDefault() //
                         .endRecord());
         avro.put("string", null);
         avro.put("int", null);
@@ -187,18 +229,34 @@ class AvroConverterTest extends AdlsGen2TestBase {
     @Test
     void withTimeStampsInAndOut() {
         avro = new GenericData.Record( //
-                SchemaBuilder.builder().record("sample").fields() //
-                        .name("string").type().stringType().noDefault() //
-                        .name("int").type().intType().noDefault() //
-                        .name("long").type().longType().noDefault() //
-                        .name("officialts").type().longType().noDefault() //
+                SchemaBuilder
+                        .builder()
+                        .record("sample")
+                        .fields() //
+                        .name("string")
+                        .type()
+                        .stringType()
+                        .noDefault() //
+                        .name("int")
+                        .type()
+                        .intType()
+                        .noDefault() //
+                        .name("long")
+                        .type()
+                        .longType()
+                        .noDefault() //
+                        .name("officialts")
+                        .type()
+                        .longType()
+                        .noDefault() //
                         .endRecord());
 
     }
 
     // @Test
     void withAllowNullColumnSchema() {
-        Schema schema = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
+        Schema schema = recordBuilderFactory
+                .newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(this.buildEntry("nullStringColumn", Schema.Type.STRING))
                 .withEntry(this.buildEntry("nullStringColumn2", Schema.Type.STRING))
                 .withEntry(this.buildEntry("nullIntColumn", Schema.Type.INT))
@@ -207,8 +265,10 @@ class AvroConverterTest extends AdlsGen2TestBase {
                 .withEntry(this.buildEntry("nullDoubleColumn", Schema.Type.DOUBLE))
                 .withEntry(this.buildEntry("nullBooleanColumn", Schema.Type.BOOLEAN))
                 .withEntry(this.buildEntry("nullByteArrayColumn", Schema.Type.BYTES))
-                .withEntry(this.buildEntry("nullDateColumn", Schema.Type.DATETIME)).build();
-        Record testRecord = recordBuilderFactory.newRecordBuilder(schema).withString("nullStringColumn", "myString").build();
+                .withEntry(this.buildEntry("nullDateColumn", Schema.Type.DATETIME))
+                .build();
+        Record testRecord =
+                recordBuilderFactory.newRecordBuilder(schema).withString("nullStringColumn", "myString").build();
         System.out.println("schema: " + testRecord.getSchema());
         System.out.println("record: " + testRecord);
         assertNotNull(testRecord.getString("nullStringColumn"));
@@ -218,7 +278,9 @@ class AvroConverterTest extends AdlsGen2TestBase {
     @Test
     void withNullData() throws Exception {
         InputStream business = getClass().getResource("/common/format/avro/null-data.avro").openStream();
-        AvroIterator iter = AvroIterator.Builder.of(recordBuilderFactory).withConfiguration(new AvroConfiguration())
+        AvroIterator iter = AvroIterator.Builder
+                .of(recordBuilderFactory)
+                .withConfiguration(new AvroConfiguration())
                 .parse(business);
         Record first = null;
         first = iter.next();
@@ -232,7 +294,9 @@ class AvroConverterTest extends AdlsGen2TestBase {
     @Test
     void withBusinessAvroFile() throws Exception {
         InputStream business = getClass().getResource("/common/format/avro/business.avro").openStream();
-        AvroIterator iter = AvroIterator.Builder.of(recordBuilderFactory).withConfiguration(new AvroConfiguration())
+        AvroIterator iter = AvroIterator.Builder
+                .of(recordBuilderFactory)
+                .withConfiguration(new AvroConfiguration())
                 .parse(business);
         Record first, last = null;
         first = iter.next();
@@ -351,7 +415,9 @@ class AvroConverterTest extends AdlsGen2TestBase {
     @Test
     void withBigBusinessAvroFile() throws Exception {
         InputStream businessIs = getClass().getResource("/common/format/avro/big_business.avro").openStream();
-        AvroIterator iter = AvroIterator.Builder.of(recordBuilderFactory).withConfiguration(new AvroConfiguration())
+        AvroIterator iter = AvroIterator.Builder
+                .of(recordBuilderFactory)
+                .withConfiguration(new AvroConfiguration())
                 .parse(businessIs);
         Record first, last = null;
         first = iter.next();
@@ -367,15 +433,22 @@ class AvroConverterTest extends AdlsGen2TestBase {
         assertEquals(2647, first.getRecord("business").getInt("num_of_reviews"));
         assertNotNull(first.getRecord("business").getRecord("attributes"));
         assertNotNull(first.getRecord("business").getRecord("attributes").getRecord("good_for"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("dessert"));
-        assertEquals(true, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("kids"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("drinks"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("breakfast"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("lunch"));
-        assertEquals(true, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("dinner"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("dessert"));
+        assertEquals(true,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("kids"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("drinks"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("breakfast"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("lunch"));
+        assertEquals(true,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("dinner"));
         assertNotNull(first.getRecord("business").getRecord("attributes").getRecord("parking"));
         assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("parking").getBoolean("lot"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("parking").getBoolean("valet"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("parking").getBoolean("valet"));
         assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("parking").getBoolean("lot"));
         assertEquals(true, first.getRecord("business").getRecord("attributes").getBoolean("take_reservations"));
         assertEquals("quiet", first.getRecord("business").getRecord("attributes").getString("noise_level"));
@@ -507,23 +580,48 @@ class AvroConverterTest extends AdlsGen2TestBase {
         List<Record> records = Arrays.asList(versatileRecord, versatileRecord);
         //
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
-        Record input = recordBuilderFactory.newRecordBuilder() //
-                .withArray(entryBuilder.withName("strings").withType(Schema.Type.ARRAY)
-                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.STRING).build()).build(), strings)
-                .withArray(entryBuilder.withName("integers").withType(Schema.Type.ARRAY)
-                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.INT).build()).build(), integers)
-                .withArray(entryBuilder.withName("longs").withType(Schema.Type.ARRAY)
-                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.LONG).build()).build(), longs)
-                .withArray(entryBuilder.withName("floats").withType(Schema.Type.ARRAY)
-                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.FLOAT).build()).build(), floats)
-                .withArray(entryBuilder.withName("doubles").withType(Schema.Type.ARRAY)
-                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.DOUBLE).build()).build(), doubles)
-                .withArray(entryBuilder.withName("booleans").withType(Schema.Type.ARRAY)
-                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.BOOLEAN).build()).build(), booleans)
-                .withArray(entryBuilder.withName("bytes").withType(Schema.Type.ARRAY)
-                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.BYTES).build()).build(), bytes)
-                .withArray(entryBuilder.withName("records").withType(Schema.Type.ARRAY)
-                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.RECORD).build()).build(), records)
+        Record input = recordBuilderFactory
+                .newRecordBuilder() //
+                .withArray(entryBuilder
+                        .withName("strings")
+                        .withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build(), strings)
+                .withArray(entryBuilder
+                        .withName("integers")
+                        .withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.INT).build())
+                        .build(), integers)
+                .withArray(entryBuilder
+                        .withName("longs")
+                        .withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.LONG).build())
+                        .build(), longs)
+                .withArray(entryBuilder
+                        .withName("floats")
+                        .withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.FLOAT).build())
+                        .build(), floats)
+                .withArray(entryBuilder
+                        .withName("doubles")
+                        .withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.DOUBLE).build())
+                        .build(), doubles)
+                .withArray(entryBuilder
+                        .withName("booleans")
+                        .withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.BOOLEAN).build())
+                        .build(), booleans)
+                .withArray(entryBuilder
+                        .withName("bytes")
+                        .withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.BYTES).build())
+                        .build(), bytes)
+                .withArray(entryBuilder
+                        .withName("records")
+                        .withType(Schema.Type.ARRAY)
+                        .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.RECORD).build())
+                        .build(), records)
                 .build();
         //
         GenericRecord converted = converter.fromRecord(input);

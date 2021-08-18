@@ -38,14 +38,17 @@ public class SoqlLexer extends Lexer {
 
     public static String[] modeNames = { "DEFAULT_MODE" };
 
-    public static final String[] ruleNames = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P",
-            "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "WS", "COMMA", "DOT", "LPAR", "RPAR", "FROM", "SELECT", "NAME",
-            "ANYCHAR" };
+    public static final String[] ruleNames =
+            { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P",
+                    "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "WS", "COMMA", "DOT", "LPAR", "RPAR", "FROM",
+                    "SELECT", "NAME",
+                    "ANYCHAR" };
 
     private static final String[] _LITERAL_NAMES = { null, null, "','", "'.'", "'('", "')'" };
 
-    private static final String[] _SYMBOLIC_NAMES = { null, "WS", "COMMA", "DOT", "LPAR", "RPAR", "FROM", "SELECT", "NAME",
-            "ANYCHAR" };
+    private static final String[] _SYMBOLIC_NAMES =
+            { null, "WS", "COMMA", "DOT", "LPAR", "RPAR", "FROM", "SELECT", "NAME",
+                    "ANYCHAR" };
 
     public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 

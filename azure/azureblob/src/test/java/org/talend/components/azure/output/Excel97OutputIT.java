@@ -75,21 +75,39 @@ class Excel97OutputIT extends BaseIT {
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
 
-        Assertions.assertTrue(
-                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext(),
-                "No files were created in test container");
+        Assertions
+                .assertTrue(
+                        container
+                                .listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false)
+                                .iterator()
+                                .hasNext(),
+                        "No files were created in test container");
 
         BlobInputProperties inputProperties = new BlobInputProperties();
         inputProperties.setDataset(blobOutputProperties.getDataset());
 
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size());
@@ -109,21 +127,39 @@ class Excel97OutputIT extends BaseIT {
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
 
-        Assertions.assertTrue(
-                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext(),
-                "No files were created in test container");
+        Assertions
+                .assertTrue(
+                        container
+                                .listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false)
+                                .iterator()
+                                .hasNext(),
+                        "No files were created in test container");
 
         BlobInputProperties inputProperties = new BlobInputProperties();
         inputProperties.setDataset(blobOutputProperties.getDataset());
 
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size());
@@ -132,28 +168,51 @@ class Excel97OutputIT extends BaseIT {
     @Test
     public void testOutputDoubleAndBooleanData() throws URISyntaxException, StorageException {
         final int recordSize = 1;
-        Record testRecord = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder().withInt("intValue", 1)
-                .withDouble("doubleValue", 2.0).withBoolean("booleanValue", true).build();
+        Record testRecord = componentsHandler
+                .findService(RecordBuilderFactory.class)
+                .newRecordBuilder()
+                .withInt("intValue", 1)
+                .withDouble("doubleValue", 2.0)
+                .withBoolean("booleanValue", true)
+                .build();
 
         componentsHandler.setInputData(Collections.singleton(testRecord));
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
 
-        Assertions.assertTrue(
-                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext(),
-                "No files were created in test container");
+        Assertions
+                .assertTrue(
+                        container
+                                .listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false)
+                                .iterator()
+                                .hasNext(),
+                        "No files were created in test container");
 
         BlobInputProperties inputProperties = new BlobInputProperties();
         inputProperties.setDataset(blobOutputProperties.getDataset());
 
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size());
@@ -173,13 +232,24 @@ class Excel97OutputIT extends BaseIT {
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + (recordSize * 100);
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
 
-        Assertions.assertTrue(
-                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext(),
-                "No files were created in test container");
+        Assertions
+                .assertTrue(
+                        container
+                                .listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false)
+                                .iterator()
+                                .hasNext(),
+                        "No files were created in test container");
     }
 }

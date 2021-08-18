@@ -51,7 +51,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "csv-w-header");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -74,7 +76,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "csv-wo-header");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -94,7 +98,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "avro");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -114,7 +120,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "business-avro");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("in", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("in", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("in") //
@@ -169,7 +177,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "parquet");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -189,7 +199,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "big_business.avro");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("in", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("in", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("in") //
@@ -209,15 +221,22 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         assertEquals(2647, first.getRecord("business").getInt("num_of_reviews"));
         assertNotNull(first.getRecord("business").getRecord("attributes"));
         assertNotNull(first.getRecord("business").getRecord("attributes").getRecord("good_for"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("dessert"));
-        assertEquals(true, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("kids"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("drinks"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("breakfast"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("lunch"));
-        assertEquals(true, first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("dinner"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("dessert"));
+        assertEquals(true,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("kids"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("drinks"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("breakfast"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("lunch"));
+        assertEquals(true,
+                first.getRecord("business").getRecord("attributes").getRecord("good_for").getBoolean("dinner"));
         assertNotNull(first.getRecord("business").getRecord("attributes").getRecord("parking"));
         assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("parking").getBoolean("lot"));
-        assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("parking").getBoolean("valet"));
+        assertEquals(false,
+                first.getRecord("business").getRecord("attributes").getRecord("parking").getBoolean("valet"));
         assertEquals(false, first.getRecord("business").getRecord("attributes").getRecord("parking").getBoolean("lot"));
         assertEquals(true, first.getRecord("business").getRecord("attributes").getBoolean("take_reservations"));
         assertEquals("quiet", first.getRecord("business").getRecord("attributes").getString("noise_level"));
@@ -272,7 +291,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "json");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -292,7 +313,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "business-avro/business.avro");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -315,7 +338,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathIn + "encoding/SJIS-encoded.csv");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("in", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("in", "Azure://AdlsGen2Input?" + config) //
                 .component("out", "test://collector") //
                 .connections() //
                 .from("in") //
@@ -338,7 +363,9 @@ public class InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath(basePathOut + "business-avro");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("in", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("in", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("in") //

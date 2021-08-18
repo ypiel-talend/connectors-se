@@ -57,7 +57,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Environment(SparkRunnerEnvironment.class)
 @EnvironmentConfiguration(environment = "Spark", systemProperties = {
-        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
+        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner",
+                value = "org.apache.beam.runners.spark.SparkRunner"),
         @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
         @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false") })
 
@@ -114,7 +115,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setFormat(Format.JSON);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -141,7 +143,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setFormat(Format.JSON);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -166,7 +169,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setFormat(Format.JSON);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -180,7 +184,8 @@ public class ClientTestWithMockProxyTest {
         assertEquals(1, records.get(0).getSchema().getEntries().size());
         assertEquals(Schema.Type.ARRAY, records.get(0).getSchema().getEntries().get(0).getType());
         assertEquals("all", records.get(0).getSchema().getEntries().get(0).getName());
-        assertEquals("000001", ((ArrayList<Record>) records.get(0).getArray(Record.class, "all")).get(0).getString("_id"));
+        assertEquals("000001",
+                ((ArrayList<Record>) records.get(0).getArray(Record.class, "all")).get(0).getString("_id"));
     }
 
     @EnvironmentalTest
@@ -192,7 +197,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setFormat(Format.JSON);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -229,7 +235,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setFormat(Format.JSON);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -269,7 +276,8 @@ public class ClientTestWithMockProxyTest {
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
         try {
-            Job.components() //
+            Job
+                    .components() //
                     .component("emitter", "REST://Input?" + configStr) //
                     .component("out", "test://collector") //
                     .connections() //
@@ -293,7 +301,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setCompletePayload(false);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -322,7 +331,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setCompletePayload(true);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -348,7 +358,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setCompletePayload(false);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -361,7 +372,8 @@ public class ClientTestWithMockProxyTest {
         assertEquals(1, records.size());
 
         Record record = records.get(0);
-        assertEquals("<xml><books><book id=\"1\"><title>Romeo and Juliet</title><isbn>21321321</isbn></book></books></xml>",
+        assertEquals(
+                "<xml><books><book id=\"1\"><title>Romeo and Juliet</title><isbn>21321321</isbn></book></books></xml>",
                 record.getString("body"));
     }
 
@@ -393,7 +405,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setFormat(Format.JSON);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -424,7 +437,8 @@ public class ClientTestWithMockProxyTest {
         config.getDataset().setFormat(Format.JSON);
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //

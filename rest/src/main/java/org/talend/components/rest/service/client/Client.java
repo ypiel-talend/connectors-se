@@ -38,8 +38,10 @@ public interface Client extends HttpClient {
     @Request
     @UseConfigurer(RestConfigurer.class)
     @Codec(encoder = { RequestEncoder.class })
-    Response<InputStream> execute(@ConfigurerOption("i18n") I18n i18n, @ConfigurerOption("configuration") RequestConfig config,
-            @ConfigurerOption("httpClient") Client httpClient, // Needed to do intermediate call for example to get oauth token
+    Response<InputStream> execute(@ConfigurerOption("i18n") I18n i18n,
+            @ConfigurerOption("configuration") RequestConfig config,
+            @ConfigurerOption("httpClient") Client httpClient, // Needed to do intermediate call for example to get
+                                                               // oauth token
             @HttpMethod String httpMethod, @Url String url, @Headers Map<String, String> headers,
             @QueryParams(/* default encode = true */) Map<String, String> queryParams, Body body);
 

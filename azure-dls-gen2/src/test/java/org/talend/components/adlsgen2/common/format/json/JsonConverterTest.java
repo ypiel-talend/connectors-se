@@ -75,7 +75,8 @@ class JsonConverterTest extends AdlsGen2TestBase {
         assertEquals(20.5f, from.getJsonObject("record").getJsonNumber("float").doubleValue());
         assertEquals(20.5, from.getJsonObject("record").getJsonNumber("double").doubleValue());
         assertTrue(from.getJsonObject("record").getBoolean("boolean"));
-        assertEquals(now.toInstant().toEpochMilli(), ZonedDateTime.parse(from.getString("now")).toInstant().toEpochMilli());
+        assertEquals(now.toInstant().toEpochMilli(),
+                ZonedDateTime.parse(from.getString("now")).toInstant().toEpochMilli());
     }
 
     @Test

@@ -79,11 +79,18 @@ public class BigQueryTableExtractMapperTest {
         service = Mockito.mock(BigQueryService.class);
         storageService = Mockito.mock(GoogleStorageService.class);
 
-        Mockito.doCallRealMethod().when(service).convertToTckField(Mockito.any(FieldValueList.class),
-                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class), Mockito.any(Schema.class));
+        Mockito
+                .doCallRealMethod()
+                .when(service)
+                .convertToTckField(Mockito.any(FieldValueList.class),
+                        Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class),
+                        Mockito.any(Schema.class));
         Mockito.doCallRealMethod().when(service).convertToTckSchema(Mockito.any(Schema.class));
-        Mockito.doCallRealMethod().when(service).convertToTckType(Mockito.any(LegacySQLTypeName.class),
-                Mockito.any(com.google.cloud.bigquery.Field.Mode.class));
+        Mockito
+                .doCallRealMethod()
+                .when(service)
+                .convertToTckType(Mockito.any(LegacySQLTypeName.class),
+                        Mockito.any(com.google.cloud.bigquery.Field.Mode.class));
         java.lang.reflect.Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
         rbField.setAccessible(true);
         rbField.set(service, builderFactory);
@@ -106,16 +113,20 @@ public class BigQueryTableExtractMapperTest {
 
     @Test
     public void testSplit() {
-        BigQueryTableExtractMapper beanUnderTest = new BigQueryTableExtractMapper(configuration, service, storageService, i18n,
-                builderFactory);
+        BigQueryTableExtractMapper beanUnderTest =
+                new BigQueryTableExtractMapper(configuration, service, storageService, i18n,
+                        builderFactory);
 
         Mockito.when(table.getNumBytes()).thenReturn(42L);
         TableDefinition td = Mockito.mock(TableDefinition.class);
         Mockito.when(table.getDefinition()).thenReturn(td);
         Schema gSchema = Schema.of(BigQueryQueryInputTest.getFields());
         Mockito.when(td.getSchema()).thenReturn(gSchema);
-        Mockito.when(storage.list(Mockito.eq(configuration.getTableDataset().getGsBucket()),
-                Mockito.any(Storage.BlobListOption.class))).thenReturn(blobs);
+        Mockito
+                .when(storage
+                        .list(Mockito.eq(configuration.getTableDataset().getGsBucket()),
+                                Mockito.any(Storage.BlobListOption.class)))
+                .thenReturn(blobs);
 
         Iterator<Blob> blobsIterator = Mockito.mock(Iterator.class);
         Iterable<Blob> blobsIterable = new Iterable<Blob>() {
@@ -140,7 +151,9 @@ public class BigQueryTableExtractMapperTest {
         Assertions.assertNotNull(mappers);
         Assertions.assertEquals(2, mappers.size());
 
-        List<BigQueryTableExtractInput> sources = mappers.stream().map(BigQueryTableExtractMapper::createSource)
+        List<BigQueryTableExtractInput> sources = mappers
+                .stream()
+                .map(BigQueryTableExtractMapper::createSource)
                 .collect(Collectors.toList());
 
         Assertions.assertNotNull(sources);

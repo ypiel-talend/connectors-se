@@ -84,7 +84,8 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=150";
         //
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -109,7 +110,8 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=150";
         //
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -134,7 +136,8 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=250";
         //
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -159,7 +162,8 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=250";
         //
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -191,7 +195,8 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=250";
         //
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -217,7 +222,8 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         final int schemaSize = 9;
         final Schema.Builder schemaBuilder = this.factory.newSchemaBuilder(Schema.Type.RECORD);
-        final Schema schema = schemaBuilder.withEntry(this.buildEntry("nullStringColumn", Schema.Type.STRING))
+        final Schema schema = schemaBuilder
+                .withEntry(this.buildEntry("nullStringColumn", Schema.Type.STRING))
                 .withEntry(this.buildEntry("nullStringColumn2", Schema.Type.STRING))
                 .withEntry(this.buildEntry("nullIntColumn", Schema.Type.INT))
                 .withEntry(this.buildEntry("nullLongColumn", Schema.Type.LONG))
@@ -225,25 +231,33 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
                 .withEntry(this.buildEntry("nullDoubleColumn", Schema.Type.DOUBLE))
                 .withEntry(this.buildEntry("nullBooleanColumn", Schema.Type.BOOLEAN))
                 .withEntry(this.buildEntry("nullByteArrayColumn", Schema.Type.BYTES))
-                .withEntry(this.buildEntry("nullDateColumn", Schema.Type.DATETIME)).build();
-        Record testRecord = components.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
-                .withString("nullStringColumn", null).build();
+                .withEntry(this.buildEntry("nullDateColumn", Schema.Type.DATETIME))
+                .build();
+        Record testRecord = components
+                .findService(RecordBuilderFactory.class)
+                .newRecordBuilder(schema)
+                .withString("nullStringColumn", null)
+                .build();
         List<Record> testRecords = Collections.singletonList(testRecord);
         components.setInputData(testRecords);
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "test://emitter") //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
-        Job.components() //
+                .build()
+                .run();
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "test://collector") //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
+                .build()
+                .run();
         List<Record> records = components.getCollectedData(Record.class);
         Record firstRecord = records.get(0);
         Assertions.assertEquals(schemaSize, firstRecord.getSchema().getEntries().size());
@@ -274,31 +288,44 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         final int fieldSize = 2;
         Schema.Builder schemaBuilder = this.factory.newSchemaBuilder(Schema.Type.RECORD);
-        Schema schema = schemaBuilder.withEntry(this.buildEntry("stringColumn", Schema.Type.STRING))
-                .withEntry(this.buildEntry("intColumn", Schema.Type.INT)).build();
+        Schema schema = schemaBuilder
+                .withEntry(this.buildEntry("stringColumn", Schema.Type.STRING))
+                .withEntry(this.buildEntry("intColumn", Schema.Type.INT))
+                .build();
         List<Record> testRecords = new ArrayList<>();
-        testRecords.add(components.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
-                .withString("stringColumn", "a").build()); // stringColumn:a, intColumn:null
         testRecords
-                .add(components.findService(RecordBuilderFactory.class).newRecordBuilder(schema).withString("stringColumn", "b") //
+                .add(components
+                        .findService(RecordBuilderFactory.class)
+                        .newRecordBuilder(schema)
+                        .withString("stringColumn", "a")
+                        .build()); // stringColumn:a, intColumn:null
+        testRecords
+                .add(components
+                        .findService(RecordBuilderFactory.class)
+                        .newRecordBuilder(schema)
+                        .withString("stringColumn", "b") //
                         .withInt("intColumn", Integer.MAX_VALUE) //
                         .build()); // stringColumn:a,
         // intColumn:not null
         components.setInputData(testRecords);
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "test://emitter") //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
-        Job.components() //
+                .build()
+                .run();
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "test://collector") //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
+                .build()
+                .run();
         List<Record> records = components.getCollectedData(Record.class);
         Assertions.assertEquals(fieldSize, records.get(0).getSchema().getEntries().size());
         Assertions.assertEquals(fieldSize, records.get(1).getSchema().getEntries().size());
@@ -331,15 +358,18 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
             fail("Should not be here for encoding:" + encoding);
         }
         //
-        Schema schema = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD) //
+        Schema schema = recordBuilderFactory
+                .newSchemaBuilder(Schema.Type.RECORD) //
                 .withEntry(this.buildEntry("id", Schema.Type.INT)) //
                 .withEntry(this.buildEntry("value", Type.STRING)) //
                 .build();
         List<Record> testRecords = new ArrayList<>();
-        testRecords.add(recordBuilderFactory.newRecordBuilder(schema) //
-                .withInt("id", 1) //
-                .withString("value", sample) //
-                .build());
+        testRecords
+                .add(recordBuilderFactory
+                        .newRecordBuilder(schema) //
+                        .withInt("id", 1) //
+                        .withString("value", sample) //
+                        .build());
         //
         String blobPath = String.format("%scsv-encoded-%s", basePathOut, encoding);
         //
@@ -352,20 +382,24 @@ public class OuputTestIT extends AdlsGen2IntegrationTestBase {
         outputConfiguration.setBlobNameTemplate(String.format("csv-%s-encoded-data-", encoding));
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         components.setInputData(testRecords);
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "test://emitter") //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
+                .build()
+                .run();
         // now read back
         dataSet.setFormat(FileFormat.CSV);
         dataSet.setCsvConfiguration(csvConfiguration);
         dataSet.setBlobPath(blobPath);
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("in", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("in", "Azure://AdlsGen2Input?" + config) //
                 .component("out", "test://collector") //
                 .connections() //
                 .from("in") //

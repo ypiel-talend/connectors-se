@@ -26,7 +26,8 @@ import java.io.Serializable;
 @Version(value = AbstractConfig.VERSION, migrationHandler = DatasetMigrationHandler.class)
 @GridLayout({ @GridLayout.Row({ "dso" }), @GridLayout.Row({ "dse_legacy" }), @GridLayout.Row({ "dse_duplication" }),
         @GridLayout.Row({ "dse_migration_handler_callback" }), @GridLayout.Row({ "dse_incoming" }),
-        @GridLayout.Row({ "dse_outgoing" }), @GridLayout.Row({ "dse_from_source" }), @GridLayout.Row({ "dse_from_sink" }) })
+        @GridLayout.Row({ "dse_outgoing" }), @GridLayout.Row({ "dse_from_source" }),
+        @GridLayout.Row({ "dse_from_sink" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})
 @Data
 @DataSet("Dataset")

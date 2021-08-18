@@ -61,7 +61,8 @@ public class AzureCloudConnection implements Serializable {
             + "You can get the SAS URL for each allowed service on Microsoft Azure portal after generating SAS.\n"
             + "The SAS URL format is https://<$storagename>.<$service>.core.windows.net/<$sastoken>, "
             + "where <$storagename> is the storage account name, "
-            + "<$service> is the allowed service name (blob, file, queue or table)," + "and <$sastoken> is the SAS token value."
+            + "<$service> is the allowed service name (blob, file, queue or table),"
+            + "and <$sastoken> is the SAS token value."
             + "For more information, see Azure documentation.\n" + "Note that the SAS has valid period, "
             + "you can set the start time at which the SAS becomes valid and the expiry time after which the SAS is no longer valid when generating it, "
             + "and you need to make sure your SAS is still valid when running your Job.")

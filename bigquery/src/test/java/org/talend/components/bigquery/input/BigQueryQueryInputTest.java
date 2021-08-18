@@ -77,11 +77,18 @@ public class BigQueryQueryInputTest {
         tableResult = Mockito.mock(TableResult.class);
 
         Mockito.when(bigQueryService.createClient(connection)).thenReturn(bigQuery);
-        Mockito.doCallRealMethod().when(bigQueryService).convertToTckField(Mockito.any(FieldValueList.class),
-                Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class), Mockito.any(Schema.class));
+        Mockito
+                .doCallRealMethod()
+                .when(bigQueryService)
+                .convertToTckField(Mockito.any(FieldValueList.class),
+                        Mockito.any(Record.Builder.class), Mockito.any(com.google.cloud.bigquery.Field.class),
+                        Mockito.any(Schema.class));
         Mockito.doCallRealMethod().when(bigQueryService).convertToTckSchema(Mockito.any(Schema.class));
-        Mockito.doCallRealMethod().when(bigQueryService).convertToTckType(Mockito.any(LegacySQLTypeName.class),
-                Mockito.any(com.google.cloud.bigquery.Field.Mode.class));
+        Mockito
+                .doCallRealMethod()
+                .when(bigQueryService)
+                .convertToTckType(Mockito.any(LegacySQLTypeName.class),
+                        Mockito.any(com.google.cloud.bigquery.Field.Mode.class));
         Field rbField = BigQueryService.class.getDeclaredField("recordBuilderFactoryService");
         rbField.setAccessible(true);
         rbField.set(bigQueryService, builderFactory);
@@ -130,14 +137,17 @@ public class BigQueryQueryInputTest {
     }
 
     public FieldValueList getRecord() {
-        List<FieldValue> row = Arrays.asList(new FieldValue[] { FieldValue.of(FieldValue.Attribute.PRIMITIVE, "A"),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE, "0.5"), FieldValue.of(FieldValue.Attribute.PRIMITIVE, "true"),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1978/12/08"),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2019-11-11T09:00:00"),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE,
-                        Base64.getEncoder().encodeToString("TALEND".getBytes(StandardCharsets.UTF_8))),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE, "42"),
-                FieldValue.of(FieldValue.Attribute.PRIMITIVE, "09:00:00.0100000") });
+        List<FieldValue> row = Arrays
+                .asList(new FieldValue[] { FieldValue.of(FieldValue.Attribute.PRIMITIVE, "A"),
+                        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "0.5"),
+                        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "true"),
+                        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "1978/12/08"),
+                        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "2019-11-11T09:00:00"),
+                        FieldValue
+                                .of(FieldValue.Attribute.PRIMITIVE,
+                                        Base64.getEncoder().encodeToString("TALEND".getBytes(StandardCharsets.UTF_8))),
+                        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "42"),
+                        FieldValue.of(FieldValue.Attribute.PRIMITIVE, "09:00:00.0100000") });
 
         FieldList schema = FieldList.of(getFields());
         FieldValueList fvl = FieldValueList.of(row, schema);

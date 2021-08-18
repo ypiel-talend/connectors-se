@@ -87,10 +87,12 @@ public class RestServiceTest {
             config.getDataset().setHasPathParams(true);
             config.getDataset().setPathParams(pathParams);
 
-            String finalResource = service.setPathParams(config.getDataset().getResource(), config.getDataset().isHasPathParams(),
-                    config.pathParams());
+            String finalResource = service
+                    .setPathParams(config.getDataset().getResource(), config.getDataset().isHasPathParams(),
+                            config.pathParams());
 
-            assertEquals("get/" + params[0] + "/" + params[1] + "/" + params[2] + "/id/" + params[1] + "/resource/" + params[0]
+            assertEquals("get/" + params[0] + "/" + params[1] + "/" + params[2] + "/id/" + params[1] + "/resource/"
+                    + params[0]
                     + "/end", finalResource);
         }
     }
@@ -101,7 +103,8 @@ public class RestServiceTest {
         String name = "paco";
         ZonedDateTime now = ZonedDateTime.now();
 
-        Record record = recordBuilderFactory.newRecordBuilder() //
+        Record record = recordBuilderFactory
+                .newRecordBuilder() //
                 .withInt("id", id) //
                 .withString("name", name) //
                 .withDateTime("date", now) //
@@ -112,9 +115,12 @@ public class RestServiceTest {
         queryParams.add(new Param("id", "${/id}"));
         queryParams.add(new Param("name", "<name>${/name}</name>"));
         queryParams.add(new Param("complexe1", "<name>${/name}</name><id>${/id}</id>"));
-        queryParams.add(new Param("complexe2", "<name>${/name}</name><id>${/id}</id><unexists>${/unexists:-default}</unexists>"));
-        queryParams.add(new Param("complexe3",
-                "<name>${/name}</name><id>${/id}</id><unexists>${/unexists:-default}</unexists><escaped>\\${escaped:-none}<escaped>"));
+        queryParams
+                .add(new Param("complexe2",
+                        "<name>${/name}</name><id>${/id}</id><unexists>${/unexists:-default}</unexists>"));
+        queryParams
+                .add(new Param("complexe3",
+                        "<name>${/name}</name><id>${/id}</id><unexists>${/unexists:-default}</unexists><escaped>\\${escaped:-none}<escaped>"));
 
         config.getDataset().setHasQueryParams(true);
         config.getDataset().setQueryParams(queryParams);
@@ -129,15 +135,19 @@ public class RestServiceTest {
         assertEquals("<name>" + name + "</name><id>" + id + "</id>", updatedQueryParams.get("complexe1"));
         assertEquals("<name>" + name + "</name><id>" + id + "</id><unexists>default</unexists>",
                 updatedQueryParams.get("complexe2"));
-        assertEquals("<name>" + name + "</name><id>" + id + "</id><unexists>default</unexists><escaped>${escaped:-none}<escaped>",
+        assertEquals(
+                "<name>" + name + "</name><id>" + id
+                        + "</id><unexists>default</unexists><escaped>${escaped:-none}<escaped>",
                 updatedQueryParams.get("complexe3"));
     }
 
     @ParameterizedTest
-    @CsvSource(value = { "http://www.domain.com,,http://www.domain.com", "http://www.domain.com/,,http://www.domain.com/",
-            "http://www.domain.com,get,http://www.domain.com/get", "http://www.domain.com/,get,http://www.domain.com/get",
-            "http://www.domain.com,/get,http://www.domain.com/get",
-            "   http://www.domain.com/ ,  /get ,http://www.domain.com//get", })
+    @CsvSource(
+            value = { "http://www.domain.com,,http://www.domain.com", "http://www.domain.com/,,http://www.domain.com/",
+                    "http://www.domain.com,get,http://www.domain.com/get",
+                    "http://www.domain.com/,get,http://www.domain.com/get",
+                    "http://www.domain.com,/get,http://www.domain.com/get",
+                    "   http://www.domain.com/ ,  /get ,http://www.domain.com//get", })
     void buildUrl(final String base, final String resource, final String expected) {
         config.getDataset().getDatastore().setBase(base);
         config.getDataset().setResource(resource == null ? "   " : resource);
@@ -148,18 +158,33 @@ public class RestServiceTest {
     @Test
     void paramsFilterEmpty() {
         config.getDataset().setHasPathParams(true);
-        config.getDataset().setPathParams(Arrays.asList(new Param("xxx1", null), new Param("key1", "val"), new Param(null, "val"),
-                new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
+        config
+                .getDataset()
+                .setPathParams(Arrays
+                        .asList(new Param("xxx1", null), new Param("key1", "val"), new Param(null, "val"),
+                                new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
         config.getDataset().setHasQueryParams(true);
-        config.getDataset().setQueryParams(Arrays.asList(new Param("xxx1", null), new Param("key1", "val"),
-                new Param(null, "val"), new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
+        config
+                .getDataset()
+                .setQueryParams(Arrays
+                        .asList(new Param("xxx1", null), new Param("key1", "val"),
+                                new Param(null, "val"), new Param("key2", "val"), new Param("", ""),
+                                new Param("key3", "")));
         config.getDataset().setHasHeaders(true);
-        config.getDataset().setHeaders(Arrays.asList(new Param("xxx1", null), new Param("key1", "val"), new Param(null, "val"),
-                new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
+        config
+                .getDataset()
+                .setHeaders(Arrays
+                        .asList(new Param("xxx1", null), new Param("key1", "val"), new Param(null, "val"),
+                                new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
         config.getDataset().setHasBody(true);
         config.getDataset().getBody().setType(RequestBody.Type.FORM_DATA);
-        config.getDataset().getBody().setParams(Arrays.asList(new Param("xxx1", null), new Param("key1", "val"),
-                new Param(null, "val"), new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
+        config
+                .getDataset()
+                .getBody()
+                .setParams(Arrays
+                        .asList(new Param("xxx1", null), new Param("key1", "val"),
+                                new Param(null, "val"), new Param("key2", "val"), new Param("", ""),
+                                new Param("key3", "")));
 
         config.pathParams().forEach((k, v) -> {
             assertTrue(k != null);
@@ -193,18 +218,33 @@ public class RestServiceTest {
     @Test
     void paramsTransformNullToEmpty() {
         config.getDataset().setHasPathParams(true);
-        config.getDataset().setPathParams(Arrays.asList(new Param("xxx1", null), new Param("key1", "val"), new Param(null, "val"),
-                new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
+        config
+                .getDataset()
+                .setPathParams(Arrays
+                        .asList(new Param("xxx1", null), new Param("key1", "val"), new Param(null, "val"),
+                                new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
         config.getDataset().setHasQueryParams(true);
-        config.getDataset().setQueryParams(Arrays.asList(new Param("xxx1", null), new Param("key1", "val"),
-                new Param(null, "val"), new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
+        config
+                .getDataset()
+                .setQueryParams(Arrays
+                        .asList(new Param("xxx1", null), new Param("key1", "val"),
+                                new Param(null, "val"), new Param("key2", "val"), new Param("", ""),
+                                new Param("key3", "")));
         config.getDataset().setHasHeaders(true);
-        config.getDataset().setHeaders(Arrays.asList(new Param("xxx1", null), new Param("key1", "val"), new Param(null, "val"),
-                new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
+        config
+                .getDataset()
+                .setHeaders(Arrays
+                        .asList(new Param("xxx1", null), new Param("key1", "val"), new Param(null, "val"),
+                                new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
         config.getDataset().setHasBody(true);
         config.getDataset().getBody().setType(RequestBody.Type.FORM_DATA);
-        config.getDataset().getBody().setParams(Arrays.asList(new Param("xxx1", null), new Param("key1", "val"),
-                new Param(null, "val"), new Param("key2", "val"), new Param("", ""), new Param("key3", "")));
+        config
+                .getDataset()
+                .getBody()
+                .setParams(Arrays
+                        .asList(new Param("xxx1", null), new Param("key1", "val"),
+                                new Param(null, "val"), new Param("key2", "val"), new Param("", ""),
+                                new Param("key3", "")));
 
         assertEquals("", config.pathParams().get("xxx1"));
         assertEquals("", config.queryParams().get("xxx1"));
@@ -221,10 +261,12 @@ public class RestServiceTest {
 
     @Test
     void testHasNoDuplicates() {
-        List<Param> withDuplciates = Arrays.asList(new Param("xxx1", null), new Param("key1", "val"), new Param("xxx1", "val"),
-                new Param("key2", "val"), new Param("", ""), new Param("key3", ""));
-        List<Param> withoutDuplciates = Arrays.asList(new Param("xxx1", null), new Param("key1", "val"), new Param("xxx2", "val"),
-                new Param("key2", "val"), new Param("", ""), new Param("key3", ""));
+        List<Param> withDuplciates = Arrays
+                .asList(new Param("xxx1", null), new Param("key1", "val"), new Param("xxx1", "val"),
+                        new Param("key2", "val"), new Param("", ""), new Param("key3", ""));
+        List<Param> withoutDuplciates = Arrays
+                .asList(new Param("xxx1", null), new Param("key1", "val"), new Param("xxx2", "val"),
+                        new Param("key2", "val"), new Param("", ""), new Param("key3", ""));
 
         assertTrue(service.hasNoDuplicates(null));
         assertTrue(service.hasNoDuplicates(withoutDuplciates));
@@ -233,7 +275,8 @@ public class RestServiceTest {
 
     @ParameterizedTest
     @CsvSource(value = { "https://this.is.my.host.com/api/v1,https://this.is.my.host.com",
-            "http://www.mysite.org/a/page,http://www.mysite.org", "https://www.mysite.com?v=param,https://www.mysite.com",
+            "http://www.mysite.org/a/page,http://www.mysite.org",
+            "https://www.mysite.com?v=param,https://www.mysite.com",
             "https://www.mysite.com/this/is/page.html,https://www.mysite.com" })
     void getHost(final String baseUrl, final String host) throws MalformedURLException {
         assertEquals(host, service.getHost(baseUrl));

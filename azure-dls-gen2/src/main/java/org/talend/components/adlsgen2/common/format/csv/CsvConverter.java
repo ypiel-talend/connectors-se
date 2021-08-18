@@ -128,13 +128,23 @@ public class CsvConverter implements RecordConverter<CSVRecord>, Serializable {
                 Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
                 finalName = RecordConverter.getCorrectSchemaFieldName(f.getKey(), index++, existNames);
                 existNames.add(finalName);
-                builder.withEntry(entryBuilder.withName(finalName).withType(Schema.Type.STRING).withNullable(true).build());
+                builder
+                        .withEntry(entryBuilder
+                                .withName(finalName)
+                                .withType(Schema.Type.STRING)
+                                .withNullable(true)
+                                .build());
             }
         } else {
             for (int i = 0; i < record.size(); i++) {
                 Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
                 finalName = "field" + i;
-                builder.withEntry(entryBuilder.withName(finalName).withType(Schema.Type.STRING).withNullable(true).build());
+                builder
+                        .withEntry(entryBuilder
+                                .withName(finalName)
+                                .withType(Schema.Type.STRING)
+                                .withNullable(true)
+                                .build());
             }
         }
         return builder.build();

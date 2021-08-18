@@ -51,7 +51,8 @@ class AvroReaderTest {
     public void read() throws IOException {
 
         try (AvroReader reader = new AvroReader(toRecord);
-                InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("./testAvroReader.avro")) {
+                InputStream in =
+                        Thread.currentThread().getContextClassLoader().getResourceAsStream("./testAvroReader.avro")) {
             final Iterator<Record> iterator = reader.read(in);
 
             for (int i = 0; i < 10; i++) {
@@ -74,7 +75,9 @@ class AvroReaderTest {
     public void readBadFormat() {
         boolean toException = false;
         try (AvroReader reader = new AvroReader(toRecord);
-                InputStream in = Thread.currentThread().getContextClassLoader()
+                InputStream in = Thread
+                        .currentThread()
+                        .getContextClassLoader()
                         .getResourceAsStream("./testAvroReaderBadFormat.avro")) {
             final Iterator<Record> iterator = reader.read(in);
 

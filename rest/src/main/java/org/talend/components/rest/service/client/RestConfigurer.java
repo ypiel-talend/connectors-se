@@ -48,8 +48,12 @@ public class RestConfigurer implements Configurer {
         // Add Content-Type of body if none.
         if (config.getDataset().isHasBody()) {
             if (config.getDataset().isHasHeaders()) {
-                final boolean contentTypeAlreadySet = config.headers().entrySet().stream()
-                        .filter(h -> ContentType.HEADER_KEY.toLowerCase().equals(h.getKey().toLowerCase())).findFirst()
+                final boolean contentTypeAlreadySet = config
+                        .headers()
+                        .entrySet()
+                        .stream()
+                        .filter(h -> ContentType.HEADER_KEY.toLowerCase().equals(h.getKey().toLowerCase()))
+                        .findFirst()
                         .orElse(null) != null;
                 if (!contentTypeAlreadySet) {
                     final String value = config.getDataset().getBody().getType().getContentType();

@@ -27,7 +27,8 @@ import java.io.Serializable;
 @Version(value = AbstractConfig.VERSION, migrationHandler = DatastoreMigrationHandler.class)
 @GridLayout({ @GridLayout.Row({ "dso_legacy" }), @GridLayout.Row({ "dso_duplication" }),
         @GridLayout.Row({ "dso_migration_handler_callback" }), @GridLayout.Row({ "dso_incoming" }),
-        @GridLayout.Row({ "dso_outgoing" }), @GridLayout.Row({ "dso_from_dataset" }), @GridLayout.Row({ "dso_from_source" }),
+        @GridLayout.Row({ "dso_outgoing" }), @GridLayout.Row({ "dso_from_dataset" }),
+        @GridLayout.Row({ "dso_from_source" }),
         @GridLayout.Row({ "dso_from_sink" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dso_shouldNotBeEmpty" }) })
 @Data

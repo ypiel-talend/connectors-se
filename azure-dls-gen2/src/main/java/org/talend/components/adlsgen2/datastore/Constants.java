@@ -24,13 +24,16 @@ public class Constants {
 
     public static final String TOKEN_URL = "https://login.microsoftonline.com";
 
-    public static final String TOKEN_FORM = "grant_type=client_credentials&client_id=%s&client_secret=%s&scope=https://storage.azure.com/.default";
+    public static final String TOKEN_FORM =
+            "grant_type=client_credentials&client_id=%s&client_secret=%s&scope=https://storage.azure.com/.default";
 
     public static final DateTimeFormatter RFC1123GMTDateFormatter = DateTimeFormatter
-            .ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ROOT).withZone(ZoneId.of("GMT"));
+            .ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ROOT)
+            .withZone(ZoneId.of("GMT"));
 
     public static final DateTimeFormatter ISO8601UTCDateFormatter = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT).withZone(ZoneId.of("UTC"));
+            .ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT)
+            .withZone(ZoneId.of("UTC"));
 
     /**
      * Stores a reference to the UTC time zone.

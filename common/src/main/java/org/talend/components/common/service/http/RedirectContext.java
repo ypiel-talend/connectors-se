@@ -53,7 +53,8 @@ public class RedirectContext {
         this.history.add(0, this);
     }
 
-    public RedirectContext(final String base, final Integer maxRedirect, final boolean forceGETOn302, final String method,
+    public RedirectContext(final String base, final Integer maxRedirect, final boolean forceGETOn302,
+            final String method,
             final boolean onlySameHost) {
         this.response = null;
         this.maxRedirect = maxRedirect;

@@ -74,10 +74,16 @@ class CSVOutputIT extends BaseIT {
         blobOutputProperties.setBlobNameTemplate("testFile");
         blobOutputProperties.getDataset().getCsvOptions().setTextEnclosureCharacter("\"");
 
-        Record testRecord = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder()
-                .withBoolean("booleanValue", testBooleanValue).withLong("longValue", testLongValue)
-                .withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
-                .withDateTime("dateValue", testDateValue).withBytes("byteArray", bytes).build();
+        Record testRecord = componentsHandler
+                .findService(RecordBuilderFactory.class)
+                .newRecordBuilder()
+                .withBoolean("booleanValue", testBooleanValue)
+                .withLong("longValue", testLongValue)
+                .withInt("intValue", testIntValue)
+                .withDouble("doubleValue", testDoubleValue)
+                .withDateTime("dateValue", testDateValue)
+                .withBytes("byteArray", bytes)
+                .build();
 
         List<Record> testRecords = new ArrayList<>();
         for (int i = 0; i < recordSize; i++) {
@@ -86,22 +92,44 @@ class CSVOutputIT extends BaseIT {
         componentsHandler.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
         BlobTestUtils.recordBuilderFactory = componentsHandler.findService(RecordBuilderFactory.class);
-        List<Record> retrievedRecords = BlobTestUtils.readDataFromCSVDirectory(blobOutputProperties.getDataset().getDirectory(),
-                storageAccount, blobOutputProperties.getDataset(),
-                CSVConverter.of(recordBuilderFactory, blobOutputProperties.getDataset().getCsvOptions()).getCsvFormat());
+        List<Record> retrievedRecords = BlobTestUtils
+                .readDataFromCSVDirectory(blobOutputProperties.getDataset().getDirectory(),
+                        storageAccount, blobOutputProperties.getDataset(),
+                        CSVConverter
+                                .of(recordBuilderFactory, blobOutputProperties.getDataset().getCsvOptions())
+                                .getCsvFormat());
 
         Assertions.assertEquals(recordSize, retrievedRecords.size());
-        Assertions.assertEquals(testRecord.getSchema().getEntries().size(),
-                retrievedRecords.get(0).getSchema().getEntries().size());
-        Assertions.assertEquals(String.valueOf(testRecord.getBoolean("booleanValue")),
-                retrievedRecords.get(0).getString("field0"));
-        Assertions.assertEquals(String.valueOf(testRecord.getLong("longValue")), retrievedRecords.get(0).getString("field1"));
-        Assertions.assertEquals(String.valueOf(testRecord.getInt("intValue")), retrievedRecords.get(0).getString("field2"));
-        Assertions.assertEquals(String.valueOf(testRecord.getDouble("doubleValue")), retrievedRecords.get(0).getString("field3"));
-        Assertions.assertEquals(String.valueOf(testRecord.getDateTime("dateValue")), retrievedRecords.get(0).getString("field4"));
-        Assertions.assertEquals(Arrays.toString(testRecord.getBytes("byteArray")), retrievedRecords.get(0).getString("field5"));
+        Assertions
+                .assertEquals(testRecord.getSchema().getEntries().size(),
+                        retrievedRecords.get(0).getSchema().getEntries().size());
+        Assertions
+                .assertEquals(String.valueOf(testRecord.getBoolean("booleanValue")),
+                        retrievedRecords.get(0).getString("field0"));
+        Assertions
+                .assertEquals(String.valueOf(testRecord.getLong("longValue")),
+                        retrievedRecords.get(0).getString("field1"));
+        Assertions
+                .assertEquals(String.valueOf(testRecord.getInt("intValue")),
+                        retrievedRecords.get(0).getString("field2"));
+        Assertions
+                .assertEquals(String.valueOf(testRecord.getDouble("doubleValue")),
+                        retrievedRecords.get(0).getString("field3"));
+        Assertions
+                .assertEquals(String.valueOf(testRecord.getDateTime("dateValue")),
+                        retrievedRecords.get(0).getString("field4"));
+        Assertions
+                .assertEquals(Arrays.toString(testRecord.getBytes("byteArray")),
+                        retrievedRecords.get(0).getString("field5"));
     }
 }

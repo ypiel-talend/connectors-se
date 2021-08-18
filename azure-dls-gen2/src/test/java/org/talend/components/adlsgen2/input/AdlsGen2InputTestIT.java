@@ -38,7 +38,9 @@ class AdlsGen2InputTestIT extends AdlsGen2IntegrationTestBase {
     public void csvBasicCase(String authmethod) {
         connection.setAuthMethod(AuthMethod.valueOf(authmethod));
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -63,7 +65,9 @@ class AdlsGen2InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath("demo_gen2/in/customers.csv");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -92,7 +96,9 @@ class AdlsGen2InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath("demo_gen2/in/customers.csv");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //
@@ -121,7 +127,9 @@ class AdlsGen2InputTestIT extends AdlsGen2IntegrationTestBase {
         dataSet.setBlobPath("demo_gen2/in/customers.csv");
         inputConfiguration.setDataSet(dataSet);
         final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AdlsGen2Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AdlsGen2Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //

@@ -111,7 +111,8 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
     @Producer
     public Record next() {
         log.debug("Next is called; nbRecords: " + nbRecords + ",nbIterations: " + nbIterations);
-        boolean commit = (inputConfig.getChangeOffsetOnRead() == InputCaptureDataChangeConfig.ChangeOffsetOnReadStrategy.YES);
+        boolean commit =
+                (inputConfig.getChangeOffsetOnRead() == InputCaptureDataChangeConfig.ChangeOffsetOnReadStrategy.YES);
         try {
             boolean resultSetIsNull = (resultSet == null);
             boolean noNext = resultSetIsNull || (resultSetSize == 0) || (resultSet.getRow() == resultSetSize);
@@ -132,13 +133,15 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
 
             if (schema == null) {
                 final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
-                IntStream.rangeClosed(1, metaData.getColumnCount())
+                IntStream
+                        .rangeClosed(1, metaData.getColumnCount())
                         .forEach(index -> jdbcDriversService.addField(schemaBuilder, metaData, index));
                 schema = schemaBuilder.build();
             }
 
             final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);
-            IntStream.rangeClosed(1, metaData.getColumnCount())
+            IntStream
+                    .rangeClosed(1, metaData.getColumnCount())
                     .forEach(index -> jdbcDriversService.addColumn(recordBuilder, metaData, index, resultSet));
 
             if (nbRecords == resultSetSize)
@@ -173,7 +176,8 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
 
     private void fetchData() {
         ResultSet resultSetCopy;
-        boolean commit = (inputConfig.getChangeOffsetOnRead() == InputCaptureDataChangeConfig.ChangeOffsetOnReadStrategy.YES);
+        boolean commit =
+                (inputConfig.getChangeOffsetOnRead() == InputCaptureDataChangeConfig.ChangeOffsetOnReadStrategy.YES);
         log.info("Fetch data attempt, commmit: " + commit);
         nbIterations++;
         try {

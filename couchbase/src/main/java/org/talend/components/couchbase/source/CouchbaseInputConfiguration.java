@@ -28,8 +28,9 @@ import lombok.Data;
 @Data
 @GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row("dataSet"), @GridLayout.Row("selectAction"),
         @GridLayout.Row("documentId"), @GridLayout.Row("query") })
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "limit" }),
-        @GridLayout.Row("createPrimaryIndex") })
+@GridLayout(names = GridLayout.FormType.ADVANCED,
+        value = { @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "limit" }),
+                @GridLayout.Row("createPrimaryIndex") })
 
 @Documentation("Couchbase input Mapper Configuration")
 public class CouchbaseInputConfiguration implements Serializable {

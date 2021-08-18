@@ -77,11 +77,13 @@ public interface AdlsGen2APIClient extends HttpClient {
             @ConfigurerOption("connection") AdlsGen2Connection connection, //
             @Header(AUTHORIZATION) String auth, //
             @Header(DATE) String date, //
-            @Header("X-HTTP-Method-Override") String patch, // This header can be used in a POST request to “fake” other HTTP
+            @Header("X-HTTP-Method-Override") String patch, // This header can be used in a POST request to “fake” other
+                                                            // HTTP
             // methods
             @Path("filesystem") String filesystem, //
             @Path("path") String path, //
-            @Path("position") String position, byte[] Payload // As Content-Length is needed and it is a restricted header
+            @Path("position") String position, byte[] Payload // As Content-Length is needed and it is a restricted
+                                                              // header
     // that we cannot force, we set an empty body so content-length will be set.
     );
 }

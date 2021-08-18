@@ -51,7 +51,8 @@ public class ParquetIterator implements Iterator<Record>, Serializable {
             tmp.deleteOnExit();
             Files.copy(inputStream, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
             IOUtils.closeQuietly(inputStream);
-            HadoopInputFile hdpIn = HadoopInputFile.fromPath(new Path(tmp.getPath()), new org.apache.hadoop.conf.Configuration());
+            HadoopInputFile hdpIn =
+                    HadoopInputFile.fromPath(new Path(tmp.getPath()), new org.apache.hadoop.conf.Configuration());
             reader = AvroParquetReader.<GenericRecord> builder(hdpIn).build();
         } catch (IOException e) {
             log.error("[ParquetIterator] {}", e.getMessage());

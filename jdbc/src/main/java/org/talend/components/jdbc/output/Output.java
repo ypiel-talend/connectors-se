@@ -84,13 +84,15 @@ public abstract class Output implements Serializable {
 
     private void lazyInit() throws SQLException {
         this.init = true;
-        this.datasource = jdbcService.createDataSource(configuration.getDataset().getConnection(),
-                configuration.isRewriteBatchedStatements());
+        this.datasource = jdbcService
+                .createDataSource(configuration.getDataset().getConnection(),
+                        configuration.isRewriteBatchedStatements());
         if (this.tableExistsCheck == null) {
             this.tableExistsCheck = checkTableExistence(configuration.getDataset().getTableName(), datasource);
         }
         if (!this.tableExistsCheck && !this.configuration.isCreateTableIfNotExists()) {
-            throw new IllegalStateException(this.i18n.errorTaberDoesNotExists(this.configuration.getDataset().getTableName()));
+            throw new IllegalStateException(
+                    this.i18n.errorTaberDoesNotExists(this.configuration.getDataset().getTableName()));
         }
     }
 
@@ -98,10 +100,11 @@ public abstract class Output implements Serializable {
     public void afterGroup() throws SQLException {
         if (!tableExistsCheck && !tableCreated && configuration.isCreateTableIfNotExists()) {
             try (final Connection connection = datasource.getConnection()) {
-                getPlatform().createTableIfNotExist(connection, configuration.getDataset().getTableName(),
-                        configuration.getKeys(), configuration.getSortStrategy(), configuration.getSortKeys(),
-                        configuration.getDistributionStrategy(), configuration.getDistributionKeys(),
-                        configuration.getVarcharLength(), records);
+                getPlatform()
+                        .createTableIfNotExist(connection, configuration.getDataset().getTableName(),
+                                configuration.getKeys(), configuration.getSortStrategy(), configuration.getSortKeys(),
+                                configuration.getDistributionStrategy(), configuration.getDistributionKeys(),
+                                configuration.getVarcharLength(), records);
                 tableCreated = true;
             }
         }

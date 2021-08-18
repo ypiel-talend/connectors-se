@@ -33,13 +33,15 @@ public class DefaultRecordReader implements RecordReader {
     /** translate line to record */
     private final LineTranslator<Record> toRecord;
 
-    public static DefaultRecordReader of(RecordBuilderFactory factory, LineConfiguration lineConfig, LineSplitter splitter) {
+    public static DefaultRecordReader of(RecordBuilderFactory factory, LineConfiguration lineConfig,
+            LineSplitter splitter) {
 
         final LineToRecord toRecord = new LineToRecord(factory, splitter);
         final HeaderHandler headerHandler = new HeaderHandler(lineConfig.calcHeader(), toRecord::withHeaders);
 
-        final LineReader lineReader = new DefaultLineReader(lineConfig.getLineSeparator(), lineConfig.getEncoding().getEncoding(),
-                headerHandler);
+        final LineReader lineReader =
+                new DefaultLineReader(lineConfig.getLineSeparator(), lineConfig.getEncoding().getEncoding(),
+                        headerHandler);
 
         return new DefaultRecordReader(lineReader, toRecord);
     }

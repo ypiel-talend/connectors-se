@@ -37,8 +37,10 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
 import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.OR;
 
 @Data
-@GridLayout(value = { @GridLayout.Row("dataset"), @GridLayout.Row({ "actionOnData" }), @GridLayout.Row("createTableIfNotExists"),
-        @GridLayout.Row("varcharLength"), @GridLayout.Row("keys"), @GridLayout.Row("sortStrategy"), @GridLayout.Row("sortKeys"),
+@GridLayout(value = { @GridLayout.Row("dataset"), @GridLayout.Row({ "actionOnData" }),
+        @GridLayout.Row("createTableIfNotExists"),
+        @GridLayout.Row("varcharLength"), @GridLayout.Row("keys"), @GridLayout.Row("sortStrategy"),
+        @GridLayout.Row("sortKeys"),
         @GridLayout.Row("distributionStrategy"), @GridLayout.Row("distributionKeys"), @GridLayout.Row("ignoreUpdate") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("dataset"),
         @GridLayout.Row("rewriteBatchedStatements") })
@@ -126,6 +128,7 @@ public class OutputConfig implements Serializable {
 
     @RequiredArgsConstructor
     public enum ActionOnData {
+
         BULK_LOAD(I18nMessage::actionOnDataBulkLoad, true),
         INSERT(I18nMessage::actionOnDataInsert, true),
         UPDATE(I18nMessage::actionOnDataUpdate, false),

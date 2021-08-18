@@ -41,11 +41,15 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UiActionService {
 
-    private static Set<String> MODULE_NOT_SUPPORT_BULK_API = new HashSet<String>(Arrays.asList("AcceptedEventRelation",
-            "ActivityHistory", "AggregateResult", "AttachedContentDocument", "CaseStatus", "CombinedAttachment", "ContractStatus",
-            "DeclinedEventRelation", "EmailStatus", "LookedUpFromActivity", "Name", "NoteAndAttachment", "OpenActivity",
-            "OwnedContentDocument", "PartnerRole", "ProcessInstanceHistory", "RecentlyViewed", "SolutionStatus", "TaskPriority",
-            "TaskStatus", "UndecidedEventRelation", "UserRecordAccess"));
+    private static Set<String> MODULE_NOT_SUPPORT_BULK_API = new HashSet<String>(Arrays
+            .asList("AcceptedEventRelation",
+                    "ActivityHistory", "AggregateResult", "AttachedContentDocument", "CaseStatus", "CombinedAttachment",
+                    "ContractStatus",
+                    "DeclinedEventRelation", "EmailStatus", "LookedUpFromActivity", "Name", "NoteAndAttachment",
+                    "OpenActivity",
+                    "OwnedContentDocument", "PartnerRole", "ProcessInstanceHistory", "RecentlyViewed", "SolutionStatus",
+                    "TaskPriority",
+                    "TaskStatus", "UndecidedEventRelation", "UserRecordAccess"));
 
     @Service
     private SalesforceService service;

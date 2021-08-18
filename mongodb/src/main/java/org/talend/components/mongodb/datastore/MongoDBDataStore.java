@@ -36,8 +36,10 @@ import java.util.List;
 @Icon(value = Icon.IconType.CUSTOM, custom = "mongodb")
 @DataStore("MongoDBDataStore")
 @Checkable("healthCheck")
-@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "addressType" }), @GridLayout.Row({ "address" }),
-        @GridLayout.Row({ "replicaSetAddress" }), @GridLayout.Row({ "database" }), @GridLayout.Row({ "auth" }) })
+@GridLayout(names = GridLayout.FormType.MAIN,
+        value = { @GridLayout.Row({ "addressType" }), @GridLayout.Row({ "address" }),
+                @GridLayout.Row({ "replicaSetAddress" }), @GridLayout.Row({ "database" }),
+                @GridLayout.Row({ "auth" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectionParameter" }) })
 @Documentation("MongoDB connection")
 public class MongoDBDataStore implements Serializable {

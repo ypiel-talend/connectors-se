@@ -49,6 +49,9 @@ public class HTMLReader implements FormatReader {
             rowIterator.next();
         }
 
-        return IteratorComposer.of(rowIterator).map((Element element) -> this.toRecord.toRecord(schema, element)).build();
+        return IteratorComposer
+                .of(rowIterator)
+                .map((Element element) -> this.toRecord.toRecord(schema, element))
+                .build();
     }
 }

@@ -50,7 +50,8 @@ class DSEMigrationHandlerTest {
         assertEquals(migrated.get("dse_incoming"),
                 "{\n" + "\t\"dse_incoming\" : \"\",\n" + "\t\"dse_outgoing\" : \"\",\n"
                         + "\t\"dso.dso_migration_handler_callback\" : \"\",\n" + "\t\"dse_legacy\" : \"legacy data\",\n"
-                        + "\t\"dse_migration_handler_callback\" : \"\",\n" + "\t\"dso.dso_legacy\" : \"legacy data\"\n" + "}");
+                        + "\t\"dse_migration_handler_callback\" : \"\",\n" + "\t\"dso.dso_legacy\" : \"legacy data\"\n"
+                        + "}");
         assertFalse(migrated.get("dse_outgoing").isEmpty());
 
         assertEquals(migrated.get("dso.dso_legacy"), "legacy data");

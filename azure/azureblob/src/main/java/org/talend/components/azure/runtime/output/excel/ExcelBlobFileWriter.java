@@ -49,7 +49,8 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
 
     private final String fileExtension;
 
-    public ExcelBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
+    public ExcelBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
+            throws Exception {
         super(config, connectionServices);
         this.config = config;
         ExcelFormat format = config.getDataset().getExcelOptions().getExcelFormat();
@@ -61,7 +62,8 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
             fileExtension = ".xlsx";
         }
 
-        if (config.getDataset().getExcelOptions().isUseHeader() || config.getDataset().getExcelOptions().isUseFooter()) {
+        if (config.getDataset().getExcelOptions().isUseHeader()
+                || config.getDataset().getExcelOptions().isUseFooter()) {
             reduceMaxRowsSize();
         }
     }
@@ -153,14 +155,16 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         Sheet sheet = item.createSheet(config.getDataset().getExcelOptions().getSheetName());
         converter = ExcelConverter.ofOutput(sheet);
         int dataRowCounter = 0;
-        if (config.getDataset().getExcelOptions().isUseHeader() && config.getDataset().getExcelOptions().getHeader() > 0) {
+        if (config.getDataset().getExcelOptions().isUseHeader()
+                && config.getDataset().getExcelOptions().getHeader() > 0) {
             appendHeader(sheet, getBatch().get(0));
             dataRowCounter += config.getDataset().getExcelOptions().getHeader();
         }
         converter.appendBatchToTheSheet(getBatch(), dataRowCounter);
         dataRowCounter += getBatch().size();
 
-        if (config.getDataset().getExcelOptions().isUseFooter() && config.getDataset().getExcelOptions().getFooter() > 0) {
+        if (config.getDataset().getExcelOptions().isUseFooter()
+                && config.getDataset().getExcelOptions().getFooter() > 0) {
             appendFooter(sheet, dataRowCounter);
         }
         item.write(bos);
@@ -168,12 +172,14 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
     }
 
     private void reduceMaxRowsSize() {
-        if (config.getDataset().getExcelOptions().isUseHeader() && config.getDataset().getExcelOptions().getHeader() > 0) {
+        if (config.getDataset().getExcelOptions().isUseHeader()
+                && config.getDataset().getExcelOptions().getHeader() > 0) {
             this.excel97MaxRows -= config.getDataset().getExcelOptions().getHeader();
             this.excel2007MaxRows -= config.getDataset().getExcelOptions().getHeader();
         }
 
-        if (config.getDataset().getExcelOptions().isUseFooter() && config.getDataset().getExcelOptions().getFooter() > 0) {
+        if (config.getDataset().getExcelOptions().isUseFooter()
+                && config.getDataset().getExcelOptions().getFooter() > 0) {
             this.excel97MaxRows -= config.getDataset().getExcelOptions().getFooter();
             this.excel2007MaxRows -= config.getDataset().getExcelOptions().getFooter();
         }

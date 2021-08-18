@@ -52,7 +52,8 @@ public class Delete implements RecordsOperation {
             }
         }
         if (containsId) {
-            final List<Record> recordWithID = records.stream() //
+            final List<Record> recordWithID = records
+                    .stream() //
                     .filter((Record r) -> r.getString(ID) != null) //
                     .collect(Collectors.toList());
 
@@ -89,7 +90,8 @@ public class Delete implements RecordsOperation {
         if (deleteResult.isSuccess()) {
             return Result.OK;
         }
-        final List<String> errors = Stream.of(deleteResult.getErrors()) //
+        final List<String> errors = Stream
+                .of(deleteResult.getErrors()) //
                 .map(IError::getMessage) //
                 .collect(Collectors.toList());
         return new Result(errors);

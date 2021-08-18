@@ -54,7 +54,8 @@ public class AvroBlobFileReader extends BlobFileReader {
 
         private InputStream input;
 
-        private AvroFileRecordIterator(Iterable<ListBlobItem> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
+        private AvroFileRecordIterator(Iterable<ListBlobItem> blobItemsList,
+                RecordBuilderFactory recordBuilderFactory) {
             super(blobItemsList, recordBuilderFactory);
             takeFirstItem();
         }

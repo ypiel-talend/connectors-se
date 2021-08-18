@@ -54,7 +54,8 @@ public interface ListClient extends HttpClient {
      * Retrieves person records which are members of the given static list.
      * 
      * @param accessToken Marketo authorization token for API
-     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
+     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size
+     * and
      * can be passed in a subsequent call through this parameter.
      * @param listId Id of the static list to retrieve records from
      * @param fields Comma-separated list of field names to return changes for. Field names can be retrieved with the
@@ -86,13 +87,16 @@ public interface ListClient extends HttpClient {
      * Returns a set of static list records based on given filter parameters.
      * 
      * @param accessToken Marketo authorization token for API
-     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
+     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size
+     * and
      * can be passed in a subsequent call through this parameter.
      * @param id Comma-separated list of static list ids to return
      * @param name Comma-separated list of static list names to return
-     * @param programName Comma-separated list of program names. If set will return all static lists that are children of
+     * @param programName Comma-separated list of program names. If set will return all static lists that are children
+     * of
      * the given programs.
-     * @param workspaceName Comma-separated list of workspace names. If set will return all static lists that are children
+     * @param workspaceName Comma-separated list of workspace names. If set will return all static lists that are
+     * children
      * of the given workspaces.
      * @return
      */

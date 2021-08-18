@@ -29,7 +29,8 @@ public class AvroRecordWriter implements RecordWriter {
 
     private final AvroOutput output;
 
-    public AvroRecordWriter(final RecordConverter<GenericRecord, org.apache.avro.Schema> converter, final AvroOutput output) {
+    public AvroRecordWriter(final RecordConverter<GenericRecord, org.apache.avro.Schema> converter,
+            final AvroOutput output) {
         this.converter = converter;
         this.output = output;
     }

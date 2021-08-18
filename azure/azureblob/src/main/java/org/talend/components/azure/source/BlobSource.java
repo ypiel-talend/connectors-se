@@ -40,7 +40,8 @@ public class BlobSource implements Serializable {
 
     private BlobFileReader reader;
 
-    public BlobSource(@Option("configuration") final BlobInputProperties configuration, final AzureBlobComponentServices service,
+    public BlobSource(@Option("configuration") final BlobInputProperties configuration,
+            final AzureBlobComponentServices service,
             final RecordBuilderFactory builderFactory, final MessageService i18n) {
         this.configuration = configuration;
         this.service = service;
@@ -51,8 +52,9 @@ public class BlobSource implements Serializable {
     @PostConstruct
     public void init() throws Exception {
         try {
-            reader = BlobFileReader.BlobFileReaderFactory.getReader(configuration.getDataset(), builderFactory, service,
-                    messageService);
+            reader = BlobFileReader.BlobFileReaderFactory
+                    .getReader(configuration.getDataset(), builderFactory, service,
+                            messageService);
         } catch (Exception e) {
             throw new BlobRuntimeException(messageService.cantStartReadBlobItems(e.getMessage()), e);
         }

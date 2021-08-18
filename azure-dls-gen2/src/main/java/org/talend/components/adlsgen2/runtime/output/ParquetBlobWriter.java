@@ -43,7 +43,8 @@ public class ParquetBlobWriter extends BlobWriter {
     public ParquetBlobWriter(OutputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
             JsonBuilderFactory jsonFactory, AdlsGen2Service service, AdlsActiveDirectoryService tokenProviderService) {
         super(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
-        this.converter = ParquetConverter.of(recordBuilderFactory, configuration.getDataSet().getParquetConfiguration());
+        this.converter =
+                ParquetConverter.of(recordBuilderFactory, configuration.getDataSet().getParquetConfiguration());
         this.config = new Configuration();
         config.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
     }
@@ -62,9 +63,12 @@ public class ParquetBlobWriter extends BlobWriter {
         try {
             tempFilePath = File.createTempFile("tempFile", EXT_PARQUET);
             Path tempFile = new Path(tempFilePath.getPath());
-            ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord> builder(tempFile)
-                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE).withSchema(converter.inferAvroSchema(getSchema()))
-                    .withConf(config).build();
+            ParquetWriter<GenericRecord> writer = AvroParquetWriter
+                    .<GenericRecord> builder(tempFile)
+                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
+                    .withSchema(converter.inferAvroSchema(getSchema()))
+                    .withConf(config)
+                    .build();
             for (Record r : getBatch()) {
                 writer.write(converter.fromRecord(r));
             }

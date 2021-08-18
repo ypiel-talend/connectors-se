@@ -57,8 +57,12 @@ public class Update extends QueryManagerImpl {
     public boolean validateQueryParam(final Record record) {
         final Set<Schema.Entry> entries = new HashSet<>(record.getSchema().getEntries());
         return keys.stream().allMatch(k -> entries.stream().anyMatch(entry -> entry.getName().equals(k)))
-                && entries.stream().filter(entry -> keys.contains(entry.getName())).filter(entry -> !entry.isNullable())
-                        .map(entry -> valueOf(record, entry)).allMatch(Optional::isPresent);
+                && entries
+                        .stream()
+                        .filter(entry -> keys.contains(entry.getName()))
+                        .filter(entry -> !entry.isNullable())
+                        .map(entry -> valueOf(record, entry))
+                        .allMatch(Optional::isPresent);
     }
 
     @Override
@@ -70,16 +74,29 @@ public class Update extends QueryManagerImpl {
     public String buildQuery(final List<Record> records) {
         this.queryParams = new HashMap<>();
         final AtomicInteger index = new AtomicInteger(0);
-        final List<Schema.Entry> entries = records.stream().flatMap(r -> r.getSchema().getEntries().stream()).distinct()
+        final List<Schema.Entry> entries = records
+                .stream()
+                .flatMap(r -> r.getSchema().getEntries().stream())
+                .distinct()
                 .collect(toList());
-        final String query = "UPDATE " + getPlatform().identifier(getConfiguration().getDataset().getTableName()) + " SET "
-                + entries.stream().filter(e -> !ignoreColumns.contains(e.getName()) && !keys.contains(e.getName()))
-                        .peek(e -> queryParams.put(index.incrementAndGet(), e)).map(c -> getPlatform().identifier(c.getName()))
-                        .map(c -> c + " = ?").collect(joining(","))
-                + " WHERE " + keys.stream().map(c -> getPlatform().identifier(c)).map(c -> c + " = ?").collect(joining(" AND "));
+        final String query = "UPDATE " + getPlatform().identifier(getConfiguration().getDataset().getTableName())
+                + " SET "
+                + entries
+                        .stream()
+                        .filter(e -> !ignoreColumns.contains(e.getName()) && !keys.contains(e.getName()))
+                        .peek(e -> queryParams.put(index.incrementAndGet(), e))
+                        .map(c -> getPlatform().identifier(c.getName()))
+                        .map(c -> c + " = ?")
+                        .collect(joining(","))
+                + " WHERE "
+                + keys.stream().map(c -> getPlatform().identifier(c)).map(c -> c + " = ?").collect(joining(" AND "));
 
-        keys.stream()
-                .map(key -> entries.stream().filter(e -> key.equals(e.getName())).findFirst()
+        keys
+                .stream()
+                .map(key -> entries
+                        .stream()
+                        .filter(e -> key.equals(e.getName()))
+                        .findFirst()
                         .orElseThrow(() -> new IllegalStateException(getI18n().errorNoFieldForQueryParam(key))))
                 .forEach(entry -> queryParams.put(index.incrementAndGet(), entry));
         return query;

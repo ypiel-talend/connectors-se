@@ -66,9 +66,10 @@ public class JdbcService {
 
     private static final String SNOWFLAKE_DATABASE_NAME = "Snowflake";
 
-    private static Pattern READ_ONLY_QUERY_PATTERN = Pattern.compile(
-            "^SELECT\\s+((?!((\\bINTO\\b)|(\\bFOR\\s+UPDATE\\b)|(\\bLOCK\\s+IN\\s+SHARE\\s+MODE\\b))).)+$",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+    private static Pattern READ_ONLY_QUERY_PATTERN = Pattern
+            .compile(
+                    "^SELECT\\s+((?!((\\bINTO\\b)|(\\bFOR\\s+UPDATE\\b)|(\\bLOCK\\s+IN\\s+SHARE\\s+MODE\\b))).)+$",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 
     private final Map<JdbcConfiguration.Driver, URL[]> drivers = new HashMap<>();
 
@@ -92,7 +93,8 @@ public class JdbcService {
 
     public boolean driverNotDisabled(JdbcConfiguration.Driver driver) {
         return !ofNullable(localConfiguration.get("jdbc.driver." + driver.getId().toLowerCase(Locale.ROOT) + ".skip"))
-                .map(Boolean::valueOf).orElse(false);
+                .map(Boolean::valueOf)
+                .orElse(false);
     }
 
     /**
@@ -104,18 +106,28 @@ public class JdbcService {
     }
 
     public JdbcConfiguration.Driver getDriver(final JdbcConnection dataStore) {
-        return jdbcConfiguration.get().getDrivers().stream().filter(this::driverNotDisabled)
-                .filter(d -> d.getId()
-                        .equals(ofNullable(dataStore.getHandler()).filter(h -> !h.isEmpty()).orElse(dataStore.getDbType())))
-                .filter(d -> d.getHandlers() == null || d.getHandlers().isEmpty()).findFirst()
+        return jdbcConfiguration
+                .get()
+                .getDrivers()
+                .stream()
+                .filter(this::driverNotDisabled)
+                .filter(d -> d
+                        .getId()
+                        .equals(ofNullable(dataStore.getHandler())
+                                .filter(h -> !h.isEmpty())
+                                .orElse(dataStore.getDbType())))
+                .filter(d -> d.getHandlers() == null || d.getHandlers().isEmpty())
+                .findFirst()
                 .orElseThrow(() -> new IllegalStateException(i18n.errorDriverNotFound(dataStore.getDbType())));
     }
 
     public static boolean checkTableExistence(final String tableName, final JdbcService.JdbcDatasource dataSource)
             throws SQLException {
         try (final Connection connection = dataSource.getConnection()) {
-            try (final ResultSet resultSet = connection.getMetaData().getTables(connection.getCatalog(), getSchema(connection),
-                    tableName, new String[] { "TABLE", "SYNONYM" })) {
+            try (final ResultSet resultSet = connection
+                    .getMetaData()
+                    .getTables(connection.getCatalog(), getSchema(connection),
+                            tableName, new String[] { "TABLE", "SYNONYM" })) {
                 while (resultSet.next()) {
                     if (ofNullable(ofNullable(resultSet.getString("TABLE_NAME")).orElseGet(() -> {
                         try {
@@ -123,8 +135,11 @@ public class JdbcService {
                         } catch (final SQLException e) {
                             return null;
                         }
-                    })).filter(tn -> ("DeltaLake".equalsIgnoreCase(dataSource.getDriverId()) ? tableName.equalsIgnoreCase(tn)
-                            : tableName.equals(tn))).isPresent()) {
+                    }))
+                            .filter(tn -> ("DeltaLake".equalsIgnoreCase(dataSource.getDriverId())
+                                    ? tableName.equalsIgnoreCase(tn)
+                                    : tableName.equals(tn)))
+                            .isPresent()) {
                         return true;
                     }
                 }
@@ -145,7 +160,8 @@ public class JdbcService {
     public JdbcDatasource createDataSource(final JdbcConnection connection, boolean isAutoCommit,
             final boolean rewriteBatchedStatements) {
         final JdbcConfiguration.Driver driver = getDriver(connection);
-        return new JdbcDatasource(resolver, i18n, tokenClient, connection, driver, isAutoCommit, rewriteBatchedStatements);
+        return new JdbcDatasource(resolver, i18n, tokenClient, connection, driver, isAutoCommit,
+                rewriteBatchedStatements);
     }
 
     public static class JdbcDatasource implements AutoCloseable {
@@ -166,8 +182,11 @@ public class JdbcService {
 
             classLoaderDescriptor = resolver.mapDescriptorToClassLoader(driver.getPaths());
             if (!classLoaderDescriptor.resolvedDependencies().containsAll(driver.getPaths())) {
-                String missingJars = driver.getPaths().stream()
-                        .filter(p -> classLoaderDescriptor.resolvedDependencies().contains(p)).collect(joining("\n"));
+                String missingJars = driver
+                        .getPaths()
+                        .stream()
+                        .filter(p -> classLoaderDescriptor.resolvedDependencies().contains(p))
+                        .collect(joining("\n"));
                 throw new IllegalStateException(i18n.errorDriverLoad(driverId, missingJars));
             }
 
@@ -183,11 +202,15 @@ public class JdbcService {
                     dataSource.setPassword(connection.getPassword());
                 } else if (AuthenticationType.KEY_PAIR == connection.getAuthenticationType()) {
                     dataSource.setUsername(connection.getUserId());
-                    dataSource.addDataSourceProperty("privateKey",
-                            PrivateKeyUtils.getPrivateKey(connection.getPrivateKey(), connection.getPrivateKeyPassword(), i18n));
+                    dataSource
+                            .addDataSourceProperty("privateKey",
+                                    PrivateKeyUtils
+                                            .getPrivateKey(connection.getPrivateKey(),
+                                                    connection.getPrivateKeyPassword(), i18n));
                 } else if (AuthenticationType.OAUTH == connection.getAuthenticationType()) {
                     dataSource.addDataSourceProperty("authenticator", "oauth");
-                    dataSource.addDataSourceProperty("token", OAuth2Utils.getAccessToken(connection, tokenClient, i18n));
+                    dataSource
+                            .addDataSourceProperty("token", OAuth2Utils.getAccessToken(connection, tokenClient, i18n));
                 }
                 dataSource.setDriverClassName(driver.getClassName());
                 dataSource.setJdbcUrl(connection.getJdbcUrl());
@@ -210,7 +233,10 @@ public class JdbcService {
                 dataSource.addDataSourceProperty("allowLoadLocalInfile", "false"); // MySQL
                 dataSource.addDataSourceProperty("allowLocalInfile", "false"); // MariaDB
 
-                driver.getFixedParameters().stream().forEach(kv -> dataSource.addDataSourceProperty(kv.getKey(), kv.getValue()));
+                driver
+                        .getFixedParameters()
+                        .stream()
+                        .forEach(kv -> dataSource.addDataSourceProperty(kv.getKey(), kv.getValue()));
 
             } finally {
                 thread.setContextClassLoader(prev);
@@ -246,8 +272,11 @@ public class JdbcService {
         }
 
         private static <T> T wrap(final ClassLoader classLoader, final Object delegate, final Class<T> api) {
-            return api.cast(
-                    Proxy.newProxyInstance(classLoader, new Class<?>[] { api }, new ContextualDelegate(delegate, classLoader)));
+            return api
+                    .cast(
+                            Proxy
+                                    .newProxyInstance(classLoader, new Class<?>[] { api },
+                                            new ContextualDelegate(delegate, classLoader)));
         }
 
         @AllArgsConstructor
@@ -264,7 +293,8 @@ public class JdbcService {
                 thread.setContextClassLoader(classLoader);
                 try {
                     final Object invoked = method.invoke(delegate, args);
-                    if (method.getReturnType().getName().startsWith("java.sql.") && method.getReturnType().isInterface()) {
+                    if (method.getReturnType().getName().startsWith("java.sql.")
+                            && method.getReturnType().isInterface()) {
                         return wrap(classLoader, invoked, method.getReturnType());
                     }
                     return invoked;
@@ -297,7 +327,8 @@ public class JdbcService {
             final String javaType = metaData.getColumnClassName(columnIndex);
             final int sqlType = metaData.getColumnType(columnIndex);
             final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
-            entryBuilder.withName(metaData.getColumnName(columnIndex))
+            entryBuilder
+                    .withName(metaData.getColumnName(columnIndex))
                     .withNullable(metaData.isNullable(columnIndex) != columnNoNulls);
             switch (sqlType) {
             case java.sql.Types.SMALLINT:
@@ -353,7 +384,8 @@ public class JdbcService {
             final int sqlType = metaData.getColumnType(columnIndex);
             final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
             final Object value = resultSet.getObject(columnIndex);
-            entryBuilder.withName(metaData.getColumnName(columnIndex))
+            entryBuilder
+                    .withName(metaData.getColumnName(columnIndex))
                     .withNullable(metaData.isNullable(columnIndex) != columnNoNulls);
             switch (sqlType) {
             case java.sql.Types.SMALLINT:
@@ -386,16 +418,19 @@ public class JdbcService {
                 }
                 break;
             case java.sql.Types.DATE:
-                builder.withDateTime(entryBuilder.withType(DATETIME).build(),
-                        value == null ? null : new Date(((java.sql.Date) value).getTime()));
+                builder
+                        .withDateTime(entryBuilder.withType(DATETIME).build(),
+                                value == null ? null : new Date(((java.sql.Date) value).getTime()));
                 break;
             case java.sql.Types.TIME:
-                builder.withDateTime(entryBuilder.withType(DATETIME).build(),
-                        value == null ? null : new Date(((java.sql.Time) value).getTime()));
+                builder
+                        .withDateTime(entryBuilder.withType(DATETIME).build(),
+                                value == null ? null : new Date(((java.sql.Time) value).getTime()));
                 break;
             case java.sql.Types.TIMESTAMP:
-                builder.withDateTime(entryBuilder.withType(DATETIME).build(),
-                        value == null ? null : new Date(((java.sql.Timestamp) value).getTime()));
+                builder
+                        .withDateTime(entryBuilder.withType(DATETIME).build(),
+                                value == null ? null : new Date(((java.sql.Timestamp) value).getTime()));
                 break;
             case java.sql.Types.BINARY:
             case java.sql.Types.VARBINARY:

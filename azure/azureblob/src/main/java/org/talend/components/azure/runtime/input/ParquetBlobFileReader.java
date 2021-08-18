@@ -53,7 +53,8 @@ public class ParquetBlobFileReader extends BlobFileReader {
 
         private final static String AZURE_FILESYSTEM_PROPERTY_KEY = "fs.azure";
 
-        private final static String AZURE_FILESYSTEM_PROPERTY_VALUE = "org.apache.hadoop.fs.azure.NativeAzureFileSystem";
+        private final static String AZURE_FILESYSTEM_PROPERTY_VALUE =
+                "org.apache.hadoop.fs.azure.NativeAzureFileSystem";
 
         private ParquetConverter converter;
 
@@ -80,7 +81,8 @@ public class ParquetBlobFileReader extends BlobFileReader {
                 RegionUtils ru = new RegionUtils(getConfig().getConnection().getSignatureConnection());
                 accountName = ru.getAccountName4SignatureAuth();
                 endpointSuffix = ru.getEndpointSuffix4SignatureAuth();
-                String sasKey = RegionUtils.getSasKey4SignatureAuth(getConfig().getContainerName(), accountName, endpointSuffix);
+                String sasKey = RegionUtils
+                        .getSasKey4SignatureAuth(getConfig().getContainerName(), accountName, endpointSuffix);
                 String token = ru.getToken4SignatureAuth();
                 hadoopConfig.set(sasKey, token);
             } else {
@@ -106,8 +108,9 @@ public class ParquetBlobFileReader extends BlobFileReader {
 
             boolean isHttpsConnectionUsed = getConfig().getConnection().isUseAzureSharedSignature()
                     || getConfig().getConnection().getAccountConnection().getProtocol().equals(Protocol.HTTPS);
-            String blobURI = RegionUtils.getBlobURI(isHttpsConnectionUsed, getConfig().getContainerName(), accountName,
-                    endpointSuffix, getCurrentItem().getName());
+            String blobURI = RegionUtils
+                    .getBlobURI(isHttpsConnectionUsed, getConfig().getContainerName(), accountName,
+                            endpointSuffix, getCurrentItem().getName());
             try {
                 InputFile file = HadoopInputFile.fromPath(new org.apache.hadoop.fs.Path(blobURI), hadoopConfig);
                 reader = AvroParquetReader.<GenericRecord> builder(file).build();

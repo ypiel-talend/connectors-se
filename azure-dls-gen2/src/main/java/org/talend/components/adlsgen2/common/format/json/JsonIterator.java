@@ -108,11 +108,13 @@ public class JsonIterator implements Iterator<Record>, Serializable {
             this.jsonFactory = jsonFactory;
         }
 
-        public static JsonIterator.Builder of(final RecordBuilderFactory factory, final JsonBuilderFactory jsonFactory) {
+        public static JsonIterator.Builder of(final RecordBuilderFactory factory,
+                final JsonBuilderFactory jsonFactory) {
             return new JsonIterator.Builder(factory, jsonFactory);
         }
 
-        public JsonIterator.Builder withConfiguration(final @Configuration("jsonConfiguration") JsonConfiguration configuration) {
+        public JsonIterator.Builder
+                withConfiguration(final @Configuration("jsonConfiguration") JsonConfiguration configuration) {
             this.configuration = configuration;
             converter = JsonConverter.of(factory, jsonFactory, configuration);
 

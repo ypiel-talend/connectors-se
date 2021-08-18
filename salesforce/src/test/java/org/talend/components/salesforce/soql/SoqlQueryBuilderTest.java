@@ -31,7 +31,8 @@ public class SoqlQueryBuilderTest {
     public void testBuildSoqlQuerySimple() {
         String expected = "\"SELECT Id, Name, BillingCity FROM Account\"";
 
-        String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("Id", "Name", "BillingCity"), "Account").buildSoqlQuery();
+        String queryFromBuilder =
+                new SoqlQueryBuilder(Arrays.asList("Id", "Name", "BillingCity"), "Account").buildSoqlQuery();
 
         Assertions.assertEquals(expected, queryFromBuilder);
     }
@@ -45,8 +46,9 @@ public class SoqlQueryBuilderTest {
     public void testBuildSoqlQueryChildToParent() {
         String expected = "\"SELECT Name, Account.Name, Account.Owner.Name FROM Contact\"";
 
-        String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("Name", "Account_Name", "Account_Owner_Name"), "Contact")
-                .buildSoqlQuery();
+        String queryFromBuilder =
+                new SoqlQueryBuilder(Arrays.asList("Name", "Account_Name", "Account_Owner_Name"), "Contact")
+                        .buildSoqlQuery();
 
         Assertions.assertEquals(expected, queryFromBuilder);
     }
@@ -89,10 +91,14 @@ public class SoqlQueryBuilderTest {
     @Test
     @DisplayName("Test build SOQL query complect relationship")
     public void testBuildSoqlQueryComplexRelationship() {
-        String expected = "\"SELECT Id, Name, (SELECT Quantity, ListPrice, PricebookEntry.UnitPrice, PricebookEntry.Name FROM OpportunityLineItems) FROM Opportunity\"";
-        String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("Id", "Name", "OpportunityLineItems_records_Quantity",
-                "OpportunityLineItems_records_ListPrice", "OpportunityLineItems_records_PricebookEntry_UnitPrice",
-                "OpportunityLineItems_records_PricebookEntry_Name"), "Opportunity").buildSoqlQuery();
+        String expected =
+                "\"SELECT Id, Name, (SELECT Quantity, ListPrice, PricebookEntry.UnitPrice, PricebookEntry.Name FROM OpportunityLineItems) FROM Opportunity\"";
+        String queryFromBuilder = new SoqlQueryBuilder(Arrays
+                .asList("Id", "Name", "OpportunityLineItems_records_Quantity",
+                        "OpportunityLineItems_records_ListPrice",
+                        "OpportunityLineItems_records_PricebookEntry_UnitPrice",
+                        "OpportunityLineItems_records_PricebookEntry_Name"),
+                "Opportunity").buildSoqlQuery();
 
         Assertions.assertEquals(expected, queryFromBuilder);
     }
@@ -106,7 +112,8 @@ public class SoqlQueryBuilderTest {
     public void testBuildSoqlQueryCustomField() {
         String expected = "\"SELECT Id, SLAExpirationDate__c FROM Account\"";
 
-        String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("Id", "SLAExpirationDate__c"), "Account").buildSoqlQuery();
+        String queryFromBuilder =
+                new SoqlQueryBuilder(Arrays.asList("Id", "SLAExpirationDate__c"), "Account").buildSoqlQuery();
 
         Assertions.assertEquals(expected, queryFromBuilder);
     }
@@ -133,10 +140,13 @@ public class SoqlQueryBuilderTest {
     @Test
     @DisplayName("Test build SOQL query with custom modules child to parent")
     public void testBuildSoqlQueryWithCustomTablesChildToParent() {
-        String expected = "\"SELECT talend_custom__c.Name, talend_custom__c.custom_name__c, talend_contact__r.Name, talend_contact__r.Account.Name FROM talend_custom__c\"";
+        String expected =
+                "\"SELECT talend_custom__c.Name, talend_custom__c.custom_name__c, talend_contact__r.Name, talend_contact__r.Account.Name FROM talend_custom__c\"";
 
-        String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("talend_custom__c_Name", "talend_custom__c_custom_name__c",
-                "talend_contact__r_Name", "talend_contact__r_Account_Name"), "talend_custom__c").buildSoqlQuery();
+        String queryFromBuilder = new SoqlQueryBuilder(Arrays
+                .asList("talend_custom__c_Name", "talend_custom__c_custom_name__c",
+                        "talend_contact__r_Name", "talend_contact__r_Account_Name"),
+                "talend_custom__c").buildSoqlQuery();
 
         Assertions.assertEquals(expected, queryFromBuilder);
     }
@@ -148,12 +158,15 @@ public class SoqlQueryBuilderTest {
     @Test
     @DisplayName("Test build SOQL query with custom modules parent to child")
     public void testBuildSoqlQueryWithCustomTablesParentToChild() {
-        String expected = "\"SELECT Name, (SELECT custom.lastName, custom_name__c, talend_account__c.custom_lastName__c, talend_account__c.Age FROM talend_custom__r), contact_title__c FROM talend_contact__c\"";
+        String expected =
+                "\"SELECT Name, (SELECT custom.lastName, custom_name__c, talend_account__c.custom_lastName__c, talend_account__c.Age FROM talend_custom__r), contact_title__c FROM talend_contact__c\"";
 
-        String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("Name", "talend_custom__r_records_custom_lastName",
-                "contact_title__c", "talend_custom__r_records_custom_name__c",
-                "talend_custom__r_records_talend_account__c_custom_lastName__c",
-                "talend_custom__r_records_talend_account__c_Age"), "talend_contact__c").buildSoqlQuery();
+        String queryFromBuilder = new SoqlQueryBuilder(Arrays
+                .asList("Name", "talend_custom__r_records_custom_lastName",
+                        "contact_title__c", "talend_custom__r_records_custom_name__c",
+                        "talend_custom__r_records_talend_account__c_custom_lastName__c",
+                        "talend_custom__r_records_talend_account__c_Age"),
+                "talend_contact__c").buildSoqlQuery();
 
         Assertions.assertEquals(expected, queryFromBuilder);
     }
@@ -165,10 +178,14 @@ public class SoqlQueryBuilderTest {
     @Test
     @DisplayName("Test build SOQL query with complex child table name parent to child")
     public void testBuildSoqlQueryWithComplexChildTableNameParentToChild() {
-        String expected = "\"SELECT Name, (SELECT custom.lastName, talend_account__c.Age FROM talend_contact__c.Persons), contact_title__c FROM talend_contact__c\"";
+        String expected =
+                "\"SELECT Name, (SELECT custom.lastName, talend_account__c.Age FROM talend_contact__c.Persons), contact_title__c FROM talend_contact__c\"";
 
-        String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("Name", "talend_contact__c_Persons_records_custom_lastName",
-                "contact_title__c", "talend_contact__c_Persons_records_talend_account__c_Age"), "talend_contact__c")
+        String queryFromBuilder = new SoqlQueryBuilder(
+                Arrays
+                        .asList("Name", "talend_contact__c_Persons_records_custom_lastName",
+                                "contact_title__c", "talend_contact__c_Persons_records_talend_account__c_Age"),
+                "talend_contact__c")
                         .buildSoqlQuery();
 
         Assertions.assertEquals(expected, queryFromBuilder);

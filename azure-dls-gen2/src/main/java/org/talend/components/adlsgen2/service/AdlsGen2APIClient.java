@@ -46,13 +46,18 @@ public interface AdlsGen2APIClient extends HttpClient {
 
     /**
      * @param prefix Filters results to filesystems within the specified prefix.
-     * @param continuation The number of filesystems returned with each invocation is limited. If the number of filesystems to be
-     * returned exceeds this limit, a continuation token is returned in the response header x-ms-continuation. When a continuation
-     * token is returned in the response, it must be specified in a subsequent invocation of the list operation to continue
+     * @param continuation The number of filesystems returned with each invocation is limited. If the number of
+     * filesystems to be
+     * returned exceeds this limit, a continuation token is returned in the response header x-ms-continuation. When a
+     * continuation
+     * token is returned in the response, it must be specified in a subsequent invocation of the list operation to
+     * continue
      * listing the filesystems.
-     * @param maxResults An optional value that specifies the maximum number of items to return. If omitted or greater than 5,000,
+     * @param maxResults An optional value that specifies the maximum number of items to return. If omitted or greater
+     * than 5,000,
      * the response will include up to 5,000 items.
-     * @param timeout An optional operation timeout value in seconds. The period begins when the request is received by the
+     * @param timeout An optional operation timeout value in seconds. The period begins when the request is received by
+     * the
      * service. If the timeout value elapses before the operation completes, the operation fails.
      * @return Filesystem[]
      * <p>
@@ -75,24 +80,37 @@ public interface AdlsGen2APIClient extends HttpClient {
     // ={continuation}&maxResults={maxResults}&upn={upn}&resource=filesystem&timeout={timeout}
 
     /**
-     * @param filesystem The filesystem identifier. The value must start and end with a letter or number and must contain only
-     * letters, numbers, and the dash (-) character. Consecutive dashes are not permitted. All letters must be lowercase. The
+     * @param filesystem The filesystem identifier. The value must start and end with a letter or number and must
+     * contain only
+     * letters, numbers, and the dash (-) character. Consecutive dashes are not permitted. All letters must be
+     * lowercase. The
      * value must have between 3 and 63 characters.
      * Regex pattern: ^[$a-z0-9](?!.*--)[-a-z0-9]{1,61}[a-z0-9]$
-     * @param directory Filters results to paths within the specified directory. An error occurs if the directory does not exist.
-     * @param recursive If "true", all paths are listed; otherwise, only paths at the root of the filesystem are listed. If
+     * @param directory Filters results to paths within the specified directory. An error occurs if the directory does
+     * not exist.
+     * @param recursive If "true", all paths are listed; otherwise, only paths at the root of the filesystem are listed.
+     * If
      * "directory" is specified, the list will only include paths that share the same root.
-     * @param continuation The number of paths returned with each invocation is limited. If the number of paths to be returned
-     * exceeds this limit, a continuation token is returned in the response header x-ms-continuation. When a continuation token is
-     * returned in the response, it must be specified in a subsequent invocation of the list operation to continue listing the
+     * @param continuation The number of paths returned with each invocation is limited. If the number of paths to be
+     * returned
+     * exceeds this limit, a continuation token is returned in the response header x-ms-continuation. When a
+     * continuation token is
+     * returned in the response, it must be specified in a subsequent invocation of the list operation to continue
+     * listing the
      * paths.
-     * @param maxResults An optional value that specifies the maximum number of items to return. If omitted or greater than 5,000,
+     * @param maxResults An optional value that specifies the maximum number of items to return. If omitted or greater
+     * than 5,000,
      * the response will include up to 5,000 items.
-     * @param upn Optional. Valid only when Hierarchical Namespace is enabled for the account. If "true", the user identity values
-     * returned in the owner and group fields of each list entry will be transformed from Azure Active Directory Object IDs to
-     * User Principal Names. If "false", the values will be returned as Azure Active Directory Object IDs. The default value is
-     * false. Note that group and application Object IDs are not translated because they do not have unique friendly names.
-     * @param timeout An optional operation timeout value in seconds. The period begins when the request is received by the
+     * @param upn Optional. Valid only when Hierarchical Namespace is enabled for the account. If "true", the user
+     * identity values
+     * returned in the owner and group fields of each list entry will be transformed from Azure Active Directory Object
+     * IDs to
+     * User Principal Names. If "false", the values will be returned as Azure Active Directory Object IDs. The default
+     * value is
+     * false. Note that group and application Object IDs are not translated because they do not have unique friendly
+     * names.
+     * @param timeout An optional operation timeout value in seconds. The period begins when the request is received by
+     * the
      * service. If the timeout value elapses before the operation completes, the operation fails.
      * @return Path[]
      * <p>
@@ -163,8 +181,10 @@ public interface AdlsGen2APIClient extends HttpClient {
     /**
      * @param filesystem The filesystem identifier.
      * @param path The file or directory path.
-     * @param action The action must be "append" to upload data to be appended to a file, "flush" to flush previously uploaded
-     * data to a file, "setProperties" to set the properties of a file or directory, or "setAccessControl" to set the owner,
+     * @param action The action must be "append" to upload data to be appended to a file, "flush" to flush previously
+     * uploaded
+     * data to a file, "setProperties" to set the properties of a file or directory, or "setAccessControl" to set the
+     * owner,
      * group, permissions, or access control list for a file or directory.
      * @param sas Shared Acccess Signature
      * @param payload File content

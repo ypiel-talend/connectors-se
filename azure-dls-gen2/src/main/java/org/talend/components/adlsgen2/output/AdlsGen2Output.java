@@ -61,7 +61,8 @@ public class AdlsGen2Output implements Serializable {
 
     private BlobWriter blobWriter;
 
-    public AdlsGen2Output(@Option("configuration") final OutputConfiguration configuration, final AdlsGen2Service service,
+    public AdlsGen2Output(@Option("configuration") final OutputConfiguration configuration,
+            final AdlsGen2Service service,
             final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory,
             AdlsActiveDirectoryService tokenProviderService) {
         this.configuration = configuration;
@@ -75,8 +76,9 @@ public class AdlsGen2Output implements Serializable {
     public void init() {
         log.debug("[init]");
         try {
-            blobWriter = BlobWriterFactory.getWriter(configuration, recordBuilderFactory, jsonBuilderFactory, service,
-                    tokenProviderService);
+            blobWriter = BlobWriterFactory
+                    .getWriter(configuration, recordBuilderFactory, jsonBuilderFactory, service,
+                            tokenProviderService);
         } catch (Exception e) {
             log.error("[init] {}", e.getMessage());
             throw new AdlsGen2RuntimeException(e.getMessage(), e);

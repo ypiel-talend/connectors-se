@@ -97,10 +97,13 @@ public class BigQueryService {
         try {
             return new SuggestionValues(true,
                     StreamSupport
-                            .stream(client.listDatasets(connection.getProjectName(), DatasetListOption.pageSize(100)).getValues()
+                            .stream(client
+                                    .listDatasets(connection.getProjectName(), DatasetListOption.pageSize(100))
+                                    .getValues()
                                     .spliterator(), false)
                             .map(dataset -> new SuggestionValues.Item(dataset.getDatasetId().getDataset(),
-                                    ofNullable(dataset.getFriendlyName()).orElseGet(() -> dataset.getDatasetId().getDataset())))
+                                    ofNullable(dataset.getFriendlyName())
+                                            .orElseGet(() -> dataset.getDatasetId().getDataset())))
                             .collect(toList()));
         } catch (Exception e) {
             return new SuggestionValues(false, Collections.emptyList());
@@ -114,8 +117,11 @@ public class BigQueryService {
         try {
             return new SuggestionValues(true,
                     StreamSupport
-                            .stream(client.listTables(DatasetId.of(connection.getProjectName(), bqDataset),
-                                    BigQuery.TableListOption.pageSize(100)).getValues().spliterator(), false)
+                            .stream(client
+                                    .listTables(DatasetId.of(connection.getProjectName(), bqDataset),
+                                            BigQuery.TableListOption.pageSize(100))
+                                    .getValues()
+                                    .spliterator(), false)
                             .map(table -> new SuggestionValues.Item(table.getTableId().getTable(),
                                     ofNullable(table.getFriendlyName()).orElseGet(() -> table.getTableId().getTable())))
                             .collect(toList()));
@@ -131,7 +137,11 @@ public class BigQueryService {
         if (connection.getJsonCredentials() != null && !"".equals(connection.getJsonCredentials().trim())) {
             GoogleCredentials credentials = getCredentials(connection.getJsonCredentials());
 
-            client = BigQueryOptions.newBuilder().setCredentials(credentials).setProjectId(connection.getProjectName()).build()
+            client = BigQueryOptions
+                    .newBuilder()
+                    .setCredentials(credentials)
+                    .setProjectId(connection.getProjectName())
+                    .build()
                     .getService();
         } else {
             client = BigQueryOptions.getDefaultInstance().getService();
@@ -142,8 +152,9 @@ public class BigQueryService {
 
     public com.google.cloud.bigquery.Schema guessSchema(BigQueryOutputConfig configuration) {
         BigQuery client = createClient(configuration.getDataSet().getConnection());
-        Table table = client.getTable(configuration.getDataSet().getBqDataset(), configuration.getDataSet().getTableName(),
-                TableOption.fields(TableField.SCHEMA));
+        Table table = client
+                .getTable(configuration.getDataSet().getBqDataset(), configuration.getDataSet().getTableName(),
+                        TableOption.fields(TableField.SCHEMA));
         if (table != null) {
             return table.getDefinition().getSchema();
         } else {
@@ -165,10 +176,17 @@ public class BigQueryService {
         org.talend.sdk.component.api.record.Schema.Builder schemaBuilder = recordBuilderFactoryService
                 .newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
 
-        gSchema.getFields().stream()
-                .forEach(f -> schemaBuilder.withEntry(recordBuilderFactoryService.newEntryBuilder().withName(f.getName())
-                        .withType(convertToTckType(f.getType(), f.getMode())).withElementSchema(getSubSchema(f))
-                        .withNullable(true).build()));
+        gSchema
+                .getFields()
+                .stream()
+                .forEach(f -> schemaBuilder
+                        .withEntry(recordBuilderFactoryService
+                                .newEntryBuilder()
+                                .withName(f.getName())
+                                .withType(convertToTckType(f.getType(), f.getMode()))
+                                .withElementSchema(getSubSchema(f))
+                                .withNullable(true)
+                                .build()));
 
         return schemaBuilder.build();
     }
@@ -176,29 +194,44 @@ public class BigQueryService {
     public org.talend.sdk.component.api.record.Schema getSubSchema(Field f) {
 
         if (!f.getType().equals(LegacySQLTypeName.RECORD)) {
-            return recordBuilderFactoryService.newSchemaBuilder(convertToTckType(f.getType(), Field.Mode.NULLABLE)).build();
+            return recordBuilderFactoryService
+                    .newSchemaBuilder(convertToTckType(f.getType(), Field.Mode.NULLABLE))
+                    .build();
         }
 
         org.talend.sdk.component.api.record.Schema.Builder schemaBuilder = recordBuilderFactoryService
                 .newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
 
         if (f.getSubFields() != null && !f.getSubFields().isEmpty()) {
-            f.getSubFields().stream()
-                    .forEach(inner -> schemaBuilder.withEntry(recordBuilderFactoryService.newEntryBuilder()
-                            .withName(inner.getName()).withType(convertToTckType(inner.getType(), inner.getMode()))
-                            .withElementSchema(getSubSchema(inner)).withNullable(true).build()));
+            f
+                    .getSubFields()
+                    .stream()
+                    .forEach(inner -> schemaBuilder
+                            .withEntry(recordBuilderFactoryService
+                                    .newEntryBuilder()
+                                    .withName(inner.getName())
+                                    .withType(convertToTckType(inner.getType(), inner.getMode()))
+                                    .withElementSchema(getSubSchema(inner))
+                                    .withNullable(true)
+                                    .build()));
         }
 
         return schemaBuilder.build();
     }
 
     public Schema convertToGoogleSchema(org.talend.sdk.component.api.record.Schema tckSchema) {
-        return Schema.of(tckSchema.getEntries().stream()
-                .map(e -> Field.newBuilder(e.getName(), convertToGoogleType(e.getType(), e.getElementSchema()), getSubFields(e))
-                        .setMode(e.getType() == org.talend.sdk.component.api.record.Schema.Type.ARRAY ? Field.Mode.REPEATED
-                                : Field.Mode.NULLABLE)
-                        .build())
-                .collect(Collectors.toList()));
+        return Schema
+                .of(tckSchema
+                        .getEntries()
+                        .stream()
+                        .map(e -> Field
+                                .newBuilder(e.getName(), convertToGoogleType(e.getType(), e.getElementSchema()),
+                                        getSubFields(e))
+                                .setMode(e.getType() == org.talend.sdk.component.api.record.Schema.Type.ARRAY
+                                        ? Field.Mode.REPEATED
+                                        : Field.Mode.NULLABLE)
+                                .build())
+                        .collect(Collectors.toList()));
     }
 
     public Field[] getSubFields(org.talend.sdk.component.api.record.Schema.Entry entry) {
@@ -271,12 +304,23 @@ public class BigQueryService {
 
             if (f.getMode() == Field.Mode.REPEATED) {
                 // ARRAY
-                Schema subSchema = tableSchema.getFields().stream().filter(field -> field.getName().equals(name)).map(
-                        field -> Schema.of(field.getSubFields() != null ? field.getSubFields() : Collections.singleton(field)))
-                        .findFirst().get();
-                org.talend.sdk.component.api.record.Schema.Entry entry = recordBuilderFactoryService.newEntryBuilder()
-                        .withName(name).withType(org.talend.sdk.component.api.record.Schema.Type.ARRAY).withNullable(true)
-                        .withElementSchema(convertToTckSchema(subSchema)).build();
+                Schema subSchema = tableSchema
+                        .getFields()
+                        .stream()
+                        .filter(field -> field.getName().equals(name))
+                        .map(
+                                field -> Schema
+                                        .of(field.getSubFields() != null ? field.getSubFields()
+                                                : Collections.singleton(field)))
+                        .findFirst()
+                        .get();
+                org.talend.sdk.component.api.record.Schema.Entry entry = recordBuilderFactoryService
+                        .newEntryBuilder()
+                        .withName(name)
+                        .withType(org.talend.sdk.component.api.record.Schema.Type.ARRAY)
+                        .withNullable(true)
+                        .withElementSchema(convertToTckSchema(subSchema))
+                        .build();
 
                 switch (type.name()) {
 
@@ -286,28 +330,42 @@ public class BigQueryService {
                         FieldValueList ifv = fv.getRecordValue();
                         FieldList ifs = f.getSubFields();
 
-                        FieldValueList innerFieldsValueWithSchema = FieldValueList.of(
-                                StreamSupport.stream(ifv.spliterator(), false).collect(Collectors.toList()),
-                                subSchema.getFields());
+                        FieldValueList innerFieldsValueWithSchema = FieldValueList
+                                .of(
+                                        StreamSupport.stream(ifv.spliterator(), false).collect(Collectors.toList()),
+                                        subSchema.getFields());
                         Record.Builder innerRecordBuilder = recordBuilderFactoryService
                                 .newRecordBuilder(convertToTckSchema(subSchema));
-                        ifs.stream().forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
-                                innerField, subSchema));
+                        ifs
+                                .stream()
+                                .forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
+                                        innerField, subSchema));
                         return innerRecordBuilder.build();
 
                     }).collect(Collectors.toList()));
                     break;
                 case "BOOLEAN":
-                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getBooleanValue())
-                            .collect(Collectors.toList()));
+                    rb
+                            .withArray(entry,
+                                    ((FieldValueList) value.getValue())
+                                            .stream()
+                                            .map(fv -> fv.getBooleanValue())
+                                            .collect(Collectors.toList()));
                     break;
                 case "BYTES":
-                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream()
-                            .map(fv -> Base64.decodeBase64(fv.getStringValue())).collect(Collectors.toList()));
+                    rb
+                            .withArray(entry, ((FieldValueList) value.getValue())
+                                    .stream()
+                                    .map(fv -> Base64.decodeBase64(fv.getStringValue()))
+                                    .collect(Collectors.toList()));
                     break;
                 case "TIMESTAMP":
-                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getTimestampValue() / 1000)
-                            .collect(Collectors.toList()));
+                    rb
+                            .withArray(entry,
+                                    ((FieldValueList) value.getValue())
+                                            .stream()
+                                            .map(fv -> fv.getTimestampValue() / 1000)
+                                            .collect(Collectors.toList()));
                     break;
                 case "DATE":
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -332,12 +390,19 @@ public class BigQueryService {
                     }).collect(Collectors.toList()));
                     break;
                 case "FLOAT":
-                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getDoubleValue())
-                            .collect(Collectors.toList()));
+                    rb
+                            .withArray(entry,
+                                    ((FieldValueList) value.getValue())
+                                            .stream()
+                                            .map(fv -> fv.getDoubleValue())
+                                            .collect(Collectors.toList()));
                     break;
                 case "INTEGER":
-                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getLongValue())
-                            .collect(Collectors.toList()));
+                    rb
+                            .withArray(entry, ((FieldValueList) value.getValue())
+                                    .stream()
+                                    .map(fv -> fv.getLongValue())
+                                    .collect(Collectors.toList()));
                     break;
                 case "TIME":
                     sdf = new SimpleDateFormat("HH:mm:ss");
@@ -351,8 +416,12 @@ public class BigQueryService {
                     }).collect(Collectors.toList()));
                     break;
                 default:
-                    rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> fv.getStringValue())
-                            .collect(Collectors.toList()));
+                    rb
+                            .withArray(entry,
+                                    ((FieldValueList) value.getValue())
+                                            .stream()
+                                            .map(fv -> fv.getStringValue())
+                                            .collect(Collectors.toList()));
                 }
             } else {
                 switch (type.name()) {
@@ -361,16 +430,26 @@ public class BigQueryService {
                     FieldValueList innerFieldsValue = value.getRecordValue();
                     FieldList innerFields = f.getSubFields();
 
-                    Schema subSchema = tableSchema.getFields().stream().filter(field -> field.getName().equals(name))
-                            .map(field -> Schema.of(field.getSubFields())).findFirst().get();
-                    final FieldValueList innerFieldsValueWithSchema = FieldValueList.of(
-                            StreamSupport.stream(innerFieldsValue.spliterator(), false).collect(Collectors.toList()),
-                            subSchema.getFields());
+                    Schema subSchema = tableSchema
+                            .getFields()
+                            .stream()
+                            .filter(field -> field.getName().equals(name))
+                            .map(field -> Schema.of(field.getSubFields()))
+                            .findFirst()
+                            .get();
+                    final FieldValueList innerFieldsValueWithSchema = FieldValueList
+                            .of(
+                                    StreamSupport
+                                            .stream(innerFieldsValue.spliterator(), false)
+                                            .collect(Collectors.toList()),
+                                    subSchema.getFields());
                     Record.Builder innerRecordBuilder = recordBuilderFactoryService
                             .newRecordBuilder(convertToTckSchema(subSchema));
 
-                    innerFields.stream().forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
-                            innerField, subSchema));
+                    innerFields
+                            .stream()
+                            .forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
+                                    innerField, subSchema));
                     rb.withRecord(name, innerRecordBuilder.build());
                     break;
                 case "BOOLEAN":
@@ -391,7 +470,9 @@ public class BigQueryService {
                     break;
                 case "DATETIME":
                     try {
-                        rb.withDateTime(name, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value.getStringValue()));
+                        rb
+                                .withDateTime(name,
+                                        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value.getStringValue()));
                     } catch (ParseException e) {
                         log.warn("Cannot parse time {}", value.getStringValue());
                     }
@@ -426,13 +507,17 @@ public class BigQueryService {
             return FieldList.of(fields);
         };
 
-        return new GsonBuilder().registerTypeAdapter(LegacySQLTypeName.class, typeDeserializer)
-                .registerTypeAdapter(FieldList.class, subFieldsDeserializer).setLenient().create();
+        return new GsonBuilder()
+                .registerTypeAdapter(LegacySQLTypeName.class, typeDeserializer)
+                .registerTypeAdapter(FieldList.class, subFieldsDeserializer)
+                .setLenient()
+                .create();
     }
 
     public GoogleCredentials getCredentials(String credentials) {
         try {
-            return GoogleCredentials.fromStream(new ByteArrayInputStream(credentials.getBytes()))
+            return GoogleCredentials
+                    .fromStream(new ByteArrayInputStream(credentials.getBytes()))
                     .createScoped(BigqueryScopes.all());
         } catch (Exception e) {
             throw new BigQueryConnectorException(i18n.errorReadingCredentials(e.getMessage()), e);
@@ -440,8 +525,10 @@ public class BigQueryService {
     }
 
     public void extractTable(BigQuery bigQuery, Table table, String blobGenericName) {
-        ExtractJobConfiguration jobConfig = ExtractJobConfiguration.newBuilder(table.getTableId(), blobGenericName)
-                .setFormat("Avro").build();
+        ExtractJobConfiguration jobConfig = ExtractJobConfiguration
+                .newBuilder(table.getTableId(), blobGenericName)
+                .setFormat("Avro")
+                .build();
 
         JobInfo jobInfo = JobInfo.newBuilder(jobConfig).build();
 

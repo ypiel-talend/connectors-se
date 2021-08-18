@@ -35,8 +35,13 @@ public class HTMLToRecord {
     public Schema inferSchema(Element record) {
         List<String> columnNames = inferSchemaInfo(record, !isHeaderRecord(record));
         Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
-        columnNames.forEach(column -> schemaBuilder
-                .withEntry(recordBuilderFactory.newEntryBuilder().withName(column).withType(Schema.Type.STRING).build()));
+        columnNames
+                .forEach(column -> schemaBuilder
+                        .withEntry(recordBuilderFactory
+                                .newEntryBuilder()
+                                .withName(column)
+                                .withType(Schema.Type.STRING)
+                                .build()));
         return schemaBuilder.build();
     }
 

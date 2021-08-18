@@ -92,16 +92,30 @@ public abstract class AbstractBaseJDBC {
         final JdbcConnection connection = newConnection();
         dataset.setConnection(connection);
         final String total = "total";
-        dataset.setSqlQuery(
-                "select count(*) as " + total + " from " + PlatformFactory.get(connection, i18nMessage).identifier(table));
+        dataset
+                .setSqlQuery(
+                        "select count(*) as " + total + " from "
+                                + PlatformFactory.get(connection, i18nMessage).identifier(table));
         final InputQueryConfig config = new InputQueryConfig();
         config.setDataSet(dataset);
         final String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components().component("jdbcInput", "Jdbc://QueryInput?" + inConfig).component("collector", "test://collector")
-                .connections().from("jdbcInput").to("collector").build().run();
+        Job
+                .components()
+                .component("jdbcInput", "Jdbc://QueryInput?" + inConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("jdbcInput")
+                .to("collector")
+                .build()
+                .run();
         final Record data = componentsHandler.getCollectedData(Record.class).iterator().next();
         componentsHandler.resetState();
-        return data.getSchema().getEntries().stream().filter(entry -> entry.getName().equalsIgnoreCase(total)).findFirst()
+        return data
+                .getSchema()
+                .getEntries()
+                .stream()
+                .filter(entry -> entry.getName().equalsIgnoreCase(total))
+                .findFirst()
                 .map(entry -> entry.getType() == Schema.Type.STRING ? Long.parseLong(data.getString(entry.getName()))
                         : data.getLong(entry.getName()))
                 .orElse(0L);
@@ -124,7 +138,8 @@ public abstract class AbstractBaseJDBC {
                 + "&config.withBytes=" + withBytes; //
     }
 
-    public void insertRows(final String table, final long rowCount, final boolean withNullValues, final String stringPrefix) {
+    public void insertRows(final String table, final long rowCount, final boolean withNullValues,
+            final String stringPrefix) {
         final JdbcTestContainer container = this.getContainer();
         final boolean withBoolean = !container.getDatabaseType().equalsIgnoreCase("oracle");
         final boolean withBytes = !container.getDatabaseType().equalsIgnoreCase("redshift");
@@ -135,11 +150,16 @@ public abstract class AbstractBaseJDBC {
         configuration.setKeys(asList("id"));
         configuration.setRewriteBatchedStatements(true);
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
-        Job.components()
+        Job
+                .components()
                 .component("rowGenerator",
                         "jdbcTest://RowGenerator?"
                                 + rowGeneratorConfig(rowCount, withNullValues, stringPrefix, withBoolean, withBytes))
-                .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("rowGenerator").to("jdbcOutput").build()
+                .component("jdbcOutput", "Jdbc://Output?" + config)
+                .connections()
+                .from("rowGenerator")
+                .to("jdbcOutput")
+                .build()
                 .run();
     }
 
@@ -147,8 +167,15 @@ public abstract class AbstractBaseJDBC {
         final InputTableNameConfig config = new InputTableNameConfig();
         config.setDataSet(newTableNameDataset(table));
         final String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + inConfig).component("collector", "test://collector")
-                .connections().from("jdbcInput").to("collector").build().run();
+        Job
+                .components()
+                .component("jdbcInput", "Jdbc://TableNameInput?" + inConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("jdbcInput")
+                .to("collector")
+                .build()
+                .run();
         final List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
         componentsHandler.resetState();
         return data;

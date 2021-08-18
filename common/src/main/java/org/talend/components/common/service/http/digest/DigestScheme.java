@@ -62,7 +62,8 @@ public class DigestScheme {
      * @see #formatHex(byte[])
      */
 
-    private static final char[] HEXADECIMAL = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+    private static final char[] HEXADECIMAL =
+            { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
     private static final int QOP_UNKNOWN = -1;
 
@@ -98,23 +99,29 @@ public class DigestScheme {
         try {
             return MessageDigest.getInstance(digAlg);
         } catch (final Exception e) {
-            throw new UnsupportedDigestAlgorithmException("Unsupported algorithm in HTTP Digest authentication: " + digAlg);
+            throw new UnsupportedDigestAlgorithmException(
+                    "Unsupported algorithm in HTTP Digest authentication: " + digAlg);
         }
     }
 
     public String createDigestResponse(final String username, final String password, final BasicHeader authChallenge,
             final DigestAuthContext context) throws AuthenticationException {
-        Map<String, BasicNameValuePair> pairs = BasicHeaderValueParser.parseParametersAsMap(authChallenge,
-                new BasicHeaderValueParser());
+        Map<String, BasicNameValuePair> pairs = BasicHeaderValueParser
+                .parseParametersAsMap(authChallenge,
+                        new BasicHeaderValueParser());
 
         pairs.entrySet().forEach(k -> this.paramMap.put(k.getKey(), k.getValue().getValue()));
 
         final String uri = context.getUri();
         final String method = context.getMethod();
-        final String realm = Optional.ofNullable(pairs.get("realm")).map(m -> m.getValue())
+        final String realm = Optional
+                .ofNullable(pairs.get("realm"))
+                .map(m -> m.getValue())
                 .orElseThrow(() -> new AuthenticationException("No realm value in digest authentication challenge."));
 
-        final String nonce = Optional.ofNullable(pairs.get("nonce")).map(m -> m.getValue())
+        final String nonce = Optional
+                .ofNullable(pairs.get("nonce"))
+                .map(m -> m.getValue())
                 .orElseThrow(() -> new AuthenticationException("No nonce value in digest authentication challenge."));
 
         final String opaque = Optional.ofNullable(pairs.get("opaque")).map(m -> m.getValue()).orElse(null);
@@ -225,7 +232,12 @@ public class DigestScheme {
             } catch (final IOException ex) {
                 throw new AuthenticationException("I/O error reading entity content", ex);
             }
-            a2 = buffer.append(method).append(":").append(uri).append(":").append(formatHex(entityDigester.getDigest()))
+            a2 = buffer
+                    .append(method)
+                    .append(":")
+                    .append(uri)
+                    .append(":")
+                    .append(formatHex(entityDigester.getDigest()))
                     .toByteArray();
         } else {
             a2 = buffer.append(method).append(":").append(uri).toByteArray();
@@ -241,8 +253,18 @@ public class DigestScheme {
             buffer.append(hasha1).append(":").append(nonce).append(":").append(hasha2);
             digestInput = buffer.toByteArray();
         } else {
-            buffer.append(hasha1).append(":").append(nonce).append(":").append(nc).append(":").append(cnonce).append(":")
-                    .append(qop == QOP_AUTH_INT ? "auth-int" : "auth").append(":").append(hasha2);
+            buffer
+                    .append(hasha1)
+                    .append(":")
+                    .append(nonce)
+                    .append(":")
+                    .append(nc)
+                    .append(":")
+                    .append(cnonce)
+                    .append(":")
+                    .append(qop == QOP_AUTH_INT ? "auth-int" : "auth")
+                    .append(":")
+                    .append(hasha2);
             digestInput = buffer.toByteArray();
         }
         buffer.reset();

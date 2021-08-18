@@ -28,7 +28,8 @@ import lombok.Data;
 @GridLayout({
         // the generated layout put one configuration entry per line,
         // customize it as much as needed
-        @GridLayout.Row({ "moduleDataSet" }), @GridLayout.Row({ "outputAction" }), @GridLayout.Row({ "upsertKeyColumn" }),
+        @GridLayout.Row({ "moduleDataSet" }), @GridLayout.Row({ "outputAction" }),
+        @GridLayout.Row({ "upsertKeyColumn" }),
         @GridLayout.Row({ "batchMode" }), @GridLayout.Row("commitLevel"), @GridLayout.Row("exceptionForErrors") })
 @Documentation("This configuration of output component")
 public class OutputConfig implements Serializable {

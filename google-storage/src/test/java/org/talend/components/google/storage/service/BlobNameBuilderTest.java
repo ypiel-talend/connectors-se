@@ -40,8 +40,9 @@ class BlobNameBuilderTest {
         Assertions.assertEquals("Hello", builder.revert("Hello"));
         Assertions.assertEquals("Hello_", builder.revert("Hello_"));
         Assertions.assertEquals("_", builder.revert("_"));
-        Assertions.assertEquals("Hello_1234567890ABCDEF1234567890ABCDEF1234",
-                builder.revert("Hello_1234567890ABCDEF1234567890ABCDEF1234"));
+        Assertions
+                .assertEquals("Hello_1234567890ABCDEF1234567890ABCDEF1234",
+                        builder.revert("Hello_1234567890ABCDEF1234567890ABCDEF1234"));
 
         Assertions.assertEquals("Hello", builder.revert(builder.generateName("Hello")));
     }
@@ -51,20 +52,22 @@ class BlobNameBuilderTest {
     void generateNameWithExtension(final String input, final String pattern) {
         final BlobNameBuilder builder = new BlobNameBuilder();
         final String generateName = builder.generateName(input);
-        Assertions.assertTrue(generateName.matches(pattern),
-                "Wrong generated name '" + generateName + "'" + " for '" + input + "'");
+        Assertions
+                .assertTrue(generateName.matches(pattern),
+                        "Wrong generated name '" + generateName + "'" + " for '" + input + "'");
         Assertions.assertTrue(builder.isGenerated(input, generateName));
 
         Assertions.assertEquals(input, builder.revert(generateName));
     }
 
     private static Stream<Arguments> provideNames() {
-        return Stream.of( //
-                Arguments.of("Hello.csv", "^Hello_[0-9a-f\\-]{36}\\.csv$"), //
-                Arguments.of("Hello._", "^Hello_[0-9a-f\\-]{36}\\._$"), //
-                Arguments.of("Hello.", "^Hello_[0-9a-f\\-]{36}\\.$"), //
-                Arguments.of("Hello", "^Hello_[0-9a-f\\-]{36}$"), //
-                Arguments.of(".gitignore", "^_[0-9a-f\\-]{36}\\.gitignore$"), //
-                Arguments.of(".", "^_[0-9a-f\\-]{36}\\.$"));
+        return Stream
+                .of( //
+                        Arguments.of("Hello.csv", "^Hello_[0-9a-f\\-]{36}\\.csv$"), //
+                        Arguments.of("Hello._", "^Hello_[0-9a-f\\-]{36}\\._$"), //
+                        Arguments.of("Hello.", "^Hello_[0-9a-f\\-]{36}\\.$"), //
+                        Arguments.of("Hello", "^Hello_[0-9a-f\\-]{36}$"), //
+                        Arguments.of(".gitignore", "^_[0-9a-f\\-]{36}\\.gitignore$"), //
+                        Arguments.of(".", "^_[0-9a-f\\-]{36}\\.$"));
     }
 }

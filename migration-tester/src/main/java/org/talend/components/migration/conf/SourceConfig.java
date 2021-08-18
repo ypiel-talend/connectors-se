@@ -19,7 +19,8 @@ import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
-@GridLayout({ @GridLayout.Row({ "dse" }), @GridLayout.Row({ "source_legacy" }), @GridLayout.Row({ "source_duplication" }),
+@GridLayout({ @GridLayout.Row({ "dse" }), @GridLayout.Row({ "source_legacy" }),
+        @GridLayout.Row({ "source_duplication" }),
         @GridLayout.Row({ "source_migration_handler_callback" }), @GridLayout.Row({ "source_incoming" }),
         @GridLayout.Row({ "source_outgoing" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {})

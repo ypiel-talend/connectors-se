@@ -37,7 +37,8 @@ public class JsonBlobFileWriter extends BlobFileWriter {
 
     private JsonBuilderFactory jsonBuilderFactory;
 
-    public JsonBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
+    public JsonBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
+            throws Exception {
         super(config, connectionServices);
         this.config = config;
 

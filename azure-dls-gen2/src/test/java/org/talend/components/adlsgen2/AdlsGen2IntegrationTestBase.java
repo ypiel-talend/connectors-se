@@ -37,7 +37,8 @@ public class AdlsGen2IntegrationTestBase extends AdlsGen2TestBase {
 
     protected static String storageFs;
 
-    protected static String accountKey = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==";
+    protected static String accountKey =
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==";
 
     protected static String sas;
 

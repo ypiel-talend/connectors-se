@@ -61,7 +61,8 @@ public class ParquetBlobReader extends BlobReader {
 
         private GenericRecord currentRecord;
 
-        private ParquetRecordIterator(Iterable<BlobInformations> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
+        private ParquetRecordIterator(Iterable<BlobInformations> blobItemsList,
+                RecordBuilderFactory recordBuilderFactory) {
             super(blobItemsList, recordBuilderFactory);
             initConfig();
             peekFirstBlob();
@@ -75,7 +76,8 @@ public class ParquetBlobReader extends BlobReader {
         @Override
         protected Record convertToRecord(GenericRecord next) {
             if (converter == null) {
-                converter = ParquetConverter.of(getRecordBuilderFactory(), configuration.getDataSet().getParquetConfiguration());
+                converter = ParquetConverter
+                        .of(getRecordBuilderFactory(), configuration.getDataSet().getParquetConfiguration());
             }
 
             return converter.toRecord(next);

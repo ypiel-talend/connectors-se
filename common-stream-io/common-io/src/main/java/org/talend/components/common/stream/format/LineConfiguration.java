@@ -32,6 +32,7 @@ public class LineConfiguration implements ContentFormat {
 
     @AllArgsConstructor
     public enum LineSeparatorType {
+
         LF("\n"),
         CRLF("\r\n"),
         OTHER("");

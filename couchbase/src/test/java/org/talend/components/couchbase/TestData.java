@@ -82,7 +82,8 @@ public class TestData {
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
         final Schema arrayInnerSchema = recordBuilderFactory.newSchemaBuilder(Schema.Type.STRING).build();
 
-        return recordBuilderFactory.newRecordBuilder()
+        return recordBuilderFactory
+                .newRecordBuilder()
                 .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(), id)
                 .withInt(entryBuilder.withName("t_int_min").withType(Schema.Type.INT).build(), getColIntMin())
                 .withInt(entryBuilder.withName("t_int_max").withType(Schema.Type.INT).build(), getColIntMax())
@@ -90,12 +91,19 @@ public class TestData {
                 .withLong(entryBuilder.withName("t_long_max").withType(Schema.Type.LONG).build(), getColLongMax())
                 .withFloat(entryBuilder.withName("t_float_min").withType(Schema.Type.FLOAT).build(), getColFloatMin())
                 .withFloat(entryBuilder.withName("t_float_max").withType(Schema.Type.FLOAT).build(), getColFloatMax())
-                .withDouble(entryBuilder.withName("t_double_min").withType(Schema.Type.DOUBLE).build(), getColDoubleMin())
-                .withDouble(entryBuilder.withName("t_double_max").withType(Schema.Type.DOUBLE).build(), getColDoubleMax())
+                .withDouble(entryBuilder.withName("t_double_min").withType(Schema.Type.DOUBLE).build(),
+                        getColDoubleMin())
+                .withDouble(entryBuilder.withName("t_double_max").withType(Schema.Type.DOUBLE).build(),
+                        getColDoubleMax())
                 .withBoolean(entryBuilder.withName("t_boolean").withType(Schema.Type.BOOLEAN).build(), isColBoolean())
-                .withDateTime(entryBuilder.withName("t_datetime").withType(Schema.Type.DATETIME).build(), getColDateTime())
+                .withDateTime(entryBuilder.withName("t_datetime").withType(Schema.Type.DATETIME).build(),
+                        getColDateTime())
                 .withArray(
-                        entryBuilder.withName("t_array").withType(Schema.Type.ARRAY).withElementSchema(arrayInnerSchema).build(),
+                        entryBuilder
+                                .withName("t_array")
+                                .withType(Schema.Type.ARRAY)
+                                .withElementSchema(arrayInnerSchema)
+                                .build(),
                         getColList())
                 .build();
     }

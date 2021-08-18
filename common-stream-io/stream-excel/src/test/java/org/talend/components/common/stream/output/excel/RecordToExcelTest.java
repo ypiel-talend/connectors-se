@@ -48,28 +48,67 @@ class RecordToExcelTest {
     void withNull() {
         final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
 
-        final Schema.Entry a_string = factory.newEntryBuilder().withType(Schema.Type.STRING).withNullable(true)
-                .withName("a_string").build();
-        final Schema.Entry a_double = factory.newEntryBuilder().withType(Schema.Type.DOUBLE).withNullable(true)
-                .withName("a_double").build();
-        final Schema.Entry a_int = factory.newEntryBuilder().withType(Schema.Type.INT).withNullable(true).withName("a_int")
+        final Schema.Entry a_string = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.STRING)
+                .withNullable(true)
+                .withName("a_string")
                 .build();
-        final Schema.Entry a_float = factory.newEntryBuilder().withType(Schema.Type.FLOAT).withNullable(true).withName("a_float")
+        final Schema.Entry a_double = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.DOUBLE)
+                .withNullable(true)
+                .withName("a_double")
                 .build();
-        final Schema.Entry a_long = factory.newEntryBuilder().withType(Schema.Type.LONG).withNullable(true).withName("a_long")
+        final Schema.Entry a_int = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.INT)
+                .withNullable(true)
+                .withName("a_int")
                 .build();
-        final Schema.Entry a_bool = factory.newEntryBuilder().withType(Schema.Type.BOOLEAN).withNullable(true).withName("a_bool")
+        final Schema.Entry a_float = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.FLOAT)
+                .withNullable(true)
+                .withName("a_float")
                 .build();
-        final Schema.Entry some_bytes = factory.newEntryBuilder().withType(Schema.Type.BYTES).withNullable(true)
-                .withName("some_bytes").build();
-        final Schema.Entry a_datetime = factory.newEntryBuilder().withType(Schema.Type.DATETIME).withNullable(true)
-                .withName("a_datetime").build();
+        final Schema.Entry a_long = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.LONG)
+                .withNullable(true)
+                .withName("a_long")
+                .build();
+        final Schema.Entry a_bool = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.BOOLEAN)
+                .withNullable(true)
+                .withName("a_bool")
+                .build();
+        final Schema.Entry some_bytes = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.BYTES)
+                .withNullable(true)
+                .withName("some_bytes")
+                .build();
+        final Schema.Entry a_datetime = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.DATETIME)
+                .withNullable(true)
+                .withName("a_datetime")
+                .build();
 
         final Schema arraySchema = factory.newSchemaBuilder(Schema.Type.STRING).build();
-        final Schema.Entry an_array = factory.newEntryBuilder().withType(Schema.Type.ARRAY).withElementSchema(arraySchema)
-                .withNullable(true).withName("an_array").build();
+        final Schema.Entry an_array = factory
+                .newEntryBuilder()
+                .withType(Schema.Type.ARRAY)
+                .withElementSchema(arraySchema)
+                .withNullable(true)
+                .withName("an_array")
+                .build();
 
-        final Schema schema = factory.newSchemaBuilder(Schema.Type.RECORD).withEntry(a_double) // 0
+        final Schema schema = factory
+                .newSchemaBuilder(Schema.Type.RECORD)
+                .withEntry(a_double) // 0
                 .withEntry(a_int) // 1
                 .withEntry(a_float) // 2
                 .withEntry(a_long) // 3
@@ -90,11 +129,17 @@ class RecordToExcelTest {
         Assertions.assertNotNull(rowNull);
 
         // numbers & date generate empty cell if null as input
-        Arrays.asList(0, 1, 2, 3, 8).stream().map(i -> rowNull.getCell(i))
+        Arrays
+                .asList(0, 1, 2, 3, 8)
+                .stream()
+                .map(i -> rowNull.getCell(i))
                 .forEach(c -> Assertions.assertEquals("", c.getStringCellValue()));
 
         // string, bytes, array has "null" in cell if null as input
-        Arrays.asList(5, 6, 7).stream().map(i -> rowNull.getCell(i))
+        Arrays
+                .asList(5, 6, 7)
+                .stream()
+                .map(i -> rowNull.getCell(i))
                 .forEach(c -> Assertions.assertEquals("null", c.getStringCellValue()));
 
         // boolean cell is FALSE when not set when having null as input
@@ -103,10 +148,18 @@ class RecordToExcelTest {
         // We still get values if any
         final RecordToExcel toExcelValues = new RecordToExcel();
         final Date now = Date.from(Instant.now());
-        final Record recordValues = factory.newRecordBuilder(schema).withDouble(a_double, 123.123d).withInt(a_int, 12345)
-                .withFloat(a_float, 124.124f).withLong(a_long, 232456L).withBoolean(a_bool, true).withString(a_string, "a_string")
-                .withBytes(some_bytes, new byte[] { 65, 66, 67, 68, 69 }).withArray(an_array, Arrays.asList("aaa", "bbb", "ccc"))
-                .withDateTime(a_datetime, now).build();
+        final Record recordValues = factory
+                .newRecordBuilder(schema)
+                .withDouble(a_double, 123.123d)
+                .withInt(a_int, 12345)
+                .withFloat(a_float, 124.124f)
+                .withLong(a_long, 232456L)
+                .withBoolean(a_bool, true)
+                .withString(a_string, "a_string")
+                .withBytes(some_bytes, new byte[] { 65, 66, 67, 68, 69 })
+                .withArray(an_array, Arrays.asList("aaa", "bbb", "ccc"))
+                .withDateTime(a_datetime, now)
+                .build();
 
         final XSSFWorkbook wbValues = new XSSFWorkbook();
         final XSSFSheet sheetValues = wbValues.createSheet();

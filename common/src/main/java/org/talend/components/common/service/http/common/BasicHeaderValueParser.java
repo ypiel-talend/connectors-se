@@ -112,7 +112,8 @@ public class BasicHeaderValueParser {
      *
      * @return a header element representing the argument
      */
-    protected BasicHeaderElement createHeaderElement(final String name, final String value, final BasicNameValuePair[] params) {
+    protected BasicHeaderElement createHeaderElement(final String name, final String value,
+            final BasicNameValuePair[] params) {
         return new BasicHeaderElement(name, value, params);
     }
 

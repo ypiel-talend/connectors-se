@@ -56,12 +56,20 @@ public class JSONInputIT extends BaseIT {
         final int recordSize = 100;
         final int columnSize = 3;
 
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "json/testJson100RecordArray.json",
-                "testJson100RecordArray.json");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "json/testJson100RecordArray.json",
+                        "testJson100RecordArray.json");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");

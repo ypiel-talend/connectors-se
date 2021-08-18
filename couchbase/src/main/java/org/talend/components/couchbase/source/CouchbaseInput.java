@@ -110,7 +110,8 @@ public class CouchbaseInput implements Serializable {
             switch (configuration.getSelectAction()) {
             case ALL:
                 Statement statement;
-                AsPath asPath = Select.select("meta().id as " + Expression.i(META_ID_FIELD), "*")
+                AsPath asPath = Select
+                        .select("meta().id as " + Expression.i(META_ID_FIELD), "*")
                         .from(Expression.i(bucket.name()));
                 if (!configuration.getLimit().isEmpty()) {
                     statement = asPath.limit(Integer.parseInt(configuration.getLimit().trim()));
@@ -126,8 +127,10 @@ public class CouchbaseInput implements Serializable {
                 n1qlQuery = N1qlQuery.simple(configuration.getQuery());
                 break;
             case ONE:
-                Statement pathToOneDocument = Select.select("meta().id as " + Expression.i(META_ID_FIELD), "*")
-                        .from(Expression.i(bucket.name())).useKeysValues(configuration.getDocumentId());
+                Statement pathToOneDocument = Select
+                        .select("meta().id as " + Expression.i(META_ID_FIELD), "*")
+                        .from(Expression.i(bucket.name()))
+                        .useKeysValues(configuration.getDocumentId());
                 n1qlQuery = N1qlQuery.simple(pathToOneDocument);
                 break;
             default:
@@ -171,7 +174,8 @@ public class CouchbaseInput implements Serializable {
                     try {
                         String id = jsonObject.getString(META_ID_FIELD);
                         if (id == null) {
-                            LOG.error("Cannot find '_meta_id_' field. The query should contain 'meta().id as _meta_id_' field");
+                            LOG
+                                    .error("Cannot find '_meta_id_' field. The query should contain 'meta().id as _meta_id_' field");
                             return null;
                         }
                         DocumentParser documentParser = ParserFactory
@@ -187,7 +191,8 @@ public class CouchbaseInput implements Serializable {
     }
 
     private Record createJsonRecord(JsonObject jsonObject) {
-        if (configuration.getSelectAction() == SelectAction.ALL || configuration.getSelectAction() == SelectAction.ONE) {
+        if (configuration.getSelectAction() == SelectAction.ALL
+                || configuration.getSelectAction() == SelectAction.ONE) {
             // unwrap JSON (we use SELECT * to retrieve all values. Result will be wrapped with bucket name)
             // couldn't use bucket_name.*, in this case big float numbers (e.g. 1E100) are converted into BigInteger
             // with

@@ -35,7 +35,8 @@ public class ClientGen2Fake implements AdlsGen2APIClient {
         inject(manager, AdlsGen2APIClient.class, AdlsGen2Service.class, client);
     }
 
-    public static void inject(final ComponentManager manager, Class<?> serviceClazzForInjection, Class<?> serviceClassToInject,
+    public static void inject(final ComponentManager manager, Class<?> serviceClazzForInjection,
+            Class<?> serviceClassToInject,
             final Object serviceObject) {
         final Container container = manager.findPlugin("classes").orElse(null);
 
@@ -74,7 +75,8 @@ public class ClientGen2Fake implements AdlsGen2APIClient {
 
     @Override
     public Response<JsonObject> pathList(Map<String, String> headers, String filesystem, Map<String, String> sas,
-            String directory, String resource, Boolean recursive, String continuation, Integer maxResults, Integer timeout) {
+            String directory, String resource, Boolean recursive, String continuation, Integer maxResults,
+            Integer timeout) {
         return this.preparedResponse;
     }
 
@@ -85,7 +87,8 @@ public class ClientGen2Fake implements AdlsGen2APIClient {
     }
 
     @Override
-    public Response<JsonObject> pathGetProperties(Map<String, String> headers, String filesystem, String path, Integer timeout,
+    public Response<JsonObject> pathGetProperties(Map<String, String> headers, String filesystem, String path,
+            Integer timeout,
             Map<String, String> sas) {
         return this.preparedResponse;
     }

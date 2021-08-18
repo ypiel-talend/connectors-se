@@ -57,7 +57,8 @@ public class BigQueryTableInput implements Serializable {
 
     private transient boolean loaded = false;
 
-    public BigQueryTableInput(@Option("configuration") BigQueryTableInputConfig configuration, final BigQueryService service,
+    public BigQueryTableInput(@Option("configuration") BigQueryTableInputConfig configuration,
+            final BigQueryService service,
             final I18nMessage i18n, final RecordBuilderFactory builderFactory) {
         this.connection = configuration.getDataStore();
         this.service = service;
@@ -76,7 +77,8 @@ public class BigQueryTableInput implements Serializable {
         if (!loaded) {
             try {
                 BigQuery bigQuery = service.createClient(connection);
-                TableId tableId = TableId.of(connection.getProjectName(), dataSet.getBqDataset(), dataSet.getTableName());
+                TableId tableId =
+                        TableId.of(connection.getProjectName(), dataSet.getBqDataset(), dataSet.getTableName());
                 Table table = bigQuery.getTable(tableId);
                 if (table == null) {
                     throw new BigQueryConnectorException(

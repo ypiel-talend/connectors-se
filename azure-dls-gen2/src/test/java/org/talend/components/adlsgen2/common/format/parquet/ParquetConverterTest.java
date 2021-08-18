@@ -78,7 +78,8 @@ class ParquetConverterTest extends AdlsGen2TestBase {
         HadoopOutputFile hdpOut = HadoopOutputFile.fromPath(new Path(tmp), new org.apache.hadoop.conf.Configuration());
         GenericRecord record = converter.fromRecord(versatileRecord);
         assertNotNull(record);
-        ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord> builder(hdpOut) //
+        ParquetWriter<GenericRecord> writer = AvroParquetWriter
+                .<GenericRecord> builder(hdpOut) //
                 .withSchema(record.getSchema()) //
                 .build();
         writer.write(record);

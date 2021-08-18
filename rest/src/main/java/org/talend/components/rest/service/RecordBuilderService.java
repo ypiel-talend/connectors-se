@@ -59,17 +59,25 @@ public class RecordBuilderService {
         final Format format = config.getDataset().getFormat();
         final boolean isCompletePayload = config.getDataset().isCompletePayload();
 
-        Map<String, String> headers = Optional.ofNullable(resp.headers()).orElseGet(Collections::emptyMap).entrySet().stream()
+        Map<String, String> headers = Optional
+                .ofNullable(resp.headers())
+                .orElseGet(Collections::emptyMap)
+                .entrySet()
+                .stream()
                 .collect(toMap((Map.Entry<String, List<String>> e) -> e.getKey(), e -> String.join(",", e.getValue())));
 
         final String encoding = ContentType.getCharsetName(resp.headers());
 
         final ContentFormat contentFormat = findFormat(config);
         final RecordReaderSupplier recordReaderSupplier = this.ioRepository.findReader(contentFormat.getClass());
-        final RecordReader reader = recordReaderSupplier.getReader(recordBuilderFactory, contentFormat,
-                new ExtendedRawTextConfiguration(encoding, isCompletePayload));
+        final RecordReader reader = recordReaderSupplier
+                .getReader(recordBuilderFactory, contentFormat,
+                        new ExtendedRawTextConfiguration(encoding, isCompletePayload));
 
-        final List<Record> headerRecords = headers.entrySet().stream().map(this::convertHeadersToRecords)
+        final List<Record> headerRecords = headers
+                .entrySet()
+                .stream()
+                .map(this::convertHeadersToRecords)
                 .collect(Collectors.toList());
 
         final Iterator<Record> readIterator;
@@ -78,7 +86,9 @@ public class RecordBuilderService {
             readIterator = reader.read(resp.body());
         } catch (RuntimeException e) {
             throw new IllegalArgumentException(
-                    i18n.invalideBodyContent(format == Format.RAW_TEXT ? i18n.formatText() : i18n.formatJSON(), e.getMessage()));
+                    i18n
+                            .invalideBodyContent(format == Format.RAW_TEXT ? i18n.formatText() : i18n.formatJSON(),
+                                    e.getMessage()));
         }
 
         return new IteratorMap<Record, Record>(readIterator,
@@ -101,17 +111,27 @@ public class RecordBuilderService {
     }
 
     private Record convertHeadersToRecords(final Map.Entry<String, String> header) {
-        return this.recordBuilderFactory.newRecordBuilder().withString("key", header.getKey())
-                .withString("value", header.getValue()).build();
+        return this.recordBuilderFactory
+                .newRecordBuilder()
+                .withString("key", header.getKey())
+                .withString("value", header.getValue())
+                .build();
     }
 
-    private Record buildRecord(final Record body, final int status, final List<Record> headers, final boolean isCompletePayload,
+    private Record buildRecord(final Record body, final int status, final List<Record> headers,
+            final boolean isCompletePayload,
             final Format format) {
 
         final SchemaContainer schema = buildShema(body, isCompletePayload, format);
 
-        final boolean isRawText = schema.getRecordSchema().getEntries().stream().filter(e -> "body".equals(e.getName()))
-                .findFirst().get().getType() == Schema.Type.STRING;
+        final boolean isRawText = schema
+                .getRecordSchema()
+                .getEntries()
+                .stream()
+                .filter(e -> "body".equals(e.getName()))
+                .findFirst()
+                .get()
+                .getType() == Schema.Type.STRING;
 
         final Record.Builder bodyBuilder;
         if (isRawText && isCompletePayload) {
@@ -132,13 +152,21 @@ public class RecordBuilderService {
     }
 
     private SchemaContainer buildShema(final Record body, final boolean isCompletePayload, final Format format) {
-        final Schema.Entry headersEntry = this.recordBuilderFactory.newEntryBuilder().withName("headers")
+        final Schema.Entry headersEntry = this.recordBuilderFactory
+                .newEntryBuilder()
+                .withName("headers")
                 .withType(Schema.Type.ARRAY)
-                .withElementSchema(this.recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
-                        .withEntry(newEntry("key", Schema.Type.STRING)).withEntry(newEntry("value", Schema.Type.STRING)).build())
+                .withElementSchema(this.recordBuilderFactory
+                        .newSchemaBuilder(Schema.Type.RECORD)
+                        .withEntry(newEntry("key", Schema.Type.STRING))
+                        .withEntry(newEntry("value", Schema.Type.STRING))
+                        .build())
                 .build();
 
-        final Schema.Entry statusEntry = this.recordBuilderFactory.newEntryBuilder().withName("status").withType(Schema.Type.INT)
+        final Schema.Entry statusEntry = this.recordBuilderFactory
+                .newEntryBuilder()
+                .withName("status")
+                .withType(Schema.Type.INT)
                 .build();
 
         final Schema.Entry.Builder bodyBuilder = this.recordBuilderFactory.newEntryBuilder().withName("body");

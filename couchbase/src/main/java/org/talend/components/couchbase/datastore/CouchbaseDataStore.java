@@ -34,8 +34,9 @@ import lombok.Data;
 @DataStore("CouchbaseDataStore")
 @Checkable("healthCheck")
 
-@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "bootstrapNodes" }), @GridLayout.Row({ "username" }),
-        @GridLayout.Row({ "password" }) })
+@GridLayout(names = GridLayout.FormType.MAIN,
+        value = { @GridLayout.Row({ "bootstrapNodes" }), @GridLayout.Row({ "username" }),
+                @GridLayout.Row({ "password" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "useConnectionParameters" }),
         @GridLayout.Row({ "connectionParametersList" }) })
 

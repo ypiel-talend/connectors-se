@@ -78,14 +78,15 @@ public class LeadSource extends MarketoSource {
     private Boolean isLeadUrlSizeGreaterThan8k(String filterType, String filterValues, String fields) {
         int pathSize = 20;
         int endpointSize = configuration.getDataSet().getDataStore().getEndpoint().length();
-        int queryParameterNamesSize = ATTR_ACCESS_TOKEN.length() + 1 + (accessToken == null ? 0 : accessToken.length()) + //
-                ATTR_NEXT_PAGE_TOKEN.length() + 1 + (nextPageToken == null ? 0 : nextPageToken.length()) + //
-                endpointSize + //
-                pathSize + //
-                ATTR_ACCESS_TOKEN.length() + 1 + //
-                ATTR_FILTER_TYPE.length() + 1 + //
-                ATTR_FILTER_VALUES.length() + 1 + //
-                ATTR_FIELDS.length() + 1; //
+        int queryParameterNamesSize =
+                ATTR_ACCESS_TOKEN.length() + 1 + (accessToken == null ? 0 : accessToken.length()) + //
+                        ATTR_NEXT_PAGE_TOKEN.length() + 1 + (nextPageToken == null ? 0 : nextPageToken.length()) + //
+                        endpointSize + //
+                        pathSize + //
+                        ATTR_ACCESS_TOKEN.length() + 1 + //
+                        ATTR_FILTER_TYPE.length() + 1 + //
+                        ATTR_FILTER_VALUES.length() + 1 + //
+                        ATTR_FIELDS.length() + 1; //
         int queryParameterValuesSize = (filterType == null ? 0 : filterType.length())
                 + (filterValues == null ? 0 : filterValues.length()) + (fields == null ? 0 : fields.length());
         int total = queryParameterNamesSize + queryParameterValuesSize;
@@ -108,7 +109,8 @@ public class LeadSource extends MarketoSource {
         if (DateTimeMode.absolute.equals(configuration.getDataSet().getDateTimeMode())) {
             result = configuration.getDataSet().getSinceDateTimeAbsolute();
         } else {
-            result = ZonedDateTime.now()
+            result = ZonedDateTime
+                    .now()
                     .minus(Period.parse(configuration.getDataSet().getSinceDateTimeRelative().getRelativeOffset()))
                     .format(DateTimeFormatter.ofPattern(DATETIME_FORMAT));
         }
@@ -132,7 +134,8 @@ public class LeadSource extends MarketoSource {
             activityTypeIds = configuration.getDataSet().getActivityTypeIds().stream().collect(joining(","));
         }
         String listId = configuration.getDataSet().getListId();
-        return handleResponse(leadClient.getLeadActivities(accessToken, nextPageToken, activityTypeIds, "", listId, ""));
+        return handleResponse(
+                leadClient.getLeadActivities(accessToken, nextPageToken, activityTypeIds, "", listId, ""));
     }
 
     public JsonObject getActivities() {

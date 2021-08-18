@@ -53,7 +53,8 @@ import java.util.UUID;
 public class CosmosDbTestBase {
 
     @ClassRule
-    public static final SimpleComponentRule COMPONENT_FACTORY = new SimpleComponentRule("org.talend.components.cosmosDB");
+    public static final SimpleComponentRule COMPONENT_FACTORY =
+            new SimpleComponentRule("org.talend.components.cosmosDB");
 
     @Rule
     public final ServiceInjectionRule injections = new ServiceInjectionRule(COMPONENT_FACTORY, this);
@@ -109,15 +110,18 @@ public class CosmosDbTestBase {
     @BeforeClass
     public static void prepareDatabse() throws IOException, DocumentClientException {
 
-        DocumentClient client = new DocumentClient(serviceEndpoint, primaryKey, new ConnectionPolicy(), ConsistencyLevel.Session);
+        DocumentClient client =
+                new DocumentClient(serviceEndpoint, primaryKey, new ConnectionPolicy(), ConsistencyLevel.Session);
 
         cosmosTestUtils = new CosmosTestUtils(client, databaseID, collectionID);
         cosmosTestUtils.createDatabaseIfNotExists();
         cosmosTestUtils.createDocumentCollectionIfNotExists();
-        cosmosTestUtils.insertDocument(
-                "{\"lastName\":\"Wakefield\",\"address\":{\"city\":\"NY\",\"county\":\"Manhattan\",\"state\":\"NY\"},\"children\":[{\"pets\":[{\"givenName\":\"Goofy\"},{\"givenName\":\"Shadow\"}],\"firstName\":\"Jesse\",\"gender\":null,\"familyName\":\"Merriam\",\"grade\":8},{\"pets\":null,\"firstName\":\"Lisa\",\"gender\":\"female\",\"familyName\":\"Miller\",\"grade\":1}],\"district\":\"NY23\",\"registered\":true,\"id\":\"Wakefield.7\",\"parents\":[{\"firstName\":\"Robin\",\"familyName\":\"Wakefield\"},{\"firstName\":\"Ben\",\"familyName\":\"Miller\"}]}");
-        cosmosTestUtils.insertDocument(
-                "{\"lastName\":\"Andersen\",\"address\":{\"city\":\"Seattle\",\"county\":\"King\",\"state\":\"WA\"},\"children\":null,\"district\":\"WA5\",\"registered\":true,\"id\":\"Andersen.1\",\"parents\":[{\"firstName\":\"Thomas\",\"familyName\":null},{\"firstName\":\"MaryKay\",\"familyName\":null}]}");
+        cosmosTestUtils
+                .insertDocument(
+                        "{\"lastName\":\"Wakefield\",\"address\":{\"city\":\"NY\",\"county\":\"Manhattan\",\"state\":\"NY\"},\"children\":[{\"pets\":[{\"givenName\":\"Goofy\"},{\"givenName\":\"Shadow\"}],\"firstName\":\"Jesse\",\"gender\":null,\"familyName\":\"Merriam\",\"grade\":8},{\"pets\":null,\"firstName\":\"Lisa\",\"gender\":\"female\",\"familyName\":\"Miller\",\"grade\":1}],\"district\":\"NY23\",\"registered\":true,\"id\":\"Wakefield.7\",\"parents\":[{\"firstName\":\"Robin\",\"familyName\":\"Wakefield\"},{\"firstName\":\"Ben\",\"familyName\":\"Miller\"}]}");
+        cosmosTestUtils
+                .insertDocument(
+                        "{\"lastName\":\"Andersen\",\"address\":{\"city\":\"Seattle\",\"county\":\"King\",\"state\":\"WA\"},\"children\":null,\"district\":\"WA5\",\"registered\":true,\"id\":\"Andersen.1\",\"parents\":[{\"firstName\":\"Thomas\",\"familyName\":null},{\"firstName\":\"MaryKay\",\"familyName\":null}]}");
 
     }
 
@@ -147,14 +151,18 @@ public class CosmosDbTestBase {
     protected List<Record> createData(int i) {
         List records = new ArrayList(i);
         for (; i > 0; i--) {
-            Record record = recordBuilderFactory.newRecordBuilder() //
+            Record record = recordBuilderFactory
+                    .newRecordBuilder() //
                     .withInt("id2", i) //
-                    .withString("id", "" + i).withString("lastName", "firstfirst") //
+                    .withString("id", "" + i)
+                    .withString("lastName", "firstfirst") //
                     .withDouble("double", 3.555) //
                     .withLong("long", 7928342L) //
                     .withInt("int", 3242342) //
                     .withRecord("record", createData2(1).get(0)) //
-                    .withBytes("bytes", "YOasdfe2232".getBytes()).withDateTime("Date1", new Date(435352454530l)).build();
+                    .withBytes("bytes", "YOasdfe2232".getBytes())
+                    .withDateTime("Date1", new Date(435352454530l))
+                    .build();
 
             records.add(record);
         }
@@ -164,10 +172,14 @@ public class CosmosDbTestBase {
     protected List<Record> createData2(int i) {
         List records = new ArrayList(i);
         for (; i > 0; i--) {
-            Record record = recordBuilderFactory.newRecordBuilder() //
+            Record record = recordBuilderFactory
+                    .newRecordBuilder() //
                     .withInt("id", i) //
                     .withString("firstname", "firstfirst") //
-                    .withString("quoter", "\"\"").withString("nullString", "").withString("null", null).build();
+                    .withString("quoter", "\"\"")
+                    .withString("nullString", "")
+                    .withString("null", null)
+                    .build();
             records.add(record);
         }
         return records;
@@ -175,7 +187,8 @@ public class CosmosDbTestBase {
 
     protected List<Record> createData3() {
         List records = new ArrayList();
-        Record record = recordBuilderFactory.newRecordBuilder() //
+        Record record = recordBuilderFactory
+                .newRecordBuilder() //
                 .withInt("sdfds", 1) //
                 .withString("id", "Andersen.1") //
                 .withString("address", "444") //
@@ -184,7 +197,8 @@ public class CosmosDbTestBase {
                 .withString("lastName", "Andersen") //
                 .build();
         records.add(record);
-        Record record2 = recordBuilderFactory.newRecordBuilder() //
+        Record record2 = recordBuilderFactory
+                .newRecordBuilder() //
                 .withInt("id", 2) //
                 .withString("firstname", "firstfirst") //
                 .withString("lastname", "lastlast") //
@@ -221,7 +235,8 @@ public class CosmosDbTestBase {
             case RECORD:
                 ;
                 result = result
-                        && recordEqual(record.getRecord(entry.getName()), new Document(document.get(entry.getName()).toString()));
+                        && recordEqual(record.getRecord(entry.getName()),
+                                new Document(document.get(entry.getName()).toString()));
                 break;
 
             default:

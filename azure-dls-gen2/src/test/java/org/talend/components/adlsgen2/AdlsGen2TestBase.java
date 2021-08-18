@@ -123,7 +123,8 @@ public class AdlsGen2TestBase implements Serializable {
         outputConfiguration.setDataSet(dataSet);
 
         // some demo records
-        versatileRecord = recordBuilderFactory.newRecordBuilder() //
+        versatileRecord = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString("string1", "Bonjour") //
                 .withString("string2", "Olà") //
                 .withInt("int", 71) //
@@ -133,17 +134,27 @@ public class AdlsGen2TestBase implements Serializable {
                 .withFloat("float", 20.5f) //
                 .withDouble("double", 20.5) //
                 .build();
-        Entry er = recordBuilderFactory.newEntryBuilder().withName("record").withType(Type.RECORD)
-                .withElementSchema(versatileRecord.getSchema()).build();
-        Entry ea = recordBuilderFactory.newEntryBuilder().withName("array").withType(Type.ARRAY)
-                .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.ARRAY).withType(Type.STRING).build()).build();
+        Entry er = recordBuilderFactory
+                .newEntryBuilder()
+                .withName("record")
+                .withType(Type.RECORD)
+                .withElementSchema(versatileRecord.getSchema())
+                .build();
+        Entry ea = recordBuilderFactory
+                .newEntryBuilder()
+                .withName("array")
+                .withType(Type.ARRAY)
+                .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.ARRAY).withType(Type.STRING).build())
+                .build();
         //
         now = ZonedDateTime.now();
-        complexRecord = recordBuilderFactory.newRecordBuilder() //
+        complexRecord = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString("name", "ComplexR") //
                 .withRecord(er, versatileRecord) //
                 .withDateTime("now", now) //
-                .withArray(ea, Arrays.asList("ary1", "ary2", "ary3")).build();
+                .withArray(ea, Arrays.asList("ary1", "ary2", "ary3"))
+                .build();
         // inject needed services
         components.injectServices(CsvConverter.class);
         I18n i18 = components.findService(I18n.class);
@@ -151,7 +162,8 @@ public class AdlsGen2TestBase implements Serializable {
     }
 
     protected Record createData() {
-        Record record = recordBuilderFactory.newRecordBuilder() //
+        Record record = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString("id", "1") //
                 .withString("firstname", "firstfirst") //
                 .withString("lastname", "lastlast") //

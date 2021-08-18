@@ -123,8 +123,9 @@ class JsonRecordReaderTest {
         int i = 0;
         for (Schema.Entry entry : next.getSchema().getEntries()) {
             Assertions.assertEquals((String) expectedSchema.get(i)[0], entry.getName());
-            Assertions.assertEquals((Schema.Type) expectedSchema.get(i)[1], entry.getType(),
-                    "Wrong schema for " + expectedSchema.get(i)[0]);
+            Assertions
+                    .assertEquals((Schema.Type) expectedSchema.get(i)[1], entry.getType(),
+                            "Wrong schema for " + expectedSchema.get(i)[0]);
             i++;
         }
 
@@ -152,15 +153,47 @@ class JsonRecordReaderTest {
         final Entry firstField = next.getSchema().getEntries().get(0);
         Assertions.assertEquals(Schema.Type.ARRAY, firstField.getType());
         Assertions.assertEquals(Schema.Type.RECORD, firstField.getElementSchema().getEntries().get(0).getType());
-        Assertions.assertEquals(Schema.Type.ARRAY,
-                firstField.getElementSchema().getEntries().get(0).getElementSchema().getEntries().get(0).getType());
-        Assertions.assertEquals(Schema.Type.RECORD, firstField.getElementSchema().getEntries().get(0).getElementSchema()
-                .getEntries().get(0).getElementSchema().getType());
+        Assertions
+                .assertEquals(Schema.Type.ARRAY,
+                        firstField
+                                .getElementSchema()
+                                .getEntries()
+                                .get(0)
+                                .getElementSchema()
+                                .getEntries()
+                                .get(0)
+                                .getType());
+        Assertions
+                .assertEquals(Schema.Type.RECORD, firstField
+                        .getElementSchema()
+                        .getEntries()
+                        .get(0)
+                        .getElementSchema()
+                        .getEntries()
+                        .get(0)
+                        .getElementSchema()
+                        .getType());
 
-        Assertions.assertEquals(Schema.Type.ARRAY,
-                firstField.getElementSchema().getEntries().get(0).getElementSchema().getEntries().get(1).getType());
-        Assertions.assertEquals(Schema.Type.LONG, firstField.getElementSchema().getEntries().get(0).getElementSchema()
-                .getEntries().get(1).getElementSchema().getType());
+        Assertions
+                .assertEquals(Schema.Type.ARRAY,
+                        firstField
+                                .getElementSchema()
+                                .getEntries()
+                                .get(0)
+                                .getElementSchema()
+                                .getEntries()
+                                .get(1)
+                                .getType());
+        Assertions
+                .assertEquals(Schema.Type.LONG, firstField
+                        .getElementSchema()
+                        .getEntries()
+                        .get(0)
+                        .getElementSchema()
+                        .getEntries()
+                        .get(1)
+                        .getElementSchema()
+                        .getType());
 
         final Record coordinates = next.getArray(Record.class, "data").iterator().next().getRecord("coordinates");
         Assertions.assertEquals(1.0d, coordinates.getArray(Record.class, "latitude").iterator().next().getDouble("aa"));

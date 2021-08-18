@@ -46,7 +46,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Environment(SparkRunnerEnvironment.class)
 @EnvironmentConfiguration(environment = "Spark", systemProperties = {
-        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
+        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner",
+                value = "org.apache.beam.runners.spark.SparkRunner"),
         @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
         @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false") })
 

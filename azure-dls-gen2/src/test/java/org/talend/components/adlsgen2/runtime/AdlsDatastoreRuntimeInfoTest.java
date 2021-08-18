@@ -58,8 +58,9 @@ class AdlsDatastoreRuntimeInfoTest {
 
     private AdlsGen2Connection buildConnection() {
         final AdlsGen2Connection cnx = new AdlsGen2Connection();
-        cnx.setSas(
-                "?sv=2019-12-12&ss=bfqt&srt=sco&sp=rwdlacupx&se=2023-12-11T16:17:32Z&st=2020-12-11T08:17:32Z&spr=https&sig=xl5fq%2FA%2FCXA65xxxxxxxxxxs%2F%2Bjqqx6%2BSEepSXXX%3D");
+        cnx
+                .setSas(
+                        "?sv=2019-12-12&ss=bfqt&srt=sco&sp=rwdlacupx&se=2023-12-11T16:17:32Z&st=2020-12-11T08:17:32Z&spr=https&sig=xl5fq%2FA%2FCXA65xxxxxxxxxxs%2F%2Bjqqx6%2BSEepSXXX%3D");
 
         return cnx;
     }

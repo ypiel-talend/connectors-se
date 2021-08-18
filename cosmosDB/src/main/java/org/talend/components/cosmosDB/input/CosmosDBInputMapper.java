@@ -46,7 +46,8 @@ public class CosmosDBInputMapper implements Serializable {
     private final I18nMessage i18nMessage;
 
     public CosmosDBInputMapper(@Option("configuration") final CosmosDBInputConfiguration configuration,
-            final CosmosDBService service, final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
+            final CosmosDBService service, final RecordBuilderFactory recordBuilderFactory,
+            final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
@@ -67,7 +68,8 @@ public class CosmosDBInputMapper implements Serializable {
         //
         // for instance if your estimateSize() returned 1000 and you can run on 10 nodes
         // then the environment can decide to run it concurrently (10 * 100).
-        // In this case bundles = 100 and we must try to return 10 CosmosDBInputMapper with 1/10 of the overall work each.
+        // In this case bundles = 100 and we must try to return 10 CosmosDBInputMapper with 1/10 of the overall work
+        // each.
         //
         // default implementation returns this which means it doesn't support the work to be split
         return singletonList(this);

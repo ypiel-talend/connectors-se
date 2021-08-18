@@ -78,10 +78,17 @@ class AvroOutputIT extends BaseIT {
     void testOutput() throws URISyntaxException, StorageException {
         final int recordSize = 5;
 
-        Record testRecord = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder()
-                .withString("stringValue", testStringValue).withBoolean("booleanValue", testBooleanValue)
-                .withLong("longValue", testLongValue).withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
-                .withDateTime("dateValue", testDateValue).withBytes("byteArray", bytes).build();
+        Record testRecord = componentsHandler
+                .findService(RecordBuilderFactory.class)
+                .newRecordBuilder()
+                .withString("stringValue", testStringValue)
+                .withBoolean("booleanValue", testBooleanValue)
+                .withLong("longValue", testLongValue)
+                .withInt("intValue", testIntValue)
+                .withDouble("doubleValue", testDoubleValue)
+                .withDateTime("dateValue", testDateValue)
+                .withBytes("byteArray", bytes)
+                .build();
 
         List<Record> testRecords = new ArrayList<>();
         for (int i = 0; i < recordSize; i++) {
@@ -91,21 +98,39 @@ class AvroOutputIT extends BaseIT {
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
 
-        Assertions.assertTrue(
-                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext(),
-                "No files were created in test container");
+        Assertions
+                .assertTrue(
+                        container
+                                .listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false)
+                                .iterator()
+                                .hasNext(),
+                        "No files were created in test container");
 
         BlobInputProperties inputProperties = new BlobInputProperties();
         inputProperties.setDataset(blobOutputProperties.getDataset());
 
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size());
@@ -123,10 +148,17 @@ class AvroOutputIT extends BaseIT {
     public void testBatchSizeIsGreaterThanRowSize() throws URISyntaxException, StorageException {
         final int recordSize = 5;
 
-        Record testRecord = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder()
-                .withString("stringValue", testStringValue).withBoolean("booleanValue", testBooleanValue)
-                .withLong("longValue", testLongValue).withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
-                .withDateTime("dateValue", testDateValue).withBytes("byteArray", bytes).build();
+        Record testRecord = componentsHandler
+                .findService(RecordBuilderFactory.class)
+                .newRecordBuilder()
+                .withString("stringValue", testStringValue)
+                .withBoolean("booleanValue", testBooleanValue)
+                .withLong("longValue", testLongValue)
+                .withInt("intValue", testIntValue)
+                .withDouble("doubleValue", testDoubleValue)
+                .withDateTime("dateValue", testDateValue)
+                .withBytes("byteArray", bytes)
+                .build();
 
         List<Record> testRecords = new ArrayList<>();
         for (int i = 0; i < recordSize; i++) {
@@ -136,14 +168,25 @@ class AvroOutputIT extends BaseIT {
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + (recordSize * 100);
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
 
-        Assertions.assertTrue(
-                container.listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false).iterator().hasNext(),
-                "No files were created in test container");
+        Assertions
+                .assertTrue(
+                        container
+                                .listBlobs(blobOutputProperties.getDataset().getDirectory() + "/", false)
+                                .iterator()
+                                .hasNext(),
+                        "No files were created in test container");
     }
 
     @Test
@@ -151,7 +194,8 @@ class AvroOutputIT extends BaseIT {
         final int recordSize = 1;
         final int schemaSize = 9;
         final Schema.Builder schemaBuilder = this.factory.newSchemaBuilder(Schema.Type.RECORD);
-        final Schema schema = schemaBuilder.withEntry(this.buildEntry("nullStringColumn", Schema.Type.STRING))
+        final Schema schema = schemaBuilder
+                .withEntry(this.buildEntry("nullStringColumn", Schema.Type.STRING))
                 .withEntry(this.buildEntry("nullStringColumn2", Schema.Type.STRING))
                 .withEntry(this.buildEntry("nullIntColumn", Schema.Type.INT))
                 .withEntry(this.buildEntry("nullLongColumn", Schema.Type.LONG))
@@ -159,23 +203,41 @@ class AvroOutputIT extends BaseIT {
                 .withEntry(this.buildEntry("nullDoubleColumn", Schema.Type.DOUBLE))
                 .withEntry(this.buildEntry("nullBooleanColumn", Schema.Type.BOOLEAN))
                 .withEntry(this.buildEntry("nullByteArrayColumn", Schema.Type.BYTES))
-                .withEntry(this.buildEntry("nullDateColumn", Schema.Type.DATETIME)).build();
-        Record testRecord = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
-                .withString("nullStringColumn", null).build();
+                .withEntry(this.buildEntry("nullDateColumn", Schema.Type.DATETIME))
+                .build();
+        Record testRecord = componentsHandler
+                .findService(RecordBuilderFactory.class)
+                .newRecordBuilder(schema)
+                .withString("nullStringColumn", null)
+                .build();
 
         List<Record> testRecords = Collections.singletonList(testRecord);
         componentsHandler.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         BlobInputProperties inputProperties = new BlobInputProperties();
         inputProperties.setDataset(blobOutputProperties.getDataset());
 
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size());
@@ -198,28 +260,53 @@ class AvroOutputIT extends BaseIT {
         final int recordSize = 2;
         final int fieldSize = 2;
         final Schema.Builder schemaBuilder = this.factory.newSchemaBuilder(Schema.Type.RECORD);
-        final Schema schema = schemaBuilder.withEntry(this.buildEntry("stringColumn", Schema.Type.STRING))
-                .withEntry(this.buildEntry("intColumn", Schema.Type.INT)).build();
+        final Schema schema = schemaBuilder
+                .withEntry(this.buildEntry("stringColumn", Schema.Type.STRING))
+                .withEntry(this.buildEntry("intColumn", Schema.Type.INT))
+                .build();
 
         List<Record> testRecords = new ArrayList<>();
-        testRecords.add(componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
-                .withString("stringColumn", "a").build()); // stringColumn:a, intColumn:null
+        testRecords
+                .add(componentsHandler
+                        .findService(RecordBuilderFactory.class)
+                        .newRecordBuilder(schema)
+                        .withString("stringColumn", "a")
+                        .build()); // stringColumn:a, intColumn:null
 
-        testRecords.add(componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder(schema)
-                .withString("stringColumn", "b").withInt("intColumn", Integer.MAX_VALUE).build()); // stringColumn:a,
+        testRecords
+                .add(componentsHandler
+                        .findService(RecordBuilderFactory.class)
+                        .newRecordBuilder(schema)
+                        .withString("stringColumn", "b")
+                        .withInt("intColumn", Integer.MAX_VALUE)
+                        .build()); // stringColumn:a,
         // intColumn:not null
         componentsHandler.setInputData(testRecords);
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         BlobInputProperties inputProperties = new BlobInputProperties();
         inputProperties.setDataset(blobOutputProperties.getDataset());
 
         String inputConfig = configurationByExample().forInstance(inputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size());
@@ -232,10 +319,17 @@ class AvroOutputIT extends BaseIT {
         int recordSize = 1;
         blobOutputProperties.getDataset().setDirectory(null);
 
-        Record testRecord = componentsHandler.findService(RecordBuilderFactory.class).newRecordBuilder()
-                .withString("stringValue", testStringValue).withBoolean("booleanValue", testBooleanValue)
-                .withLong("longValue", testLongValue).withInt("intValue", testIntValue).withDouble("doubleValue", testDoubleValue)
-                .withDateTime("dateValue", testDateValue).withBytes("byteArray", bytes).build();
+        Record testRecord = componentsHandler
+                .findService(RecordBuilderFactory.class)
+                .newRecordBuilder()
+                .withString("stringValue", testStringValue)
+                .withBoolean("booleanValue", testBooleanValue)
+                .withLong("longValue", testLongValue)
+                .withInt("intValue", testIntValue)
+                .withDouble("doubleValue", testDoubleValue)
+                .withDateTime("dateValue", testDateValue)
+                .withBytes("byteArray", bytes)
+                .build();
 
         List<Record> testRecords = new ArrayList<>();
         for (int i = 0; i < recordSize; i++) {
@@ -245,8 +339,15 @@ class AvroOutputIT extends BaseIT {
 
         String outputConfig = configurationByExample().forInstance(blobOutputProperties).configured().toQueryString();
         outputConfig += "&$configuration.$maxBatchSize=" + recordSize;
-        Job.components().component("inputFlow", "test://emitter").component("outputComponent", "Azure://Output?" + outputConfig)
-                .connections().from("inputFlow").to("outputComponent").build().run();
+        Job
+                .components()
+                .component("inputFlow", "test://emitter")
+                .component("outputComponent", "Azure://Output?" + outputConfig)
+                .connections()
+                .from("inputFlow")
+                .to("outputComponent")
+                .build()
+                .run();
 
         CloudBlobContainer container = storageAccount.createCloudBlobClient().getContainerReference(containerName);
         Iterator blobIterator = container.listBlobs("", false).iterator();

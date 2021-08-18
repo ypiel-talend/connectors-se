@@ -59,7 +59,8 @@ public class CosmosDBOutput implements Serializable {
 
     private OutputParserFactory.IOutputParser out;
 
-    public CosmosDBOutput(@Option("configuration") final CosmosDBOutputConfiguration configuration, final CosmosDBService service,
+    public CosmosDBOutput(@Option("configuration") final CosmosDBOutputConfiguration configuration,
+            final CosmosDBService service,
             final I18nMessage i18n) {
         this.configuration = configuration;
         this.service = service;
@@ -102,7 +103,8 @@ public class CosmosDBOutput implements Serializable {
             // If the document collection does not exist, create a new
             // collection
             if (de.getStatusCode() == 404) {
-                if (configuration.getDataAction() == DataAction.DELETE || configuration.getDataAction() == DataAction.UPDATE) {
+                if (configuration.getDataAction() == DataAction.DELETE
+                        || configuration.getDataAction() == DataAction.UPDATE) {
                     throw new IllegalArgumentException(de);
                 }
                 DocumentCollection collectionInfo = new DocumentCollection();

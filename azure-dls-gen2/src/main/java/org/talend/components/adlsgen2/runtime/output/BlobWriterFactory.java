@@ -32,7 +32,8 @@ public class BlobWriterFactory {
         case JSON:
             return new JsonBlobWriter(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
         case PARQUET:
-            return new ParquetBlobWriter(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
+            return new ParquetBlobWriter(configuration, recordBuilderFactory, jsonFactory, service,
+                    tokenProviderService);
         default:
             throw new IllegalArgumentException("Unsupported file format");
         }

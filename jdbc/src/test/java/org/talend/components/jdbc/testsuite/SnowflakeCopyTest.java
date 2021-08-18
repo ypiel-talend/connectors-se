@@ -45,7 +45,8 @@ public class SnowflakeCopyTest {
     private RecordBuilderFactory recordBuilderFactory = COMPONENT_FACTORY.findService(RecordBuilderFactory.class);
 
     @Test
-    public void createTmpDirTest() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
+    public void createTmpDirTest()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
         Method createWorkDir = SnowflakeCopyService.class.getDeclaredMethod("createWorkDir");
         createWorkDir.setAccessible(true);
@@ -67,8 +68,9 @@ public class SnowflakeCopyTest {
     @Test
     public void testTempTable() {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
-        String tableName = snowflakeCopyService.tmpTableName(
-                "aVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongName");
+        String tableName = snowflakeCopyService
+                .tmpTableName(
+                        "aVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongName");
         Assertions.assertTrue(tableName.length() < 256);
     }
 
@@ -106,8 +108,9 @@ public class SnowflakeCopyTest {
             String expectedString = "(\"id\",\"firstname\",\"lastname\",\"address\",\"enrolled\",\"zip\",\"state\")";
             Assertions.assertEquals(expectedString, columnNamesList);
 
-            chunks = (List<?>) splitRecords.invoke(snowflakeCopyService, path,
-                    Arrays.asList(recordBuilderFactory.newRecordBuilder().withInt("id", 1).build()));
+            chunks = (List<?>) splitRecords
+                    .invoke(snowflakeCopyService, path,
+                            Arrays.asList(recordBuilderFactory.newRecordBuilder().withInt("id", 1).build()));
             columnNamesList = (String) columnNames.invoke(snowflakeCopyService, chunks);
             expectedString = "(\"id\")";
             Assertions.assertEquals(expectedString, columnNamesList);
@@ -134,7 +137,8 @@ public class SnowflakeCopyTest {
             joinFileNames.setAccessible(true);
 
             String joinFileNamesString = (String) joinFileNames.invoke(snowflakeCopyService, chunks);
-            final Pattern pattern = Pattern.compile("\\(('[/\\\\A-Za-z_0-9.-]*.csv.gz')(,'[/\\\\A-Za-z_0-9.-]*.csv.gz')*\\)");
+            final Pattern pattern =
+                    Pattern.compile("\\(('[/\\\\A-Za-z_0-9.-]*.csv.gz')(,'[/\\\\A-Za-z_0-9.-]*.csv.gz')*\\)");
             Assertions.assertTrue(pattern.matcher(joinFileNamesString).matches());
         } finally {
             snowflakeCopyService.cleanTmpFiles();
@@ -144,7 +148,8 @@ public class SnowflakeCopyTest {
     List<Record> createData(int i) {
         List<Record> records = new ArrayList<Record>(i);
         for (; i > 0; i--) {
-            Record record = recordBuilderFactory.newRecordBuilder() //
+            Record record = recordBuilderFactory
+                    .newRecordBuilder() //
                     .withInt("id", i) //
                     .withString("firstname", "firstfirst") //
                     .withString("lastname", "lastlast") //

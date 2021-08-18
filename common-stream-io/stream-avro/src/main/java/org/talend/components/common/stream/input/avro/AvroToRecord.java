@@ -60,7 +60,8 @@ public class AvroToRecord {
         if (recordSchema == null) {
             recordSchema = inferSchema(record);
         }
-        return avroToRecord(record, record.getSchema().getFields(), recordBuilderFactory.newRecordBuilder(recordSchema));
+        return avroToRecord(record, record.getSchema().getFields(),
+                recordBuilderFactory.newRecordBuilder(recordSchema));
     }
 
     private Record avroToRecord(GenericRecord genericRecord, List<org.apache.avro.Schema.Field> fields,
@@ -148,8 +149,10 @@ public class AvroToRecord {
         final Collection<?> objectArray;
         switch (arrayInnerType.getType()) {
         case RECORD:
-            objectArray = ((Collection<GenericRecord>) value).stream()
-                    .map(record -> avroToRecord(record, arrayInnerType.getFields(), recordBuilderFactory.newRecordBuilder()))
+            objectArray = ((Collection<GenericRecord>) value)
+                    .stream()
+                    .map(record -> avroToRecord(record, arrayInnerType.getFields(),
+                            recordBuilderFactory.newRecordBuilder()))
                     .collect(Collectors.toList());
             break;
         case STRING:
@@ -179,13 +182,16 @@ public class AvroToRecord {
         recordBuilder.withArray(entry, objectArray);
     }
 
-    protected void buildField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder, Entry entry) {
+    protected void buildField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder,
+            Entry entry) {
         String logicalType = field.schema().getProp(AVRO_LOGICAL_TYPE);
         org.apache.avro.Schema.Type fieldType = AvroHelper.getFieldType(field);
         switch (fieldType) {
         case RECORD:
-            recordBuilder.withRecord(entry, avroToRecord((GenericRecord) value, ((GenericRecord) value).getSchema().getFields(),
-                    recordBuilderFactory.newRecordBuilder()));
+            recordBuilder
+                    .withRecord(entry,
+                            avroToRecord((GenericRecord) value, ((GenericRecord) value).getSchema().getFields(),
+                                    recordBuilderFactory.newRecordBuilder()));
             break;
         case ARRAY:
             if (value instanceof Collection<?>) {
@@ -202,7 +208,8 @@ public class AvroToRecord {
         case INT:
             int ivalue = value != null ? (Integer) value : 0;
             if (AVRO_LOGICAL_TYPE_DATE.equals(logicalType) || AVRO_LOGICAL_TYPE_TIME_MILLIS.equals(logicalType)) {
-                recordBuilder.withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(ivalue), ZoneOffset.UTC));
+                recordBuilder
+                        .withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(ivalue), ZoneOffset.UTC));
             } else {
                 recordBuilder.withInt(entry, ivalue);
             }
@@ -219,7 +226,8 @@ public class AvroToRecord {
         case LONG:
             long lvalue = value != null ? (Long) value : 0;
             if (AVRO_LOGICAL_TYPE_TIMESTAMP_MILLIS.equals(logicalType)) {
-                recordBuilder.withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(lvalue), ZoneOffset.UTC));
+                recordBuilder
+                        .withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(lvalue), ZoneOffset.UTC));
             } else {
                 recordBuilder.withLong(entry, lvalue);
             }

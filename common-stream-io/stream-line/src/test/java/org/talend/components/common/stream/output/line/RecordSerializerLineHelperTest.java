@@ -74,12 +74,14 @@ class RecordSerializerLineHelperTest {
         gc.setTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC")));
         final Date date = gc.getTime();
 
-        final Record rec1 = recordBuilderFactory.newRecordBuilder() //
+        final Record rec1 = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString(createEntry("name", Type.STRING, false), "Smith") //
                 .withInt(createEntry("age", Type.INT, false), 35) //
                 .withBoolean(createEntry("registered", Type.BOOLEAN, false), true) //
                 .withDateTime(createEntry("last_save", Type.DATETIME, false), date) //
-                .withBytes(createEntry("bytes", Type.BYTES, false), "HelloBytes".getBytes(StandardCharsets.UTF_8)).build();
+                .withBytes(createEntry("bytes", Type.BYTES, false), "HelloBytes".getBytes(StandardCharsets.UTF_8))
+                .build();
         return rec1;
     }
 
@@ -95,16 +97,23 @@ class RecordSerializerLineHelperTest {
     }
 
     private Record buildRecords_withNull() {
-        final Record rec1 = recordBuilderFactory.newRecordBuilder()
+        final Record rec1 = recordBuilderFactory
+                .newRecordBuilder()
                 .withString(createEntry("name", Schema.Type.STRING, false), "Smith")
                 .withInt(createEntry("age", Schema.Type.INT, false), 35)
                 .withBoolean(createEntry("registered", Schema.Type.BOOLEAN, false), true)
-                .withDateTime(createEntry("last_save", Schema.Type.DATETIME, true), (Date) null).build();
+                .withDateTime(createEntry("last_save", Schema.Type.DATETIME, true), (Date) null)
+                .build();
         return rec1;
     }
 
     private Schema.Entry createEntry(final String name, final Schema.Type type, final boolean nullable) {
-        return recordBuilderFactory.newEntryBuilder().withName(name).withRawName(name).withType(type).withNullable(nullable)
+        return recordBuilderFactory
+                .newEntryBuilder()
+                .withName(name)
+                .withRawName(name)
+                .withType(type)
+                .withNullable(nullable)
                 .build();
     }
 

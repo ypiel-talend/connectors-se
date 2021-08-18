@@ -47,8 +47,10 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
 
     private transient List<String> allModuleFields;
 
-    public ModuleQueryEmitter(@Option("configuration") final InputModuleConfig inputModuleConfig, final SalesforceService service,
-            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
+    public ModuleQueryEmitter(@Option("configuration") final InputModuleConfig inputModuleConfig,
+            final SalesforceService service,
+            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory,
+            final Messages messages) {
         super(inputModuleConfig, service, configuration, recordBuilderFactory, messages);
     }
 
@@ -63,7 +65,11 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
             queryFields = getAllModuleFields();
         } else if (!getAllModuleFields().containsAll(selectedColumns)) { // ensure requested fields exist
             throw new IllegalStateException(
-                    "columns { " + selectedColumns.stream().filter(c -> !getAllModuleFields().contains(c)).collect(joining(","))
+                    "columns { "
+                            + selectedColumns
+                                    .stream()
+                                    .filter(c -> !getAllModuleFields().contains(c))
+                                    .collect(joining(","))
                             + " } " + "doesn't exist in module '" + getModuleName() + "'");
         } else {
             queryFields = selectedColumns;
@@ -107,7 +113,8 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
         if (allModuleFields == null) {
             DescribeSObjectResult describeSObjectResult;
             try {
-                final PartnerConnection connection = service.connect(inputConfig.getDataSet().getDataStore(), localConfiguration);
+                final PartnerConnection connection =
+                        service.connect(inputConfig.getDataSet().getDataStore(), localConfiguration);
                 describeSObjectResult = connection.describeSObject(getModuleName());
                 allModuleFields = new ArrayList<>();
                 for (Field field : describeSObjectResult.getFields()) {

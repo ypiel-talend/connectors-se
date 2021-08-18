@@ -56,7 +56,8 @@ public class CosmosDBInput implements Serializable {
 
     Iterator<Document> iterator;
 
-    public CosmosDBInput(@Option("configuration") final CosmosDBInputConfiguration configuration, final CosmosDBService service,
+    public CosmosDBInput(@Option("configuration") final CosmosDBInputConfiguration configuration,
+            final CosmosDBService service,
             final RecordBuilderFactory builderFactory, final I18nMessage i18n) {
         this.configuration = configuration;
         this.service = service;
@@ -100,7 +101,8 @@ public class CosmosDBInput implements Serializable {
             queryOptions.setPageSize(-1);
             queryOptions.setEnableCrossPartitionQuery(true);
             log.debug("query: " + configuration.getDataset().getQuery());
-            queryResults = this.client.queryDocuments(collectionLink, configuration.getDataset().getQuery(), queryOptions);
+            queryResults =
+                    this.client.queryDocuments(collectionLink, configuration.getDataset().getQuery(), queryOptions);
             log.info("Query [{}] execution success.", configuration.getDataset().getQuery());
         } else {
             queryResults = client.readDocuments(collectionLink, null);

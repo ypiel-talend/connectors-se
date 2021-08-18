@@ -55,7 +55,8 @@ public class SalesforceOutput implements Serializable {
 
     private Messages messages;
 
-    public SalesforceOutput(@Option("configuration") final OutputConfig outputConfig, final LocalConfiguration localConfiguration,
+    public SalesforceOutput(@Option("configuration") final OutputConfig outputConfig,
+            final LocalConfiguration localConfiguration,
             final SalesforceService service, final Messages messages) {
         this.configuration = outputConfig;
         this.service = service;
@@ -67,10 +68,12 @@ public class SalesforceOutput implements Serializable {
     public void onNext(@Input final Record record) throws IOException {
         if (outputService == null) {
             try {
-                final ConnectionFacade cnx = this.service.buildConnection(configuration.getModuleDataSet().getDataStore(),
-                        localConfiguration);
+                final ConnectionFacade cnx = this.service
+                        .buildConnection(configuration.getModuleDataSet().getDataStore(),
+                                localConfiguration);
                 outputService = new SalesforceOutputService(configuration, cnx, this.messages);
-                Map<String, IField> fieldMap = service.getFieldMap(cnx, configuration.getModuleDataSet().getModuleName());
+                Map<String, IField> fieldMap =
+                        service.getFieldMap(cnx, configuration.getModuleDataSet().getModuleName());
                 outputService.setFieldMap(fieldMap);
             } catch (ConnectionException e) {
                 throw service.handleConnectionException(e);

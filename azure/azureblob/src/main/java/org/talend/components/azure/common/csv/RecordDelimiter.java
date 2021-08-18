@@ -15,6 +15,7 @@ package org.talend.components.azure.common.csv;
 import lombok.Getter;
 
 public enum RecordDelimiter {
+
     LF("\n"),
     CR("\r"),
     CRLF("\r\n"),

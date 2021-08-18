@@ -66,7 +66,8 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
         private ExcelConverter converter;
 
-        private BatchExcelRecordIterator(Iterable<ListBlobItem> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
+        private BatchExcelRecordIterator(Iterable<ListBlobItem> blobItemsList,
+                RecordBuilderFactory recordBuilderFactory) {
             super(blobItemsList, recordBuilderFactory);
             this.rows = new LinkedList<>();
             takeFirstItem();
@@ -107,8 +108,10 @@ public class ExcelBlobFileReader extends BlobFileReader {
                         rows.add(row);
                     }
                 } else {
-                    log.warn("Excel file " + getCurrentItem().getName() + " was ignored since no sheet name exist: "
-                            + getConfig().getExcelOptions().getSheetName());
+                    log
+                            .warn("Excel file " + getCurrentItem().getName()
+                                    + " was ignored since no sheet name exist: "
+                                    + getConfig().getExcelOptions().getSheetName());
                 }
 
             } catch (StorageException | IOException e) {
@@ -143,7 +146,8 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
         private LinkedList<Row> batch;
 
-        public StreamingExcelRecordIterator(Iterable<ListBlobItem> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
+        public StreamingExcelRecordIterator(Iterable<ListBlobItem> blobItemsList,
+                RecordBuilderFactory recordBuilderFactory) {
             super(blobItemsList, recordBuilderFactory);
             batch = new LinkedList<>();
             takeFirstItem();
@@ -163,14 +167,18 @@ public class ExcelBlobFileReader extends BlobFileReader {
             }
 
             try {
-                currentWorkBook = (StreamingWorkbook) StreamingReader.builder().rowCacheSize(4096)
+                currentWorkBook = (StreamingWorkbook) StreamingReader
+                        .builder()
+                        .rowCacheSize(4096)
                         .open(getCurrentItem().openInputStream());
                 StreamingSheet sheet = null;
                 try {
                     sheet = (StreamingSheet) currentWorkBook.getSheet(getConfig().getExcelOptions().getSheetName());
                 } catch (MissingSheetException e) {
-                    log.warn("Excel file " + getCurrentItem().getName() + " was ignored since no sheet name exist: "
-                            + getConfig().getExcelOptions().getSheetName());
+                    log
+                            .warn("Excel file " + getCurrentItem().getName()
+                                    + " was ignored since no sheet name exist: "
+                                    + getConfig().getExcelOptions().getSheetName());
                     rowIterator = Iterators.emptyIterator();
                     return;
                 }

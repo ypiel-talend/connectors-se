@@ -41,7 +41,8 @@ import static org.talend.components.marketo.MarketoApiConstants.REQUEST_PARAM_QU
 public interface LeadClient extends HttpClient {
 
     /**
-     * Returns metadata about lead objects in the target instance, including a list of all fields available for interaction
+     * Returns metadata about lead objects in the target instance, including a list of all fields available for
+     * interaction
      * via the APIs.
      * 
      * @param accessToken Marketo authorization token for API
@@ -76,12 +77,14 @@ public interface LeadClient extends HttpClient {
      * Returns a list of up to 300 leads based on a list of values in a particular field.
      *
      * @param accessToken Marketo authorization token for API
-     * @param filterType The lead field to filter on. Custom fields (string, email, integer), and the following field types
+     * @param filterType The lead field to filter on. Custom fields (string, email, integer), and the following field
+     * types
      * are supported: id, cookies, email, twitterId, facebookId, linkedInId, sfdcAccountId, sfdcContactId, sfdcLeadId,
      * sfdcLeadOwnerId, sfdcOpptyId.
      * @param filterValues A comma-separated list of values to filter on in the specified fields.
      * @param fields A comma-separated list of lead fields to return for each record
-     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
+     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size
+     * and
      * can be passed in a subsequent call through this parameter
      * @return
      */
@@ -102,13 +105,16 @@ public interface LeadClient extends HttpClient {
      * @param accessToken Marketo authorization token for API
      * @param payload is a string for application/x-www-form-urlencoded containing the following parameters
      * <ul>
-     * <li>@param filterType The lead field to filter on. Custom fields (string, email, integer), and the following field
-     * types are supported: id, cookies, email, twitterId, facebookId, linkedInId, sfdcAccountId, sfdcContactId, sfdcLeadId,
+     * <li>@param filterType The lead field to filter on. Custom fields (string, email, integer), and the following
+     * field
+     * types are supported: id, cookies, email, twitterId, facebookId, linkedInId, sfdcAccountId, sfdcContactId,
+     * sfdcLeadId,
      * sfdcLeadOwnerId, sfdcOpptyId.</li>
      * <li>@param filterValues A comma-separated list of values to filter on in the specified fields.</li>
      * <li>@param fields A comma-separated list of lead fields to return for each record</li>
      * </ul>
-     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
+     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size
+     * and
      * can be passed in a subsequent call through this parameter
      * @return
      */
@@ -129,7 +135,8 @@ public interface LeadClient extends HttpClient {
      * <ul>
      * <li>@param action Type of sync operation to perform. Defaults to createOrUpdate if unset = ['createOnly',
      * 'updateOnly', 'createOrUpdate', 'createDuplicate'],</li>
-     * <li>@param lookupField Field to deduplicate on. The field must be present in each lead record of the input. Defaults
+     * <li>@param lookupField Field to deduplicate on. The field must be present in each lead record of the input.
+     * Defaults
      * to email if unset ,</li>
      * <li>@param input List of leads for input</li>
      * </ul>
@@ -173,9 +180,11 @@ public interface LeadClient extends HttpClient {
      * Returns a list of Data Value Changes and New Lead activities after a given datetime.
      * 
      * @param accessToken Marketo authorization token for API
-     * @param nextPageToken (X) Token representation of a datetime returned by the Get Paging Token endpoint. This endpoint
+     * @param nextPageToken (X) Token representation of a datetime returned by the Get Paging Token endpoint. This
+     * endpoint
      * will return activities after this datetime
-     * @param fields (X) Comma-separated list of field names to return changes for. Field names can be retrieved with the
+     * @param fields (X) Comma-separated list of field names to return changes for. Field names can be retrieved with
+     * the
      * Describe Lead API.
      * @param listId Id of a static list. If set, will only return activities of members of this static list.
      * @param leadIds Comma-separated list of lead ids. If set, will only return activities of the leads with these ids.
@@ -204,15 +213,19 @@ public interface LeadClient extends HttpClient {
     );
 
     /**
-     * Returns a list of activities from after a datetime given by the nextPageToken parameter. Also allows for filtering by
+     * Returns a list of activities from after a datetime given by the nextPageToken parameter. Also allows for
+     * filtering by
      * lead static list membership, or by a list of up to 30 lead ids.
      * 
      * @param accessToken Marketo authorization token for API
-     * @param nextPageToken (X) Token representation of a datetime returned by the Get Paging Token endpoint. This endpoint
+     * @param nextPageToken (X) Token representation of a datetime returned by the Get Paging Token endpoint. This
+     * endpoint
      * will return activities after this datetime
-     * @param activityTypeIds (X) Comma-separated list of activity type ids. These can be retrieved with the Get Activity
+     * @param activityTypeIds (X) Comma-separated list of activity type ids. These can be retrieved with the Get
+     * Activity
      * Types API
-     * @param assetIds Id of the primary asset for an activity. This is based on the primary asset id of a given activity
+     * @param assetIds Id of the primary asset for an activity. This is based on the primary asset id of a given
+     * activity
      * type. Should only be used when a single activity type is set
      * @param listId Id of a static list. If set, will only return activities of members of this static list.
      * @param leadIds Comma-separated list of lead ids. If set, will only return activities of the leads with these ids.

@@ -59,7 +59,8 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @Slf4j
 @Environment(ContextualEnvironment.class)
-@EnvironmentConfiguration(environment = "Contextual", systemProperties = {}) // EnvironmentConfiguration is necessary for each
+@EnvironmentConfiguration(environment = "Contextual", systemProperties = {}) // EnvironmentConfiguration is necessary
+                                                                             // for each
                                                                              // @Environment
 
 /*
@@ -67,13 +68,15 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
  * 
  * @EnvironmentConfiguration(environment = "Direct", systemProperties = {
  * 
- * @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.direct.DirectRunner")
+ * @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value =
+ * "org.apache.beam.runners.direct.DirectRunner")
  * })
  */
 
 @Environment(SparkRunnerEnvironment.class)
 @EnvironmentConfiguration(environment = "Spark", systemProperties = {
-        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
+        @EnvironmentConfiguration.Property(key = "talend.beam.job.runner",
+                value = "org.apache.beam.runners.spark.SparkRunner"),
         @EnvironmentConfiguration.Property(key = "talend.beam.job.filesToStage", value = ""),
         @EnvironmentConfiguration.Property(key = "spark.ui.enabled", value = "false") })
 
@@ -126,17 +129,20 @@ class RestOutputTest {
         outputConfig.getDataset().setResource("post/{module}/{id}");
 
         outputConfig.getDataset().setHasPathParams(true);
-        List<Param> pathParams = Arrays.asList(new Param[] { new Param("module", "{/module}"), new Param("id", "{/id}") });
+        List<Param> pathParams =
+                Arrays.asList(new Param[] { new Param("module", "{/module}"), new Param("id", "{/id}") });
         outputConfig.getDataset().setPathParams(pathParams);
 
         outputConfig.getDataset().setHasHeaders(true);
-        List<Param> headers = Arrays.asList(new Param[] { new Param("head_1", "header/{/id}"),
-                new Param("head_2", "page:{/pagination/page} on {/pagination/total}") });
+        List<Param> headers = Arrays
+                .asList(new Param[] { new Param("head_1", "header/{/id}"),
+                        new Param("head_2", "page:{/pagination/page} on {/pagination/total}") });
         outputConfig.getDataset().setHeaders(headers);
 
         outputConfig.getDataset().setHasQueryParams(true);
         List<Param> params = Arrays
-                .asList(new Param[] { new Param("param_1", "param{/id}&/encoded < >"), new Param("param_2", "{/user_name}") });
+                .asList(new Param[] { new Param("param_1", "param{/id}&/encoded < >"),
+                        new Param("param_2", "{/user_name}") });
         outputConfig.getDataset().setQueryParams(params);
 
         outputConfig.getDataset().setHasBody(true);
@@ -158,14 +164,25 @@ class RestOutputTest {
             int i = index.getAndIncrement();
 
             receivedURI.set(httpExchange.getRequestURI().getPath());
-            receivedHeader1.set(Optional.ofNullable(httpExchange.getRequestHeaders().get("head_1"))
-                    .orElse(Collections.emptyList()).stream().findFirst().orElse(""));
-            receivedHeader2.set(Optional.ofNullable(httpExchange.getRequestHeaders().get("head_2"))
-                    .orElse(Collections.emptyList()).stream().findFirst().orElse(""));
+            receivedHeader1
+                    .set(Optional
+                            .ofNullable(httpExchange.getRequestHeaders().get("head_1"))
+                            .orElse(Collections.emptyList())
+                            .stream()
+                            .findFirst()
+                            .orElse(""));
+            receivedHeader2
+                    .set(Optional
+                            .ofNullable(httpExchange.getRequestHeaders().get("head_2"))
+                            .orElse(Collections.emptyList())
+                            .stream()
+                            .findFirst()
+                            .orElse(""));
 
             String requestUri = httpExchange.getRequestURI().toASCIIString();
             String[] queryParamsAsArray = requestUri.substring(requestUri.indexOf('?') + 1).split("&");
-            Map<String, String> queryParams = Arrays.stream(queryParamsAsArray)
+            Map<String, String> queryParams = Arrays
+                    .stream(queryParamsAsArray)
                     .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
 
             receivedQueryParam1.set(URLDecoder.decode(queryParams.get("param_1"), StandardCharsets.UTF_8.name()));
@@ -189,7 +206,9 @@ class RestOutputTest {
             Assertions.assertEquals(header_1.toString(), receivedHeader1.get());
 
             StringBuilder header_2 = new StringBuilder("page:");
-            header_2.append(data.get(i).getRecord("pagination").getInt("page")).append(" on ")
+            header_2
+                    .append(data.get(i).getRecord("pagination").getInt("page"))
+                    .append(" on ")
                     .append(data.get(i).getRecord("pagination").getInt("total"));
             Assertions.assertEquals(header_2.toString(), receivedHeader2.get());
 
@@ -198,7 +217,8 @@ class RestOutputTest {
             Assertions.assertEquals(data.get(i).getString("user_name"), receivedQueryParam2.get());
 
             // Check Body
-            String expected = content.replaceAll("\\$\\{/book/title\\}", "Title_" + i)
+            String expected = content
+                    .replaceAll("\\$\\{/book/title\\}", "Title_" + i)
                     .replaceAll("\\$\\{/book/market/price\\}", String.valueOf(1.35 * i))
                     .replaceAll("\\$\\{/book/identification/id\\}", String.valueOf(i))
                     .replaceAll("\\$\\{/book/identification/isbn\\}", "ISBN_" + i);
@@ -212,7 +232,8 @@ class RestOutputTest {
 
         final String configStr = configurationByExample().forInstance(outputConfig).configured().toQueryString();
         handler.setInputData(data);
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "test://emitter") //
                 .component("out", "REST://Output?" + configStr) //
                 .connections() //
@@ -229,13 +250,15 @@ class RestOutputTest {
         outputConfig.getDataset().setResource("post/path1/path2");
 
         outputConfig.getDataset().setHasHeaders(false);
-        List<Param> headers = Arrays.asList(new Param[] { new Param("head_1", "header/{/id}"),
-                new Param("head_2", "page:{/pagination/page} on {/pagination/total}") });
+        List<Param> headers = Arrays
+                .asList(new Param[] { new Param("head_1", "header/{/id}"),
+                        new Param("head_2", "page:{/pagination/page} on {/pagination/total}") });
         outputConfig.getDataset().setHeaders(headers);
 
         outputConfig.getDataset().setHasQueryParams(false);
         List<Param> params = Arrays
-                .asList(new Param[] { new Param("param_1", "param{/id}&/encoded < >"), new Param("param_2", "{/user_name}") });
+                .asList(new Param[] { new Param("param_1", "param{/id}&/encoded < >"),
+                        new Param("param_2", "{/user_name}") });
         outputConfig.getDataset().setQueryParams(params);
 
         outputConfig.getDataset().setHasBody(false);
@@ -272,7 +295,8 @@ class RestOutputTest {
 
         final String configStr = configurationByExample().forInstance(outputConfig).configured().toQueryString();
         handler.setInputData(data);
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "test://emitter") //
                 .component("out", "REST://Output?" + configStr) //
                 .connections() //
@@ -288,16 +312,31 @@ class RestOutputTest {
         List<Record> records = new ArrayList<>();
         for (int i = 0; i < n; i++) {
 
-            records.add(factory.newRecordBuilder().withInt("id", i)
-                    .withRecord("pagination",
-                            factory.newRecordBuilder().withInt("page", 10 + i).withInt("total", 100 + i).build())
-                    .withString("module", "module_" + i).withString("user_name", "<user> user_" + i + " /<user>")
-                    .withRecord("book", factory.newRecordBuilder().withString("title", "Title_" + i)
-                            .withRecord("market", factory.newRecordBuilder().withDouble("price", 1.35 * i).build())
-                            .withRecord("identification",
-                                    factory.newRecordBuilder().withInt("id", i).withString("isbn", "ISBN_" + i).build())
-                            .build())
-                    .build());
+            records
+                    .add(factory
+                            .newRecordBuilder()
+                            .withInt("id", i)
+                            .withRecord("pagination",
+                                    factory
+                                            .newRecordBuilder()
+                                            .withInt("page", 10 + i)
+                                            .withInt("total", 100 + i)
+                                            .build())
+                            .withString("module", "module_" + i)
+                            .withString("user_name", "<user> user_" + i + " /<user>")
+                            .withRecord("book", factory
+                                    .newRecordBuilder()
+                                    .withString("title", "Title_" + i)
+                                    .withRecord("market",
+                                            factory.newRecordBuilder().withDouble("price", 1.35 * i).build())
+                                    .withRecord("identification",
+                                            factory
+                                                    .newRecordBuilder()
+                                                    .withInt("id", i)
+                                                    .withString("isbn", "ISBN_" + i)
+                                                    .build())
+                                    .build())
+                            .build());
 
         }
 

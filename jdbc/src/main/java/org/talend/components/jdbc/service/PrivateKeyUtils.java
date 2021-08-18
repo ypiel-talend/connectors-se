@@ -43,7 +43,8 @@ public final class PrivateKeyUtils {
     private PrivateKeyUtils() {
     }
 
-    public static PrivateKey getPrivateKey(String privateKey, String privateKeyPassword, final I18nMessage i18nMessage) {
+    public static PrivateKey getPrivateKey(String privateKey, String privateKeyPassword,
+            final I18nMessage i18nMessage) {
         try {
             return privateKey.contains("ENCRYPTED") ? getFromEncrypted(privateKey, privateKeyPassword)
                     : getFromRegular(privateKey);
@@ -59,14 +60,17 @@ public final class PrivateKeyUtils {
             throws IOException, OperatorCreationException, PKCSException {
         PKCS8EncryptedPrivateKeyInfo pkcs8EncryptedPrivateKeyInfo = new PKCS8EncryptedPrivateKeyInfo(
                 decodeString(replaceGeneratedExtraString(privateKey, true)));
-        InputDecryptorProvider inputDecryptorProvider = new JceOpenSSLPKCS8DecryptorProviderBuilder().setProvider("BC")
+        InputDecryptorProvider inputDecryptorProvider = new JceOpenSSLPKCS8DecryptorProviderBuilder()
+                .setProvider("BC")
                 .build(ofNullable(privateKeyPassword).map(String::toCharArray).orElse(new char[0]));
         PrivateKeyInfo privateKeyInfo = pkcs8EncryptedPrivateKeyInfo.decryptPrivateKeyInfo(inputDecryptorProvider);
         return new JcaPEMKeyConverter().setProvider("BC").getPrivateKey(privateKeyInfo);
     }
 
-    private static PrivateKey getFromRegular(String privateKey) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodeString(replaceGeneratedExtraString(privateKey, false)));
+    private static PrivateKey getFromRegular(String privateKey)
+            throws InvalidKeySpecException, NoSuchAlgorithmException {
+        PKCS8EncodedKeySpec keySpec =
+                new PKCS8EncodedKeySpec(decodeString(replaceGeneratedExtraString(privateKey, false)));
         return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
     }
 
@@ -76,9 +80,14 @@ public final class PrivateKeyUtils {
 
     private static String replaceGeneratedExtraString(String privateKey, boolean isEncrypted) {
         return isEncrypted
-                ? privateKey.replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "").replace("-----END ENCRYPTED PRIVATE KEY-----",
-                        "")
-                : privateKey.replace("-----BEGIN RSA PRIVATE KEY-----", "").replace("-----END RSA PRIVATE KEY-----", "")
-                        .replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "");
+                ? privateKey
+                        .replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
+                        .replace("-----END ENCRYPTED PRIVATE KEY-----",
+                                "")
+                : privateKey
+                        .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+                        .replace("-----END RSA PRIVATE KEY-----", "")
+                        .replace("-----BEGIN PRIVATE KEY-----", "")
+                        .replace("-----END PRIVATE KEY-----", "");
     }
 }

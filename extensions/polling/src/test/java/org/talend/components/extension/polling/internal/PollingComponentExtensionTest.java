@@ -68,7 +68,8 @@ public class PollingComponentExtensionTest {
 
     private Supplier<Container> container = () -> {
         final ContainerManager containerManager = ComponentManager.instance().getContainer();
-        return containerManager.find(handler.getTestPlugins().iterator().next())
+        return containerManager
+                .find(handler.getTestPlugins().iterator().next())
                 .orElseThrow(() -> new IllegalStateException("At least one plugin, 'test/classes', must be loaded"));
     };
 
@@ -80,7 +81,8 @@ public class PollingComponentExtensionTest {
         try (final ObjectOutputStream objectOutputStream = new ObjectOutputStream(out)) {
             objectOutputStream.writeObject(mapper.get());
         }
-        try (final ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()))) {
+        try (final ObjectInputStream objectInputStream =
+                new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()))) {
             final Object o = objectInputStream.readObject();
             assertTrue(Proxy.isProxyClass(o.getClass()));
             final InvocationHandler invocationHandler = Proxy.getInvocationHandler(o);
@@ -101,14 +103,22 @@ public class PollingComponentExtensionTest {
         PollingConfiguration pollingConf = new PollingConfiguration();
         pollingConf.setDelay(TEST_POLLING_DELAY);
 
-        final String mainConfigStr = configurationByExample().forInstance(mainConfig)
-                .withPrefix("configuration.BatchSource.configuration").configured().toQueryString();
+        final String mainConfigStr = configurationByExample()
+                .forInstance(mainConfig)
+                .withPrefix("configuration.BatchSource.configuration")
+                .configured()
+                .toQueryString();
 
-        final String pollingConfigStr = configurationByExample().forInstance(pollingConf).withPrefix(
-                "configuration." + PollingComponentExtension.POLLING_CONFIGURATION_KEY + ".internal_polling_configuration")
-                .configured().toQueryString();
+        final String pollingConfigStr = configurationByExample()
+                .forInstance(pollingConf)
+                .withPrefix(
+                        "configuration." + PollingComponentExtension.POLLING_CONFIGURATION_KEY
+                                + ".internal_polling_configuration")
+                .configured()
+                .toQueryString();
 
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "mytest://MyPollable?" + String.join("&", mainConfigStr, pollingConfigStr)) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -128,14 +138,16 @@ public class PollingComponentExtensionTest {
 
     @Test
     void testMapperDuplication() {
-        final ContainerComponentRegistry containerComponentRegistry = container.get().get(ContainerComponentRegistry.class);
+        final ContainerComponentRegistry containerComponentRegistry =
+                container.get().get(ContainerComponentRegistry.class);
         assertEquals(1, containerComponentRegistry.getComponents().size());
 
         final ComponentFamilyMeta components = containerComponentRegistry.getComponents().get("mytest");
         assertNotNull(components); // test family found
         assertEquals(3, components.getPartitionMappers().size());
 
-        assertTrue(components.getPartitionMappers().containsKey(BatchSource.class.getAnnotation(Pollable.class).name()));
+        assertTrue(
+                components.getPartitionMappers().containsKey(BatchSource.class.getAnnotation(Pollable.class).name()));
 
         Stream.of("BatchSource", "MyPollable", "UnusedSource").forEach(n -> {
             final ComponentFamilyMeta.PartitionMapperMeta partitionMapperMeta = components.getPartitionMappers().get(n);
@@ -151,8 +163,15 @@ public class PollingComponentExtensionTest {
         assertEquals(1, repositoryModel.getFamilies().size());
         assertEquals("mytest", repositoryModel.getFamilies().get(0).getMeta().getName());
 
-        final List<String> mapperNames = repositoryModel.getFamilies().get(0).getMeta().getPartitionMappers().values().stream()
-                .map(ComponentFamilyMeta.BaseMeta::getName).collect(Collectors.toList());
+        final List<String> mapperNames = repositoryModel
+                .getFamilies()
+                .get(0)
+                .getMeta()
+                .getPartitionMappers()
+                .values()
+                .stream()
+                .map(ComponentFamilyMeta.BaseMeta::getName)
+                .collect(Collectors.toList());
         assertEquals(3, mapperNames.size());
         assertTrue(mapperNames.remove("BatchSource"));
         assertTrue(mapperNames.remove("MyPollable")); // Duplicate of BatchSource
@@ -163,34 +182,56 @@ public class PollingComponentExtensionTest {
 
     @Test
     void checkDataSetNameInMapperParameterModels() {
-        final List<ParameterMeta> parameterMetas = container.get().get(ContainerComponentRegistry.class).getComponents()
-                .get("mytest").getPartitionMappers().get("MyPollable").getParameterMetas().get();
+        final List<ParameterMeta> parameterMetas = container
+                .get()
+                .get(ContainerComponentRegistry.class)
+                .getComponents()
+                .get("mytest")
+                .getPartitionMappers()
+                .get("MyPollable")
+                .getParameterMetas()
+                .get();
         final List<String> datasetName = flatten(parameterMetas)
                 .filter(it -> "dataset".equals(it.getMetadata().get("tcomp::configurationtype::type")))
-                .map(it -> it.getMetadata().get("tcomp::configurationtype::name")).filter(Objects::nonNull).collect(toList());
+                .map(it -> it.getMetadata().get("tcomp::configurationtype::name"))
+                .filter(Objects::nonNull)
+                .collect(toList());
         assertEquals(singletonList("batchDatasetNamePollable"), datasetName);
         assertNotNull(findParameterMeta(parameterMetas, "dataset", "batchDatasetNamePollable"));
     }
 
     @Test
     void checkDataSet() {
-        final ParameterMeta parameterMetas = container.get().get(RepositoryModel.class).getFamilies().iterator().next()
-                .getConfigs().get().stream().flatMap(it -> it.getChildConfigs().stream())
-                .filter(it -> it.getKey().getConfigName().endsWith(PollableDuplicateDataset.DUPLICATE_SUFFIX)).iterator().next()
+        final ParameterMeta parameterMetas = container
+                .get()
+                .get(RepositoryModel.class)
+                .getFamilies()
+                .iterator()
+                .next()
+                .getConfigs()
+                .get()
+                .stream()
+                .flatMap(it -> it.getChildConfigs().stream())
+                .filter(it -> it.getKey().getConfigName().endsWith(PollableDuplicateDataset.DUPLICATE_SUFFIX))
+                .iterator()
+                .next()
                 .getMeta();
         assertNotNull(findParameterMeta(singletonList(parameterMetas), "dataset", "batchDatasetNamePollable"));
     }
 
     private Stream<ParameterMeta> flatten(final List<ParameterMeta> parameterMetas) {
-        return parameterMetas.stream().flatMap(it -> it.getNestedParameters() == null ? Stream.of(it)
-                : Stream.concat(Stream.of(it), flatten(it.getNestedParameters())));
+        return parameterMetas
+                .stream()
+                .flatMap(it -> it.getNestedParameters() == null ? Stream.of(it)
+                        : Stream.concat(Stream.of(it), flatten(it.getNestedParameters())));
     }
 
     // pd method
     public ParameterMeta findParameterMeta(List<ParameterMeta> in, String type, String name) {
         // If this matches, return success
         for (ParameterMeta pm : in) {
-            if (pm.getType() == ParameterMeta.Type.OBJECT && type.equals(pm.getMetadata().get("tcomp::configurationtype::type"))
+            if (pm.getType() == ParameterMeta.Type.OBJECT
+                    && type.equals(pm.getMetadata().get("tcomp::configurationtype::type"))
                     && name.equals(pm.getMetadata().get("tcomp::configurationtype::name"))) {
                 return pm;
             }

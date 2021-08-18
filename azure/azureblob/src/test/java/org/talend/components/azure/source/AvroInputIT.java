@@ -66,11 +66,20 @@ class AvroInputIT extends BaseIT {
         final long dateValue = 1556789638915L;
         final byte[] bytesValue = new byte[] { 1, 2, 3 };
 
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro1Record.avro", "testAvro1Record.avro");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro1Record.avro",
+                        "testAvro1Record.avro");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -81,19 +90,29 @@ class AvroInputIT extends BaseIT {
         Assertions.assertEquals(longValue, firstRecord.getLong("longValue"));
         Assertions.assertEquals(intValue, firstRecord.getInt("intValue"));
         Assertions.assertEquals(doubleValue, firstRecord.getDouble("doubleValue"), 0.01);
-        Assertions.assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateValue), ZoneId.of("UTC")),
-                firstRecord.getDateTime("dateValue"));
+        Assertions
+                .assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateValue), ZoneId.of("UTC")),
+                        firstRecord.getDateTime("dateValue"));
         Assertions.assertArrayEquals(bytesValue, firstRecord.getBytes("byteArray"));
     }
 
     @Test
     void testInput1FileMultipleRecords() throws StorageException, IOException, URISyntaxException {
         final int recordSize = 5;
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro5Records.avro", "testAvro5Records.avro");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro5Records.avro",
+                        "testAvro5Records.avro");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -103,12 +122,23 @@ class AvroInputIT extends BaseIT {
     void testInputMultipleFiles() throws Exception {
         final int recordSize = 1 + 5;
         blobInputProperties.getDataset().setDirectory("avro");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro1Record.avro", "testAvro1Record.avro");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro5Records.avro", "testAvro5Records.avro");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro1Record.avro",
+                        "testAvro1Record.avro");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro5Records.avro",
+                        "testAvro5Records.avro");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -118,12 +148,20 @@ class AvroInputIT extends BaseIT {
     void testInputFileWithNullValues() throws Exception {
         final int recordSize = 1;
         final int columnSize = 9;
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro1RecordNull.avro",
-                "testAvro1RecordNull.avro");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro1RecordNull.avro",
+                        "testAvro1RecordNull.avro");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");

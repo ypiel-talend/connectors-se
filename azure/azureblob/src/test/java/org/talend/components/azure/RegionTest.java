@@ -87,12 +87,18 @@ public class RegionTest {
             Assertions.assertEquals("myaccount", ru.getAccountName4SignatureAuth());
             Assertions.assertEquals(region, ru.getEndpointSuffix4SignatureAuth());
             Assertions.assertEquals("mytoken", ru.getToken4SignatureAuth());
-            Assertions.assertEquals("fs.azure.sas.mycontainer.myaccount.blob." + region, RegionUtils.getSasKey4SignatureAuth(
-                    "mycontainer", ru.getAccountName4SignatureAuth(), ru.getEndpointSuffix4SignatureAuth()));
-            Assertions.assertEquals("fs.azure.account.key.myaccount.blob." + region,
-                    RegionUtils.getAccountCredKey4AccountAuth("myaccount", region));
-            Assertions.assertEquals("wasbs://mycontainer@myaccount.blob." + region + "/myitem",
-                    RegionUtils.getBlobURI(true, "mycontainer", "myaccount", region, "myitem"));
+            Assertions
+                    .assertEquals("fs.azure.sas.mycontainer.myaccount.blob." + region,
+                            RegionUtils
+                                    .getSasKey4SignatureAuth(
+                                            "mycontainer", ru.getAccountName4SignatureAuth(),
+                                            ru.getEndpointSuffix4SignatureAuth()));
+            Assertions
+                    .assertEquals("fs.azure.account.key.myaccount.blob." + region,
+                            RegionUtils.getAccountCredKey4AccountAuth("myaccount", region));
+            Assertions
+                    .assertEquals("wasbs://mycontainer@myaccount.blob." + region + "/myitem",
+                            RegionUtils.getBlobURI(true, "mycontainer", "myaccount", region, "myitem"));
         }
     }
 

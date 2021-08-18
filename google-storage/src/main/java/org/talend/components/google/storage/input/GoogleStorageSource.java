@@ -83,7 +83,8 @@ public class GoogleStorageSource implements Serializable {
         final RecordReader recordReader = this.buildReader();
 
         // build iterator on record for each input
-        return IteratorComposer.of(blobsName.iterator()) //
+        return IteratorComposer
+                .of(blobsName.iterator()) //
                 .map((String name) -> storage.buildInput(dataset.getBucket(), name)) // create input stream
                 .map((Supplier<InputStream> input) -> new RecordsInputStream(recordReader, input)) //
                 .flatmap(RecordsInputStream::records) //

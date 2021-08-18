@@ -173,8 +173,12 @@ public class JsonConverter implements RecordConverter<JsonObject>, Serializable 
     }
 
     private void populateJsonObjectEntries(Schema.Builder builder, JsonObject value) {
-        value.entrySet().stream().filter(e -> e.getValue() != javax.json.JsonValue.NULL)
-                .map(s -> createEntry(s.getKey(), s.getValue())).forEach(builder::withEntry);
+        value
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue() != javax.json.JsonValue.NULL)
+                .map(s -> createEntry(s.getKey(), s.getValue()))
+                .forEach(builder::withEntry);
     }
 
     public Type translateType(JsonValue value) {
@@ -201,34 +205,63 @@ public class JsonConverter implements RecordConverter<JsonObject>, Serializable 
         schema.getEntries().stream().forEach(entry -> {
             switch (entry.getType()) {
             case RECORD:
-                builder.withRecord(entry, Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v))
-                        .map(value -> convertJsonObjectToRecord(entry.getElementSchema(), value.asJsonObject())).orElse(null));
+                builder
+                        .withRecord(entry, Optional
+                                .ofNullable(json.get(entry.getName()))
+                                .filter(v -> !JsonValue.NULL.equals(v))
+                                .map(value -> convertJsonObjectToRecord(entry.getElementSchema(), value.asJsonObject()))
+                                .orElse(null));
                 break;
             case ARRAY:
                 switch (entry.getElementSchema().getType()) {
                 case RECORD:
-                    builder.withArray(entry, json.getJsonArray(entry.getName()).stream()
-                            .map(v -> convertJsonObjectToRecord(entry.getElementSchema(), v.asJsonObject())).collect(toList()));
+                    builder
+                            .withArray(entry, json
+                                    .getJsonArray(entry.getName())
+                                    .stream()
+                                    .map(v -> convertJsonObjectToRecord(entry.getElementSchema(), v.asJsonObject()))
+                                    .collect(toList()));
                     break;
                 case ARRAY:
-                    log.error("[convertJsonObjectToRecord] Not supporting array of array: {}",
-                            json.get(0).asJsonArray().get(0).getValueType());
+                    log
+                            .error("[convertJsonObjectToRecord] Not supporting array of array: {}",
+                                    json.get(0).asJsonArray().get(0).getValueType());
                     break;
                 case STRING:
-                    builder.withArray(entry, json.getJsonArray(entry.getName()).stream().map(JsonString.class::cast)
-                            .map(JsonString::getString).collect(toList()));
+                    builder
+                            .withArray(entry, json
+                                    .getJsonArray(entry.getName())
+                                    .stream()
+                                    .map(JsonString.class::cast)
+                                    .map(JsonString::getString)
+                                    .collect(toList()));
                     break;
                 case LONG:
-                    builder.withArray(entry, json.getJsonArray(entry.getName()).stream().map(JsonNumber.class::cast)
-                            .map(JsonNumber::longValue).collect(toList()));
+                    builder
+                            .withArray(entry, json
+                                    .getJsonArray(entry.getName())
+                                    .stream()
+                                    .map(JsonNumber.class::cast)
+                                    .map(JsonNumber::longValue)
+                                    .collect(toList()));
                     break;
                 case DOUBLE:
-                    builder.withArray(entry, json.getJsonArray(entry.getName()).stream().map(JsonNumber.class::cast)
-                            .map(JsonNumber::doubleValue).collect(toList()));
+                    builder
+                            .withArray(entry, json
+                                    .getJsonArray(entry.getName())
+                                    .stream()
+                                    .map(JsonNumber.class::cast)
+                                    .map(JsonNumber::doubleValue)
+                                    .collect(toList()));
                     break;
                 case BOOLEAN:
-                    builder.withArray(entry,
-                            json.getJsonArray(entry.getName()).stream().map(JsonValue.TRUE::equals).collect(toList()));
+                    builder
+                            .withArray(entry,
+                                    json
+                                            .getJsonArray(entry.getName())
+                                            .stream()
+                                            .map(JsonValue.TRUE::equals)
+                                            .collect(toList()));
                     break;
                 default: {
                     throw new FileFormatRuntimeException("Test Record doesn't contain any other data types");
@@ -236,38 +269,67 @@ public class JsonConverter implements RecordConverter<JsonObject>, Serializable 
                 }
                 break;
             case STRING:
-                builder.withString(entry, Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v))
-                        .map(JsonString.class::cast).map(JsonString::getString).orElse(null));
+                builder
+                        .withString(entry,
+                                Optional
+                                        .ofNullable(json.get(entry.getName()))
+                                        .filter(v -> !JsonValue.NULL.equals(v))
+                                        .map(JsonString.class::cast)
+                                        .map(JsonString::getString)
+                                        .orElse(null));
                 break;
             case INT:
-                Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v)).map(JsonNumber.class::cast)
-                        .map(JsonNumber::intValue).ifPresent(value -> builder.withInt(entry, value));
+                Optional
+                        .ofNullable(json.get(entry.getName()))
+                        .filter(v -> !JsonValue.NULL.equals(v))
+                        .map(JsonNumber.class::cast)
+                        .map(JsonNumber::intValue)
+                        .ifPresent(value -> builder.withInt(entry, value));
                 break;
             case LONG:
-                Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v)).map(JsonNumber.class::cast)
-                        .map(JsonNumber::longValue).ifPresent(value -> builder.withLong(entry, value));
+                Optional
+                        .ofNullable(json.get(entry.getName()))
+                        .filter(v -> !JsonValue.NULL.equals(v))
+                        .map(JsonNumber.class::cast)
+                        .map(JsonNumber::longValue)
+                        .ifPresent(value -> builder.withLong(entry, value));
                 break;
             case FLOAT:
             case DOUBLE:
-                Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v)).map(JsonNumber.class::cast)
-                        .map(JsonNumber::doubleValue).ifPresent(value -> builder.withDouble(entry, value));
+                Optional
+                        .ofNullable(json.get(entry.getName()))
+                        .filter(v -> !JsonValue.NULL.equals(v))
+                        .map(JsonNumber.class::cast)
+                        .map(JsonNumber::doubleValue)
+                        .ifPresent(value -> builder.withDouble(entry, value));
                 break;
             case BOOLEAN:
-                Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v)).map(JsonValue.TRUE::equals)
+                Optional
+                        .ofNullable(json.get(entry.getName()))
+                        .filter(v -> !JsonValue.NULL.equals(v))
+                        .map(JsonValue.TRUE::equals)
                         .ifPresent(value -> builder.withBoolean(entry, value));
                 break;
             case BYTES:
-                Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v)).map(JsonString.class::cast)
+                Optional
+                        .ofNullable(json.get(entry.getName()))
+                        .filter(v -> !JsonValue.NULL.equals(v))
+                        .map(JsonString.class::cast)
                         .ifPresent(value -> builder.withBytes(entry, value.getString().getBytes()));
                 break;
             case DATETIME:
                 try {
-                    Optional.ofNullable(json.get(entry.getName())).filter(v -> !JsonValue.NULL.equals(v))
-                            .map(JsonNumber.class::cast).map(JsonString.class::cast)
+                    Optional
+                            .ofNullable(json.get(entry.getName()))
+                            .filter(v -> !JsonValue.NULL.equals(v))
+                            .map(JsonNumber.class::cast)
+                            .map(JsonString.class::cast)
                             .ifPresent(value -> builder.withDateTime(entry, ZonedDateTime.parse(value.toString())));
                 } catch (Exception e) {
-                    log.error("[convertJsonObjectToRecord] parse ZonedDateTime failed for {} : {}.", entry.getName(),
-                            json.get(entry.getName()));
+                    log
+                            .error("[convertJsonObjectToRecord] parse ZonedDateTime failed for {} : {}.",
+                                    entry.getName(),
+                                    json.get(entry.getName()));
                 }
                 break;
             }

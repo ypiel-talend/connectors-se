@@ -52,14 +52,18 @@ public class DynamicsCrmInputMapperTestIT extends DynamicsCrmTestBase {
         final DynamicsCrmDataset dataset = createDataset();
         final DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setDataset(dataset);
-        configuration.setColumns(Arrays.asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
-                "company", "creditonhold"));
+        configuration
+                .setColumns(Arrays
+                        .asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
+                                "company", "creditonhold"));
         FilterFactory filterFactory = new FilterFactoryImpl();
         configuration.setCustomFilter(true);
         configuration.setFilter(filterFactory.eq("company", company).build());
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
-        Job.components().component("mycomponent", "Azure://AzureDynamics365Input?" + config) //
+        Job
+                .components()
+                .component("mycomponent", "Azure://AzureDynamics365Input?" + config) //
                 .component("collector", "test://collector") //
                 .connections() //
                 .from("mycomponent") //

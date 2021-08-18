@@ -62,21 +62,27 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
         configuration.setIgnoreNull(true);
         configuration.setEmptyStringToNull(true);
         configuration.setAction(Action.INSERT);
-        configuration.setColumns(Arrays.asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
-                "company", "creditonhold", "_transactioncurrencyid_value", "birthdate"));
+        configuration
+                .setColumns(Arrays
+                        .asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
+                                "company", "creditonhold", "_transactioncurrencyid_value", "birthdate"));
 
-        configuration.setLookupMapping(Arrays.asList(new LookupMapping("_transactioncurrencyid_value", "transactioncurrencies")));
+        configuration
+                .setLookupMapping(
+                        Arrays.asList(new LookupMapping("_transactioncurrencyid_value", "transactioncurrencies")));
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         List<Record> testRecords = Collections.singletonList(testRecord);
         components.setInputData(testRecords);
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "test://emitter") //
                 .component("out", "Azure://AzureDynamics365Output?" + config) //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
+                .build()
+                .run();
 
         List<ClientEntity> data = getData(client);
         assertEquals(1, data.size());
@@ -84,7 +90,8 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
         LocalDate date = LocalDate.ofEpochDay(6720);
         ClientEntity entity = data.get(0);
         assertEquals(false, entity.getProperty("creditonhold").getPrimitiveValue().toValue());
-        assertEquals(2.0f, ((BigDecimal) entity.getProperty("annualincome").getPrimitiveValue().toValue()).floatValue());
+        assertEquals(2.0f,
+                ((BigDecimal) entity.getProperty("annualincome").getPrimitiveValue().toValue()).floatValue());
         assertEquals("assistant", entity.getProperty("assistantname").getPrimitiveValue().toString());
         assertEquals("business2", entity.getProperty("business2").getPrimitiveValue().toString());
         assertEquals("callback", entity.getProperty("callback").getPrimitiveValue().toString());
@@ -120,21 +127,27 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
         configuration.setIgnoreNull(true);
         configuration.setEmptyStringToNull(true);
         configuration.setAction(Action.UPSERT);
-        configuration.setColumns(Arrays.asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
-                "company", "creditonhold", "_transactioncurrencyid_value", "birthdate"));
+        configuration
+                .setColumns(Arrays
+                        .asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
+                                "company", "creditonhold", "_transactioncurrencyid_value", "birthdate"));
 
-        configuration.setLookupMapping(Arrays.asList(new LookupMapping("_transactioncurrencyid_value", "transactioncurrencies")));
+        configuration
+                .setLookupMapping(
+                        Arrays.asList(new LookupMapping("_transactioncurrencyid_value", "transactioncurrencies")));
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         List<Record> testRecords = Collections.singletonList(testRecord);
         components.setInputData(testRecords);
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "test://emitter") //
                 .component("out", "Azure://AzureDynamics365Output?" + config) //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
+                .build()
+                .run();
 
         List<ClientEntity> data = getData(client);
         assertEquals(1, data.size());
@@ -142,7 +155,8 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
         LocalDate date = LocalDate.ofEpochDay(6720);
         ClientEntity resultEntity = data.get(0);
         assertEquals(false, resultEntity.getProperty("creditonhold").getPrimitiveValue().toValue());
-        assertEquals(2.0f, ((BigDecimal) resultEntity.getProperty("annualincome").getPrimitiveValue().toValue()).floatValue());
+        assertEquals(2.0f,
+                ((BigDecimal) resultEntity.getProperty("annualincome").getPrimitiveValue().toValue()).floatValue());
         assertEquals("assistant", resultEntity.getProperty("assistantname").getPrimitiveValue().toString());
         assertEquals("business2", resultEntity.getProperty("business2").getPrimitiveValue().toString());
         assertEquals("callback", resultEntity.getProperty("callback").getPrimitiveValue().toString());
@@ -165,21 +179,27 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
         configuration.setIgnoreNull(true);
         configuration.setEmptyStringToNull(true);
         configuration.setAction(Action.UPSERT);
-        configuration.setColumns(Arrays.asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
-                "company", "creditonhold", "_transactioncurrencyid_value", "birthdate"));
+        configuration
+                .setColumns(Arrays
+                        .asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
+                                "company", "creditonhold", "_transactioncurrencyid_value", "birthdate"));
 
-        configuration.setLookupMapping(Arrays.asList(new LookupMapping("_transactioncurrencyid_value", "transactioncurrencies")));
+        configuration
+                .setLookupMapping(
+                        Arrays.asList(new LookupMapping("_transactioncurrencyid_value", "transactioncurrencies")));
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         List<Record> testRecords = Collections.singletonList(testRecord);
         components.setInputData(testRecords);
-        ComponentException exception = assertThrows(ComponentException.class, () -> Job.components() //
+        ComponentException exception = assertThrows(ComponentException.class, () -> Job
+                .components() //
                 .component("in", "test://emitter") //
                 .component("out", "Azure://AzureDynamics365Output?" + config) //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run());
+                .build()
+                .run());
         assertEquals(DynamicsCrmException.class.getName(), exception.getOriginalType());
         assertEquals(i18n.idCannotBeNull("contactid"), exception.getOriginalMessage());
     }
@@ -200,19 +220,23 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
         configuration.setIgnoreNull(true);
         configuration.setEmptyStringToNull(true);
         configuration.setAction(Action.DELETE);
-        configuration.setColumns(Arrays.asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
-                "company", "creditonhold"));
+        configuration
+                .setColumns(Arrays
+                        .asList("annualincome", "assistantname", "business2", "callback", "childrensnames",
+                                "company", "creditonhold"));
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         List<Record> testRecords = Collections.singletonList(testRecord);
         components.setInputData(testRecords);
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "test://emitter") //
                 .component("out", "Azure://AzureDynamics365Output?" + config) //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
+                .build()
+                .run();
 
         List<ClientEntity> data = getData(client);
         assertEquals(0, data.size());
@@ -224,31 +248,77 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
     }
 
     private Record createTestRecordWithId(String id) {
-        Schema schema = builderFactory.newSchemaBuilder(Type.RECORD)
-                .withEntry(builderFactory.newEntryBuilder().withName("annualincome").withType(Type.FLOAT)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.FLOAT).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("contactid").withType(Type.STRING).withNullable(true)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("assistantname").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("business2").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("callback").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("childrensnames").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("company").withType(Type.STRING)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build()).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("creditonhold").withType(Type.BOOLEAN)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.BOOLEAN).build()).build())
+        Schema schema = builderFactory
+                .newSchemaBuilder(Type.RECORD)
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("annualincome")
+                        .withType(Type.FLOAT)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.FLOAT).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("contactid")
+                        .withType(Type.STRING)
+                        .withNullable(true)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("assistantname")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("business2")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("callback")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("childrensnames")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("company")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("creditonhold")
+                        .withType(Type.BOOLEAN)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.BOOLEAN).build())
+                        .build())
                 // DATE type in Tcomp record
-                .withEntry(builderFactory.newEntryBuilder().withName("birthdate").withType(Type.INT)
-                        .withElementSchema(builderFactory.newSchemaBuilder(Type.INT).build()).build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("birthdate")
+                        .withType(Type.INT)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.INT).build())
+                        .build())
                 .build();
-        Record testRecord = builderFactory.newRecordBuilder(schema).withString("contactid", id).withFloat("annualincome", 2.0f)
-                .withString("assistantname", "assistant").withString("business2", "business2").withString("callback", "callback")
-                .withString("childrensnames", "childrensnames").withString("company", company).withBoolean("creditonhold", false)
-                .withInt("birthdate", 6720).build();
+        Record testRecord = builderFactory
+                .newRecordBuilder(schema)
+                .withString("contactid", id)
+                .withFloat("annualincome", 2.0f)
+                .withString("assistantname", "assistant")
+                .withString("business2", "business2")
+                .withString("callback", "callback")
+                .withString("childrensnames", "childrensnames")
+                .withString("company", company)
+                .withBoolean("creditonhold", false)
+                .withInt("birthdate", 6720)
+                .build();
         return testRecord;
     }
 

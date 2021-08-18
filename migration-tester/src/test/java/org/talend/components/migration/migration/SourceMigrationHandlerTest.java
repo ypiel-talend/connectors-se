@@ -63,7 +63,8 @@ class SourceMigrationHandlerTest {
         assertEquals("{\n" + "\t\"configuration.source_legacy\" : \"legacy data\",\n"
                 + "\t\"configuration.dse.dse_migration_handler_callback\" : \"\",\n"
                 + "\t\"configuration.dse.dso.dso_legacy\" : \"legacy data\",\n"
-                + "\t\"configuration.dse.dse_legacy\" : \"legacy data\",\n" + "\t\"configuration.source_outgoing\" : \"\",\n"
+                + "\t\"configuration.dse.dse_legacy\" : \"legacy data\",\n"
+                + "\t\"configuration.source_outgoing\" : \"\",\n"
                 + "\t\"configuration.dse.dso.dso_migration_handler_callback\" : \"\",\n"
                 + "\t\"configuration.source_migration_handler_callback\" : \"\",\n"
                 + "\t\"configuration.source_incoming\" : \"\"\n" + "}", migrated.get("configuration.source_incoming"));

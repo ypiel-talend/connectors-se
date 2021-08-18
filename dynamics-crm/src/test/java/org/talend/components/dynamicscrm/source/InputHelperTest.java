@@ -209,8 +209,11 @@ public class InputHelperTest {
     @Test
     public void testOrderBySeveralFields() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
-        configuration.setOrderByConditionsList(
-                Arrays.asList(new OrderByCondition("field", Order.DESC), new OrderByCondition("field1", Order.ASC)));
+        configuration
+                .setOrderByConditionsList(
+                        Arrays
+                                .asList(new OrderByCondition("field", Order.DESC),
+                                        new OrderByCondition("field1", Order.ASC)));
 
         String orderQuery = helper.getOrderByQuery(configuration);
 

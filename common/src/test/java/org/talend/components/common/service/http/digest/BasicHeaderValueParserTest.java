@@ -47,7 +47,8 @@ class BasicHeaderValueParserTest {
         expected.put("algorithm", "MD5");
         expected.put("stale", "FALSE");
 
-        String challenge = "Digest realm=\"me@mydomain.com\", nonce=\"321205f334fa396833187ad546560cbe\", qop=\"auth, auth-int\", opaque=\"a7e6ee56656ddb8d654a7f9344c52111\", algorithm=MD5, stale=FALSE";
+        String challenge =
+                "Digest realm=\"me@mydomain.com\", nonce=\"321205f334fa396833187ad546560cbe\", qop=\"auth, auth-int\", opaque=\"a7e6ee56656ddb8d654a7f9344c52111\", algorithm=MD5, stale=FALSE";
         parseWWWAuthenticate(expected, challenge);
     }
 
@@ -61,7 +62,8 @@ class BasicHeaderValueParserTest {
         expected.put("opaque", "a7e6ee56656ddb8d654a7f9344c52111");
         expected.put("algorithm", "MD5");
         expected.put("stale", "FALSE");
-        String challenge = "UnsuportedType realm=\"me@mydomain.com\", nonce=\"321205f334fa396833187ad546560cbe\", qop=\"auth, auth-int\", opaque=\"a7e6ee56656ddb8d654a7f9344c52111\", algorithm=MD5, stale=FALSE";
+        String challenge =
+                "UnsuportedType realm=\"me@mydomain.com\", nonce=\"321205f334fa396833187ad546560cbe\", qop=\"auth, auth-int\", opaque=\"a7e6ee56656ddb8d654a7f9344c52111\", algorithm=MD5, stale=FALSE";
         parseWWWAuthenticate(expected, challenge);
     }
 
@@ -75,7 +77,8 @@ class BasicHeaderValueParserTest {
         expected.put("opaque", "a7e6ee56656ddb8d654a7f9344c52111");
         expected.put("algorithm", "MD5");
         expected.put("stale", "FALSE");
-        String challenge = "    UnsuportedType     realm=\"me@mydomain.com\"   ,    nonce=\"321205f334fa396833187ad546560cbe\",    qop=\"auth, auth-int\",    opaque=\"a7e6ee56656ddb8d654a7f9344c52111\",    algorithm=MD5   ,   stale=FALSE   ";
+        String challenge =
+                "    UnsuportedType     realm=\"me@mydomain.com\"   ,    nonce=\"321205f334fa396833187ad546560cbe\",    qop=\"auth, auth-int\",    opaque=\"a7e6ee56656ddb8d654a7f9344c52111\",    algorithm=MD5   ,   stale=FALSE   ";
         parseWWWAuthenticate(expected, challenge);
     }
 
@@ -88,7 +91,8 @@ class BasicHeaderValueParserTest {
         expected.put("opaque", "a7e6ee56656ddb8d654a7f9344c52111");
         expected.put("algorithm", "MD5");
         expected.put("stale", "FALSE");
-        String challenge = "realm=\"me@mydomain.com\", nonce=\"321205f334fa396833187ad546560cbe\", qop=\"auth, auth-int\", opaque=\"a7e6ee56656ddb8d654a7f9344c52111\", algorithm=MD5, stale=FALSE";
+        String challenge =
+                "realm=\"me@mydomain.com\", nonce=\"321205f334fa396833187ad546560cbe\", qop=\"auth, auth-int\", opaque=\"a7e6ee56656ddb8d654a7f9344c52111\", algorithm=MD5, stale=FALSE";
         parseWWWAuthenticate(expected, challenge);
     }
 
@@ -102,7 +106,8 @@ class BasicHeaderValueParserTest {
         expected.put("opaque", "a7e6ee56656ddb8d654a7f9344c52111");
         expected.put("algorithm", "MD5");
         expected.put("stale", "FALSE");
-        String challenge = "Basic realm=\"me@mydomain.com\", nonce=\"321205f334fa396833187ad546560cbe\", qop=\"auth, auth-int\", opaque=\"a7e6ee56656ddb8d654a7f9344c52111\", algorithm=MD5, stale=FALSE";
+        String challenge =
+                "Basic realm=\"me@mydomain.com\", nonce=\"321205f334fa396833187ad546560cbe\", qop=\"auth, auth-int\", opaque=\"a7e6ee56656ddb8d654a7f9344c52111\", algorithm=MD5, stale=FALSE";
         parseHeader("MyHeader", expected, challenge);
     }
 
@@ -112,7 +117,8 @@ class BasicHeaderValueParserTest {
 
     private void parseHeader(final String headerName, final Map<String, String> expected, final String challenge) {
         BasicHeader authChallenge = new BasicHeader(headerName, challenge);
-        BasicNameValuePair[] nameValuePairs = BasicHeaderValueParser.parseParameters(authChallenge, new BasicHeaderValueParser());
+        BasicNameValuePair[] nameValuePairs =
+                BasicHeaderValueParser.parseParameters(authChallenge, new BasicHeaderValueParser());
 
         assertEquals(expected.size(), nameValuePairs.length);
         expected.entrySet().stream().forEach(k -> {
@@ -122,13 +128,20 @@ class BasicHeaderValueParserTest {
     }
 
     private boolean existsOnce(BasicNameValuePair[] pairs, String name) {
-        List<BasicNameValuePair> list = Arrays.asList(pairs).stream().filter(p -> name.equals(p.getName()))
+        List<BasicNameValuePair> list = Arrays
+                .asList(pairs)
+                .stream()
+                .filter(p -> name.equals(p.getName()))
                 .collect(Collectors.toList());
         return list.size() == 1;
     }
 
     private BasicNameValuePair getByName(BasicNameValuePair[] pairs, String name) {
-        return Arrays.stream(pairs).filter(p -> name.equals(p.getName())).findFirst().orElse(new BasicNameValuePair("", ""));
+        return Arrays
+                .stream(pairs)
+                .filter(p -> name.equals(p.getName()))
+                .findFirst()
+                .orElse(new BasicNameValuePair("", ""));
     }
 
 }

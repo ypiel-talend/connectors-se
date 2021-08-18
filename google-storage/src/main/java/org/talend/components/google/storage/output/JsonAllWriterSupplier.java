@@ -28,7 +28,8 @@ public class JsonAllWriterSupplier implements RecordWriterSupplier {
     public RecordWriter getWriter(TargetFinder target, ContentFormat config) {
 
         if (!JsonAllConfiguration.class.isInstance(config)) {
-            throw new ComponentException(ErrorOrigin.BACKEND, "try to get json-all-writer with other than json-all config");
+            throw new ComponentException(ErrorOrigin.BACKEND,
+                    "try to get json-all-writer with other than json-all config");
         }
 
         return new JsonRecordWriter(target, new RecordToJson());

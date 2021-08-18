@@ -63,14 +63,17 @@ public class RestService {
     private final static String PARAMETERS_SUBSTITUTOR_SUFFIX = System
             .getProperty("org.talend.components.rest.parameters_substitutor_suffix", "}");
 
-    private final static String BODY_SUBSTITUTOR_PREFIX = System.getProperty("org.talend.components.rest.body_substitutor_prefix",
-            "${");
+    private final static String BODY_SUBSTITUTOR_PREFIX = System
+            .getProperty("org.talend.components.rest.body_substitutor_prefix",
+                    "${");
 
-    private final static String BODY_SUBSTITUTOR_SUFFIX = System.getProperty("org.talend.components.rest.body_substitutor_suffix",
-            "}");
+    private final static String BODY_SUBSTITUTOR_SUFFIX = System
+            .getProperty("org.talend.components.rest.body_substitutor_suffix",
+                    "}");
 
-    private final Substitutor.KeyFinder parameterFinder = new Substitutor.KeyFinder(RestService.PARAMETERS_SUBSTITUTOR_PREFIX,
-            RestService.PARAMETERS_SUBSTITUTOR_SUFFIX);
+    private final Substitutor.KeyFinder parameterFinder =
+            new Substitutor.KeyFinder(RestService.PARAMETERS_SUBSTITUTOR_PREFIX,
+                    RestService.PARAMETERS_SUBSTITUTOR_SUFFIX);
 
     private final Substitutor.KeyFinder bodyFinder = new Substitutor.KeyFinder(RestService.BODY_SUBSTITUTOR_PREFIX,
             RestService.BODY_SUBSTITUTOR_SUFFIX);
@@ -144,30 +147,40 @@ public class RestService {
                 try {
                     URL url = new URL(surl);
                     DigestAuthService das = new DigestAuthService();
-                    DigestAuthContext context = new DigestAuthContext(url.getPath(), config.getDataset().getMethodType().name(),
-                            url.getHost(), url.getPort(), body == null ? null : body.getContent(), new UserNamePassword(
-                                    authentication.getBasic().getUsername(), authentication.getBasic().getPassword()));
-                    resp = das.call(context, () -> client.executeWithDigestAuth(i18n, context, config, client,
-                            previousRedirectContext.getMethod(), surl, headers, queryParams, body));
+                    DigestAuthContext context =
+                            new DigestAuthContext(url.getPath(), config.getDataset().getMethodType().name(),
+                                    url.getHost(), url.getPort(), body == null ? null : body.getContent(),
+                                    new UserNamePassword(
+                                            authentication.getBasic().getUsername(),
+                                            authentication.getBasic().getPassword()));
+                    resp = das
+                            .call(context, () -> client
+                                    .executeWithDigestAuth(i18n, context, config, client,
+                                            previousRedirectContext.getMethod(), surl, headers, queryParams, body));
                 } catch (MalformedURLException e) {
                     throw new IllegalArgumentException(i18n.malformedURL(surl, e.getMessage()));
                 }
             } else if (authentication.getType() == Authorization.AuthorizationType.Basic) {
                 UserNamePassword credential = new UserNamePassword(authentication.getBasic().getUsername(),
                         authentication.getBasic().getPassword());
-                resp = client.executeWithBasicAuth(i18n, credential, config, client, previousRedirectContext.getMethod(), surl,
-                        headers, queryParams, body);
+                resp = client
+                        .executeWithBasicAuth(i18n, credential, config, client, previousRedirectContext.getMethod(),
+                                surl,
+                                headers, queryParams, body);
             } else if (authentication.getType() == Authorization.AuthorizationType.Bearer) {
                 String token = authentication.getBearerToken();
-                resp = client.executeWithBearerAuth(i18n, token, config, client, previousRedirectContext.getMethod(), surl,
-                        headers, queryParams, body);
+                resp = client
+                        .executeWithBearerAuth(i18n, token, config, client, previousRedirectContext.getMethod(), surl,
+                                headers, queryParams, body);
             } else {
-                resp = client.execute(i18n, config, client, previousRedirectContext.getMethod(), surl, headers, queryParams,
-                        body);
+                resp = client
+                        .execute(i18n, config, client, previousRedirectContext.getMethod(), surl, headers, queryParams,
+                                body);
             }
 
             if (config.getDataset().supportRedirect()) {
-                // Redirection is managed by RedirectService only if it is not supported by underlying http client implementation
+                // Redirection is managed by RedirectService only if it is not supported by underlying http client
+                // implementation
                 RedirectContext rctx = new RedirectContext(resp, previousRedirectContext);
                 RedirectService rs = new RedirectService();
                 rctx = rs.call(rctx);
@@ -193,8 +206,9 @@ public class RestService {
 
     public String buildUrl(final RequestConfig config, final Map<String, String> params) {
         String base = config.getDataset().getDatastore().getBase().trim();
-        String segments = this.setPathParams(config.getDataset().getResource().trim(), config.getDataset().isHasPathParams(),
-                params);
+        String segments = this
+                .setPathParams(config.getDataset().getResource().trim(), config.getDataset().isHasPathParams(),
+                        params);
 
         if (segments.isEmpty()) {
             return base;

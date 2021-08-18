@@ -73,7 +73,8 @@ public class DynamicsCrmOutput implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            client = service.createClient(configuration.getDataset().getDatastore(), configuration.getDataset().getEntitySet());
+            client = service
+                    .createClient(configuration.getDataset().getDatastore(), configuration.getDataset().getEntitySet());
         } catch (AuthenticationException e) {
             throw new DynamicsCrmException(i18n.authenticationFailed(e.getMessage()));
         }
@@ -82,13 +83,18 @@ public class DynamicsCrmOutput implements Serializable {
         Set<String> possibleColumns = service
                 .getPropertiesValidationData(client, configuration.getDataset().getDatastore(),
                         entitySet.getEntityType().getName())
-                .stream().filter(getFilter()).map(PropertyValidationData::getName).collect(Collectors.toSet());
+                .stream()
+                .filter(getFilter())
+                .map(PropertyValidationData::getName)
+                .collect(Collectors.toSet());
 
         List<String> columnNames = configuration.getColumns();
         if (columnNames == null || columnNames.isEmpty()) {
             columnNames = entitySet.getEntityType().getPropertyNames();
         }
-        fields = columnNames.stream().filter(s -> possibleColumns.contains(client.extractNavigationLinkName(s)))
+        fields = columnNames
+                .stream()
+                .filter(s -> possibleColumns.contains(client.extractNavigationLinkName(s)))
                 .collect(Collectors.toList());
         processor = createProcessor(configuration.getAction());
     }

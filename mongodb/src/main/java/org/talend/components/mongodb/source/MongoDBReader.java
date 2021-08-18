@@ -75,7 +75,8 @@ public class MongoDBReader implements Serializable {
 
     private transient String query4Split;
 
-    public MongoDBReader(@Option("configuration") final BaseSourceConfiguration configuration, final MongoDBService service,
+    public MongoDBReader(@Option("configuration") final BaseSourceConfiguration configuration,
+            final MongoDBService service,
             final RecordBuilderFactory builderFactory, final I18nMessage i18n, String query4Split) {
         this.configuration = configuration;
         this.service = service;
@@ -183,7 +184,8 @@ public class MongoDBReader implements Serializable {
         // TODO bson can convert to json with loss data? check it
         String jsonContnt = document2Json(document);
         // can't use org.talend.components.common.stream.input.json.JsonRecordReader here, please see
-        // org.talend.components.common.stream.input.json.JsonRecordReaderTest that is not the result what we expect here
+        // org.talend.components.common.stream.input.json.JsonRecordReaderTest that is not the result what we expect
+        // here
         // here we expect one document, one record always
         Record result = jsonToRecord.toRecord(getJsonObject(jsonContnt));
         return result;
@@ -302,8 +304,9 @@ public class MongoDBReader implements Serializable {
             recordBuilder.withBytes(entryBuilder.build(), (byte[]) value);
         case STRING:
             // toString is right for all type, like document? TODO
-            recordBuilder.withString(entryBuilder.build(),
-                    value instanceof Document ? document2Json((Document) value) : value.toString());
+            recordBuilder
+                    .withString(entryBuilder.build(),
+                            value instanceof Document ? document2Json((Document) value) : value.toString());
             break;
         case LONG:
             recordBuilder.withLong(entryBuilder.build(), (Long) value);

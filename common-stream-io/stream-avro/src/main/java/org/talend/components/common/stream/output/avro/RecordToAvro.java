@@ -74,8 +74,14 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
             switch (fieldType) {
             case RECORD:
                 final Record record = fromRecord.getRecord(name);
-                final Schema schema = fromRecord.getSchema().getEntries().stream().filter(e -> name.equals(e.getName()))
-                        .findFirst().map(Entry::getElementSchema).orElse(null);
+                final Schema schema = fromRecord
+                        .getSchema()
+                        .getEntries()
+                        .stream()
+                        .filter(e -> name.equals(e.getName()))
+                        .findFirst()
+                        .map(Entry::getElementSchema)
+                        .orElse(null);
                 if (record != null) {
                     final org.apache.avro.Schema subSchema = fromRecordSchema(record.getSchema());
                     final GenericRecord subrecord = recordToAvro(record, new GenericData.Record(subSchema));
@@ -84,17 +90,22 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
                 break;
             case ARRAY:
                 final Entry e = getSchemaForEntry(name, fromRecord.getSchema());
-                final Collection<Object> recordArray = fromRecord.getOptionalArray(Object.class, name).orElse(new ArrayList<>());
+                final Collection<Object> recordArray =
+                        fromRecord.getOptionalArray(Object.class, name).orElse(new ArrayList<>());
                 if (!recordArray.isEmpty()) {
                     final Object firstArrayValue = recordArray.iterator().next();
                     if (firstArrayValue instanceof Record) {
-                        final org.apache.avro.Schema subSchema = fromRecordSchema(((Record) firstArrayValue).getSchema());
-                        final List<GenericRecord> records = recordArray.stream()
+                        final org.apache.avro.Schema subSchema =
+                                fromRecordSchema(((Record) firstArrayValue).getSchema());
+                        final List<GenericRecord> records = recordArray
+                                .stream()
                                 .map(o -> recordToAvro((Record) o, new GenericData.Record(subSchema)))
                                 .collect(Collectors.toList());
                         toRecord.put(name, records);
                     } else {
-                        toRecord.put(name, fromRecord.getArray(getJavaClassForType(e.getElementSchema().getType()), name));
+                        toRecord
+                                .put(name,
+                                        fromRecord.getArray(getJavaClassForType(e.getElementSchema().getType()), name));
                     }
                 }
                 break;
@@ -200,10 +211,12 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
             } else {
                 unionWithNull = SchemaBuilder.unionOf().type(builder).and().nullType().endUnion();
             }
-            org.apache.avro.Schema.Field field = new org.apache.avro.Schema.Field(name, unionWithNull, comment, defaultValue);
+            org.apache.avro.Schema.Field field =
+                    new org.apache.avro.Schema.Field(name, unionWithNull, comment, defaultValue);
             fields.add(field);
         }
-        return org.apache.avro.Schema.createRecord(this.buildSchemaId(schema), "", currentRecordNamespace, false, fields);
+        return org.apache.avro.Schema
+                .createRecord(this.buildSchemaId(schema), "", currentRecordNamespace, false, fields);
     }
 
     /**
@@ -213,8 +226,11 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
      * @return id
      */
     private String buildSchemaId(Schema schema) {
-        final List<String> fields = schema.getEntries().stream()
-                .map((Entry e) -> e.getName() + "_" + e.getType() + e.isNullable()).collect(Collectors.toList());
+        final List<String> fields = schema
+                .getEntries()
+                .stream()
+                .map((Entry e) -> e.getName() + "_" + e.getType() + e.isNullable())
+                .collect(Collectors.toList());
         return (RECORD_NAME + fields.hashCode()).replace('-', '1');
     }
 

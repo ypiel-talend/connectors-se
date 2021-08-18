@@ -57,7 +57,8 @@ public class DerbyTestContainer implements JdbcTestContainer {
 
         DerbyContainer() {
             try {
-                this.dbName = Files.createTempDirectory("derby_" + UUID.randomUUID()).toFile().getAbsolutePath() + "/test";
+                this.dbName =
+                        Files.createTempDirectory("derby_" + UUID.randomUUID()).toFile().getAbsolutePath() + "/test";
             } catch (IOException e) {
                 throw new IllegalStateException("can't create derby database file", e);
             }
@@ -152,26 +153,38 @@ public class DerbyTestContainer implements JdbcTestContainer {
         private void turnOnBuiltInUsers(final Connection conn) throws SQLException {
             try (Statement s = conn.createStatement()) {
                 // Setting and Confirming requireAuthentication
-                s.executeUpdate(
-                        "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.connection.requireAuthentication', 'true')");
+                s
+                        .executeUpdate(
+                                "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY("
+                                        + "'derby.connection.requireAuthentication', 'true')");
                 // Setting authentication scheme to Derby
-                s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.authentication.provider', 'BUILTIN')");
+                s
+                        .executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY("
+                                + "'derby.authentication.provider', 'BUILTIN')");
                 // Creating some sample users
                 s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.user.sa', '" + "sa" + "')");
                 s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.user.guest', '" + "sa" + "')");
                 s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.user.admin', '" + "sa" + "')");
                 // Setting default connection mode to no access
-                s.executeUpdate(
-                        "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.database.defaultConnectionMode', 'noAccess')");
+                s
+                        .executeUpdate(
+                                "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY("
+                                        + "'derby.database.defaultConnectionMode', 'noAccess')");
 
                 // Defining read-write users
-                s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.database.fullAccessUsers', 'sa,admin')");
+                s
+                        .executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY("
+                                + "'derby.database.fullAccessUsers', 'sa,admin')");
 
                 // Defining read-only users
-                s.executeUpdate(
-                        "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.database.readOnlyAccessUsers', 'guest')");
+                s
+                        .executeUpdate(
+                                "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY("
+                                        + "'derby.database.readOnlyAccessUsers', 'guest')");
 
-                s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" + "'derby.database.propertiesOnly', 'false')");
+                s
+                        .executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY("
+                                + "'derby.database.propertiesOnly', 'false')");
             }
         }
 

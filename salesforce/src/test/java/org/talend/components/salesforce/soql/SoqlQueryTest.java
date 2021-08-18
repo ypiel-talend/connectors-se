@@ -63,7 +63,8 @@ public class SoqlQueryTest {
      */
     @Test
     public void testGetFieldDescriptionsWithRemaining() {
-        String queryString = "SELECT Id FROM Contact WHERE Name LIKE 'A%' WITH DATA CATEGORY Product__c AT mobile_phones__c";
+        String queryString =
+                "SELECT Id FROM Contact WHERE Name LIKE 'A%' WITH DATA CATEGORY Product__c AT mobile_phones__c";
         SoqlQuery soqlQuery = SoqlQuery.getInstance();
         soqlQuery.init(queryString);
         List<FieldDescription> fieldDescriptions = soqlQuery.getFieldDescriptions();

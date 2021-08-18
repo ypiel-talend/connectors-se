@@ -49,12 +49,14 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 @Slf4j
 @Environment(ContextualEnvironment.class)
-@EnvironmentConfiguration(environment = "Contextual", systemProperties = {}) // EnvironmentConfiguration is necessary for each
+@EnvironmentConfiguration(environment = "Contextual", systemProperties = {}) // EnvironmentConfiguration is necessary
+                                                                             // for each
                                                                              // @Environment
 @Environment(SparkRunnerEnvironment.class)
 @EnvironmentConfiguration(environment = "Spark", systemProperties = {
         @Property(key = "talend.beam.job.runner", value = "org.apache.beam.runners.spark.SparkRunner"),
-        @Property(key = "talend.beam.job.filesToStage", value = ""), @Property(key = "spark.ui.enabled", value = "false") })
+        @Property(key = "talend.beam.job.filesToStage", value = ""),
+        @Property(key = "spark.ui.enabled", value = "false") })
 
 @WithComponents(value = "org.talend.components.rest")
 class RestEmitterTest {
@@ -103,8 +105,10 @@ class RestEmitterTest {
         config.getDataset().setMethodType(HttpMethod.GET);
 
         config.getDataset().setHasQueryParams(true);
-        config.getDataset()
-                .setQueryParams(Arrays.asList(new Param("param1", "param1_value"), new Param("param2", "param1_value2")));
+        config
+                .getDataset()
+                .setQueryParams(
+                        Arrays.asList(new Param("param1", "param1_value"), new Param("param2", "param1_value2")));
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
 
@@ -120,7 +124,8 @@ class RestEmitterTest {
             os.close();
         });
 
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -153,7 +158,8 @@ class RestEmitterTest {
         // when path param are not substituted the url contains "{...}"
         // and a 400 error is returned
         config.getDataset().setHasPathParams(hasOptions);
-        List<Param> pathParams = Arrays.asList(new Param[] { new Param("module", "myModule"), new Param("id", "myId") });
+        List<Param> pathParams =
+                Arrays.asList(new Param[] { new Param("module", "myModule"), new Param("id", "myId") });
         config.getDataset().setPathParams(pathParams);
 
         this.setServerContextAndStart(httpExchange -> {
@@ -165,7 +171,8 @@ class RestEmitterTest {
         });
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //
@@ -187,7 +194,9 @@ class RestEmitterTest {
     @EnvironmentalTest
     void testQueryContentType() {
         List<ContentTypeParams> params = new ArrayList<>();
-        params.add(new ContentTypeParams(RequestBody.Type.JSON, "{\"key\" : \"value\"}", RequestBody.Type.JSON.getContentType()));
+        params
+                .add(new ContentTypeParams(RequestBody.Type.JSON, "{\"key\" : \"value\"}",
+                        RequestBody.Type.JSON.getContentType()));
 
         for (ContentTypeParams p : params) {
             _testQueryContentType(p.getType(), p.getContent(), p.getContentType());
@@ -216,7 +225,8 @@ class RestEmitterTest {
         });
 
         final String configStr = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "REST://Input?" + configStr) //
                 .component("out", "test://collector") //
                 .connections() //

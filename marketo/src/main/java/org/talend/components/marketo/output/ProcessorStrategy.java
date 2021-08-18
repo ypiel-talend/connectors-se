@@ -66,8 +66,9 @@ public interface ProcessorStrategy {
      * @return
      */
     default boolean isRejected(JsonObject result) {
-        return !asList("created", "updated", "deleted", "scheduled", "triggered", "added", "removed", "memberof", "notmemberof")
-                .contains(result.getString(ATTR_STATUS).toLowerCase());
+        return !asList("created", "updated", "deleted", "scheduled", "triggered", "added", "removed", "memberof",
+                "notmemberof")
+                        .contains(result.getString(ATTR_STATUS).toLowerCase());
     }
 
 }

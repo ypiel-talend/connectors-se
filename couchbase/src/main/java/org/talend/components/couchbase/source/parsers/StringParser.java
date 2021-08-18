@@ -32,9 +32,11 @@ public class StringParser implements DocumentParser {
 
     public StringParser(RecordBuilderFactory builderFactory) {
         this.builderFactory = builderFactory;
-        schemaStringDocument = builderFactory.newSchemaBuilder(Schema.Type.RECORD)
+        schemaStringDocument = builderFactory
+                .newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(builderFactory.newEntryBuilder().withName("id").withType(Schema.Type.STRING).build())
-                .withEntry(builderFactory.newEntryBuilder().withName("content").withType(Schema.Type.STRING).build()).build();
+                .withEntry(builderFactory.newEntryBuilder().withName("content").withType(Schema.Type.STRING).build())
+                .build();
     }
 
     @Override

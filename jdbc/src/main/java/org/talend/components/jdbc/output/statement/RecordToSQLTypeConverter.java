@@ -23,10 +23,12 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public enum RecordToSQLTypeConverter {
+
     RECORD {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
             statement.setObject(index, record.get(Record.class, entry.getName()).toString());
         }
@@ -35,17 +37,25 @@ public enum RecordToSQLTypeConverter {
     ARRAY {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
-            statement.setArray(index, statement.getConnection().createArrayOf(entry.getName(),
-                    record.getOptionalArray(Object.class, entry.getName()).orElseGet(ArrayList::new).toArray()));
+            statement
+                    .setArray(index, statement
+                            .getConnection()
+                            .createArrayOf(entry.getName(),
+                                    record
+                                            .getOptionalArray(Object.class, entry.getName())
+                                            .orElseGet(ArrayList::new)
+                                            .toArray()));
         }
 
     },
     STRING {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
             Optional<String> value = record.getOptionalString(entry.getName());
             if (value.isPresent()) {
@@ -59,7 +69,8 @@ public enum RecordToSQLTypeConverter {
     BYTES {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
             statement.setBytes(index, record.getOptionalBytes(entry.getName()).orElse(null));
         }
@@ -68,7 +79,8 @@ public enum RecordToSQLTypeConverter {
     INT {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
             if (record.getOptionalInt(entry.getName()).isPresent()) {
                 statement.setInt(index, record.getInt(entry.getName()));
@@ -81,7 +93,8 @@ public enum RecordToSQLTypeConverter {
     LONG {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
             if (record.getOptionalLong(entry.getName()).isPresent()) {
                 statement.setLong(index, record.getLong(entry.getName()));
@@ -94,7 +107,8 @@ public enum RecordToSQLTypeConverter {
     FLOAT {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
             if (record.getOptionalFloat(entry.getName()).isPresent()) {
                 statement.setFloat(index, record.getFloat(entry.getName()));
@@ -107,7 +121,8 @@ public enum RecordToSQLTypeConverter {
     DOUBLE {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
             if (record.getOptionalDouble(entry.getName()).isPresent()) {
                 statement.setDouble(index, record.getDouble(entry.getName()));
@@ -120,7 +135,8 @@ public enum RecordToSQLTypeConverter {
     BOOLEAN {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
             if (record.getOptionalBoolean(entry.getName()).isPresent()) {
                 statement.setBoolean(index, record.getBoolean(entry.getName()));
@@ -133,10 +149,14 @@ public enum RecordToSQLTypeConverter {
     DATETIME {
 
         @Override
-        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
+        public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry,
+                final Record record)
                 throws SQLException {
-            statement.setTimestamp(index, record.getOptionalDateTime(entry.getName())
-                    .map(d -> new Timestamp(d.toInstant().toEpochMilli())).orElse(null));
+            statement
+                    .setTimestamp(index, record
+                            .getOptionalDateTime(entry.getName())
+                            .map(d -> new Timestamp(d.toInstant().toEpochMilli()))
+                            .orElse(null));
         }
 
     };

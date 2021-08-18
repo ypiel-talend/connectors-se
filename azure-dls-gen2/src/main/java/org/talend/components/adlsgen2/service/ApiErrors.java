@@ -13,6 +13,7 @@
 package org.talend.components.adlsgen2.service;
 
 public enum ApiErrors {
+
     AccountIsDisabled("The specified account is disabled."),
     AuthorizationFailure("This request is not authorized to perform this operation."),
     ConditionNotMet("The condition specified using HTTP conditional header(s) is not met."),
@@ -22,7 +23,8 @@ public enum ApiErrors {
     FilesystemAlreadyExists("The specified filesystem already exists."),
     FilesystemBeingDeleted("The specified filesystem is being deleted."),
     FilesystemNotFound("The specified filesystem does not exist."),
-    InsufficientAccountPermissions("The account being accessed does not have sufficient permissions to execute this operation."),
+    InsufficientAccountPermissions(
+            "The account being accessed does not have sufficient permissions to execute this operation."),
     InternalError("The server encountered an internal error. Please retry the request."),
     InvalidAuthenticationInfo(
             "Authentication information is not given in the correct format. Check the value of Authorization header."),
@@ -54,7 +56,8 @@ public enum ApiErrors {
             "The lease ID matched, but the lease is currently in breaking state and cannot be acquired until it is broken."),
     LeaseIsBreakingAndCannotBeChanged(
             "The lease ID matched, but the lease is currently in breaking state and cannot be changed."),
-    LeaseIsBrokenAndCannotBeRenewed("The lease ID matched, but the lease has been broken explicitly and cannot be renewed."),
+    LeaseIsBrokenAndCannotBeRenewed(
+            "The lease ID matched, but the lease has been broken explicitly and cannot be renewed."),
     LeaseLost("A lease ID was specified, but the lease for the resource has expired."),
     LeaseNameMismatch("The lease name specified did not match the existing lease name."),
     LeaseNotPresent("There is currently no lease on the resource."),
@@ -64,9 +67,11 @@ public enum ApiErrors {
     MultipleConditionHeadersNotSupported("Multiple condition headers are not supported."),
     OperationTimedOut("The operation could not be completed within the permitted time."),
     OutOfRangeInput("One of the request inputs is out of range."),
-    OutOfRangeQueryParameterValue("One of the query parameters specified in the request URI is outside the permissible range."),
+    OutOfRangeQueryParameterValue(
+            "One of the query parameters specified in the request URI is outside the permissible range."),
     PathAlreadyExists("The specified path already exists."),
-    PathConflict("The specified path, or an element of the path, exists and its resource type is invalid for this operation."),
+    PathConflict(
+            "The specified path, or an element of the path, exists and its resource type is invalid for this operation."),
     PathNotFound("The specified path does not exist."),
     RenameDestinationParentPathNotFound("The parent directory of the destination path does not exist."),
     RequestBodyTooLarge("The request body is too large and exceeds the maximum permissible limit."),

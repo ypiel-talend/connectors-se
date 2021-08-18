@@ -75,14 +75,18 @@ public final class SharedKeyUtils {
         String contentLength = getStandardHeaderValue("contentLength");
         contentLength = contentLength.equals("0") ? Constants.EMPTY_STRING : contentLength;
 
-        return String.join("\n", requestBase.getMethod(), getStandardHeaderValue(HeaderConstants.CONTENT_ENCODING),
-                getStandardHeaderValue(HeaderConstants.CONTENT_LANGUAGE), contentLength,
-                getStandardHeaderValue(HeaderConstants.CONTENT_MD5), getStandardHeaderValue(HeaderConstants.CONTENT_TYPE),
-                // x-ms-date header exists, so don't sign date header
-                Constants.EMPTY_STRING, getStandardHeaderValue(HeaderConstants.IF_MODIFIED_SINCE),
-                getStandardHeaderValue(HeaderConstants.IF_MATCH), getStandardHeaderValue(HeaderConstants.IF_NONE_MATCH),
-                getStandardHeaderValue(HeaderConstants.IF_UNMODIFIED_SINCE), getStandardHeaderValue(HeaderConstants.RANGE),
-                getAdditionalXmsHeaders(), getCanonicalizedResource(requestBase.getURI()));
+        return String
+                .join("\n", requestBase.getMethod(), getStandardHeaderValue(HeaderConstants.CONTENT_ENCODING),
+                        getStandardHeaderValue(HeaderConstants.CONTENT_LANGUAGE), contentLength,
+                        getStandardHeaderValue(HeaderConstants.CONTENT_MD5),
+                        getStandardHeaderValue(HeaderConstants.CONTENT_TYPE),
+                        // x-ms-date header exists, so don't sign date header
+                        Constants.EMPTY_STRING, getStandardHeaderValue(HeaderConstants.IF_MODIFIED_SINCE),
+                        getStandardHeaderValue(HeaderConstants.IF_MATCH),
+                        getStandardHeaderValue(HeaderConstants.IF_NONE_MATCH),
+                        getStandardHeaderValue(HeaderConstants.IF_UNMODIFIED_SINCE),
+                        getStandardHeaderValue(HeaderConstants.RANGE),
+                        getAdditionalXmsHeaders(), getCanonicalizedResource(requestBase.getURI()));
     }
 
     private void appendCanonicalizedElement(final StringBuilder builder, final String element) {
@@ -164,7 +168,10 @@ public final class SharedKeyUtils {
             final List<String> queryParamValues = queryParams.get(queryParamName);
             Collections.sort(queryParamValues);
             String queryParamValuesStr = String.join(",", queryParamValues.toArray(new String[] {}));
-            canonicalizedResource.append("\n").append(queryParamName.toLowerCase(Locale.ROOT)).append(":")
+            canonicalizedResource
+                    .append("\n")
+                    .append(queryParamName.toLowerCase(Locale.ROOT))
+                    .append(":")
                     .append(queryParamValuesStr);
         }
 

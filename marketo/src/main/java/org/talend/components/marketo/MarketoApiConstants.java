@@ -104,7 +104,8 @@ public class MarketoApiConstants {
 
     public static final String HEADER_CONTENT_TYPE_APPLICATION_JSON = "application/json";
 
-    public static final String HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    public static final String HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED =
+            "application/x-www-form-urlencoded";
 
     public static final String HEADER_CONTENT_TYPE_TEXT_JSON = "text/json";
 

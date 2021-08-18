@@ -42,8 +42,16 @@ class JdbcDriverLoadingTest {
         final InputQueryConfig config = new InputQueryConfig();
         config.setDataSet(dataset);
         final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-        assertThrows(IllegalStateException.class, () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build().run());
+        assertThrows(IllegalStateException.class,
+                () -> Job
+                        .components()
+                        .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("jdbcInput")
+                        .to("collector")
+                        .build()
+                        .run());
     }
 
     @Test
@@ -62,8 +70,14 @@ class JdbcDriverLoadingTest {
         config.setDataSet(dataset);
         final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
         assertThrows(IllegalStateException.class,
-                () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                        .component("collector", "jdbcTest://DataCollector").connections().from("jdbcInput").to("collector")
-                        .build().run());
+                () -> Job
+                        .components()
+                        .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                        .component("collector", "jdbcTest://DataCollector")
+                        .connections()
+                        .from("jdbcInput")
+                        .to("collector")
+                        .build()
+                        .run());
     }
 }

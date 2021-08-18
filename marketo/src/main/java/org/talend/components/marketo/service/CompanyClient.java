@@ -54,10 +54,12 @@ public interface CompanyClient extends HttpClient {
      * Retrieves company records from the destination instance based on the submitted filter.
      * 
      * @param accessToken Marketo authorization token for API
-     * @param filterType The company field to filter on. Searchable fields can be retrieved with the Describe Company call
+     * @param filterType The company field to filter on. Searchable fields can be retrieved with the Describe Company
+     * call
      * @param filterValues Comma-separated list of values to match against query
      * @param fields Comma-separated list of fields to include in the response query
-     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
+     * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size
+     * and
      * can be passed in a subsequent call through this parameter
      * @return company records
      */
@@ -97,7 +99,8 @@ public interface CompanyClient extends HttpClient {
      * @param payload is json object containing the following parameters
      * <ul>
      * <li>@param deleteBy Field to delete company records by. Key may be "dedupeFields" or "idField"</li>
-     * <li>@param input List of company records. Companies in the list should only contain a member matching the dedupeBy
+     * <li>@param input List of company records. Companies in the list should only contain a member matching the
+     * dedupeBy
      * value</li>
      * </ul>
      * @return

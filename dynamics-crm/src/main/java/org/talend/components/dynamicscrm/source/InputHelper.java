@@ -91,11 +91,13 @@ public class InputHelper {
     }
 
     public String getFilterQuery(DynamicsCrmInputMapperConfiguration configuration) {
-        if (configuration.isCustomFilter() && configuration.getFilter() != null && !configuration.getFilter().isEmpty()) {
+        if (configuration.isCustomFilter() && configuration.getFilter() != null
+                && !configuration.getFilter().isEmpty()) {
             return configuration.getFilter();
         } else if (!configuration.isCustomFilter() && configuration.getFilterConditions() != null
                 && !configuration.getFilterConditions().isEmpty()) {
-            return convertFilterConditionsTableToString(configuration.getFilterConditions(), configuration.getOperator());
+            return convertFilterConditionsTableToString(configuration.getFilterConditions(),
+                    configuration.getOperator());
         }
         return null;
     }
@@ -144,7 +146,8 @@ public class InputHelper {
         return parseSchema(metadata, entitySetName, columnNames, builderFactory);
     }
 
-    private Schema parseSchema(Edm edm, String entitySetName, List<String> columnNames, RecordBuilderFactory builderFactory) {
+    private Schema parseSchema(Edm edm, String entitySetName, List<String> columnNames,
+            RecordBuilderFactory builderFactory) {
         EdmEntityContainer container = edm.getEntityContainer();
         EdmEntitySet entitySet = container.getEntitySet(entitySetName);
         EdmEntityType type = entitySet.getEntityType();
@@ -152,20 +155,32 @@ public class InputHelper {
             columnNames = type.getPropertyNames();
         }
         Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(Schema.Type.RECORD);
-        columnNames.forEach(f -> schemaBuilder
-                .withEntry(builderFactory.newEntryBuilder().withName(f).withType(getTckType((EdmProperty) type.getProperty(f)))
-                        .withElementSchema(getSubSchema(edm, (EdmProperty) type.getProperty(f), builderFactory))
-                        .withNullable(((EdmProperty) type.getProperty(f)).isNullable()).build()));
+        columnNames
+                .forEach(f -> schemaBuilder
+                        .withEntry(builderFactory
+                                .newEntryBuilder()
+                                .withName(f)
+                                .withType(getTckType((EdmProperty) type.getProperty(f)))
+                                .withElementSchema(getSubSchema(edm, (EdmProperty) type.getProperty(f), builderFactory))
+                                .withNullable(((EdmProperty) type.getProperty(f)).isNullable())
+                                .build()));
         return schemaBuilder.build();
     }
 
     private Schema parseSchema(Edm edm, EdmStructuredType type, RecordBuilderFactory builderFactory) {
         Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(Schema.Type.RECORD);
-        type.getPropertyNames()
-                .forEach(f -> schemaBuilder.withEntry(
-                        builderFactory.newEntryBuilder().withName(f).withType(getTckType((EdmProperty) type.getProperty(f)))
-                                .withElementSchema(getSubSchema(edm, (EdmProperty) type.getProperty(f), builderFactory))
-                                .withNullable(((EdmProperty) type.getProperty(f)).isNullable()).build()));
+        type
+                .getPropertyNames()
+                .forEach(f -> schemaBuilder
+                        .withEntry(
+                                builderFactory
+                                        .newEntryBuilder()
+                                        .withName(f)
+                                        .withType(getTckType((EdmProperty) type.getProperty(f)))
+                                        .withElementSchema(
+                                                getSubSchema(edm, (EdmProperty) type.getProperty(f), builderFactory))
+                                        .withNullable(((EdmProperty) type.getProperty(f)).isNullable())
+                                        .build()));
         return schemaBuilder.build();
     }
 
@@ -218,15 +233,19 @@ public class InputHelper {
 
     public Record createRecord(ClientEntity entity, Schema schema, RecordBuilderFactory builderFactory) {
         final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-        schema.getEntries()
-                .forEach(entry -> setValue(entity.getProperty(entry.getName()).getValue(), entry, recordBuilder, builderFactory));
+        schema
+                .getEntries()
+                .forEach(entry -> setValue(entity.getProperty(entry.getName()).getValue(), entry, recordBuilder,
+                        builderFactory));
         return recordBuilder.build();
     }
 
     private Record createRecord(ClientComplexValue value, Schema schema, RecordBuilderFactory builderFactory) {
         final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schema);
-        schema.getEntries()
-                .forEach(entry -> setValue(value.get(entry.getName()).getValue(), entry, recordBuilder, builderFactory));
+        schema
+                .getEntries()
+                .forEach(
+                        entry -> setValue(value.get(entry.getName()).getValue(), entry, recordBuilder, builderFactory));
         return recordBuilder.build();
     }
 
@@ -290,7 +309,8 @@ public class InputHelper {
         return getValue(value, schema.getType(), schema, builderFactory);
     }
 
-    private Object getValue(ClientValue value, Schema.Type type, Schema elementSchema, RecordBuilderFactory builderFactory) {
+    private Object getValue(ClientValue value, Schema.Type type, Schema elementSchema,
+            RecordBuilderFactory builderFactory) {
         if (value == null || (value.isPrimitive() && value.asPrimitive().toValue() == null)) {
             return null;
         }
@@ -324,8 +344,9 @@ public class InputHelper {
             } else {
                 EdmPrimitiveType binaryType = EdmPrimitiveTypeFactory.getInstance(EdmPrimitiveTypeKind.Binary);
                 try {
-                    bytesValue = binaryType.valueOfString(value.toString(), null, null, Constants.DEFAULT_PRECISION,
-                            Constants.DEFAULT_SCALE, null, byte[].class);
+                    bytesValue = binaryType
+                            .valueOfString(value.toString(), null, null, Constants.DEFAULT_PRECISION,
+                                    Constants.DEFAULT_SCALE, null, byte[].class);
                 } catch (EdmPrimitiveTypeException e) {
                     String errorMessage = i18n.failedParsingBytesValue(e.getMessage());
                     log.error(errorMessage);

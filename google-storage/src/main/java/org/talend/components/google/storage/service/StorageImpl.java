@@ -49,7 +49,8 @@ public class StorageImpl implements StorageFacade {
 
     private transient Storage storage = null;
 
-    public StorageImpl(final CredentialService credentialService, final String jsonCredentials, final I18nMessage i18n) {
+    public StorageImpl(final CredentialService credentialService, final String jsonCredentials,
+            final I18nMessage i18n) {
         this.credentialService = credentialService;
         this.credentials = credentialService.getCredentials(jsonCredentials);
         this.i18n = i18n;
@@ -88,7 +89,8 @@ public class StorageImpl implements StorageFacade {
         final BlobListOption blobListOption = Storage.BlobListOption.prefix(basename(blobStartName));
         final Page<Blob> blobPage = this.getStorage().list(bucket, blobListOption);
 
-        return StreamSupport.stream(blobPage.iterateAll().spliterator(), false) //
+        return StreamSupport
+                .stream(blobPage.iterateAll().spliterator(), false) //
                 .map(Blob::getName) //
                 .filter((String name) -> Objects.equals(blobStartName, name)
                         || this.nameBuilder.isGenerated(blobStartName, name));

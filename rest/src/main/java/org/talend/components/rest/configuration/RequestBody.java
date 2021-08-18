@@ -65,7 +65,11 @@ public class RequestBody implements Serializable {
         }
 
         params.stream().filter(p -> p.getValue() == null).forEach(p -> p.setValue(""));
-        return params.stream().filter(p -> p.getKey() != null).filter(p -> !p.getKey().isEmpty()).collect(Collectors.toList());
+        return params
+                .stream()
+                .filter(p -> p.getKey() != null)
+                .filter(p -> !p.getKey().isEmpty())
+                .collect(Collectors.toList());
     }
 
     public void setTextContent(String content) {
@@ -98,6 +102,7 @@ public class RequestBody implements Serializable {
     }
 
     public enum Type {
+
         TEXT("text/plain"),
         JSON("application/json"),
         XML("text/xml"),

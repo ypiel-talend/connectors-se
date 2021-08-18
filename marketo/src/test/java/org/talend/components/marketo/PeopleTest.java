@@ -40,18 +40,21 @@ public class PeopleTest extends MarketoBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        r1 = recordBuilderFactory.newRecordBuilder() //
+        r1 = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString("email", "release-1.2.0-test-r1@talend.com") //
                 .withString("firstName", "Talend") //
                 .withString("lastName", "IT-1") //
                 .build();
-        r2 = recordBuilderFactory.newRecordBuilder() //
+        r2 = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString("email", "release-1.2.0-test-r2@talend.com") //
                 .withString("firstName", "Talend") //
                 .withString("lastName", "IT-2") //
                 .build();
 
-        r3 = recordBuilderFactory.newRecordBuilder() //
+        r3 = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString("email", "Release_10@talend.com") //
                 .withString("firstName", "firstName") //
                 .withString("lastName", "lastName") //
@@ -69,13 +72,15 @@ public class PeopleTest extends MarketoBaseTest {
         records.add(r3);
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         handler.setInputData(records);
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "test://emitter") //
                 .component("out", "Marketo://Output?" + config) //
                 .connections() //
                 .from("in") //
                 .to("out") //
-                .build().run();
+                .build()
+                .run();
         handler.resetState();
         final List<Record> results = handler.getCollectedData(Record.class);
         assertNotNull(results);

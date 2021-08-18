@@ -34,7 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("JDBC input using table name")
 public class TableNameInputEmitter extends AbstractInputEmitter implements Serializable {
 
-    public TableNameInputEmitter(@Option("configuration") final InputTableNameConfig config, final JdbcService jdbcDriversService,
+    public TableNameInputEmitter(@Option("configuration") final InputTableNameConfig config,
+            final JdbcService jdbcDriversService,
             final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
         super(config, jdbcDriversService, recordBuilderFactory, i18nMessage);
     }

@@ -97,9 +97,16 @@ public class BigQueryOutputTest {
     private List<Record> getRecordsToStore() {
         RecordBuilderFactory rbf = new RecordBuilderFactoryImpl(null);
         return IntStream.of(10).mapToObj(i -> {
-            return rbf.newRecordBuilder().withString("f1", "A").withFloat("f2", 42.5f).withBoolean("f3", i % 2 == 0)
-                    .withDateTime("f4", new Date()).withDateTime("f5", new Date()).withBytes("f6", new byte[] { 0x01, 0x02 })
-                    .withInt("f7", i).build();
+            return rbf
+                    .newRecordBuilder()
+                    .withString("f1", "A")
+                    .withFloat("f2", 42.5f)
+                    .withBoolean("f3", i % 2 == 0)
+                    .withDateTime("f4", new Date())
+                    .withDateTime("f5", new Date())
+                    .withBytes("f6", new byte[] { 0x01, 0x02 })
+                    .withInt("f7", i)
+                    .build();
         }).collect(Collectors.toList());
     }
 

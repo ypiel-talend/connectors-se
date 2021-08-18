@@ -144,7 +144,8 @@ public class SalesforceService {
     }
 
     /**
-     * Provides manual login as in {@link PartnerConnection} constructor, checks login result for valid connection/credentials.
+     * Provides manual login as in {@link PartnerConnection} constructor, checks login result for valid
+     * connection/credentials.
      *
      * @param config connector configuration with endpoint/userId/password
      * @param connection to be used for login in Salesforce.
@@ -248,9 +249,11 @@ public class SalesforceService {
         }
     }
 
-    public Schema guessSchema(List<String> fieldNames, Map<String, IField> fieldMap, final RecordBuilderFactory factory) {
+    public Schema guessSchema(List<String> fieldNames, Map<String, IField> fieldMap,
+            final RecordBuilderFactory factory) {
         final Schema.Entry.Builder entryBuilder = factory.newEntryBuilder();
-        final Schema.Builder schemaBuilder = factory.newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
+        final Schema.Builder schemaBuilder =
+                factory.newSchemaBuilder(org.talend.sdk.component.api.record.Schema.Type.RECORD);
         if ((fieldNames == null || fieldNames.isEmpty()) || fieldMap == null || fieldMap.isEmpty()) {
             return schemaBuilder.build();
         } else {

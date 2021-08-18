@@ -61,11 +61,13 @@ public class BlobOutputTest {
         BlobOutputConfiguration outputConfiguration = new BlobOutputConfiguration();
         outputConfiguration.setDataset(dataset);
 
-        BlobOutput output = new BlobOutput(outputConfiguration, blobComponentServicesMock, Mockito.mock(MessageService.class));
+        BlobOutput output =
+                new BlobOutput(outputConfiguration, blobComponentServicesMock, Mockito.mock(MessageService.class));
         BlobRuntimeException thrownException = Assertions.assertThrows(BlobRuntimeException.class, output::init);
 
-        Assertions.assertEquals(expectedExceptionMessage, thrownException.getCause().getMessage(),
-                "Exception message is different");
+        Assertions
+                .assertEquals(expectedExceptionMessage, thrownException.getCause().getMessage(),
+                        "Exception message is different");
     }
 
     @Test
@@ -79,7 +81,8 @@ public class BlobOutputTest {
         BlobOutputConfiguration outputConfiguration = new BlobOutputConfiguration();
         outputConfiguration.setDataset(dataset);
 
-        BlobOutput output = new BlobOutput(outputConfiguration, blobComponentServicesMock, Mockito.mock(MessageService.class));
+        BlobOutput output =
+                new BlobOutput(outputConfiguration, blobComponentServicesMock, Mockito.mock(MessageService.class));
         Assertions.assertDoesNotThrow(output::init);
     }
 }

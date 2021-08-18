@@ -92,8 +92,9 @@ public class ClientTestWithHttpbinTest {
     static void startHttpBinContainer() {
         httpbin = new GenericContainer<>("kennethreitz/httpbin").withExposedPorts(80).waitingFor(Wait.forHttp("/"));
         httpbin.start();
-        HTTPBIN_BASE = () -> System.getProperty("org.talend.components.rest.httpbin_base",
-                "http://localhost:" + httpbin.getMappedPort(80));
+        HTTPBIN_BASE = () -> System
+                .getProperty("org.talend.components.rest.httpbin_base",
+                        "http://localhost:" + httpbin.getMappedPort(80));
     }
 
     @AfterAll
@@ -171,7 +172,8 @@ public class ClientTestWithHttpbinTest {
         assertFalse(resp.getRecord("body").getRecord("args").getOptionalString("params1").isPresent());
 
         URL base = new URL(HTTPBIN_BASE.get());
-        assertEquals(base.getHost() + ":" + base.getPort(), resp.getRecord("body").getRecord("headers").getString("Host"));
+        assertEquals(base.getHost() + ":" + base.getPort(),
+                resp.getRecord("body").getRecord("headers").getString("Host"));
     }
 
     @Test
@@ -204,7 +206,8 @@ public class ClientTestWithHttpbinTest {
             assertEquals("value1", resp.getRecord("body").getRecord("args").getString("params1"));
             assertEquals("<name>Dupont & Dupond</name>", resp.getRecord("body").getRecord("args").getString("params2"));
             assertEquals("simple value", resp.getRecord("body").getRecord("headers").getString("Header1"));
-            assertEquals("<name>header Dupont & Dupond</name>", resp.getRecord("body").getRecord("headers").getString("Header2"));
+            assertEquals("<name>header Dupont & Dupond</name>",
+                    resp.getRecord("body").getRecord("headers").getString("Header2"));
         }
     }
 
@@ -344,7 +347,8 @@ public class ClientTestWithHttpbinTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = { "auth-int,MD5", "auth,MD5", "auth-int,MD5-sess", "auth,MD5-sess", "auth-int,SHA-256", "auth,SHA-256",
+    @CsvSource(value = { "auth-int,MD5", "auth,MD5", "auth-int,MD5-sess", "auth,MD5-sess", "auth-int,SHA-256",
+            "auth,SHA-256",
             "auth-int,SHA-512", "auth,SHA-512" })
     void testDisgestAuth(final String qop, final String algo) {
         String user = "my_user";
@@ -365,7 +369,8 @@ public class ClientTestWithHttpbinTest {
         testDigestAuthWithQopAlgo(401, user, pwd + "x", auth, qop, algo);
     }
 
-    private void testDigestAuthWithQop(final int expected, final String user, final String pwd, final Authentication auth,
+    private void testDigestAuthWithQop(final int expected, final String user, final String pwd,
+            final Authentication auth,
             final String qop) {
         config.getDataset().getDatastore().setAuthentication(auth);
         config.getDataset().setMethodType(HttpMethod.GET);
@@ -377,7 +382,8 @@ public class ClientTestWithHttpbinTest {
         assertEquals(expected, resp.getInt("status"));
     }
 
-    private void testDigestAuthWithQopAlgo(final int expected, final String user, final String pwd, final Authentication auth,
+    private void testDigestAuthWithQopAlgo(final int expected, final String user, final String pwd,
+            final Authentication auth,
             final String qop, final String algo) {
         config.getDataset().getDatastore().setAuthentication(auth);
         config.getDataset().setMethodType(HttpMethod.GET);
@@ -409,21 +415,28 @@ public class ClientTestWithHttpbinTest {
             final String body = resp.getString("body");
             final String expected = "{\n" + "  \"slideshow\": {\n" + "    \"author\": \"Yours Truly\", \n"
                     + "    \"date\": \"date of publication\", \n" + "    \"slides\": [\n" + "      {\n"
-                    + "        \"title\": \"Wake up to WonderWidgets!\", \n" + "        \"type\": \"all\"\n" + "      }, \n"
+                    + "        \"title\": \"Wake up to WonderWidgets!\", \n" + "        \"type\": \"all\"\n"
+                    + "      }, \n"
                     + "      {\n" + "        \"items\": [\n" + "          \"Why <em>WonderWidgets</em> are great\", \n"
-                    + "          \"Who <em>buys</em> WonderWidgets\"\n" + "        ], \n" + "        \"title\": \"Overview\", \n"
-                    + "        \"type\": \"all\"\n" + "      }\n" + "    ], \n" + "    \"title\": \"Sample Slide Show\"\n"
+                    + "          \"Who <em>buys</em> WonderWidgets\"\n" + "        ], \n"
+                    + "        \"title\": \"Overview\", \n"
+                    + "        \"type\": \"all\"\n" + "      }\n" + "    ], \n"
+                    + "    \"title\": \"Sample Slide Show\"\n"
                     + "  }\n" + "}\n";
             assertEquals(expected, body);
         } else if ("xml".equals(type)) {
             final String body = resp.getString("body");
-            final String expected = "<?xml version='1.0' encoding='us-ascii'?>\n" + "\n" + "<!--  A SAMPLE set of slides  -->\n"
-                    + "\n" + "<slideshow \n" + "    title=\"Sample Slide Show\"\n" + "    date=\"Date of publication\"\n"
+            final String expected = "<?xml version='1.0' encoding='us-ascii'?>\n" + "\n"
+                    + "<!--  A SAMPLE set of slides  -->\n"
+                    + "\n" + "<slideshow \n" + "    title=\"Sample Slide Show\"\n"
+                    + "    date=\"Date of publication\"\n"
                     + "    author=\"Yours Truly\"\n" + "    >\n" + "\n" + "    <!-- TITLE SLIDE -->\n"
-                    + "    <slide type=\"all\">\n" + "      <title>Wake up to WonderWidgets!</title>\n" + "    </slide>\n" + "\n"
+                    + "    <slide type=\"all\">\n" + "      <title>Wake up to WonderWidgets!</title>\n"
+                    + "    </slide>\n" + "\n"
                     + "    <!-- OVERVIEW -->\n" + "    <slide type=\"all\">\n" + "        <title>Overview</title>\n"
                     + "        <item>Why <em>WonderWidgets</em> are great</item>\n" + "        <item/>\n"
-                    + "        <item>Who <em>buys</em> WonderWidgets</item>\n" + "    </slide>\n" + "\n" + "</slideshow>";
+                    + "        <item>Who <em>buys</em> WonderWidgets</item>\n" + "    </slide>\n" + "\n"
+                    + "</slideshow>";
             assertEquals(expected, body);
         } else if ("html".equals(type)) {
             final String body = resp.getString("body");

@@ -30,8 +30,10 @@ public class SnowflakeTestContainer implements JdbcTestContainer {
     public SnowflakeTestContainer() {
         server = new MavenDecrypter().find(SERVER_ID);
         if (server == null) {
-            throw new IllegalArgumentException("cant find snowflake server configuration. Please configure a server with id "
-                    + SERVER_ID + " and snowflake username/password for integration test in the maven settings.xml file");
+            throw new IllegalArgumentException(
+                    "cant find snowflake server configuration. Please configure a server with id "
+                            + SERVER_ID
+                            + " and snowflake username/password for integration test in the maven settings.xml file");
         }
     }
 
@@ -52,7 +54,8 @@ public class SnowflakeTestContainer implements JdbcTestContainer {
 
     @Override
     public String getJdbcUrl() {
-        return "jdbc:snowflake://" + TEST_ACCOUNT + ".snowflakecomputing.com/?schema=PUBLIC&db=" + TEST_DATABASE + "&warehouse="
+        return "jdbc:snowflake://" + TEST_ACCOUNT + ".snowflakecomputing.com/?schema=PUBLIC&db=" + TEST_DATABASE
+                + "&warehouse="
                 + TEST_WAREHOUSE;
     }
 

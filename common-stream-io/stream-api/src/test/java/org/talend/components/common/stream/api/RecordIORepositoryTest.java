@@ -35,20 +35,23 @@ class RecordIORepositoryTest {
 
         final RecordReaderSupplier reader = this.repo.findReader(FakeConfig.class);
         Assertions.assertNotNull(reader, "reader not found");
-        Assertions.assertTrue(FakeReaderSupplier.class.isInstance(reader),
-                () -> "wrong reader class " + reader.getClass().getName());
+        Assertions
+                .assertTrue(FakeReaderSupplier.class.isInstance(reader),
+                        () -> "wrong reader class " + reader.getClass().getName());
 
         final RecordWriterSupplier writer = this.repo.findWriter(FakeConfig.class);
         Assertions.assertNotNull(writer, "writer not found");
-        Assertions.assertTrue(FakeWriterSupplier.class.isInstance(writer),
-                () -> "wrong reader class " + writer.getClass().getName());
+        Assertions
+                .assertTrue(FakeWriterSupplier.class.isInstance(writer),
+                        () -> "wrong reader class " + writer.getClass().getName());
     }
 
     @Test
     public void te2() {
         final String baseName = Messages.class.getPackage().getName() + ".Messages";
-        final ResourceBundle bundle = ResourceBundle.getBundle(baseName, Locale.getDefault(),
-                Thread.currentThread().getContextClassLoader());
+        final ResourceBundle bundle = ResourceBundle
+                .getBundle(baseName, Locale.getDefault(),
+                        Thread.currentThread().getContextClassLoader());
         Assertions.assertNotNull(bundle, "bundle not found");
 
     }

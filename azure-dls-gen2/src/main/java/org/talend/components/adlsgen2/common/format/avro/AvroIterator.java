@@ -87,7 +87,8 @@ public class AvroIterator implements Iterator<Record>, Serializable {
             return new AvroIterator.Builder(factory);
         }
 
-        public AvroIterator.Builder withConfiguration(@Configuration("avroConfiguration") final AvroConfiguration configuration) {
+        public AvroIterator.Builder
+                withConfiguration(@Configuration("avroConfiguration") final AvroConfiguration configuration) {
             this.configuration = configuration;
             converter = AvroConverter.of(factory, configuration);
 

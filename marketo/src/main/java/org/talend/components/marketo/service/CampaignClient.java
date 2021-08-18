@@ -39,11 +39,14 @@ public interface CampaignClient extends HttpClient {
      * @param accessToken Marketo authorization token for API
      * @param id Comma-separated list of campaign ids to return records for.
      * @param name Comma-separated list of names to filter on.
-     * @param programName Comma-separated list of program names to filter on. If set, will filter to only campaigns which
+     * @param programName Comma-separated list of program names to filter on. If set, will filter to only campaigns
+     * which
      * are children of the designated programs.
-     * @param workspaceName Comma-separated list of workspace names to filter on. If set, will only return campaigns in the
+     * @param workspaceName Comma-separated list of workspace names to filter on. If set, will only return campaigns in
+     * the
      * given workspaces.
-     * @param isTriggerable Set to true to return active Campaigns which have a Campaign is Requested trigger and source is
+     * @param isTriggerable Set to true to return active Campaigns which have a Campaign is Requested trigger and source
+     * is
      * Web Service API
      * @return
      */
@@ -71,7 +74,8 @@ public interface CampaignClient extends HttpClient {
     );
 
     /**
-     * Remotely schedules a batch campaign to run at a given time. My tokens local to the campaign's parent program can be
+     * Remotely schedules a batch campaign to run at a given time. My tokens local to the campaign's parent program can
+     * be
      * overridden for the run to customize content. When using the "cloneToProgramName" parameter described below, this
      * endpoint is limited to 20 calls per day.
      * 
@@ -80,13 +84,17 @@ public interface CampaignClient extends HttpClient {
      * @param input JsonObject containing the following properties:
      * <ul>
      * <li>cloneToProgramName (string, optional): Name of the resulting program. When set, this attribute will cause the
-     * campaign, parent program, and all of its assets, to be created with the resulting new name. The parent program will
-     * be cloned and the newly created campaign will be scheduled. The resulting program is created underneath the parent.
+     * campaign, parent program, and all of its assets, to be created with the resulting new name. The parent program
+     * will
+     * be cloned and the newly created campaign will be scheduled. The resulting program is created underneath the
+     * parent.
      * Programs with snippets, push notifications, in-app messages, static lists, reports, and social assets may not be
      * cloned in this way</li>
-     * <li>runAt (string, optional): Datetime to run the campaign at. If unset, the campaign will be run five minutes after
+     * <li>runAt (string, optional): Datetime to run the campaign at. If unset, the campaign will be run five minutes
+     * after
      * the call is made</li>
-     * <li>tokens (Array[Token], optional): List of my tokens to replace during the run of the target campaign. The tokens
+     * <li>tokens (Array[Token], optional): List of my tokens to replace during the run of the target campaign. The
+     * tokens
      * must be available in a parent program or folder to be replaced during the run</li>
      * </ul>
      * @return
@@ -128,8 +136,10 @@ public interface CampaignClient extends HttpClient {
     );
 
     /**
-     * Passes a set of leads to a trigger campaign to run through the campaign's flow. The designated campaign must have a
-     * Campaign is Requested: Web Service API trigger, and must be active. My tokens local to the campaign's parent program
+     * Passes a set of leads to a trigger campaign to run through the campaign's flow. The designated campaign must have
+     * a
+     * Campaign is Requested: Web Service API trigger, and must be active. My tokens local to the campaign's parent
+     * program
      * can be overridden for the run to customize content. A maximum of 100 leads are allowed per call.
      * 
      * @param accessToken Marketo authorization token for API
@@ -137,7 +147,8 @@ public interface CampaignClient extends HttpClient {
      * @param input JsonObject containing the following properties:
      * <ul>
      * <li>leads (Array[InputLead]): List of leads for input</li>
-     * <li>tokens (Array[Token], optional): List of my tokens to replace during the run of the target campaign. The tokens
+     * <li>tokens (Array[Token], optional): List of my tokens to replace during the run of the target campaign. The
+     * tokens
      * must be available in a parent program or folder to be replaced during the run</li>
      * </ul>
      * @return

@@ -28,8 +28,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @GridLayouts({
-        @GridLayout({ @GridLayout.Row({ "needAuth" }), @GridLayout.Row({ "authMech" }), @GridLayout.Row({ "useAuthDatabase" }),
-                @GridLayout.Row({ "authDatabase" }), @GridLayout.Row({ "username" }), @GridLayout.Row({ "password" }) }) })
+        @GridLayout({ @GridLayout.Row({ "needAuth" }), @GridLayout.Row({ "authMech" }),
+                @GridLayout.Row({ "useAuthDatabase" }),
+                @GridLayout.Row({ "authDatabase" }), @GridLayout.Row({ "username" }),
+                @GridLayout.Row({ "password" }) }) })
 @Documentation("Path Mapping")
 public class Auth implements Serializable {
 

@@ -23,7 +23,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @GridLayout(value = { @GridLayout.Row("recordDelimiter"), @GridLayout.Row("customRecordDelimiter"),
-        @GridLayout.Row("fieldDelimiter"), @GridLayout.Row("customFieldDelimiter"), @GridLayout.Row("textEnclosureCharacter"),
+        @GridLayout.Row("fieldDelimiter"), @GridLayout.Row("customFieldDelimiter"),
+        @GridLayout.Row("textEnclosureCharacter"),
         @GridLayout.Row("escapeCharacter"), @GridLayout.Row("encoding"), @GridLayout.Row("customEncoding"),
         @GridLayout.Row("useHeader"), @GridLayout.Row("header") })
 @Data

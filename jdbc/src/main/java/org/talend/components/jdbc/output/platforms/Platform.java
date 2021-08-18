@@ -62,13 +62,16 @@ public abstract class Platform implements Serializable {
     protected abstract boolean isTableExistsCreationError(final Throwable e);
 
     public void createTableIfNotExist(final Connection connection, final String name, final List<String> keys,
-            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys, final DistributionStrategy distributionStrategy,
-            final List<String> distributionKeys, final int varcharLength, final List<Record> records) throws SQLException {
+            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys,
+            final DistributionStrategy distributionStrategy,
+            final List<String> distributionKeys, final int varcharLength, final List<Record> records)
+            throws SQLException {
         if (records.isEmpty()) {
             return;
         }
-        final Table table = getTableModel(connection, name, keys, sortStrategy, sortKeys, distributionStrategy, distributionKeys,
-                varcharLength, records);
+        final Table table =
+                getTableModel(connection, name, keys, sortStrategy, sortKeys, distributionStrategy, distributionKeys,
+                        varcharLength, records);
         final String sql = buildQuery(connection, table);
         try (final Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
@@ -84,7 +87,9 @@ public abstract class Platform implements Serializable {
                 throw toIllegalStateException(e);
             }
 
-            log.trace("create table issue was ignored. The table and it's name space has been created by an other worker", e);
+            log
+                    .trace("create table issue was ignored. The table and it's name space has been created by an other worker",
+                            e);
         }
     }
 
@@ -92,13 +97,19 @@ public abstract class Platform implements Serializable {
         return name == null || name.isEmpty() ? name : delimiterToken() + name + delimiterToken();
     }
 
-    String createPKs(DatabaseMetaData metaData, final String table, final List<Column> primaryKeys) throws SQLException {
+    String createPKs(DatabaseMetaData metaData, final String table, final List<Column> primaryKeys)
+            throws SQLException {
         return primaryKeys == null || primaryKeys.isEmpty() ? ""
                 : ", CONSTRAINT " + pkConstraintName(metaData, table, primaryKeys) + " PRIMARY KEY "
-                        + primaryKeys.stream().map(Column::getName).map(this::identifier).collect(joining(",", "(", ")"));
+                        + primaryKeys
+                                .stream()
+                                .map(Column::getName)
+                                .map(this::identifier)
+                                .collect(joining(",", "(", ")"));
     }
 
-    protected String pkConstraintName(DatabaseMetaData metaData, String table, List<Column> primaryKeys) throws SQLException {
+    protected String pkConstraintName(DatabaseMetaData metaData, String table, List<Column> primaryKeys)
+            throws SQLException {
         final String uuid = UUID.randomUUID().toString();
         final int nameLength = metaData.getMaxColumnNameLength();
         String constraint = "pk_" + table + "_" + primaryKeys.stream().map(Column::getName).collect(joining("_")) + "_"
@@ -117,22 +128,37 @@ public abstract class Platform implements Serializable {
     }
 
     protected Table getTableModel(final Connection connection, final String name, final List<String> keys,
-            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys, DistributionStrategy distributionStrategy,
+            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys,
+            DistributionStrategy distributionStrategy,
             final List<String> distributionKeys, final int varcharLength, final List<Record> records) {
-        final Table.TableBuilder builder = Table.builder().name(name).distributionStrategy(distributionStrategy)
+        final Table.TableBuilder builder = Table
+                .builder()
+                .name(name)
+                .distributionStrategy(distributionStrategy)
                 .sortStrategy(sortStrategy);
         try {
             builder.catalog(connection.getCatalog()).schema(JdbcService.getSchema(connection));
         } catch (final SQLException e) {
             log.warn("can't get database catalog or schema", e);
         }
-        final List<Schema.Entry> entries = records.stream().flatMap(record -> record.getSchema().getEntries().stream()).distinct()
+        final List<Schema.Entry> entries = records
+                .stream()
+                .flatMap(record -> record.getSchema().getEntries().stream())
+                .distinct()
                 .collect(toList());
-        return builder.columns(entries.stream()
-                .map(entry -> Column.builder().entry(entry).primaryKey(keys.contains(entry.getName()))
-                        .sortKey(sortKeys.contains(entry.getName())).distributionKey(distributionKeys.contains(entry.getName()))
-                        .size(STRING == entry.getType() ? varcharLength : null).build())
-                .collect(toList())).build();
+        return builder
+                .columns(entries
+                        .stream()
+                        .map(entry -> Column
+                                .builder()
+                                .entry(entry)
+                                .primaryKey(keys.contains(entry.getName()))
+                                .sortKey(sortKeys.contains(entry.getName()))
+                                .distributionKey(distributionKeys.contains(entry.getName()))
+                                .size(STRING == entry.getType() ? varcharLength : null)
+                                .build())
+                        .collect(toList()))
+                .build();
     }
 
     /**

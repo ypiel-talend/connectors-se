@@ -16,6 +16,7 @@ import lombok.Getter;
 
 @Getter
 public enum CsvFieldDelimiter {
+
     SEMICOLON(';'),
     COMMA(','),
     TABULATION('\t'),

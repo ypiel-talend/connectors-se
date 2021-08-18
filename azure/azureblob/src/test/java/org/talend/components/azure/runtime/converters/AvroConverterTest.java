@@ -62,12 +62,30 @@ class AvroConverterTest {
         recordBuilderFactory = componentsHandler.findService(RecordBuilderFactory.class);
         converter = AvroConverter.of(recordBuilderFactory);
         avro = new GenericData.Record( //
-                SchemaBuilder.builder().record("sample").fields() //
-                        .name("string").type().stringType().noDefault() //
-                        .name("int").type().intType().noDefault() //
-                        .name("long").type().longType().noDefault() //
-                        .name("double").type().doubleType().noDefault() //
-                        .name("boolean").type().booleanType().noDefault() //
+                SchemaBuilder
+                        .builder()
+                        .record("sample")
+                        .fields() //
+                        .name("string")
+                        .type()
+                        .stringType()
+                        .noDefault() //
+                        .name("int")
+                        .type()
+                        .intType()
+                        .noDefault() //
+                        .name("long")
+                        .type()
+                        .longType()
+                        .noDefault() //
+                        .name("double")
+                        .type()
+                        .doubleType()
+                        .noDefault() //
+                        .name("boolean")
+                        .type()
+                        .booleanType()
+                        .noDefault() //
                         .endRecord());
         avro.put("string", "a string sample");
         avro.put("int", 710);
@@ -80,7 +98,8 @@ class AvroConverterTest {
 
     private void prepareTestRecords() {
         // some demo records
-        versatileRecord = recordBuilderFactory.newRecordBuilder() //
+        versatileRecord = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString("string1", "Bonjour") //
                 .withString("string2", "Olà") //
                 .withInt("int", 71) //
@@ -91,16 +110,26 @@ class AvroConverterTest {
                 .withDouble("double", 20.5) //
                 .build();
 
-        Entry er = recordBuilderFactory.newEntryBuilder().withName("record").withType(Type.RECORD)
-                .withElementSchema(versatileRecord.getSchema()).build();
-        Entry ea = recordBuilderFactory.newEntryBuilder().withName("array").withType(Type.ARRAY)
-                .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.ARRAY).withType(Type.STRING).build()).build();
+        Entry er = recordBuilderFactory
+                .newEntryBuilder()
+                .withName("record")
+                .withType(Type.RECORD)
+                .withElementSchema(versatileRecord.getSchema())
+                .build();
+        Entry ea = recordBuilderFactory
+                .newEntryBuilder()
+                .withName("array")
+                .withType(Type.ARRAY)
+                .withElementSchema(recordBuilderFactory.newSchemaBuilder(Type.ARRAY).withType(Type.STRING).build())
+                .build();
 
-        complexRecord = recordBuilderFactory.newRecordBuilder() //
+        complexRecord = recordBuilderFactory
+                .newRecordBuilder() //
                 .withString("name", "ComplexR") //
                 .withRecord(er, versatileRecord) //
                 .withDateTime("now", now) //
-                .withArray(ea, Arrays.asList("ary1", "ary2", "ary3")).build();
+                .withArray(ea, Arrays.asList("ary1", "ary2", "ary3"))
+                .build();
     }
 
     @Test
@@ -114,7 +143,11 @@ class AvroConverterTest {
         assertNotNull(s);
         assertEquals(5, s.getEntries().size());
         assertTrue(s.getType().equals(Type.RECORD));
-        assertTrue(s.getEntries().stream().map(Entry::getName).collect(toList())
+        assertTrue(s
+                .getEntries()
+                .stream()
+                .map(Entry::getName)
+                .collect(toList())
                 .containsAll(Stream.of("string", "int", "long", "double", "boolean").collect(toList())));
     }
 
@@ -186,12 +219,30 @@ class AvroConverterTest {
     @Test
     void withNullFieldsInIcomingRecord() {
         avro = new GenericData.Record( //
-                SchemaBuilder.builder().record("sample").fields() //
-                        .name("string").type().stringType().noDefault() //
-                        .name("int").type().intType().noDefault() //
-                        .name("long").type().longType().noDefault() //
-                        .name("double").type().doubleType().noDefault() //
-                        .name("boolean").type().booleanType().noDefault() //
+                SchemaBuilder
+                        .builder()
+                        .record("sample")
+                        .fields() //
+                        .name("string")
+                        .type()
+                        .stringType()
+                        .noDefault() //
+                        .name("int")
+                        .type()
+                        .intType()
+                        .noDefault() //
+                        .name("long")
+                        .type()
+                        .longType()
+                        .noDefault() //
+                        .name("double")
+                        .type()
+                        .doubleType()
+                        .noDefault() //
+                        .name("boolean")
+                        .type()
+                        .booleanType()
+                        .noDefault() //
                         .endRecord());
         avro.put("string", null);
         avro.put("int", null);
@@ -211,18 +262,34 @@ class AvroConverterTest {
     @Test
     void withTimeStampsInAndOut() {
         avro = new GenericData.Record( //
-                SchemaBuilder.builder().record("sample").fields() //
-                        .name("string").type().stringType().noDefault() //
-                        .name("int").type().intType().noDefault() //
-                        .name("long").type().longType().noDefault() //
-                        .name("officialts").type().longType().noDefault() //
+                SchemaBuilder
+                        .builder()
+                        .record("sample")
+                        .fields() //
+                        .name("string")
+                        .type()
+                        .stringType()
+                        .noDefault() //
+                        .name("int")
+                        .type()
+                        .intType()
+                        .noDefault() //
+                        .name("long")
+                        .type()
+                        .longType()
+                        .noDefault() //
+                        .name("officialts")
+                        .type()
+                        .longType()
+                        .noDefault() //
                         .endRecord());
 
     }
 
     @Test
     void withAllowNullColumnSchema() {
-        Schema schema = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
+        Schema schema = recordBuilderFactory
+                .newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(this.buildEntry("nullStringColumn", Schema.Type.STRING))
                 .withEntry(this.buildEntry("nullStringColumn2", Schema.Type.STRING))
                 .withEntry(this.buildEntry("nullIntColumn", Schema.Type.INT))
@@ -231,8 +298,10 @@ class AvroConverterTest {
                 .withEntry(this.buildEntry("nullDoubleColumn", Schema.Type.DOUBLE))
                 .withEntry(this.buildEntry("nullBooleanColumn", Schema.Type.BOOLEAN))
                 .withEntry(this.buildEntry("nullByteArrayColumn", Schema.Type.BYTES))
-                .withEntry(this.buildEntry("nullDateColumn", Schema.Type.DATETIME)).build();
-        Record testRecord = recordBuilderFactory.newRecordBuilder(schema).withString("nullStringColumn", "myString").build();
+                .withEntry(this.buildEntry("nullDateColumn", Schema.Type.DATETIME))
+                .build();
+        Record testRecord =
+                recordBuilderFactory.newRecordBuilder(schema).withString("nullStringColumn", "myString").build();
 
         assertNotNull(testRecord.getString("nullStringColumn"));
         assertFalse(testRecord.getOptionalInt("nullIntColumn").isPresent());

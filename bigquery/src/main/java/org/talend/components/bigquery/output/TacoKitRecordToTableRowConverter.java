@@ -70,22 +70,32 @@ public class TacoKitRecordToTableRowConverter {
             } else {
                 switch (entry.getType()) {
                 case RECORD:
-                    Optional.ofNullable(input.getRecord(fieldName))
-                            .ifPresent(record -> tableRow.put(fieldName, convertRecordToTableRow(record, field.getSubFields())));
+                    Optional
+                            .ofNullable(input.getRecord(fieldName))
+                            .ifPresent(record -> tableRow
+                                    .put(fieldName, convertRecordToTableRow(record, field.getSubFields())));
                     break;
                 case ARRAY:
                     switch (entry.getElementSchema().getType()) {
                     case RECORD:
                         Collection<Record> records = input.getArray(Record.class, fieldName);
-                        tableRow.put(fieldName, records.stream()
-                                .map(record -> convertRecordToTableRow(record, field.getSubFields())).collect(toList()));
+                        tableRow
+                                .put(fieldName, records
+                                        .stream()
+                                        .map(record -> convertRecordToTableRow(record, field.getSubFields()))
+                                        .collect(toList()));
                         break;
                     case STRING:
                         tableRow.put(fieldName, input.getArray(String.class, fieldName));
                         break;
                     case BYTES:
-                        tableRow.put(fieldName, input.getArray(byte[].class, fieldName).stream().map(Base64::encodeBase64String)
-                                .collect(Collectors.toList()));
+                        tableRow
+                                .put(fieldName,
+                                        input
+                                                .getArray(byte[].class, fieldName)
+                                                .stream()
+                                                .map(Base64::encodeBase64String)
+                                                .collect(Collectors.toList()));
                         break;
                     case INT:
                         tableRow.put(fieldName, input.getArray(Integer.class, fieldName));
@@ -103,13 +113,20 @@ public class TacoKitRecordToTableRowConverter {
                         tableRow.put(fieldName, input.getArray(Boolean.class, fieldName));
                         break;
                     case DATETIME:
-                        tableRow.put(fieldName,
-                                input.getArray(ZonedDateTime.class, fieldName).stream()
-                                        .map(dt -> Optional.ofNullable(dt).map(getDateFunction(field.getType())).orElse(null))
-                                        .collect(toList()));
+                        tableRow
+                                .put(fieldName,
+                                        input
+                                                .getArray(ZonedDateTime.class, fieldName)
+                                                .stream()
+                                                .map(dt -> Optional
+                                                        .ofNullable(dt)
+                                                        .map(getDateFunction(field.getType()))
+                                                        .orElse(null))
+                                                .collect(toList()));
                         break;
                     default:
-                        throw new BigQueryConnectorException(i18n.entryTypeNotDefined(entry.getElementSchema().getType().name()));
+                        throw new BigQueryConnectorException(
+                                i18n.entryTypeNotDefined(entry.getElementSchema().getType().name()));
                     }
                     break;
                 case STRING:
@@ -134,8 +151,11 @@ public class TacoKitRecordToTableRowConverter {
                     tableRow.put(fieldName, input.getBoolean(fieldName));
                     break;
                 case DATETIME:
-                    tableRow.put(fieldName, Optional.ofNullable(input.getDateTime(fieldName))
-                            .map(dt -> getDateFunction(field.getType()).apply(dt)).orElse(null));
+                    tableRow
+                            .put(fieldName, Optional
+                                    .ofNullable(input.getDateTime(fieldName))
+                                    .map(dt -> getDateFunction(field.getType()).apply(dt))
+                                    .orElse(null));
                     break;
                 default:
                     throw new BigQueryConnectorException(i18n.entryTypeNotDefined(entry.getType().name()));

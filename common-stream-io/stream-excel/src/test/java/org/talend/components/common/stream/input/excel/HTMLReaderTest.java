@@ -28,7 +28,8 @@ class HTMLReaderTest {
 
     @Test
     void read() throws IOException {
-        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("./html/HTML-utf8.html")) {
+        try (InputStream input =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("./html/HTML-utf8.html")) {
 
             final HTMLReader reader = new HTMLReader(new RecordBuilderFactoryImpl("test"));
             final ExcelConfiguration configuration = new ExcelConfiguration();

@@ -18,6 +18,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum FileEncoding {
+
     UTF8("UTF-8"),
     ISO_8859_15("ISO-8859-15"),
     OTHER("Other");

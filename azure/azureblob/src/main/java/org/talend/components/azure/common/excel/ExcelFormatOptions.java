@@ -25,7 +25,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @GridLayout({ @GridLayout.Row("excelFormat"), @GridLayout.Row("sheetName"), @GridLayout.Row("encoding"),
-        @GridLayout.Row("customEncoding"), @GridLayout.Row("useHeader"), @GridLayout.Row("header"), @GridLayout.Row("useFooter"),
+        @GridLayout.Row("customEncoding"), @GridLayout.Row("useHeader"), @GridLayout.Row("header"),
+        @GridLayout.Row("useFooter"),
         @GridLayout.Row("footer") })
 @Data
 public class ExcelFormatOptions implements Serializable {

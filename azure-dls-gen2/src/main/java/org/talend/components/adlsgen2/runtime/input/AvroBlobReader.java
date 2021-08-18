@@ -34,7 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AvroBlobReader extends BlobReader {
 
-    public AvroBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory, AdlsGen2Service service,
+    public AvroBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
+            AdlsGen2Service service,
             AdlsActiveDirectoryService activeDirectoryService) {
         super(configuration, recordBuilderFactory, service, activeDirectoryService);
     }
@@ -52,7 +53,8 @@ public class AvroBlobReader extends BlobReader {
 
         private InputStream input;
 
-        private AvroFileRecordIterator(Iterable<BlobInformations> blobItemsList, RecordBuilderFactory recordBuilderFactory) {
+        private AvroFileRecordIterator(Iterable<BlobInformations> blobItemsList,
+                RecordBuilderFactory recordBuilderFactory) {
             super(blobItemsList, recordBuilderFactory);
             peekFirstBlob();
         }
@@ -60,7 +62,8 @@ public class AvroBlobReader extends BlobReader {
         @Override
         protected Record convertToRecord(GenericRecord next) {
             if (converter == null) {
-                converter = AvroConverter.of(getRecordBuilderFactory(), configuration.getDataSet().getAvroConfiguration());
+                converter =
+                        AvroConverter.of(getRecordBuilderFactory(), configuration.getDataSet().getAvroConfiguration());
             }
 
             return converter.toRecord(next);

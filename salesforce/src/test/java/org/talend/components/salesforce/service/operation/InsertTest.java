@@ -56,7 +56,8 @@ class InsertTest {
 
         final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
 
-        final Record r1 = factory.newRecordBuilder() //
+        final Record r1 = factory
+                .newRecordBuilder() //
                 .withString("f1", "f1value") //
                 .withInt("f2", 123) //
                 .build();

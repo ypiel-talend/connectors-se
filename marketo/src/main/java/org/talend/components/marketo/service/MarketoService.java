@@ -139,8 +139,9 @@ public class MarketoService {
      */
     public String retrieveAccessToken(@Configuration("configuration") final MarketoDataSet dataSet) {
         initClients(dataSet.getDataStore());
-        Response<JsonObject> result = authorizationClient.getAuthorizationToken(CLIENT_CREDENTIALS,
-                dataSet.getDataStore().getClientId(), dataSet.getDataStore().getClientSecret());
+        Response<JsonObject> result = authorizationClient
+                .getAuthorizationToken(CLIENT_CREDENTIALS,
+                        dataSet.getDataStore().getClientId(), dataSet.getDataStore().getClientSecret());
         log.debug("[retrieveAccessToken] [{}] : {}.", result.status(), result.body());
         if (result.status() == 200) {
             return result.body().getString(ATTR_ACCESS_TOKEN);
@@ -167,8 +168,10 @@ public class MarketoService {
         if (response.status() == 200 && response.body() != null && response.body().getJsonArray(ATTR_RESULT) != null) {
             return response.body().getJsonArray(ATTR_RESULT);
         }
-        log.error("[parseResultFromResponse] Error: [{}] headers:{}; body: {}.", response.status(), response.headers(),
-                response.body());
+        log
+                .error("[parseResultFromResponse] Error: [{}] headers:{}; body: {}.", response.status(),
+                        response.headers(),
+                        response.body());
         throw new IllegalArgumentException(i18n.invalidOperation());
     }
 
@@ -180,7 +183,10 @@ public class MarketoService {
             List<String> fields = configuration.getDataSet().getFields();
             Schema people = getEntitySchema(configuration.getDataSet().getDataStore());
             if (fields.size() > 0) {
-                people.getEntries().stream().filter(entry -> fields.contains(entry.getName()))
+                people
+                        .getEntries()
+                        .stream()
+                        .filter(entry -> fields.contains(entry.getName()))
                         .forEach(entry -> b.withEntry(entry));
             } else {
                 people.getEntries().stream().forEach(entry -> b.withEntry(entry));
@@ -257,7 +263,8 @@ public class MarketoService {
                  */
             case DATETIME:
                 /*
-                 * Used for a date & time. Follows W3C format (ISO 8601). The best practice is to always include the time zone
+                 * Used for a date & time. Follows W3C format (ISO 8601). The best practice is to always include the
+                 * time zone
                  * offset.
                  * Complete date plus hours and minutes:
                  *
@@ -271,8 +278,14 @@ public class MarketoService {
                 log.warn(i18n.nonManagedType(dataType, entryName));
                 entryType = Schema.Type.STRING;
             }
-            entries.add(
-                    recordBuilder.newEntryBuilder().withName(entryName).withType(entryType).withComment(entityComment).build());
+            entries
+                    .add(
+                            recordBuilder
+                                    .newEntryBuilder()
+                                    .withName(entryName)
+                                    .withType(entryType)
+                                    .withComment(entityComment)
+                                    .build());
         }
         Builder b = recordBuilder.newSchemaBuilder(Schema.Type.RECORD);
         entries.forEach(b::withEntry);
@@ -339,7 +352,9 @@ public class MarketoService {
                 if (hasJsonValue(val)) {
                     switch (val.getValueType()) {
                     case ARRAY:
-                        b.withString(key, json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(",")));
+                        b
+                                .withString(key,
+                                        json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(",")));
                         break;
                     case OBJECT:
                         b.withString(key, String.valueOf(json.getJsonObject(key).toString()));
@@ -377,9 +392,12 @@ public class MarketoService {
                 break;
             case DATETIME:
                 try {
-                    b.withDateTime(key,
-                            hasJsonValue(val) ? new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(json.getString(key))
-                                    : null);
+                    b
+                            .withDateTime(key,
+                                    hasJsonValue(val)
+                                            ? new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                                    .parse(json.getString(key))
+                                            : null);
                 } catch (ParseException e1) {
                     log.error("[convertToRecord] Date parsing error: {}.", e1.getMessage());
                 }
@@ -425,24 +443,42 @@ public class MarketoService {
     }
 
     Schema getLeadActivitiesSchema() {
-        return recordBuilder.newSchemaBuilder(Type.RECORD)
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ACTIVITY_DATE).withType(Type.STRING)
-                        .withComment(DATETIME).build())
+        return recordBuilder
+                .newSchemaBuilder(Type.RECORD)
+                .withEntry(recordBuilder
+                        .newEntryBuilder()
+                        .withName(ATTR_ACTIVITY_DATE)
+                        .withType(Type.STRING)
+                        .withComment(DATETIME)
+                        .build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ACTIVITY_TYPE_ID).withType(Type.INT).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ATTRIBUTES).withType(Type.STRING).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_CAMPAIGN_ID).withType(Type.INT).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ID).withType(Type.INT).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_LEAD_ID).withType(Type.INT).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_MARKETO_GUID).withType(Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_PRIMARY_ATTRIBUTE_VALUE).withType(Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_PRIMARY_ATTRIBUTE_VALUE_ID).withType(Type.INT).build()) //
+                .withEntry(recordBuilder
+                        .newEntryBuilder()
+                        .withName(ATTR_PRIMARY_ATTRIBUTE_VALUE)
+                        .withType(Type.STRING)
+                        .build())
+                .withEntry(recordBuilder
+                        .newEntryBuilder()
+                        .withName(ATTR_PRIMARY_ATTRIBUTE_VALUE_ID)
+                        .withType(Type.INT)
+                        .build()) //
                 .build();
     }
 
     Schema getLeadChangesSchema() {
-        return recordBuilder.newSchemaBuilder(Type.RECORD)
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ACTIVITY_DATE).withType(Type.STRING)
-                        .withComment(DATETIME).build())
+        return recordBuilder
+                .newSchemaBuilder(Type.RECORD)
+                .withEntry(recordBuilder
+                        .newEntryBuilder()
+                        .withName(ATTR_ACTIVITY_DATE)
+                        .withType(Type.STRING)
+                        .withComment(DATETIME)
+                        .build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ACTIVITY_TYPE_ID).withType(Type.INT).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ATTRIBUTES).withType(Type.STRING).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_CAMPAIGN_ID).withType(Type.INT).build())
@@ -454,28 +490,43 @@ public class MarketoService {
     }
 
     Schema getLeadListDefaultSchema() {
-        return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
+        return recordBuilder
+                .newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ID).withType(Schema.Type.INT).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_STATUS).withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_REASONS).withType(Schema.Type.STRING).build()).build();
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_REASONS).withType(Schema.Type.STRING).build())
+                .build();
     }
 
     Schema getListGetDefaultSchema() {
-        return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
+        return recordBuilder
+                .newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ID).withType(Schema.Type.INT).build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_NAME).withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_WORKSPACE_NAME).withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_CREATED_AT).withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_UPDATED_AT).withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder
+                        .newEntryBuilder()
+                        .withName(ATTR_WORKSPACE_NAME)
+                        .withType(Schema.Type.STRING)
+                        .build())
+                .withEntry(
+                        recordBuilder.newEntryBuilder().withName(ATTR_CREATED_AT).withType(Schema.Type.STRING).build())
+                .withEntry(
+                        recordBuilder.newEntryBuilder().withName(ATTR_UPDATED_AT).withType(Schema.Type.STRING).build())
                 .build();
     }
 
     Schema getCustomObjectDefaultSchema() {
-        return recordBuilder.newSchemaBuilder(Schema.Type.RECORD)
+        return recordBuilder
+                .newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_SEQ).withType(Schema.Type.INT).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_MARKETO_GUID).withType(Schema.Type.STRING).build())
+                .withEntry(recordBuilder
+                        .newEntryBuilder()
+                        .withName(ATTR_MARKETO_GUID)
+                        .withType(Schema.Type.STRING)
+                        .build())
                 .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_STATUS).withType(Schema.Type.STRING).build())
-                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_REASONS).withType(Schema.Type.STRING).build()).build();
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_REASONS).withType(Schema.Type.STRING).build())
+                .build();
     }
 
 }

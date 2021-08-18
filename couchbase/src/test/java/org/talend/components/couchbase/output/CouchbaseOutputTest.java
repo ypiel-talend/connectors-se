@@ -75,8 +75,15 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
 
     private void executeJob(CouchbaseOutputConfiguration configuration) {
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
-        Job.components().component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
-                .component("emitter", "test://emitter").connections().from("emitter").to("Couchbase_Output").build().run();
+        Job
+                .components()
+                .component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
+                .component("emitter", "test://emitter")
+                .connections()
+                .from("emitter")
+                .to("Couchbase_Output")
+                .build()
+                .run();
     }
 
     @Test
@@ -126,8 +133,10 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
         List<Record> records = new ArrayList<>();
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
         for (int i = 0; i < docCount; i++) {
-            Record record = recordBuilderFactory.newRecordBuilder()
-                    .withString(entryBuilder.withName("id").withType(Schema.Type.STRING).build(), generateDocId(idPrefix, i))
+            Record record = recordBuilderFactory
+                    .newRecordBuilder()
+                    .withString(entryBuilder.withName("id").withType(Schema.Type.STRING).build(),
+                            generateDocId(idPrefix, i))
                     .withBytes(entryBuilder.withName("content").withType(Schema.Type.BYTES).build(),
                             (docContent + "_" + i).getBytes(StandardCharsets.UTF_8))
                     .build();
@@ -230,14 +239,20 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     private List<Record> createPartialUpdateRecords(String idPrefix) {
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
         List<Record> records = new ArrayList<>();
-        Record record1 = recordBuilderFactory.newRecordBuilder()
-                .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(), generateDocId(idPrefix, 0))
+        Record record1 = recordBuilderFactory
+                .newRecordBuilder()
+                .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(),
+                        generateDocId(idPrefix, 0))
                 .withInt(entryBuilder.withName("t_int_min").withType(Schema.Type.INT).build(), 1971)
-                .withString(entryBuilder.withName("extra_content").withType(Schema.Type.STRING).build(), "path new").build();
-        Record record2 = recordBuilderFactory.newRecordBuilder()
-                .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(), generateDocId(idPrefix, 1))
+                .withString(entryBuilder.withName("extra_content").withType(Schema.Type.STRING).build(), "path new")
+                .build();
+        Record record2 = recordBuilderFactory
+                .newRecordBuilder()
+                .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(),
+                        generateDocId(idPrefix, 1))
                 .withBoolean(entryBuilder.withName("t_boolean").withType(Schema.Type.BOOLEAN).build(), Boolean.FALSE)
-                .withString(entryBuilder.withName("extra_content2").withType(Schema.Type.STRING).build(), "path zap").build();
+                .withString(entryBuilder.withName("extra_content2").withType(Schema.Type.STRING).build(), "path zap")
+                .build();
         records.add(record1);
         records.add(record2);
 
@@ -271,8 +286,10 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
             assertEquals(new Integer(testData.getColIntMax()), resultList.get(idx).content().getInt("t_int_max"));
             assertEquals(new Long(testData.getColLongMin()), resultList.get(idx).content().getLong("t_long_min"));
             assertEquals(new Long(testData.getColLongMax()), resultList.get(idx).content().getLong("t_long_max"));
-            assertEquals(testData.getColFloatMin(), resultList.get(idx).content().getNumber("t_float_min").floatValue());
-            assertEquals(testData.getColFloatMax(), resultList.get(idx).content().getNumber("t_float_max").floatValue());
+            assertEquals(testData.getColFloatMin(),
+                    resultList.get(idx).content().getNumber("t_float_min").floatValue());
+            assertEquals(testData.getColFloatMax(),
+                    resultList.get(idx).content().getNumber("t_float_max").floatValue());
             assertEquals(testData.getColDoubleMin(), resultList.get(idx).content().getDouble("t_double_min"));
             assertEquals(testData.getColDoubleMax(), resultList.get(idx).content().getDouble("t_double_max"));
             assertEquals(testData.getColDateTime().toString(), resultList.get(idx).content().getString("t_datetime"));
@@ -308,8 +325,13 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     void toJsonDocumentWithBytesType() {
         byte[] bytes = "aloha".getBytes(Charset.defaultCharset());
         String idValue = "fixBytes";
-        Record test = recordBuilderFactory.newRecordBuilder().withString("ID", idValue).withInt("id", 101)
-                .withString("name", "kamikaze").withBytes("byties", bytes).build();
+        Record test = recordBuilderFactory
+                .newRecordBuilder()
+                .withString("ID", idValue)
+                .withInt("id", 101)
+                .withString("name", "kamikaze")
+                .withBytes("byties", bytes)
+                .build();
         CouchbaseOutput couch = new CouchbaseOutput(getOutputConfiguration(), null, null);
         JsonDocument jsonDoc = couch.toJsonDocument("ID", test);
         assertEquals(idValue, jsonDoc.id());

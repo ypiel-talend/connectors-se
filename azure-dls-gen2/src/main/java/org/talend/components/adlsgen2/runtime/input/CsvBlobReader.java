@@ -111,7 +111,8 @@ public class CsvBlobReader extends BlobReader {
 
         private void initMetadataIfNeeded() {
             if (converter == null) {
-                converter = CsvConverter.of(getRecordBuilderFactory(), configuration.getDataSet().getCsvConfiguration());
+                converter =
+                        CsvConverter.of(getRecordBuilderFactory(), configuration.getDataSet().getCsvConfiguration());
             }
 
             if (format == null) {

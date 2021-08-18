@@ -56,8 +56,10 @@ public class AdlsDatastoreRuntimeInfo {
         case SharedKey:
             break;
         case ActiveDirectory:
-            String activeDirToken = Optional.ofNullable(tokenProviderService.getActiveDirAuthToken(connection))
-                    .orElseThrow(() -> new IllegalStateException("Active directory authentication token can't be null"));
+            String activeDirToken = Optional
+                    .ofNullable(tokenProviderService.getActiveDirAuthToken(connection))
+                    .orElseThrow(
+                            () -> new IllegalStateException("Active directory authentication token can't be null"));
 
             adTokenMap.put(Constants.HeaderConstants.AUTHORIZATION, "Bearer " + activeDirToken);
             break;

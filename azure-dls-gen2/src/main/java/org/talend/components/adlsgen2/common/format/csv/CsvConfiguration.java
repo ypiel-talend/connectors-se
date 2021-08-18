@@ -118,7 +118,9 @@ public class CsvConfiguration implements Serializable {
             return headers;
         }
         try {
-            return Arrays.stream(csvSchema.split(String.valueOf(effectiveFieldDelimiter()))).collect(Collectors.toList());
+            return Arrays
+                    .stream(csvSchema.split(String.valueOf(effectiveFieldDelimiter())))
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("[getCsvSchemaHeaders] Cannot get Headers from {}: {}", csvSchema, e.getMessage());
         }

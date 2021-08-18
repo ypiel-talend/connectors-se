@@ -90,7 +90,8 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         if (recordSchema == null) {
             recordSchema = inferSchema(record);
         }
-        return avroToRecord(record, record.getSchema().getFields(), recordBuilderFactory.newRecordBuilder(recordSchema));
+        return avroToRecord(record, record.getSchema().getFields(),
+                recordBuilderFactory.newRecordBuilder(recordSchema));
     }
 
     @Override
@@ -113,17 +114,21 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
                 break;
             case ARRAY:
                 Entry e = getSchemaForEntry(name, fromRecord.getSchema());
-                Collection<Object> recordArray = fromRecord.getOptionalArray(Object.class, name).orElse(new ArrayList<>());
+                Collection<Object> recordArray =
+                        fromRecord.getOptionalArray(Object.class, name).orElse(new ArrayList<>());
                 if (recordArray.iterator().hasNext()) {
                     Object firstArrayValue = recordArray.iterator().next();
                     if (firstArrayValue instanceof Record) {
                         subSchema = inferAvroSchema(((Record) firstArrayValue).getSchema());
-                        List<GenericRecord> records = recordArray.stream()
+                        List<GenericRecord> records = recordArray
+                                .stream()
                                 .map(o -> recordToAvro((Record) o, new GenericData.Record(subSchema)))
                                 .collect(Collectors.toList());
                         toRecord.put(name, records);
                     } else {
-                        toRecord.put(name, fromRecord.getArray(getJavaClassForType(e.getElementSchema().getType()), name));
+                        toRecord
+                                .put(name,
+                                        fromRecord.getArray(getJavaClassForType(e.getElementSchema().getType()), name));
                     }
                 }
                 break;
@@ -264,7 +269,8 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
                     builder = org.apache.avro.Schema.createArray(subSchema);
                 } else {
                     builder = org.apache.avro.Schema
-                            .createArray(org.apache.avro.Schema.create(translateToAvroType(e.getElementSchema().getType())));
+                            .createArray(
+                                    org.apache.avro.Schema.create(translateToAvroType(e.getElementSchema().getType())));
                 }
                 break;
             case STRING:
@@ -289,11 +295,13 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
             } else {
                 unionWithNull = SchemaBuilder.unionOf().type(builder).and().nullType().endUnion();
             }
-            org.apache.avro.Schema.Field field = new org.apache.avro.Schema.Field(name, unionWithNull, comment, defaultValue);
+            org.apache.avro.Schema.Field field =
+                    new org.apache.avro.Schema.Field(name, unionWithNull, comment, defaultValue);
             fields.add(field);
         }
-        return org.apache.avro.Schema.createRecord(RECORD_NAME + String.valueOf(schema.hashCode()).replace("-", ""), "",
-                RECORD_NAMESPACE, false, fields);
+        return org.apache.avro.Schema
+                .createRecord(RECORD_NAME + String.valueOf(schema.hashCode()).replace("-", ""), "",
+                        RECORD_NAMESPACE, false, fields);
     }
 
     protected Record avroToRecord(GenericRecord genericRecord, List<org.apache.avro.Schema.Field> fields) {
@@ -407,12 +415,15 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected void buildArrayField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder, Entry entry) {
+    protected void buildArrayField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder,
+            Entry entry) {
         org.apache.avro.Schema arraySchema = getUnionSchema(field.schema());
         switch (arraySchema.getElementType().getType()) {
         case RECORD:
-            Collection<Record> recs = ((Collection<GenericRecord>) value).stream()
-                    .map(record -> avroToRecord(record, record.getSchema().getFields(), recordBuilderFactory.newRecordBuilder()))
+            Collection<Record> recs = ((Collection<GenericRecord>) value)
+                    .stream()
+                    .map(record -> avroToRecord(record, record.getSchema().getFields(),
+                            recordBuilderFactory.newRecordBuilder()))
                     .collect(toList());
             recordBuilder.withArray(entry, recs);
             break;
@@ -444,13 +455,16 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         }
     }
 
-    protected void buildField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder, Entry entry) {
+    protected void buildField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder,
+            Entry entry) {
         String logicalType = getAvroLogicalTypeName(field);
         org.apache.avro.Schema.Type fieldType = getFieldType(field);
         switch (fieldType) {
         case RECORD:
-            recordBuilder.withRecord(entry, avroToRecord((GenericRecord) value, ((GenericRecord) value).getSchema().getFields(),
-                    recordBuilderFactory.newRecordBuilder()));
+            recordBuilder
+                    .withRecord(entry,
+                            avroToRecord((GenericRecord) value, ((GenericRecord) value).getSchema().getFields(),
+                                    recordBuilderFactory.newRecordBuilder()));
             break;
         case ARRAY:
             buildArrayField(field, value, recordBuilder, entry);
@@ -465,7 +479,8 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         case INT:
             int ivalue = value != null ? (Integer) value : 0;
             if (AVRO_LOGICAL_TYPE_DATE.equals(logicalType) || AVRO_LOGICAL_TYPE_TIME_MILLIS.equals(logicalType)) {
-                recordBuilder.withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(ivalue), ZoneOffset.UTC));
+                recordBuilder
+                        .withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(ivalue), ZoneOffset.UTC));
             } else {
                 recordBuilder.withInt(entry, ivalue);
             }
@@ -482,7 +497,8 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
         case LONG:
             long lvalue = value != null ? (Long) value : 0;
             if (AVRO_LOGICAL_TYPE_TIMESTAMP_MILLIS.equals(logicalType)) {
-                recordBuilder.withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(lvalue), ZoneOffset.UTC));
+                recordBuilder
+                        .withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(lvalue), ZoneOffset.UTC));
             } else {
                 recordBuilder.withLong(entry, lvalue);
             }
@@ -500,8 +516,11 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
     private org.apache.avro.Schema getUnionSchema(org.apache.avro.Schema inputSchema) {
         org.apache.avro.Schema elementType;
         if (inputSchema.getType() == org.apache.avro.Schema.Type.UNION) {
-            List<org.apache.avro.Schema> extractedSchemas = inputSchema.getTypes().stream()
-                    .filter(schema -> !schema.getType().equals(org.apache.avro.Schema.Type.NULL)).collect(toList());
+            List<org.apache.avro.Schema> extractedSchemas = inputSchema
+                    .getTypes()
+                    .stream()
+                    .filter(schema -> !schema.getType().equals(org.apache.avro.Schema.Type.NULL))
+                    .collect(toList());
             // should have only one schema element with nullable (UNION)
             elementType = extractedSchemas.get(0);
         } else {

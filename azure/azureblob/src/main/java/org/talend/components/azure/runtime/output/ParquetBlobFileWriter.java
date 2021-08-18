@@ -41,7 +41,8 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
 
     private ParquetConverter converter;
 
-    public ParquetBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices) throws Exception {
+    public ParquetBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
+            throws Exception {
         super(config, connectionServices);
         this.config = config;
         this.converter = ParquetConverter.of(null);
@@ -82,8 +83,11 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
         try {
             tempFilePath = File.createTempFile("tempFile", ".parquet");
             Path tempFile = new org.apache.hadoop.fs.Path(tempFilePath.getPath());
-            ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord> builder(tempFile)
-                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE).withSchema(converter.inferAvroSchema(getSchema())).build();
+            ParquetWriter<GenericRecord> writer = AvroParquetWriter
+                    .<GenericRecord> builder(tempFile)
+                    .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
+                    .withSchema(converter.inferAvroSchema(getSchema()))
+                    .build();
             for (Record r : getBatch()) {
                 writer.write(converter.fromRecord(r));
             }

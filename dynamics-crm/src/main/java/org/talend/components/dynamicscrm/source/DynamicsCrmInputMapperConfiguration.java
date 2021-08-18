@@ -27,7 +27,8 @@ import lombok.Data;
 
 @Data
 @GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "customFilter" }), @GridLayout.Row({ "operator" }),
-        @GridLayout.Row({ "filterConditions" }), @GridLayout.Row({ "filter" }), @GridLayout.Row({ "orderByConditionsList" }) })
+        @GridLayout.Row({ "filterConditions" }), @GridLayout.Row({ "filter" }),
+        @GridLayout.Row({ "orderByConditionsList" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("dataset") })
 @Documentation("Dynamics CRM input configuration")
 public class DynamicsCrmInputMapperConfiguration implements Serializable {

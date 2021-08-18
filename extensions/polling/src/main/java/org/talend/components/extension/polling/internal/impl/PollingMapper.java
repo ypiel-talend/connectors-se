@@ -38,7 +38,11 @@ public class PollingMapper implements Mapper, Serializable {
 
     @Override
     public List<Mapper> split(long desiredSize) {
-        return batchMapper.split(desiredSize).stream().map(it -> new PollingMapper(pollingConfiguration, it)).collect(toList());
+        return batchMapper
+                .split(desiredSize)
+                .stream()
+                .map(it -> new PollingMapper(pollingConfiguration, it))
+                .collect(toList());
     }
 
     @Override

@@ -54,30 +54,42 @@ public class DefaultRecordGenerator implements DatasetGenerator.RecordGenerator 
         int currentNullField = index % 11;
         int toggle = index % 2;
 
-        this.fullData(assertionsBuilder, builder::withString, "a_string", currentNullField == 1, () -> "string_" + index);
+        this
+                .fullData(assertionsBuilder, builder::withString, "a_string", currentNullField == 1,
+                        () -> "string_" + index);
         this.fullData(assertionsBuilder, builder::withBoolean, "a_boolean", currentNullField == 2, () -> toggle == 0);
-        this.fullData(assertionsBuilder, builder::withInt, "a_int", currentNullField == 3,
-                () -> (toggle == 0) ? Integer.MIN_VALUE : Integer.MAX_VALUE);
-        this.fullData(assertionsBuilder, builder::withLong, "a_long", currentNullField == 4,
-                () -> (toggle == 0) ? Long.MIN_VALUE : Long.MAX_VALUE);
-        this.fullData(assertionsBuilder, builder::withFloat, "a_float", currentNullField == 5,
-                () -> (toggle == 0) ? Float.MIN_VALUE : Float.MAX_VALUE);
-        this.fullData(assertionsBuilder, builder::withDouble, "a_double", currentNullField == 6,
-                () -> (toggle == 0) ? Double.MIN_VALUE : Double.MAX_VALUE);
+        this
+                .fullData(assertionsBuilder, builder::withInt, "a_int", currentNullField == 3,
+                        () -> (toggle == 0) ? Integer.MIN_VALUE : Integer.MAX_VALUE);
+        this
+                .fullData(assertionsBuilder, builder::withLong, "a_long", currentNullField == 4,
+                        () -> (toggle == 0) ? Long.MIN_VALUE : Long.MAX_VALUE);
+        this
+                .fullData(assertionsBuilder, builder::withFloat, "a_float", currentNullField == 5,
+                        () -> (toggle == 0) ? Float.MIN_VALUE : Float.MAX_VALUE);
+        this
+                .fullData(assertionsBuilder, builder::withDouble, "a_double", currentNullField == 6,
+                        () -> (toggle == 0) ? Double.MIN_VALUE : Double.MAX_VALUE);
         this.fullData(assertionsBuilder, builder::withDateTime, "a_datetime", currentNullField == 7, () -> {
             final LocalDate date = LocalDate.parse("10/04/" + (2000 + index), formatter);
             return date.atStartOfDay(ZoneId.of("UTC"));
         });
 
-        this.fullData(assertionsBuilder, builder::withBytes, "a_byte_array", currentNullField == 8, ("index_" + index)::getBytes);
+        this
+                .fullData(assertionsBuilder, builder::withBytes, "a_byte_array", currentNullField == 8,
+                        ("index_" + index)::getBytes);
 
-        this.fullData(assertionsBuilder, builder::withArray, "a_string_array", currentNullField == 9,
-                () -> Arrays.asList("a", "b"));
+        this
+                .fullData(assertionsBuilder, builder::withArray, "a_string_array", currentNullField == 9,
+                        () -> Arrays.asList("a", "b"));
 
-        this.fullData(assertionsBuilder, builder::withRecord, "a_record", currentNullField == 10,
-                () -> this.factory.newRecordBuilder(this.subRecordSchema).withString("rec_string", "rec_string_" + index) //
-                        .withInt("rec_int", index) //
-                        .build());
+        this
+                .fullData(assertionsBuilder, builder::withRecord, "a_record", currentNullField == 10,
+                        () -> this.factory
+                                .newRecordBuilder(this.subRecordSchema)
+                                .withString("rec_string", "rec_string_" + index) //
+                                .withInt("rec_int", index) //
+                                .build());
 
         final Record rec = builder.build();
         final Consumer<T> expected = assertionsBuilder.endRecord(this.index, rec);
@@ -103,14 +115,16 @@ public class DefaultRecordGenerator implements DatasetGenerator.RecordGenerator 
     }
 
     private Schema buildSubSchema() {
-        return this.factory.newSchemaBuilder(Schema.Type.RECORD) //
+        return this.factory
+                .newSchemaBuilder(Schema.Type.RECORD) //
                 .withEntry(this.newEntry(Schema.Type.STRING, "rec_string")) //
                 .withEntry(this.newEntry(Schema.Type.INT, "rec_int")) //
                 .build();
     }
 
     private Schema buildSchema(Schema sub) {
-        return this.factory.newSchemaBuilder(Schema.Type.RECORD) //
+        return this.factory
+                .newSchemaBuilder(Schema.Type.RECORD) //
                 .withEntry(this.newEntry(Schema.Type.STRING, "a_string")) //
                 .withEntry(this.newEntry(Schema.Type.BOOLEAN, "a_boolean")) //
                 .withEntry(this.newEntry(Schema.Type.INT, "a_int")) //
@@ -119,8 +133,10 @@ public class DefaultRecordGenerator implements DatasetGenerator.RecordGenerator 
                 .withEntry(this.newEntry(Schema.Type.DOUBLE, "a_double")) //
                 .withEntry(this.newEntry(Schema.Type.DATETIME, "a_datetime")) //
                 .withEntry(this.newEntry(Schema.Type.BYTES, "a_byte_array")) //
-                .withEntry(this.newArrayEntry("a_string_array", this.factory.newSchemaBuilder(Schema.Type.STRING).build())) //
-                .withEntry(this.newRecordEntry("a_record", sub)).build(); //
+                .withEntry(
+                        this.newArrayEntry("a_string_array", this.factory.newSchemaBuilder(Schema.Type.STRING).build())) //
+                .withEntry(this.newRecordEntry("a_record", sub))
+                .build(); //
     }
 
     private Schema.Entry newEntry(final Schema.Type type, final String name) {
@@ -140,8 +156,11 @@ public class DefaultRecordGenerator implements DatasetGenerator.RecordGenerator 
     }
 
     private Schema.Entry findEntry(final String name) {
-        return this.schema.getEntries().stream() //
+        return this.schema
+                .getEntries()
+                .stream() //
                 .filter((Schema.Entry e) -> Objects.equals(e.getName(), name)) //
-                .findFirst().orElse(null);
+                .findFirst()
+                .orElse(null);
     }
 }

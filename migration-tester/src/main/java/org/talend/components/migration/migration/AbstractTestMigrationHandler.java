@@ -39,7 +39,9 @@ public abstract class AbstractTestMigrationHandler implements MigrationHandler {
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
         copyConfig(this.getIncoming(), incomingData);
 
-        incomingData.put(getPrefix() + getCallbackPropertyName(), getMigrationVersions(incomingVersion) + " | " + this.current);
+        incomingData
+                .put(getPrefix() + getCallbackPropertyName(),
+                        getMigrationVersions(incomingVersion) + " | " + this.current);
 
         copyFromLegacyToDuplication(incomingData);
 
@@ -60,7 +62,14 @@ public abstract class AbstractTestMigrationHandler implements MigrationHandler {
             if (sb.length() > 2) {
                 sb.append(",\n");
             }
-            sb.append("\t").append("\"").append(e.getKey()).append("\" : ").append("\"").append(e.getValue()).append("\"");
+            sb
+                    .append("\t")
+                    .append("\"")
+                    .append(e.getKey())
+                    .append("\" : ")
+                    .append("\"")
+                    .append(e.getValue())
+                    .append("\"");
         });
         sb.append("\n}");
 

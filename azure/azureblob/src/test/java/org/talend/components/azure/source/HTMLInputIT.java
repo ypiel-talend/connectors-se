@@ -61,17 +61,26 @@ class HTMLInputIT extends BaseIT {
         final int recordSize = 1;
         final int columnSize = 2;
 
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML1Row.html",
-                "TestExcelHTML1Row.html");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML1Row.html",
+                        "TestExcelHTML1Row.html");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
         Record firstRecord = records.get(0);
-        Assertions.assertEquals(columnSize, firstRecord.getSchema().getEntries().size(), "Record's schema is different");
+        Assertions
+                .assertEquals(columnSize, firstRecord.getSchema().getEntries().size(), "Record's schema is different");
         Assertions.assertEquals("a1", firstRecord.getString("field0"));
         Assertions.assertEquals("b1", firstRecord.getString("field1"));
     }
@@ -81,12 +90,20 @@ class HTMLInputIT extends BaseIT {
         final int recordSize = 5;
         final int columnSize = 2;
 
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML5Rows.html",
-                "TestExcelHTML5Rows.html");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML5Rows.html",
+                        "TestExcelHTML5Rows.html");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -101,14 +118,23 @@ class HTMLInputIT extends BaseIT {
     @Test
     void testInputMultipleFiles() throws StorageException, IOException, URISyntaxException {
         final int recordSize = 1 + 5;
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML1Row.html",
-                "TestExcelHTML1Row.html");
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML5Rows.html",
-                "TestExcelHTML5Rows.html");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML1Row.html",
+                        "TestExcelHTML1Row.html");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "excelHTML/TestExcelHTML5Rows.html",
+                        "TestExcelHTML5Rows.html");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
@@ -118,24 +144,35 @@ class HTMLInputIT extends BaseIT {
     void testInputHTMLExportedFromSalesforce() throws StorageException, IOException, URISyntaxException {
         final int recordSize = 6;
         final int columnSize = 7;
-        BlobTestUtils.uploadTestFile(storageAccount, blobInputProperties, "excelHTML/realSalesforceExportedHTML.html",
-                "realSalesforceExportedHTML.html");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "excelHTML/realSalesforceExportedHTML.html",
+                        "realSalesforceExportedHTML.html");
 
         String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
-        Job.components().component("azureInput", "Azure://Input?" + inputConfig).component("collector", "test://collector")
-                .connections().from("azureInput").to("collector").build().run();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
         Assertions.assertEquals(recordSize, records.size(), "Records amount is different");
         Record firstRecord = records.get(0);
-        Assertions.assertEquals(columnSize, firstRecord.getSchema().getEntries().size(), "Record's column amount is different");
+        Assertions
+                .assertEquals(columnSize, firstRecord.getSchema().getEntries().size(),
+                        "Record's column amount is different");
         Assertions.assertEquals("compqa talend", firstRecord.getString("Account_Owner"));
         Assertions.assertEquals("CLoud_salesforce", firstRecord.getString("Account_Name"));
         Assertions.assertTrue(firstRecord.getString("Type").isEmpty(), "Type should be empty");
         Assertions.assertTrue(firstRecord.getString("Rating").isEmpty(), "Rating should be empty");
         Assertions.assertTrue(firstRecord.getString("Last_Activity").isEmpty(), "Last_Activity should be empty");
         Assertions.assertEquals("2/3/2020", firstRecord.getString("Last_Modified_Date"));
-        Assertions.assertTrue(firstRecord.getString("Billing_State_Province").isEmpty(),
-                "Billing_State_Province should be empty");
+        Assertions
+                .assertTrue(firstRecord.getString("Billing_State_Province").isEmpty(),
+                        "Billing_State_Province should be empty");
     }
 }

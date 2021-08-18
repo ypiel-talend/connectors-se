@@ -22,8 +22,9 @@ import java.util.Optional;
 
 public class ContentType {
 
-    final static String DEFAULT_ENCODING = System.getProperty("org.talend.components.rest.default_encoding",
-            StandardCharsets.UTF_8.name());
+    final static String DEFAULT_ENCODING = System
+            .getProperty("org.talend.components.rest.default_encoding",
+                    StandardCharsets.UTF_8.name());
 
     public final static String HEADER_KEY = "Content-Type";
 
@@ -34,7 +35,10 @@ public class ContentType {
     }
 
     public static String getCharsetName(final Map<String, List<String>> headers, final String defaultCharsetName) {
-        String contentType = Optional.ofNullable(headers.get(ContentType.HEADER_KEY)).filter(h -> !h.isEmpty()).map(h -> h.get(0))
+        String contentType = Optional
+                .ofNullable(headers.get(ContentType.HEADER_KEY))
+                .filter(h -> !h.isEmpty())
+                .map(h -> h.get(0))
                 .orElse(defaultCharsetName);
 
         if (contentType == null) {
@@ -57,8 +61,12 @@ public class ContentType {
             values.add(contentType.substring(previous + 1, contentType.length()));
         }
 
-        String encoding = values.stream().filter(h -> h.startsWith(ContentType.CHARSET_KEY))
-                .map(h -> h.substring(ContentType.CHARSET_KEY.length())).findFirst().orElse(defaultCharsetName);
+        String encoding = values
+                .stream()
+                .filter(h -> h.startsWith(ContentType.CHARSET_KEY))
+                .map(h -> h.substring(ContentType.CHARSET_KEY.length()))
+                .findFirst()
+                .orElse(defaultCharsetName);
 
         return encoding;
     }

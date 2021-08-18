@@ -58,7 +58,8 @@ class IteratorComposerTest {
     @Test
     public void filter() {
         final List<String> strings = Arrays.asList("Hello", "all", "of", "you");
-        final Iterator<Integer> iterator = IteratorComposer.of(strings.iterator()) //
+        final Iterator<Integer> iterator = IteratorComposer
+                .of(strings.iterator()) //
                 .filter((String s) -> s.length() > 2) //
                 .map(String::length) //
                 .build();//

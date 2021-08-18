@@ -112,42 +112,54 @@ public class GoogleStorageOutputAvroTest {
     }
 
     private Collection<Record> buildRecords() {
-        final Record record1 = factory.newRecordBuilder() //
+        final Record record1 = factory
+                .newRecordBuilder() //
                 .withString("Hello", "World") //
-                .withRecord("sub1", factory.newRecordBuilder() //
+                .withRecord("sub1", factory
+                        .newRecordBuilder() //
                         .withInt("max", 200) //
                         .withBoolean("uniq", false) //
                         .build()) //
                 .withArray( //
-                        factory.newEntryBuilder().withName("array") //
+                        factory
+                                .newEntryBuilder()
+                                .withName("array") //
                                 .withType(Schema.Type.ARRAY) //
                                 .withElementSchema(factory.newSchemaBuilder(Schema.Type.STRING).build()) //
                                 .build(), //
                         Arrays.asList("v1", "v2")) //
                 .build(); //
 
-        final Record record2 = factory.newRecordBuilder() //
+        final Record record2 = factory
+                .newRecordBuilder() //
                 .withString("Hello", "You") //
-                .withRecord("sub1", factory.newRecordBuilder() //
+                .withRecord("sub1", factory
+                        .newRecordBuilder() //
                         .withInt("max", 100) //
                         .withBoolean("uniq", true) //
                         .build()) //
                 .withArray( //
-                        factory.newEntryBuilder().withName("array") //
+                        factory
+                                .newEntryBuilder()
+                                .withName("array") //
                                 .withType(Schema.Type.ARRAY) //
                                 .withElementSchema(factory.newSchemaBuilder(Schema.Type.STRING).build()) //
                                 .build(), //
                         Arrays.asList("a1", "a2")) //
                 .build(); //
 
-        final Record record3 = factory.newRecordBuilder() //
+        final Record record3 = factory
+                .newRecordBuilder() //
                 .withString("Hello", "ss") //
-                .withRecord("sub1", factory.newRecordBuilder() //
+                .withRecord("sub1", factory
+                        .newRecordBuilder() //
                         .withInt("max", 50) //
                         .withBoolean("uniq", false) //
                         .build()) //
                 .withArray( //
-                        factory.newEntryBuilder().withName("array") //
+                        factory
+                                .newEntryBuilder()
+                                .withName("array") //
                                 .withType(Schema.Type.ARRAY) //
                                 .withElementSchema(factory.newSchemaBuilder(Schema.Type.STRING).build()) //
                                 .build(), //

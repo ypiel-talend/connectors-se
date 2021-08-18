@@ -31,7 +31,8 @@ public class AdlsGen2APIConfigurer implements Configurer {
         log.warn("[configure] [{}] {}", connection.getMethod(), connection.getUrl());
         log.debug("[configure] auth       {}", auth);
 
-        connection.withHeader(CONTENT_TYPE, DFS_CONTENT_TYPE) //
+        connection
+                .withHeader(CONTENT_TYPE, DFS_CONTENT_TYPE) //
                 .withHeader(VERSION, TARGET_STORAGE_VERSION)
         // .withHeader("x-ms-blob-type", "BlockBlob")
         ;

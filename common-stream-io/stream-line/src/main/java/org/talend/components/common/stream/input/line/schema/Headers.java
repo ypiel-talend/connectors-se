@@ -51,7 +51,8 @@ public class Headers {
      * @param name : the name will be correct
      * @param nameIndex : a index which is used to generate the column name when too much underline in the name
      * @param previousNames : the previous valid names, this is used to make sure that every name is different
-     * @return the valid name, if the input name is null or empty, or the previousNames is null, return the input name directly
+     * @return the valid name, if the input name is null or empty, or the previousNames is null, return the input name
+     * directly
      */
     private String getCorrectSchemaFieldName(String name, int nameIndex, Set<String> previousNames) {
         if (name == null || name.isEmpty() || previousNames == null) {

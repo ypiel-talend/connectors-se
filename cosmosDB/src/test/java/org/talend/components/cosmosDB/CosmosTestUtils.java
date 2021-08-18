@@ -99,7 +99,8 @@ public class CosmosTestUtils {
 
     }
 
-    public Document readDocuments(String collectionID, String documentID, String partitionKey) throws DocumentClientException {
+    public Document readDocuments(String collectionID, String documentID, String partitionKey)
+            throws DocumentClientException {
         String collectionLink = String.format("/dbs/%s/colls/%s/docs/%s", databaseID, collectionID, documentID);
         RequestOptions requestOptions = new RequestOptions();
         requestOptions.setPartitionKey(new PartitionKey(partitionKey));

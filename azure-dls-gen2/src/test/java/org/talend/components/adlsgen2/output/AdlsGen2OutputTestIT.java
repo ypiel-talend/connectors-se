@@ -43,7 +43,8 @@ class AdlsGen2OutputTestIT extends AdlsGen2IntegrationTestBase {
         outputConfiguration.getDataSet().setBlobPath("demo_gen2/out/customers_test_produce.csv");
         components.setInputData(asList(createData(), createData(), createData()));
         final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "test://emitter") //
                 .component("out", "Azure://AdlsGen2Output?" + config) //
                 .connections() //
@@ -77,7 +78,8 @@ class AdlsGen2OutputTestIT extends AdlsGen2IntegrationTestBase {
         //
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=150";
-        Job.components() //
+        Job
+                .components() //
                 .component("emitter", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -110,7 +112,8 @@ class AdlsGen2OutputTestIT extends AdlsGen2IntegrationTestBase {
         //
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=150";
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -143,7 +146,8 @@ class AdlsGen2OutputTestIT extends AdlsGen2IntegrationTestBase {
         //
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=150";
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -177,7 +181,8 @@ class AdlsGen2OutputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=5";
         //
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //
@@ -211,7 +216,8 @@ class AdlsGen2OutputTestIT extends AdlsGen2IntegrationTestBase {
         String outConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         outConfig += "&$configuration.$maxBatchSize=123";
         //
-        Job.components() //
+        Job
+                .components() //
                 .component("in", "Azure://AdlsGen2Input?" + inConfig) //
                 .component("out", "Azure://AdlsGen2Output?" + outConfig) //
                 .connections() //

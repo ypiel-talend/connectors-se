@@ -28,6 +28,7 @@ public class Encoding implements Serializable {
     private static final long serialVersionUID = -332572169846419496L;
 
     public enum Type {
+
         UTF8("UTF-8"), //
         ISO_8859_15("ISO-8859-15"), //
         OTHER("OTHER");

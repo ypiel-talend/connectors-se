@@ -149,7 +149,8 @@ public class SoqlQueryBuilder {
         for (String item : inputStrings) {
             String[] array = item.split(RECORDS);
             // We expect only 2 values from splitting field tableName and columnName
-            if ((array.length != 2) || array[0] == null || array[0].isEmpty() || array[1] == null || array[1].isEmpty()) {
+            if ((array.length != 2) || array[0] == null || array[0].isEmpty() || array[1] == null
+                    || array[1].isEmpty()) {
                 // Should notify user about invalid table name or column name.
                 throw new IllegalStateException(
                         "INVALID_SOQL: Relation Parent to Child has invalid child table name or column name");

@@ -36,8 +36,10 @@ class RecordToJsonTest {
         final RecordToJson toJson = new RecordToJson();
 
         final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
-        final Record record1 = factory.newRecordBuilder()
-                .withDateTime("fieldDateTime", ZonedDateTime.of(2020, 10, 10, 23, 25, 10, 0, ZoneId.systemDefault())).build();
+        final Record record1 = factory
+                .newRecordBuilder()
+                .withDateTime("fieldDateTime", ZonedDateTime.of(2020, 10, 10, 23, 25, 10, 0, ZoneId.systemDefault()))
+                .build();
 
         final JsonObject jsonObject1 = toJson.fromRecord(record1);
         Assertions.assertNotNull(jsonObject1);

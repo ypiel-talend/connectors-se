@@ -93,8 +93,11 @@ public class CouchbaseService {
             ClusterHolder holder = clustersPool.computeIfAbsent(dataStore, ds -> {
                 Builder envBuilder = new DefaultCouchbaseEnvironment.Builder();
                 if (dataStore.isUseConnectionParameters()) {
-                    dataStore.getConnectionParametersList().forEach(
-                            conf -> setTimeout(envBuilder, conf.getParameterName(), parseValue(conf.getParameterValue())));
+                    dataStore
+                            .getConnectionParametersList()
+                            .forEach(
+                                    conf -> setTimeout(envBuilder, conf.getParameterName(),
+                                            parseValue(conf.getParameterValue())));
                 }
                 CouchbaseEnvironment environment = envBuilder.build();
                 Cluster cluster = CouchbaseCluster.create(environment, urls);
@@ -134,7 +137,8 @@ public class CouchbaseService {
     }
 
     @HealthCheck("healthCheck")
-    public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final CouchbaseDataStore datastore) {
+    public HealthCheckStatus
+            healthCheck(@Option("configuration.dataset.connection") final CouchbaseDataStore datastore) {
         try {
             openConnection(datastore);
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK");
@@ -259,11 +263,18 @@ public class CouchbaseService {
         Schema.Type type = defineValueType(firstValueInArray);
         schemaBuilder.withType(type);
         if (type == RECORD) {
-            schemaBuilder.withEntry(
-                    builderFactory.newEntryBuilder().withElementSchema(getSchema((JsonObject) firstValueInArray, null)).build());
+            schemaBuilder
+                    .withEntry(
+                            builderFactory
+                                    .newEntryBuilder()
+                                    .withElementSchema(getSchema((JsonObject) firstValueInArray, null))
+                                    .build());
         } else if (type == ARRAY) {
-            schemaBuilder.withEntry(builderFactory.newEntryBuilder()
-                    .withElementSchema(defineSchemaForArray((JsonArray) firstValueInArray)).build());
+            schemaBuilder
+                    .withEntry(builderFactory
+                            .newEntryBuilder()
+                            .withElementSchema(defineSchemaForArray((JsonArray) firstValueInArray))
+                            .build());
         }
         return schemaBuilder.withType(type).build();
     }

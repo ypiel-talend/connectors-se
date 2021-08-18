@@ -45,7 +45,8 @@ public class JsonBlobReader extends BlobReader {
     private JsonBuilderFactory jsonFactoryBuilder;
 
     JsonBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
-            JsonBuilderFactory jsonFactoryBuilder, AdlsGen2Service service, AdlsActiveDirectoryService tokenProviderService) {
+            JsonBuilderFactory jsonFactoryBuilder, AdlsGen2Service service,
+            AdlsActiveDirectoryService tokenProviderService) {
         super(configuration, recordBuilderFactory, service, tokenProviderService);
         this.jsonFactoryBuilder = jsonFactoryBuilder;
     }
@@ -137,8 +138,9 @@ public class JsonBlobReader extends BlobReader {
 
         private void initMetadataIfNeeded() {
             if (converter == null) {
-                converter = JsonConverter.of(getRecordBuilderFactory(), jsonFactoryBuilder,
-                        configuration.getDataSet().getJsonConfiguration());
+                converter = JsonConverter
+                        .of(getRecordBuilderFactory(), jsonFactoryBuilder,
+                                configuration.getDataSet().getJsonConfiguration());
             }
         }
 

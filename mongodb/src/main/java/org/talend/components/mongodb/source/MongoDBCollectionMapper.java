@@ -55,7 +55,8 @@ public class MongoDBCollectionMapper implements Serializable {
     private String query4Split;
 
     public MongoDBCollectionMapper(@Option("configuration") final MongoDBCollectionSourceConfiguration configuration,
-            final MongoDBService service, final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
+            final MongoDBService service, final RecordBuilderFactory recordBuilderFactory,
+            final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
@@ -91,7 +92,9 @@ public class MongoDBCollectionMapper implements Serializable {
             if (queries4Split == null || queries4Split.size() < 2) {
                 return singletonList(this);
             }
-            return queries4Split.stream().map(query4Split -> cloneMapperAndSetSplitParameter4Reader(query4Split))
+            return queries4Split
+                    .stream()
+                    .map(query4Split -> cloneMapperAndSetSplitParameter4Reader(query4Split))
                     .collect(Collectors.toList());
         }
 
@@ -99,7 +102,8 @@ public class MongoDBCollectionMapper implements Serializable {
     }
 
     private MongoDBCollectionMapper cloneMapperAndSetSplitParameter4Reader(String query4Split) {
-        MongoDBCollectionMapper mapper = new MongoDBCollectionMapper(configuration, service, recordBuilderFactory, i18nMessage);
+        MongoDBCollectionMapper mapper =
+                new MongoDBCollectionMapper(configuration, service, recordBuilderFactory, i18nMessage);
         mapper.setQuery4Split(query4Split);
         return mapper;
     }

@@ -222,8 +222,11 @@ public class ExcelConverter implements RecordConverter<Row> {
                     break;
                 default:
                     cell.setCellType(CellType.STRING);
-                    cell.setCellValue(String
-                            .valueOf(currentRecord.get(Object.class, currentRecord.getSchema().getEntries().get(j).getName())));
+                    cell
+                            .setCellValue(String
+                                    .valueOf(currentRecord
+                                            .get(Object.class,
+                                                    currentRecord.getSchema().getEntries().get(j).getName())));
                 }
             }
         }

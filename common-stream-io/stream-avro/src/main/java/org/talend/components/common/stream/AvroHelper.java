@@ -23,8 +23,11 @@ public class AvroHelper {
     public static org.apache.avro.Schema getUnionSchema(org.apache.avro.Schema inputSchema) {
         org.apache.avro.Schema elementType;
         if (inputSchema.getType() == org.apache.avro.Schema.Type.UNION) {
-            List<Schema> extractedSchemas = inputSchema.getTypes().stream()
-                    .filter(schema -> !schema.getType().equals(org.apache.avro.Schema.Type.NULL)).collect(toList());
+            List<Schema> extractedSchemas = inputSchema
+                    .getTypes()
+                    .stream()
+                    .filter(schema -> !schema.getType().equals(org.apache.avro.Schema.Type.NULL))
+                    .collect(toList());
             // should have only one schema element with nullable (UNION)
             elementType = extractedSchemas.get(0);
         } else {

@@ -44,8 +44,13 @@ public class HTMLConverter implements RecordConverter<Element> {
         if (columns == null) {
             List<String> columnNames = inferSchemaInfo(record, !isHeaderRecord(record));
             Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
-            columnNames.forEach(column -> schemaBuilder
-                    .withEntry(recordBuilderFactory.newEntryBuilder().withName(column).withType(Schema.Type.STRING).build()));
+            columnNames
+                    .forEach(column -> schemaBuilder
+                            .withEntry(recordBuilderFactory
+                                    .newEntryBuilder()
+                                    .withName(column)
+                                    .withType(Schema.Type.STRING)
+                                    .build()));
             columns = schemaBuilder.build();
         }
         return columns;

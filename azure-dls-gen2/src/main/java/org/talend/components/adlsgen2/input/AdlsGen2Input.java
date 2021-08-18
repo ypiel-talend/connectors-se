@@ -69,8 +69,9 @@ public class AdlsGen2Input implements Serializable {
     public void init() {
         log.debug("[init]");
         try {
-            reader = BlobFileReaderFactory.getReader(configuration, recordBuilderFactory, jsonFactory, service,
-                    tokenProviderService);
+            reader = BlobFileReaderFactory
+                    .getReader(configuration, recordBuilderFactory, jsonFactory, service,
+                            tokenProviderService);
         } catch (Exception e) {
             log.error("[init] Error: {}.", e.getMessage());
             throw new AdlsGen2RuntimeException(e.getMessage(), e);

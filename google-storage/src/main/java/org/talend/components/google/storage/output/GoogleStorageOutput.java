@@ -72,7 +72,8 @@ public class GoogleStorageOutput implements Serializable {
             this.recordWriter.add(records);
             this.recordWriter.flush();
         } catch (IOException exIO) {
-            String errorLib = this.i18n.writeError(this.getDataSet().getBucket(), this.getDataSet().getBlob(), exIO.getMessage());
+            String errorLib =
+                    this.i18n.writeError(this.getDataSet().getBucket(), this.getDataSet().getBlob(), exIO.getMessage());
             log.error(errorLib);
             throw new UncheckedIOException(errorLib, exIO);
         }

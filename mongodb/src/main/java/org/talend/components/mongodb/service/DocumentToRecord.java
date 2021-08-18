@@ -227,7 +227,8 @@ public class DocumentToRecord {
             }
             break;
         case STRING: {
-            // TODO check if is right here as this is also do process for null as all null value is mapped to String type, as
+            // TODO check if is right here as this is also do process for null as all null value is mapped to String
+            // type, as
             // value may be null here
             Object value = document.get(getElementName(entry));
             if (isNull(value)) {
@@ -294,7 +295,9 @@ public class DocumentToRecord {
         Schema elementSchema = schema.getElementSchema();
         switch (elementSchema.getType()) {
         case RECORD:
-            result = array.stream().map((Object v) -> convertDocumentToRecord(elementSchema, (Document) v))
+            result = array
+                    .stream()
+                    .map((Object v) -> convertDocumentToRecord(elementSchema, (Document) v))
                     .collect(Collectors.toList());
             break;
         case ARRAY:
@@ -309,7 +312,8 @@ public class DocumentToRecord {
             }
             break;
         case STRING:
-            // TODO : check if right here : do process for null as all null value is mapped to String type, this is for the case :
+            // TODO : check if right here : do process for null as all null value is mapped to String type, this is for
+            // the case :
             // {array: []} or {array: [null]}
             if (array.isEmpty()) {
                 // maybe need clone?

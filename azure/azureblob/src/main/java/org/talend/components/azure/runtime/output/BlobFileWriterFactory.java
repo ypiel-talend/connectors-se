@@ -18,7 +18,8 @@ import org.talend.components.azure.service.AzureBlobComponentServices;
 
 public class BlobFileWriterFactory {
 
-    public static BlobFileWriter getWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
+    public static BlobFileWriter getWriter(BlobOutputConfiguration config,
+            AzureBlobComponentServices connectionServices)
             throws Exception {
         switch (config.getDataset().getFileFormat()) {
         case CSV:

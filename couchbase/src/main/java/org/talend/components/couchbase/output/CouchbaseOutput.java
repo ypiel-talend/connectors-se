@@ -86,12 +86,18 @@ public class CouchbaseOutput implements Serializable {
     @ElementListener
     public void onNext(@Input final Record record) {
         if (configuration.isUseN1QLQuery()) {
-            Map<String, String> mappings = configuration.getQueryParams().stream()
-                    .collect(Collectors.toMap(N1QLQueryParameter::getColumn, N1QLQueryParameter::getQueryParameterName));
+            Map<String, String> mappings = configuration
+                    .getQueryParams()
+                    .stream()
+                    .collect(
+                            Collectors.toMap(N1QLQueryParameter::getColumn, N1QLQueryParameter::getQueryParameterName));
             JsonObject namedParams = buildJsonObject(record, mappings);
-            final N1qlQueryResult queryResult = bucket.query(N1qlQuery.parameterized(configuration.getQuery(), namedParams));
+            final N1qlQueryResult queryResult =
+                    bucket.query(N1qlQuery.parameterized(configuration.getQuery(), namedParams));
             if (!queryResult.finalSuccess()) {
-                final String errors = queryResult.errors().stream()
+                final String errors = queryResult
+                        .errors()
+                        .stream()
                         .map(error -> String.format("[%d] %s", error.getInt("code"), error.getString("msg")))
                         .collect(Collectors.joining("\n"));
                 log.error("N1QL failed: {}.", errors);
@@ -130,8 +136,13 @@ public class CouchbaseOutput implements Serializable {
 
     private void updatePartiallyDocument(Record record) {
         final MutateInBuilder[] mutateBuilder = { bucket.mutateIn(record.getString(idFieldName)) };
-        record.getSchema().getEntries().stream().filter(e -> !idFieldName.equals(e.getName()))
-                .forEach(e -> mutateBuilder[0] = mutateBuilder[0].upsert(e.getName(), jsonValueFromRecordValue(e, record)));
+        record
+                .getSchema()
+                .getEntries()
+                .stream()
+                .filter(e -> !idFieldName.equals(e.getName()))
+                .forEach(e -> mutateBuilder[0] =
+                        mutateBuilder[0].upsert(e.getName(), jsonValueFromRecordValue(e, record)));
         mutateBuilder[0].execute();
     }
 

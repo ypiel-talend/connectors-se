@@ -73,7 +73,8 @@ public class CosmosDBService {
     }
 
     @HealthCheck("healthCheck")
-    public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final CosmosDBDataStore datastore) {
+    public HealthCheckStatus
+            healthCheck(@Option("configuration.dataset.connection") final CosmosDBDataStore datastore) {
         String databaseID = datastore.getDatabaseID();
         if (StringUtils.isEmpty(databaseID)) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.vacantDBID());
@@ -91,7 +92,8 @@ public class CosmosDBService {
             }
         } catch (Exception exception) {
             String message = "";
-            if (exception.getCause() instanceof RuntimeException && exception.getCause().getCause() instanceof TimeoutException) {
+            if (exception.getCause() instanceof RuntimeException
+                    && exception.getCause().getCause() instanceof TimeoutException) {
                 message = i18n.destinationUnreachable();
             } else {
                 message = i18n.connectionKODetailed(exception.getMessage());
@@ -118,8 +120,11 @@ public class CosmosDBService {
     @Suggestions(ACTION_SUGGESTION_TABLE_COLUMNS_NAMES)
     public SuggestionValues getTableColumns(@Option("schema") final List<String> schema) {
         if (schema.size() > 0) {
-            return new SuggestionValues(true, schema.stream().map(columnName -> new SuggestionValues.Item(columnName, columnName))
-                    .collect(Collectors.toList()));
+            return new SuggestionValues(true,
+                    schema
+                            .stream()
+                            .map(columnName -> new SuggestionValues.Item(columnName, columnName))
+                            .collect(Collectors.toList()));
         }
         return new SuggestionValues(false, emptyList());
     }

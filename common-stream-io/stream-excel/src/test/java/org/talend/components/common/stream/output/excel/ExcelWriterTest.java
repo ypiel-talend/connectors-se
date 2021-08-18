@@ -68,16 +68,28 @@ class ExcelWriterTest {
 
     Iterable<Record> buildRecords() {
         List<Record> records = new ArrayList<>(3);
-        Record rec1 = this.factory.newRecordBuilder().withString("firstname", "peter").withString("lastname", "falker")
-                .withInt("age", 75).build();
+        Record rec1 = this.factory
+                .newRecordBuilder()
+                .withString("firstname", "peter")
+                .withString("lastname", "falker")
+                .withInt("age", 75)
+                .build();
         records.add(rec1);
 
-        Record rec2 = this.factory.newRecordBuilder().withString("firstname", "steve").withString("lastname", "jobs")
-                .withInt("age", 70).build();
+        Record rec2 = this.factory
+                .newRecordBuilder()
+                .withString("firstname", "steve")
+                .withString("lastname", "jobs")
+                .withInt("age", 70)
+                .build();
         records.add(rec2);
 
-        Record rec3 = this.factory.newRecordBuilder().withString("firstname", "grigori").withString("lastname", "perelman")
-                .withInt("age", 55).build();
+        Record rec3 = this.factory
+                .newRecordBuilder()
+                .withString("firstname", "grigori")
+                .withString("lastname", "perelman")
+                .withInt("age", 55)
+                .build();
         records.add(rec3);
 
         return records;

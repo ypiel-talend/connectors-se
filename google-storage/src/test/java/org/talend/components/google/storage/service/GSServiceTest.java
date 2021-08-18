@@ -95,8 +95,12 @@ class GSServiceTest {
 
         final Collection<Item> items = blobsName.getItems();
         Assertions.assertEquals(1, items.stream().filter((Item it) -> "blob".equals(it.getId())).count());
-        Assertions.assertEquals(1,
-                items.stream().filter((Item it) -> "blob_689d651a-5896-428d-9816-2de624d0046a".equals(it.getId())).count());
+        Assertions
+                .assertEquals(1,
+                        items
+                                .stream()
+                                .filter((Item it) -> "blob_689d651a-5896-428d-9816-2de624d0046a".equals(it.getId()))
+                                .count());
         final Item firstItem = items.iterator().next();
         Assertions.assertEquals("rep/first.txt", firstItem.getId());
     }

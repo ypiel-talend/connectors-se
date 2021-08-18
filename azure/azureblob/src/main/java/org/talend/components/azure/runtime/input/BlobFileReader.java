@@ -53,8 +53,10 @@ public abstract class BlobFileReader {
         this.config = config;
         this.messageService = messageService;
         CloudStorageAccount connection = connectionServices.createStorageAccount(config.getConnection());
-        CloudBlobClient blobClient = connectionServices.getConnectionService().createCloudBlobClient(connection,
-                AzureComponentServices.DEFAULT_RETRY_POLICY);
+        CloudBlobClient blobClient = connectionServices
+                .getConnectionService()
+                .createCloudBlobClient(connection,
+                        AzureComponentServices.DEFAULT_RETRY_POLICY);
         CloudBlobContainer container = checkBlobContainer(config, blobClient);
 
         String directoryName = config.getDirectory();
@@ -64,8 +66,9 @@ public abstract class BlobFileReader {
             directoryName += "/";
         }
 
-        Iterable<ListBlobItem> blobItems = container.listBlobs(directoryName, false, EnumSet.noneOf(BlobListingDetails.class),
-                null, AzureComponentServices.getTalendOperationContext());
+        Iterable<ListBlobItem> blobItems = container
+                .listBlobs(directoryName, false, EnumSet.noneOf(BlobListingDetails.class),
+                        null, AzureComponentServices.getTalendOperationContext());
         if (!blobItems.iterator().hasNext()) {
             throw new BlobRuntimeException("Folder doesn't exist/is empty");
         }
@@ -108,7 +111,8 @@ public abstract class BlobFileReader {
 
             case EXCEL:
                 if (config.getExcelOptions().getExcelFormat() == ExcelFormat.HTML) {
-                    return new ExcelHTMLBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                    return new ExcelHTMLBlobFileReader(config, recordBuilderFactory, connectionServices,
+                            messageService);
                 } else {
                     return new ExcelBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
                 }
