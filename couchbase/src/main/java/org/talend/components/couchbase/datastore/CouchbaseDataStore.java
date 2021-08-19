@@ -13,6 +13,7 @@
 package org.talend.components.couchbase.datastore;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.talend.components.couchbase.configuration.ConnectionConfiguration;
@@ -66,6 +67,6 @@ public class CouchbaseDataStore implements Serializable {
     @Option
     @Documentation("List of defined connection parameters.")
     @ActiveIf(target = "useConnectionParameters", value = "true")
-    private List<ConnectionConfiguration> connectionParametersList;
+    private List<ConnectionConfiguration> connectionParametersList = new ArrayList<>();
 
 }
