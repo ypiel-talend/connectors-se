@@ -123,11 +123,15 @@ spec:
         stage('Post login') {
             steps {
                 container('main') {
-                    script {
-                        try {
-                            sh "${params.POST_LOGIN_SCRIPT}"
-                        } catch (error) {
-                            //
+                    withCredentials([nexusCredentials, gitCredentials, dockerCredentials]) {
+                        script {
+                            if (params.POST_LOGIN_SCRIPT?.trim()) {
+                                try {
+                                    sh "${params.POST_LOGIN_SCRIPT}"
+                                } catch (error) {
+                                    //
+                                }
+                            }
                         }
                     }
                 }
