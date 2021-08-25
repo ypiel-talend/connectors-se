@@ -75,8 +75,7 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
 
     private void executeJob(CouchbaseOutputConfiguration configuration) {
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
-        Job
-                .components()
+        Job.components()
                 .component("Couchbase_Output", "Couchbase://Output?" + outputConfig)
                 .component("emitter", "test://emitter")
                 .connections()
@@ -101,10 +100,10 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     }
 
     private void assertJsonEquals(TestData expected, JsonObject actual) {
-        assertEquals(new Integer(expected.getColIntMin()), actual.getInt("t_int_min"));
-        assertEquals(new Integer(expected.getColIntMax()), actual.getInt("t_int_max"));
-        assertEquals(new Long(expected.getColLongMin()), actual.getLong("t_long_min"));
-        assertEquals(new Long(expected.getColLongMax()), actual.getLong("t_long_max"));
+        assertEquals(Integer.valueOf(expected.getColIntMin()), actual.getInt("t_int_min"));
+        assertEquals(Integer.valueOf(expected.getColIntMax()), actual.getInt("t_int_max"));
+        assertEquals(Long.valueOf(expected.getColLongMin()), actual.getLong("t_long_min"));
+        assertEquals(Long.valueOf(expected.getColLongMax()), actual.getLong("t_long_max"));
         assertEquals(expected.getColFloatMin(), actual.getNumber("t_float_min").floatValue());
         assertEquals(expected.getColFloatMax(), actual.getNumber("t_float_max").floatValue());
         assertEquals(expected.getColDoubleMin(), actual.getDouble("t_double_min"));
@@ -133,8 +132,7 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
         List<Record> records = new ArrayList<>();
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
         for (int i = 0; i < docCount; i++) {
-            Record record = recordBuilderFactory
-                    .newRecordBuilder()
+            Record record = recordBuilderFactory.newRecordBuilder()
                     .withString(entryBuilder.withName("id").withType(Schema.Type.STRING).build(),
                             generateDocId(idPrefix, i))
                     .withBytes(entryBuilder.withName("content").withType(Schema.Type.BYTES).build(),
@@ -239,15 +237,13 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     private List<Record> createPartialUpdateRecords(String idPrefix) {
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
         List<Record> records = new ArrayList<>();
-        Record record1 = recordBuilderFactory
-                .newRecordBuilder()
+        Record record1 = recordBuilderFactory.newRecordBuilder()
                 .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(),
                         generateDocId(idPrefix, 0))
                 .withInt(entryBuilder.withName("t_int_min").withType(Schema.Type.INT).build(), 1971)
                 .withString(entryBuilder.withName("extra_content").withType(Schema.Type.STRING).build(), "path new")
                 .build();
-        Record record2 = recordBuilderFactory
-                .newRecordBuilder()
+        Record record2 = recordBuilderFactory.newRecordBuilder()
                 .withString(entryBuilder.withName("t_string").withType(Schema.Type.STRING).build(),
                         generateDocId(idPrefix, 1))
                 .withBoolean(entryBuilder.withName("t_boolean").withType(Schema.Type.BOOLEAN).build(), Boolean.FALSE)
@@ -283,9 +279,9 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
         TestData testData = new TestData();
         Stream.iterate(0, o -> o + 1).limit(2).forEach(idx -> {
             // untouched properties
-            assertEquals(new Integer(testData.getColIntMax()), resultList.get(idx).content().getInt("t_int_max"));
-            assertEquals(new Long(testData.getColLongMin()), resultList.get(idx).content().getLong("t_long_min"));
-            assertEquals(new Long(testData.getColLongMax()), resultList.get(idx).content().getLong("t_long_max"));
+            assertEquals(Integer.valueOf(testData.getColIntMax()), resultList.get(idx).content().getInt("t_int_max"));
+            assertEquals(Long.valueOf(testData.getColLongMin()), resultList.get(idx).content().getLong("t_long_min"));
+            assertEquals(Long.valueOf(testData.getColLongMax()), resultList.get(idx).content().getLong("t_long_max"));
             assertEquals(testData.getColFloatMin(),
                     resultList.get(idx).content().getNumber("t_float_min").floatValue());
             assertEquals(testData.getColFloatMax(),
@@ -302,7 +298,8 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
                 assertEquals("path new", resultList.get(idx).content().getString("extra_content"));
                 assertNull(resultList.get(idx).content().getString("extra_content2"));
             } else {
-                assertEquals(new Integer(testData.getColIntMin()), resultList.get(idx).content().getInt("t_int_min"));
+                assertEquals(Integer.valueOf(testData.getColIntMin()),
+                        resultList.get(idx).content().getInt("t_int_min"));
                 assertEquals(Boolean.FALSE, resultList.get(idx).content().getBoolean("t_boolean"));
                 assertEquals("path zap", resultList.get(idx).content().getString("extra_content2"));
                 assertNull(resultList.get(idx).content().getString("extra_content"));
@@ -325,14 +322,13 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     void toJsonDocumentWithBytesType() {
         byte[] bytes = "aloha".getBytes(Charset.defaultCharset());
         String idValue = "fixBytes";
-        Record test = recordBuilderFactory
-                .newRecordBuilder()
+        Record test = recordBuilderFactory.newRecordBuilder()
                 .withString("ID", idValue)
                 .withInt("id", 101)
                 .withString("name", "kamikaze")
                 .withBytes("byties", bytes)
                 .build();
-        CouchbaseOutput couch = new CouchbaseOutput(getOutputConfiguration(), null, null);
+        CouchbaseOutput couch = new CouchbaseOutput(getOutputConfiguration(), null);
         JsonDocument jsonDoc = couch.toJsonDocument("ID", test);
         assertEquals(idValue, jsonDoc.id());
         JsonObject jsonObject = jsonDoc.content();

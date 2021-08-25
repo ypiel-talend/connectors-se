@@ -12,20 +12,22 @@
  */
 package org.talend.components.couchbase.source.parsers;
 
-import com.couchbase.client.deps.io.netty.util.ReferenceCountUtil;
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.document.BinaryDocument;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import com.couchbase.client.deps.io.netty.util.ReferenceCountUtil;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.document.BinaryDocument;
+
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 public class BinaryParser implements DocumentParser {
 
-    private static final transient Logger LOG = LoggerFactory.getLogger(BinaryParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BinaryParser.class);
 
     private final Schema schemaBinaryDocument;
 

@@ -16,7 +16,6 @@ import java.io.Serializable;
 
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.AllArgsConstructor;
@@ -26,17 +25,17 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@GridLayouts({ @GridLayout({ @GridLayout.Row({ "queryParameterName" }), @GridLayout.Row({ "column" }) }) })
-@Documentation("N1QL Query Parameter")
+@GridLayout({ @GridLayout.Row({ "queryParameterName" }), @GridLayout.Row({ "column" }) })
+@Documentation("N1QL Query Parameter.")
 
 public class N1QLQueryParameter implements Serializable {
 
     @Option
-    @Documentation("Query Parameter Name")
+    @Documentation("Query Parameter Name.")
     private String queryParameterName;
 
     @Option
-    @Documentation("Column Mapping")
+    @Documentation("Column Mapping.")
     private String column;
 
 }

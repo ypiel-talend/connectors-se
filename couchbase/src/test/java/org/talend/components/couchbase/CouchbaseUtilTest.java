@@ -44,10 +44,8 @@ public abstract class CouchbaseUtilTest {
 
     protected static final String ANALYTICS_DATASET = "typesDataset";
 
-    private static final int DEFAULT_TIMEOUT_IN_SEC = 40;
-
-    private static final List<String> ports = Arrays
-            .asList("8091:8091", "8092:8092", "8093:8093", "8094:8094", "8095:8095",
+    private static final List<String> ports =
+            Arrays.asList("8091:8091", "8092:8092", "8093:8093", "8094:8094", "8095:8095",
                     "11210:11210");
 
     private static final CouchbaseContainer COUCHBASE_CONTAINER;
@@ -66,8 +64,7 @@ public abstract class CouchbaseUtilTest {
         COUCHBASE_CONTAINER = new AnalyticsCouchbaseContainer(
                 System.getenv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX") + "couchbase/server:5.5.1")
                         .withClusterAdmin(CLUSTER_USERNAME, CLUSTER_PASSWORD)
-                        .withNewBucket(DefaultBucketSettings
-                                .builder()
+                        .withNewBucket(DefaultBucketSettings.builder()
                                 .enableFlush(true)
                                 .name(BUCKET_NAME)
                                 .password(BUCKET_PASSWORD)

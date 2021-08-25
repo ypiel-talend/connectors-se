@@ -12,20 +12,18 @@
  */
 package org.talend.components.couchbase.source;
 
-import com.couchbase.client.core.message.internal.PingReport;
-import com.couchbase.client.core.message.internal.PingServiceHealth;
-import com.couchbase.client.core.service.ServiceType;
-import com.couchbase.client.deps.io.netty.buffer.ByteBuf;
-import com.couchbase.client.deps.io.netty.buffer.Unpooled;
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.analytics.AnalyticsQuery;
-import com.couchbase.client.java.analytics.AnalyticsQueryResult;
-import com.couchbase.client.java.document.BinaryDocument;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.StringDocument;
-import com.couchbase.client.java.document.json.JsonObject;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,15 +36,20 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.couchbase.client.core.message.internal.PingReport;
+import com.couchbase.client.core.message.internal.PingServiceHealth;
+import com.couchbase.client.core.service.ServiceType;
+import com.couchbase.client.deps.io.netty.buffer.ByteBuf;
+import com.couchbase.client.deps.io.netty.buffer.Unpooled;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.analytics.AnalyticsQuery;
+import com.couchbase.client.java.analytics.AnalyticsQueryResult;
+import com.couchbase.client.java.document.BinaryDocument;
+import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.document.StringDocument;
+import com.couchbase.client.java.document.json.JsonObject;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @WithComponents("org.talend.components.couchbase")

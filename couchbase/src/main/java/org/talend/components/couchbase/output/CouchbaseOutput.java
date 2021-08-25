@@ -23,7 +23,6 @@ import javax.annotation.PreDestroy;
 
 import org.talend.components.couchbase.dataset.DocumentType;
 import org.talend.components.couchbase.service.CouchbaseService;
-import org.talend.components.couchbase.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -54,10 +53,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Icon(value = Icon.IconType.CUSTOM, custom = "CouchbaseOutput")
 @Processor(name = "Output")
-@Documentation("This component writes data to Couchbase")
+@Documentation("This component writes data to Couchbase.")
 public class CouchbaseOutput implements Serializable {
-
-    private I18nMessage i18n;
 
     private Bucket bucket;
 
@@ -70,10 +67,9 @@ public class CouchbaseOutput implements Serializable {
     private static final String CONTENT_FIELD_NAME = "content";
 
     public CouchbaseOutput(@Option("configuration") final CouchbaseOutputConfiguration configuration,
-            final CouchbaseService service, final I18nMessage i18n) {
+            final CouchbaseService service) {
         this.configuration = configuration;
         this.service = service;
-        this.i18n = i18n;
     }
 
     @PostConstruct

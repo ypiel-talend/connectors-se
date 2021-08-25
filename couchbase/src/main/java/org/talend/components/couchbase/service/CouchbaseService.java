@@ -22,6 +22,7 @@ import static org.talend.sdk.component.api.record.Schema.Type.LONG;
 import static org.talend.sdk.component.api.record.Schema.Type.RECORD;
 import static org.talend.sdk.component.api.record.Schema.Type.STRING;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +64,7 @@ import lombok.extern.slf4j.Slf4j;
 @Version(1)
 @Slf4j
 @Service
-public class CouchbaseService {
+public class CouchbaseService implements Serializable {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(CouchbaseService.class);
 
@@ -184,7 +185,7 @@ public class CouchbaseService {
 
     public void closeBucket(Bucket bucket) {
         if (bucket != null) {
-            if (bucket.close()) {
+            if (Boolean.TRUE.equals(bucket.close())) {
                 LOG.debug(i18n.bucketWasClosed(bucket.name()));
             } else {
                 LOG.debug(i18n.cannotCloseBucket(bucket.name()));
@@ -205,7 +206,7 @@ public class CouchbaseService {
         Cluster cluster = holder.getCluster();
         CouchbaseEnvironment environment = holder.getEnv();
         if (cluster != null) {
-            if (cluster.disconnect()) {
+            if (Boolean.TRUE.equals(cluster.disconnect())) {
                 log.debug(i18n.clusterWasClosed());
             } else {
                 log.debug(i18n.cannotCloseCluster());

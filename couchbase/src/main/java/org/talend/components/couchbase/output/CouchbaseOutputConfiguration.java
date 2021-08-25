@@ -21,7 +21,6 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -30,31 +29,30 @@ import lombok.Data;
 
 @Version(1)
 @Data
-@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataSet" }), //
-        @GridLayout.Row({ "idFieldName", "partialUpdate" }), //
-        @GridLayout.Row({ "useN1QLQuery" }), //
-        @GridLayout.Row({ "query" }), //
-        @GridLayout.Row({ "queryParams" }), //
-}), @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) }) })
-@Documentation("Couchbase output configuration")
+@GridLayout(names = GridLayout.FormType.MAIN, value = { @GridLayout.Row({ "dataSet" }),
+        @GridLayout.Row({ "idFieldName", "partialUpdate" }), @GridLayout.Row({ "useN1QLQuery" }),
+        @GridLayout.Row({ "query" }),
+        @GridLayout.Row({ "queryParams" }), })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) })
+@Documentation("Couchbase output configuration.")
 public class CouchbaseOutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Dataset")
+    @Documentation("Dataset.")
     private CouchbaseDataSet dataSet;
 
     @Option
-    @Documentation("Use N1QL query")
+    @Documentation("Use N1QL query.")
     private boolean useN1QLQuery = false;
 
     @Option
     @ActiveIf(target = "useN1QLQuery", value = "false")
-    @Documentation("Field to use as ID")
+    @Documentation("Field to use as ID.")
     private String idFieldName;
 
     @Option
     @ActiveIf(target = "useN1QLQuery", value = "false")
-    @Documentation("Do a partial update of document")
+    @Documentation("Do a partial update of document.")
     private boolean partialUpdate;
 
     @Option
@@ -66,7 +64,7 @@ public class CouchbaseOutputConfiguration implements Serializable {
 
     @Option
     @ActiveIf(target = "useN1QLQuery", value = "true")
-    @Documentation("N1QL Query Parameters")
+    @Documentation("N1QL Query Parameters.")
     private List<N1QLQueryParameter> queryParams = Collections.emptyList();
 
 }

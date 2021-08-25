@@ -31,16 +31,15 @@ import lombok.Data;
 @GridLayout(names = GridLayout.FormType.ADVANCED,
         value = { @GridLayout.Row({ "dataSet" }), @GridLayout.Row({ "limit" }),
                 @GridLayout.Row("createPrimaryIndex") })
-
-@Documentation("Couchbase input Mapper Configuration")
+@Documentation("Couchbase input Mapper Configuration.")
 public class CouchbaseInputConfiguration implements Serializable {
 
     @Option
-    @Documentation("dataset")
+    @Documentation("Dataset.")
     private CouchbaseDataSet dataSet;
 
     @Option
-    @Documentation("Select action")
+    @Documentation("Select action.")
     @DefaultValue(value = "ALL")
     private SelectAction selectAction = SelectAction.ALL;
 
@@ -61,7 +60,7 @@ public class CouchbaseInputConfiguration implements Serializable {
     private String documentId;
 
     @Option
-    @Documentation("Maximum number of documents to be returned")
+    @Documentation("Maximum number of documents to be returned.")
     @ActiveIf(target = "selectAction", value = "ALL")
     private String limit = "";
 

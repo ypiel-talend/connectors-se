@@ -21,7 +21,6 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -34,30 +33,28 @@ import lombok.Data;
 @Data
 @DataStore("CouchbaseDataStore")
 @Checkable("healthCheck")
-
 @GridLayout(names = GridLayout.FormType.MAIN,
         value = { @GridLayout.Row({ "bootstrapNodes" }), @GridLayout.Row({ "username" }),
                 @GridLayout.Row({ "password" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "useConnectionParameters" }),
         @GridLayout.Row({ "connectionParametersList" }) })
-
-@Documentation("Couchbase connection")
+@Documentation("Couchbase connection.")
 public class CouchbaseDataStore implements Serializable {
 
     @Option
     @Required
-    @Documentation("Bootstrap nodes")
+    @Documentation("Bootstrap nodes.")
     private String bootstrapNodes;
 
     @Option
     @Required
-    @Documentation("Username")
+    @Documentation("Username.")
     private String username;
 
     @Option
     @Required
     @Credential
-    @Documentation("Password")
+    @Documentation("Password.")
     private String password;
 
     @Option

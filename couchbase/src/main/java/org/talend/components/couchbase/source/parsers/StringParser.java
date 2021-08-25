@@ -24,7 +24,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 @Slf4j
 public class StringParser implements DocumentParser {
 
-    private static final transient Logger LOG = LoggerFactory.getLogger(StringParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StringParser.class);
 
     private final Schema schemaStringDocument;
 
