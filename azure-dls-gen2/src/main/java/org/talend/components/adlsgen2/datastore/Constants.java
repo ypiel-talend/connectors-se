@@ -27,6 +27,8 @@ public class Constants {
     public static final String TOKEN_FORM =
             "grant_type=client_credentials&client_id=%s&client_secret=%s&scope=https://storage.azure.com/.default";
 
+    public static final String STATIC_SAS_TOKEN_KEY = "fs.azure.sas.token.static";
+
     public static final DateTimeFormatter RFC1123GMTDateFormatter = DateTimeFormatter
             .ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ROOT)
             .withZone(ZoneId.of("GMT"));
