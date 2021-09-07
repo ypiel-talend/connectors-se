@@ -12,18 +12,24 @@
  */
 package org.talend.components.couchbase.dataset;
 
-import lombok.Data;
+import static org.talend.components.couchbase.configuration.ConfigurationConstants.DETECT_SCHEMA;
+import static org.talend.components.couchbase.configuration.ConfigurationConstants.DISCOVER_SCHEMA;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import java.io.Serializable;
-import java.util.List;
+import lombok.Data;
 
 @Version(1)
 @Data
@@ -36,21 +42,22 @@ import java.util.List;
 public class CouchbaseDataSet implements Serializable {
 
     @Option
-    @Documentation("Connection")
+    @Documentation("Connection.")
     private CouchbaseDataStore datastore;
 
     @Option
-    @Documentation("Schema")
-    @Structure(type = Structure.Type.OUT, discoverSchema = "discover")
-    private List<String> schema;
+    @Documentation("Schema.")
+    @Structure(type = Structure.Type.OUT, discoverSchema = DISCOVER_SCHEMA)
+    @Suggestable(value = DETECT_SCHEMA, parameters = { "datastore", "bucket" })
+    private List<String> schema = Collections.emptyList();
 
     @Option
     @Required
-    @Documentation("Bucket name")
+    @Documentation("Bucket name.")
     private String bucket;
 
     @Option
     @Required
-    @Documentation("Document type")
+    @Documentation("Document type.")
     private DocumentType documentType = DocumentType.JSON;
 }

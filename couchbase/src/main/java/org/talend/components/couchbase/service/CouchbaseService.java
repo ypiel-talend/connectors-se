@@ -12,6 +12,10 @@
  */
 package org.talend.components.couchbase.service;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.talend.components.couchbase.configuration.ConfigurationConstants.DETECT_SCHEMA;
+import static org.talend.components.couchbase.configuration.ConfigurationConstants.DISCOVER_SCHEMA;
 import static org.talend.sdk.component.api.record.Schema.Type.ARRAY;
 import static org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
 import static org.talend.sdk.component.api.record.Schema.Type.DATETIME;
@@ -43,6 +47,8 @@ import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.completion.SuggestionValues;
+import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -96,9 +102,8 @@ public class CouchbaseService implements Serializable {
                 if (dataStore.isUseConnectionParameters()) {
                     dataStore
                             .getConnectionParametersList()
-                            .forEach(
-                                    conf -> setTimeout(envBuilder, conf.getParameterName(),
-                                            parseValue(conf.getParameterValue())));
+                            .forEach(conf -> setTimeout(envBuilder, conf.getParameterName(),
+                                    parseValue(conf.getParameterValue())));
                 }
                 CouchbaseEnvironment environment = envBuilder.build();
                 Cluster cluster = CouchbaseCluster.create(environment, urls);
@@ -160,7 +165,7 @@ public class CouchbaseService implements Serializable {
         }
     }
 
-    @DiscoverSchema("discover")
+    @DiscoverSchema(DISCOVER_SCHEMA)
     public Schema addColumns(@Option("dataSet") final CouchbaseDataSet dataSet) {
         CouchbaseInputConfiguration configuration = new CouchbaseInputConfiguration();
         configuration.setDataSet(dataSet);
@@ -170,6 +175,26 @@ public class CouchbaseService implements Serializable {
         couchbaseInput.release();
 
         return record.getSchema();
+    }
+
+    @Suggestions(DETECT_SCHEMA)
+    public SuggestionValues listColumns(@Option("datastore") final CouchbaseDataStore datastore,
+            @Option("bucket") String bucketName) {
+        CouchbaseDataSet dataset = new CouchbaseDataSet();
+        dataset.setDatastore(datastore);
+        dataset.setBucket(bucketName);
+        try {
+            Schema schema = addColumns(dataset);
+            return new SuggestionValues(true,
+                    schema
+                            .getEntries()
+                            .stream()
+                            .map(e -> new SuggestionValues.Item(e.getName(), e.getName()))
+                            .collect(toList()));
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+        }
+        return new SuggestionValues(false, emptyList());
     }
 
     public Bucket openBucket(Cluster cluster, String bucketName) {
@@ -265,11 +290,10 @@ public class CouchbaseService implements Serializable {
         schemaBuilder.withType(type);
         if (type == RECORD) {
             schemaBuilder
-                    .withEntry(
-                            builderFactory
-                                    .newEntryBuilder()
-                                    .withElementSchema(getSchema((JsonObject) firstValueInArray, null))
-                                    .build());
+                    .withEntry(builderFactory
+                            .newEntryBuilder()
+                            .withElementSchema(getSchema((JsonObject) firstValueInArray, null))
+                            .build());
         } else if (type == ARRAY) {
             schemaBuilder
                     .withEntry(builderFactory
