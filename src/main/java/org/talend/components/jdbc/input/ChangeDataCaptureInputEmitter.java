@@ -28,6 +28,7 @@ import javax.annotation.PreDestroy;
 
 import org.talend.components.jdbc.configuration.InputCaptureDataChangeConfig;
 import org.talend.components.jdbc.dataset.ChangeDataCaptureDataset;
+import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 import org.talend.sdk.component.api.configuration.Option;
@@ -87,14 +88,17 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
     @PostConstruct
     public void init() {
         log.debug("Init is called");
-        if (inputConfig.getDataSet().getQuery() == null || inputConfig.getDataSet().getQuery().trim().isEmpty()) {
+        final Platform platform = this.jdbcDriversService.getPlatformService()
+                .getPlatform(inputConfig.getDataSet().getConnection());
+        if (inputConfig.getDataSet().getQuery(platform) == null
+                || inputConfig.getDataSet().getQuery(platform).trim().isEmpty()) {
             throw new IllegalArgumentException(i18n.errorEmptyQuery());
         }
-        if (jdbcDriversService.isNotReadOnlySQLQuery(inputConfig.getDataSet().getQuery())) {
+        if (jdbcDriversService.isNotReadOnlySQLQuery(inputConfig.getDataSet().getQuery(platform))) {
             throw new IllegalArgumentException(i18n.errorUnauthorizedQuery());
         }
 
-        String createStreamStatement = this.cdcDataset.createStreamTableIfNotExist();
+        String createStreamStatement = this.cdcDataset.createStreamTableIfNotExist(platform);
 
         try {
             dataSource = jdbcDriversService.createDataSource(inputConfig.getDataSet().getConnection());
@@ -189,20 +193,29 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
             resultSetSize = 0;
 
             log.info("------------Fetch data------------------");
-            log.info("Fetch data with query: " + inputConfig.getDataSet().getQuery());
+            log.info("Fetch data with query: " + inputConfig.getDataSet()
+                    .getQuery(
+                            this.jdbcDriversService.getPlatformService()
+                                    .getPlatform(inputConfig.getDataSet().getConnection())));
 
             lastFetchTime = time;
             connection.setAutoCommit(false);
             // then read from stream table to compute size
             statement = connection.createStatement();
             statement.setFetchSize(inputConfig.getDataSet().getFetchSize());
-            resultSetCopy = statement.executeQuery(inputConfig.getDataSet().getQuery());
+            resultSetCopy = statement.executeQuery(inputConfig.getDataSet()
+                    .getQuery(
+                            this.jdbcDriversService.getPlatformService()
+                                    .getPlatform(inputConfig.getDataSet().getConnection())));
             resultSetSize = getSize(resultSetCopy);
             resultSetCopy.close();
             // then read from stream table to compute size
             statement = connection.createStatement();
             statement.setFetchSize(inputConfig.getDataSet().getFetchSize());
-            resultSet = statement.executeQuery(inputConfig.getDataSet().getQuery());
+            resultSet = statement.executeQuery(inputConfig.getDataSet()
+                    .getQuery(
+                            this.jdbcDriversService.getPlatformService()
+                                    .getPlatform(inputConfig.getDataSet().getConnection())));
             connection.commit();
             connection.setAutoCommit(true);
 
@@ -211,11 +224,15 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
                 log.info("Result set size: " + resultSetSize);
                 connection.setAutoCommit(false);
                 statementUpdate = connection.createStatement();
-                String createStreamCounterStatement = this.cdcDataset.createCounterTableIfNotExist();
+                String createStreamCounterStatement = this.cdcDataset.createCounterTableIfNotExist(
+                        this.jdbcDriversService.getPlatformService()
+                                .getPlatform(inputConfig.getDataSet().getConnection()));
                 statementUpdate = connection.createStatement();
                 int resultCreateCounter = statementUpdate.executeUpdate(createStreamCounterStatement);
                 log.debug("Update statement changed records: " + resultCreateCounter);
-                String consumeRecordsStreamStatement = this.cdcDataset.createStatementConsumeStreamTable();
+                String consumeRecordsStreamStatement = this.cdcDataset.createStatementConsumeStreamTable(
+                        this.jdbcDriversService.getPlatformService()
+                                .getPlatform(inputConfig.getDataSet().getConnection()));
                 statementUpdate = connection.createStatement();
                 int resultConsumeRecordsStream = statementUpdate.executeUpdate(consumeRecordsStreamStatement);
                 connection.commit();

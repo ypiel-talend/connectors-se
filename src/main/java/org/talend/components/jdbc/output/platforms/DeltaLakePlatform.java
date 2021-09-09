@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.service.I18nMessage;
 
 import com.zaxxer.hikari.HikariDataSource;
@@ -31,8 +32,8 @@ public class DeltaLakePlatform extends Platform {
 
     public static final String DELTALAKE = "deltalake";
 
-    public DeltaLakePlatform(final I18nMessage i18n) {
-        super(i18n);
+    public DeltaLakePlatform(final I18nMessage i18n, final JdbcConfiguration.Driver driver) {
+        super(i18n, driver);
     }
 
     @Override
@@ -48,6 +49,16 @@ public class DeltaLakePlatform extends Platform {
     @Override
     public void addDataSourceProperties(HikariDataSource dataSource) {
         super.addDataSourceProperties(dataSource);
+    }
+
+    @Override
+    protected String buildUrlFromPattern(final String protocol, final String host, final int port,
+            final String database,
+            String params) {
+        if (!"".equals(params.trim())) {
+            params = ";" + params;
+        }
+        return String.format("%s://%s:%s/%s%s", protocol, host, port, database, params.replace('&', ';'));
     }
 
     @Override

@@ -37,22 +37,20 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import com.zaxxer.hikari.HikariDataSource;
 
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
+import org.talend.components.jdbc.configuration.JdbcConfiguration.Driver;
 import org.talend.components.jdbc.datastore.AuthenticationType;
 import org.talend.components.jdbc.datastore.JdbcConnection;
-import org.talend.components.jdbc.output.platforms.PlatformFactory;
+import org.talend.components.jdbc.output.platforms.Platform;
+import org.talend.components.jdbc.output.platforms.PlatformService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.configuration.Configuration;
-import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.dependency.Resolver;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
@@ -85,17 +83,8 @@ public class JdbcService {
     @Service
     private RecordBuilderFactory recordBuilderFactory;
 
-    @Configuration("jdbc")
-    private Supplier<JdbcConfiguration> jdbcConfiguration;
-
     @Service
-    private LocalConfiguration localConfiguration;
-
-    public boolean driverNotDisabled(JdbcConfiguration.Driver driver) {
-        return !ofNullable(localConfiguration.get("jdbc.driver." + driver.getId().toLowerCase(Locale.ROOT) + ".skip"))
-                .map(Boolean::valueOf)
-                .orElse(false);
-    }
+    private PlatformService platformService;
 
     /**
      * @param query the query to check
@@ -103,22 +92,6 @@ public class JdbcService {
      */
     public boolean isNotReadOnlySQLQuery(final String query) {
         return query != null && !READ_ONLY_QUERY_PATTERN.matcher(query.trim()).matches();
-    }
-
-    public JdbcConfiguration.Driver getDriver(final JdbcConnection dataStore) {
-        return jdbcConfiguration
-                .get()
-                .getDrivers()
-                .stream()
-                .filter(this::driverNotDisabled)
-                .filter(d -> d
-                        .getId()
-                        .equals(ofNullable(dataStore.getHandler())
-                                .filter(h -> !h.isEmpty())
-                                .orElse(dataStore.getDbType())))
-                .filter(d -> d.getHandlers() == null || d.getHandlers().isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(i18n.errorDriverNotFound(dataStore.getDbType())));
     }
 
     public static boolean checkTableExistence(final String tableName, final JdbcService.JdbcDatasource dataSource)
@@ -149,19 +122,23 @@ public class JdbcService {
     }
 
     public JdbcDatasource createDataSource(final JdbcConnection connection) {
-        return new JdbcDatasource(resolver, i18n, tokenClient, connection, getDriver(connection), false, false);
+        return new JdbcDatasource(resolver, i18n, tokenClient, connection, this, false, false);
     }
 
     public JdbcDatasource createDataSource(final JdbcConnection connection, final boolean rewriteBatchedStatements) {
-        return new JdbcDatasource(resolver, i18n, tokenClient, connection, getDriver(connection), false,
+        return new JdbcDatasource(resolver, i18n, tokenClient, connection, this, false,
                 rewriteBatchedStatements);
     }
 
     public JdbcDatasource createDataSource(final JdbcConnection connection, boolean isAutoCommit,
             final boolean rewriteBatchedStatements) {
-        final JdbcConfiguration.Driver driver = getDriver(connection);
-        return new JdbcDatasource(resolver, i18n, tokenClient, connection, driver, isAutoCommit,
+        final JdbcConfiguration.Driver driver = platformService.getDriver(connection);
+        return new JdbcDatasource(resolver, i18n, tokenClient, connection, this, isAutoCommit,
                 rewriteBatchedStatements);
+    }
+
+    public PlatformService getPlatformService() {
+        return this.platformService;
     }
 
     public static class JdbcDatasource implements AutoCloseable {
@@ -174,8 +151,9 @@ public class JdbcService {
         private final String driverId;
 
         public JdbcDatasource(final Resolver resolver, final I18nMessage i18n, final TokenClient tokenClient,
-                final JdbcConnection connection, final JdbcConfiguration.Driver driver, final boolean isAutoCommit,
+                final JdbcConnection connection, final JdbcService jdbcService, final boolean isAutoCommit,
                 final boolean rewriteBatchedStatements) {
+            final Driver driver = jdbcService.getPlatformService().getDriver(connection);
             this.driverId = driver.getId();
             final Thread thread = Thread.currentThread();
             final ClassLoader prev = thread.getContextClassLoader();
@@ -213,7 +191,9 @@ public class JdbcService {
                             .addDataSourceProperty("token", OAuth2Utils.getAccessToken(connection, tokenClient, i18n));
                 }
                 dataSource.setDriverClassName(driver.getClassName());
-                dataSource.setJdbcUrl(connection.getJdbcUrl());
+                final Platform platform = jdbcService.getPlatformService().getPlatform(connection);
+                final String jdbcUrl = platform.buildUrl(connection);
+                dataSource.setJdbcUrl(jdbcUrl);
                 if ("DeltaLake".equalsIgnoreCase(driverId)) {
                     // do nothing, DeltaLake default don't allow set auto commit to false
                 } else {
@@ -222,7 +202,7 @@ public class JdbcService {
                 dataSource.setMaximumPoolSize(1);
                 dataSource.setConnectionTimeout(connection.getConnectionTimeOut() * 1000);
                 dataSource.setValidationTimeout(connection.getConnectionValidationTimeOut() * 1000);
-                PlatformFactory.get(connection, i18n).addDataSourceProperties(dataSource);
+                jdbcService.getPlatformService().getPlatform(connection).addDataSourceProperties(dataSource);
                 dataSource.addDataSourceProperty("rewriteBatchedStatements", String.valueOf(rewriteBatchedStatements));
                 // dataSource.addDataSourceProperty("cachePrepStmts", "true");
                 // dataSource.addDataSourceProperty("prepStmtCacheSize", "250");

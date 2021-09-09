@@ -19,6 +19,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.talend.sdk.component.api.record.Schema.Type.RECORD;
 
+import org.talend.sdk.component.api.service.update.Update;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -33,7 +35,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -42,10 +43,8 @@ import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.configuration.RedshiftSortStrategy;
 import org.talend.components.jdbc.dataset.TableNameDataset;
 import org.talend.components.jdbc.datastore.JdbcConnection;
-import org.talend.components.jdbc.output.platforms.PlatformFactory;
+import org.talend.components.jdbc.output.platforms.PlatformService;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.exception.ComponentException;
-import org.talend.sdk.component.api.exception.ComponentException.ErrorOrigin;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.asyncvalidation.AsyncValidation;
@@ -55,10 +54,6 @@ import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.SuggestionValues.Item;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.completion.Values;
-import org.talend.sdk.component.api.service.configuration.Configuration;
-import org.talend.sdk.component.api.service.discovery.DiscoverDataset;
-import org.talend.sdk.component.api.service.discovery.DiscoverDatasetResult;
-import org.talend.sdk.component.api.service.discovery.DiscoverDatasetResult.DatasetDescription;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -71,6 +66,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class UIActionService {
+
+    public static final String ACTION_DEFAULT_VALUES = "ACTION_DEFAULT_VALUES";
 
     public static final String ACTION_LIST_COLUMNS = "ACTION_LIST_COLUMNS";
 
@@ -101,16 +98,38 @@ public class UIActionService {
     @Service
     private RecordBuilderFactory recordBuilderFactory;
 
-    @Configuration("jdbc")
-    private Supplier<JdbcConfiguration> jdbcConfiguration;
+    @Service
+    private PlatformService platformService;
+
+    @Update(ACTION_DEFAULT_VALUES)
+    public JdbcConnection setDefaultURLValues(final JdbcConnection connection) {
+        final JdbcConfiguration.Driver configuration = platformService.getDriver(connection); // jdbcService.getDriver(connection);
+
+        if (configuration == null) {
+            return connection;
+        }
+
+        final Boolean setRawUrl = connection.getSetRawUrl();
+        if (configuration.getDefaults() != null) {
+            if (setRawUrl) {
+                connection.setSetRawUrl(false);
+            }
+            connection.setDatabase(configuration.getDefaults().getDatabase());
+            connection.setHost(configuration.getDefaults().getHost());
+            connection.setPort(configuration.getDefaults().getPort());
+            connection.setParameters(configuration.getDefaults().getParameters());
+        }
+
+        return connection;
+    }
 
     @DynamicValues(ACTION_LIST_SUPPORTED_DB)
     public Values loadSupportedDataBaseTypes() {
-        return new Values(jdbcConfiguration
+        return new Values(platformService.getJdbcConfiguration()
                 .get()
                 .getDrivers()
                 .stream()
-                .filter(d -> jdbcService.driverNotDisabled(d))
+                .filter(d -> platformService.driverNotDisabled(d))
                 .sorted(comparingInt(JdbcConfiguration.Driver::getOrder))
                 .map(driver -> new Values.Item(driver.getId(), driver.getDisplayName()))
                 .collect(toList()));
@@ -137,15 +156,14 @@ public class UIActionService {
 
     @Suggestions(ACTION_LIST_HANDLERS_DB)
     public SuggestionValues getHandlersDataBaseTypes(@Option final String dbType) {
-        List<JdbcConfiguration.Driver> drivers = jdbcConfiguration
+        List<JdbcConfiguration.Driver> drivers = platformService.getJdbcConfiguration()
                 .get()
                 .getDrivers()
                 .stream()
-                .filter(d -> jdbcService.driverNotDisabled(d))
+                .filter(d -> platformService.driverNotDisabled(d))
                 .collect(toList());
-        return new SuggestionValues(false, drivers
-                .stream()
-                .filter(d -> jdbcService.driverNotDisabled(d))
+        return new SuggestionValues(false, drivers.stream()
+                .filter(d -> platformService.driverNotDisabled(d))
                 .filter(db -> db.getId().equals(dbType) && !db.getHandlers().isEmpty())
                 .flatMap(db -> db.getHandlers().stream())
                 .flatMap(handler -> drivers.stream().filter(d -> d.getId().equals(handler)))
@@ -248,7 +266,7 @@ public class UIActionService {
                 ofNullable(tables.getString("TABLE_TYPE"))
                         .map(String::trim)
                         .map(t -> ("BASE TABLE".equalsIgnoreCase(t)) ? "TABLE" : t)
-                        .filter(t -> jdbcConfiguration.get().getSupportedTableTypes().contains(t))
+                        .filter(t -> platformService.getJdbcConfiguration().get().getSupportedTableTypes().contains(t))
                         .ifPresent(result::add);
             }
         }
@@ -270,7 +288,10 @@ public class UIActionService {
                 Connection conn = dataSource.getConnection();
                 final Statement statement = conn.createStatement()) {
             statement.setMaxRows(1);
-            try (final ResultSet result = statement.executeQuery(dataset.getQuery())) {
+
+            try (final ResultSet result = statement
+                    .executeQuery(
+                            dataset.getQuery(jdbcService.getPlatformService().getPlatform(dataset.getConnection())))) {
                 final ResultSetMetaData meta = result.getMetaData();
                 final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
                 IntStream
@@ -286,12 +307,12 @@ public class UIActionService {
 
     @Suggestions(value = ACTION_LIST_COLUMNS)
     public SuggestionValues getListColumns(@Option final JdbcConnection datastore, String tableName) {
-        String indetifier = PlatformFactory.get(datastore, i18n).identifier(tableName);
+        String identifier = platformService.getPlatform(datastore).identifier(tableName);
         try (JdbcService.JdbcDatasource dataSource = jdbcService.createDataSource(datastore);
                 Connection conn = dataSource.getConnection();
                 final Statement statement = conn.createStatement()) {
             statement.setMaxRows(1);
-            try (final ResultSet result = statement.executeQuery("select * from " + indetifier)) {
+            try (final ResultSet result = statement.executeQuery("select * from " + identifier)) {
                 return new SuggestionValues(true,
                         IntStream.rangeClosed(1, result.getMetaData().getColumnCount()).mapToObj(i -> {
                             try {

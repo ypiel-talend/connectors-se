@@ -17,11 +17,16 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.talend.components.jdbc.configuration.DistributionStrategy;
+import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.configuration.RedshiftSortStrategy;
+import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 import org.talend.sdk.component.api.record.Record;
@@ -45,7 +50,10 @@ public abstract class Platform implements Serializable {
 
     private final I18nMessage i18n;
 
-    protected Platform(I18nMessage i18n) {
+    private final JdbcConfiguration.Driver driver;
+
+    protected Platform(final I18nMessage i18n, final JdbcConfiguration.Driver driver) {
+        this.driver = driver;
         this.i18n = i18n;
     }
 
@@ -60,6 +68,47 @@ public abstract class Platform implements Serializable {
      * @return true if the error is because the table already exist
      */
     protected abstract boolean isTableExistsCreationError(final Throwable e);
+
+    protected String buildUrlFromPattern(final String protocol, final String host, final int port,
+            final String database,
+            String params) {
+
+        if (!"".equals(params.trim())) {
+            params = "?" + params;
+        }
+        return String.format("%s://%s:%s/%s%s", protocol, host, port, database, params);
+    }
+
+    public String buildUrl(final JdbcConnection connection) {
+
+        // final JdbcConnection config = specializeConfiguration(connection);
+
+        // @Datastore/Dataset migration handlers are not called at runtime
+        // This is a workaround to detect if we have to get jdbcRul or build it from other fields.
+        String host = Optional.ofNullable(connection.getHost()).orElse("");
+        String url = Optional.ofNullable(connection.getJdbcUrl()).orElse("");
+        if (!connection.getSetRawUrl() && "".equals(host.trim()) && !"".equals(url.trim())) {
+            // If true that it's mean that this configuration has been created before v3
+            // org.talend.components.jdbc.datastore.JdbcConnection.VERSION < 3
+            connection.setSetRawUrl(true);
+        }
+
+        if (connection.getSetRawUrl()) {
+            return connection.getJdbcUrl();
+        }
+
+        final String params = Optional.ofNullable(connection.getParameters())
+                .orElse(new ArrayList<>())
+                .stream()
+                .map(p -> p.getKey() + "=" + p.getValue())
+                .collect(Collectors.joining("&"));
+        final String protocol =
+                connection.getDefineProtocol() ? connection.getProtocol() : this.getDriver().getProtocol();
+        final String builtURL = buildUrlFromPattern(protocol, connection.getHost(), connection.getPort(),
+                connection.getDatabase(), params);
+
+        return builtURL;
+    }
 
     public void createTableIfNotExist(final Connection connection, final String name, final List<String> keys,
             final RedshiftSortStrategy sortStrategy, final List<String> sortKeys,
@@ -163,7 +212,7 @@ public abstract class Platform implements Serializable {
 
     /**
      * Add platform related properties to jdbc connections
-     * 
+     *
      * @param dataSource the data source object to be configured
      */
     public void addDataSourceProperties(final HikariDataSource dataSource) {

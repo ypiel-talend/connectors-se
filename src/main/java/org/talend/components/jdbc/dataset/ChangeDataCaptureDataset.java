@@ -14,9 +14,12 @@ package org.talend.components.jdbc.dataset;
 
 import lombok.Data;
 import lombok.experimental.Delegate;
+
 import org.talend.components.jdbc.datastore.JdbcConnection;
+import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
+import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -25,7 +28,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.talend.components.jdbc.output.platforms.PlatformFactory.get;
+import static org.talend.components.jdbc.service.UIActionService.ACTION_DEFAULT_VALUES;
 import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_TABLE_NAMES;
 import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.FormType.ADVANCED;
 
@@ -42,6 +45,7 @@ public class ChangeDataCaptureDataset implements BaseDataSet {
 
     @Option
     @Documentation("the connection information to execute the query")
+    @Updatable(value = ACTION_DEFAULT_VALUES, parameters = { "." }, after = "setRawUrl")
     private JdbcConnection connection;
 
     @Option
@@ -61,32 +65,34 @@ public class ChangeDataCaptureDataset implements BaseDataSet {
     private AdvancedCommon advancedCommon = new AdvancedCommon();
 
     @Override
-    public String getQuery() {
+    public String getQuery(final Platform platform) {
         // No need for the i18n service for this instance
-        return "select * from " + get(connection, null).identifier(getStreamTableName());
+        return "select * from " + platform.identifier(getStreamTableName());
     }
 
     // Snowflake CDC specific !!!
-    public String createStreamTableIfNotExist() {
-        return "create stream if not exists " + getQN(streamTableName) + " on table " + getQN(tableName);
+    public String createStreamTableIfNotExist(final Platform platform) {
+        return "create stream if not exists " + getQN(streamTableName, platform) + " on table "
+                + getQN(tableName, platform);
     }
 
     // Snowflake CDC specific !!!
-    public String createCounterTableIfNotExist() {
-        return "create table if not exists " + getQN(getCounterTableName(streamTableName)) + "(c number(8))";
+    public String createCounterTableIfNotExist(final Platform platform) {
+        return "create table if not exists " + getQN(getCounterTableName(streamTableName), platform) + "(c number(8))";
     }
 
-    public String createStatementConsumeStreamTable() {
-        return "insert into " + getQN(getCounterTableName(streamTableName)) + "(c) " + " select count(*) from "
-                + getQN(streamTableName);
+    public String createStatementConsumeStreamTable(final Platform platform) {
+        return "insert into " + getQN(getCounterTableName(streamTableName), platform) + "(c) "
+                + " select count(*) from "
+                + getQN(streamTableName, platform);
     }
 
     private String getCounterTableName(String streamTableName) {
         return streamTableName + "_COUNTER";
     }
 
-    private String getQN(String table) {
-        String jdbcUrl = connection.getJdbcUrl();
+    private String getQN(String table, final Platform platform) {
+        String jdbcUrl = platform.buildUrl(connection);
         String[] splitParts = jdbcUrl.split("\\?");
         if (splitParts.length == 1)
             return table;

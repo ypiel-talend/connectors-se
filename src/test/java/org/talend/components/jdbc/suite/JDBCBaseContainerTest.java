@@ -28,9 +28,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -45,8 +43,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -70,14 +66,10 @@ import org.talend.components.jdbc.dataset.SqlQueryDataset;
 import org.talend.components.jdbc.dataset.TableNameDataset;
 import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.output.platforms.Platform;
-import org.talend.components.jdbc.output.platforms.PlatformFactory;
 import org.talend.components.jdbc.service.JdbcService;
-import org.talend.components.jdbc.service.UIActionService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
-import org.talend.sdk.component.api.service.discovery.DiscoverDatasetResult;
-import org.talend.sdk.component.api.service.discovery.DiscoverDatasetResult.DatasetDescription;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -182,11 +174,12 @@ public abstract class JDBCBaseContainerTest {
 
             try (final JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(dataStore)) {
                 try (final Connection connection = dataSource.getConnection()) {
-                    PlatformFactory
-                            .get(dataStore, getI18nMessage())
-                            .createTableIfNotExist(connection, testTable, asList("id"),
-                                    RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(),
-                                    -1, records);
+                    getJdbcService().getPlatformService()
+                            .getPlatform(dataStore)
+                            .createTableIfNotExist(connection, testTable,
+                                    asList("id"), RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS,
+                                    emptyList(), -1,
+                                    records);
                 }
             }
         }
@@ -201,8 +194,8 @@ public abstract class JDBCBaseContainerTest {
             try (final JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(dataStore)) {
 
                 try (final Connection connection = dataSource.getConnection()) {
-                    PlatformFactory
-                            .get(dataStore, getI18nMessage())
+                    getJdbcService().getPlatformService()
+                            .getPlatform(dataStore)
                             .createTableIfNotExist(connection, testTable,
                                     asList("id", "email"), RedshiftSortStrategy.COMPOUND, emptyList(),
                                     DistributionStrategy.KEYS,
@@ -219,11 +212,10 @@ public abstract class JDBCBaseContainerTest {
 
             try (final JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(dataStore)) {
                 try (final Connection connection = dataSource.getConnection()) {
-                    Platform platform = PlatformFactory.get(dataStore, getI18nMessage());
-                    platform
-                            .createTableIfNotExist(connection, testTable, asList("id", "email"),
-                                    RedshiftSortStrategy.COMPOUND,
-                                    emptyList(), DistributionStrategy.KEYS, emptyList(), -1, records);
+                    Platform platform = getJdbcService().getPlatformService().getPlatform(dataStore);
+                    platform.createTableIfNotExist(connection, testTable, asList("id", "email"),
+                            RedshiftSortStrategy.COMPOUND,
+                            emptyList(), DistributionStrategy.KEYS, emptyList(), -1, records);
                     // recreate the table should not fail
                     platform
                             .createTableIfNotExist(connection, testTable, asList("id", "email"),
@@ -307,14 +299,13 @@ public abstract class JDBCBaseContainerTest {
         private void createTestTable(String testTableName, JdbcConnection datastore) throws SQLException {
             try (JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(datastore, false)) {
                 try (final Connection connection = dataSource.getConnection()) {
-                    PlatformFactory
-                            .get(datastore, getI18nMessage())
+                    getJdbcService().getPlatformService()
+                            .getPlatform(datastore)
                             .createTableIfNotExist(connection, testTableName,
                                     singletonList("id"), RedshiftSortStrategy.COMPOUND, emptyList(),
                                     DistributionStrategy.KEYS,
                                     emptyList(), -1,
-                                    singletonList(this
-                                            .getRecordBuilderFactory()
+                                    singletonList(this.getRecordBuilderFactory()
                                             .newRecordBuilder()
                                             .withInt("id", 1)
                                             .build()));
@@ -406,11 +397,10 @@ public abstract class JDBCBaseContainerTest {
 
             try (final JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(dataStore)) {
                 try (final Connection connection = dataSource.getConnection()) {
-                    Platform platform = PlatformFactory.get(tableNameDataset.getConnection(), getI18nMessage());
-                    platform
-                            .createTableIfNotExist(connection, testTableName, asList("id", "email"),
-                                    RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(),
-                                    -1, records);
+                    Platform platform = getJdbcService().getPlatformService().getPlatform(dataStore);
+                    platform.createTableIfNotExist(connection, testTableName, asList("id", "email"),
+                            RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(), -1,
+                            records);
                 }
             }
             final Schema guessed = getUiActionService().guessSchema(tableNameDataset);
@@ -455,9 +445,9 @@ public abstract class JDBCBaseContainerTest {
             final JdbcConnection connection = newConnection();
             sqlQueryDataset.setConnection(connection);
             sqlQueryDataset.setFetchSize(rowCount / 3);
-            sqlQueryDataset
-                    .setSqlQuery("select * from "
-                            + PlatformFactory.get(connection, getI18nMessage()).identifier(testTableName));
+            sqlQueryDataset.setSqlQuery(
+                    "select * from "
+                            + getJdbcService().getPlatformService().getPlatform(connection).identifier(testTableName));
             final InputQueryConfig config = new InputQueryConfig();
             config.setDataSet(sqlQueryDataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
@@ -756,10 +746,11 @@ public abstract class JDBCBaseContainerTest {
             final JdbcConnection dataStore = newConnection();
             final String testTableName = getTestTableName(testInfo);
             try (final Connection connection = getJdbcService().createDataSource(dataStore).getConnection()) {
-                PlatformFactory
-                        .get(dataStore, getI18nMessage())
-                        .createTableIfNotExist(connection, testTableName, emptyList(),
-                                RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS, emptyList(), -1,
+                getJdbcService().getPlatformService()
+                        .getPlatform(dataStore)
+                        .createTableIfNotExist(connection, testTableName,
+                                emptyList(), RedshiftSortStrategy.COMPOUND, emptyList(), DistributionStrategy.KEYS,
+                                emptyList(), -1,
                                 Collections.singletonList(builder.build()));
             }
             runWithBad("id", "bad id", testTableName);

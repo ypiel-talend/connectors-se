@@ -67,7 +67,9 @@ public abstract class AbstractInputEmitter implements Serializable {
 
     @PostConstruct
     public void init() {
-        String query = inputConfig.getDataSet().getQuery();
+        String query = inputConfig.getDataSet()
+                .getQuery(
+                        jdbcDriversService.getPlatformService().getPlatform(inputConfig.getDataSet().getConnection()));
         if (query == null || query.trim().isEmpty()) {
             throw new IllegalArgumentException(i18n.errorEmptyQuery());
         }
