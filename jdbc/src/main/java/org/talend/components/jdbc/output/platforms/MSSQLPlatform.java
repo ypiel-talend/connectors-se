@@ -15,8 +15,12 @@ package org.talend.components.jdbc.output.platforms;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.talend.components.jdbc.configuration.JdbcConfiguration;
+import org.talend.components.jdbc.configuration.JdbcConfiguration.KeyVal;
+import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.service.I18nMessage;
 
 import com.zaxxer.hikari.HikariDataSource;
@@ -33,8 +37,17 @@ public class MSSQLPlatform extends Platform {
 
     public static final String MSSQL_JTDS = "mssql_jtds";
 
-    public MSSQLPlatform(final I18nMessage i18n) {
-        super(i18n);
+    protected String buildUrlFromPattern(final String protocol, final String host, final int port,
+            final String database,
+            String params) {
+        if (!"".equals(params.trim())) {
+            params = ";" + params;
+        }
+        return String.format("%s://%s:%s;databaseName=%s%s", protocol, host, port, database, params.replace('&', ';'));
+    }
+
+    public MSSQLPlatform(final I18nMessage i18n, final JdbcConfiguration.Driver driver) {
+        super(i18n, driver);
     }
 
     @Override

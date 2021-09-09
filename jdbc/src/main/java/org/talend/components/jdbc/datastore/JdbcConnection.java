@@ -12,8 +12,16 @@
  */
 package org.talend.components.jdbc.datastore;
 
-import lombok.Data;
-import lombok.ToString;
+import static org.talend.components.jdbc.service.UIActionService.ACTION_LIST_HANDLERS_DB;
+import static org.talend.components.jdbc.service.UIActionService.ACTION_LIST_SUPPORTED_DB;
+import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.AND;
+import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.OR;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.talend.components.jdbc.configuration.JdbcConfiguration.KeyVal;
 import org.talend.components.jdbc.service.UIActionService;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -30,28 +38,26 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import java.io.Serializable;
-
-import static org.talend.components.jdbc.service.UIActionService.ACTION_LIST_HANDLERS_DB;
-import static org.talend.components.jdbc.service.UIActionService.ACTION_LIST_SUPPORTED_DB;
-import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.AND;
-import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.OR;
+import lombok.Data;
+import lombok.ToString;
 
 @Data
-@Version(value = 2, migrationHandler = JdbcConnectionMigrationHandler.class)
+@Version(value = JdbcConnection.VERSION, migrationHandler = JdbcConnectionMigrationHandler.class)
 @ToString(exclude = { "password", "privateKey", "privateKeyPassword" })
-@GridLayout({ @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("jdbcUrl"),
-        @GridLayout.Row("authenticationType"),
-        @GridLayout.Row("userId"), @GridLayout.Row("password"), @GridLayout.Row("privateKey"),
-        @GridLayout.Row("privateKeyPassword"), @GridLayout.Row("oauthTokenEndpoint"), @GridLayout.Row("clientId"),
-        @GridLayout.Row("clientSecret"), @GridLayout.Row("grantType"), @GridLayout.Row("oauthUsername"),
-        @GridLayout.Row("oauthPassword"), @GridLayout.Row("scope") })
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("connectionTimeOut"),
-        @GridLayout.Row("connectionValidationTimeOut") })
+@GridLayout({ @GridLayout.Row({ "dbType", "handler" }), @GridLayout.Row("setRawUrl"), @GridLayout.Row("jdbcUrl"),
+        @GridLayout.Row("host"), @GridLayout.Row("port"), @GridLayout.Row("database"), @GridLayout.Row("parameters"),
+        @GridLayout.Row("authenticationType"), @GridLayout.Row("userId"), @GridLayout.Row("password"),
+        @GridLayout.Row("privateKey"), @GridLayout.Row("privateKeyPassword"), @GridLayout.Row("oauthTokenEndpoint"),
+        @GridLayout.Row("clientId"), @GridLayout.Row("clientSecret"), @GridLayout.Row("grantType"),
+        @GridLayout.Row("oauthUsername"), @GridLayout.Row("oauthPassword"), @GridLayout.Row("scope") })
+@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "defineProtocol", "protocol" }),
+        @GridLayout.Row("connectionTimeOut"), @GridLayout.Row("connectionValidationTimeOut") })
 @DataStore("JdbcConnection")
 @Checkable(UIActionService.ACTION_BASIC_HEALTH_CHECK)
 @Documentation("A connection to a data base.")
 public class JdbcConnection implements Serializable {
+
+    public final static int VERSION = 3;
 
     @Option
     @Required
@@ -66,9 +72,47 @@ public class JdbcConnection implements Serializable {
     private String handler;
 
     @Option
-    @Required
-    @Documentation("jdbc connection url.")
+    @Documentation("Let user define complete jdbc url or not")
+    @DefaultValue("false")
+    private Boolean setRawUrl = false;
+
+    @Option
+    @ActiveIf(target = "setRawUrl", value = { "true" })
+    @Documentation("jdbc connection raw url")
     private String jdbcUrl;
+
+    @Option
+    @ActiveIf(target = "setRawUrl", value = { "false" })
+    @Documentation("jdbc host")
+    private String host;
+
+    @Option
+    @ActiveIf(target = "setRawUrl", value = { "false" })
+    @Documentation("jdbc port")
+    @DefaultValue("80")
+    private int port = 80;
+
+    @Option
+    @ActiveIf(target = "setRawUrl", value = { "false" })
+    @Documentation("jdbc database")
+    private String database;
+
+    @Option
+    @ActiveIf(target = "setRawUrl", value = { "false" })
+    @Documentation("jdbc parameters")
+    private List<KeyVal> parameters = new ArrayList<>();
+
+    @Option
+    @Documentation("Let user define protocol of the jdbc url.")
+    @DefaultValue("false")
+    @ActiveIf(target = "setRawUrl", value = { "false" })
+    private Boolean defineProtocol = false;
+
+    @Option
+    @ActiveIfs(value = { @ActiveIf(target = "setRawUrl", value = { "false" }),
+            @ActiveIf(target = "defineProtocol", value = { "true" }) })
+    @Documentation("Protocol")
+    private String protocol;
 
     @Option
     @DefaultValue("BASIC")
@@ -160,5 +204,14 @@ public class JdbcConnection implements Serializable {
     @Option
     @Documentation("Sets the maximum number of seconds that the pool will wait for a connection to be validated as alive.")
     private long connectionValidationTimeOut = 10;
+
+    public void setJdbcUrl(final String jdbcUrl) {
+        this.setSetRawUrl(true);
+        this.jdbcUrl = jdbcUrl;
+        this.setHost("");
+        this.setPort(80);
+        this.setDatabase("");
+        this.setParameters(new ArrayList<>());
+    }
 
 }
