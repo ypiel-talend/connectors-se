@@ -73,8 +73,9 @@ public class DeltaBlobReader extends BlobReader {
             switch (authMethod) {
             case SharedKey:
                 String sharedKey = datastore.getSharedKey();
-                hadoopConfig.set("fs.azure.account.auth.type." + accountName + ".dfs.core.windows.net", "SharedKey");
-                hadoopConfig.set("fs.azure.account.key." + accountName + ".dfs.core.windows.net", sharedKey);
+                String endpoint = datastore.getEndpointSuffix();
+                hadoopConfig.set(String.format("fs.azure.account.auth.type.%s.%s", accountName, endpoint), "SharedKey");
+                hadoopConfig.set(String.format("fs.azure.account.key.%s.%s", accountName, endpoint), sharedKey);
                 break;
             case SAS:
                 // seems hadoop 3.2.2 don't support that, need to upgrade hadoop
