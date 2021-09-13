@@ -260,10 +260,10 @@ spec:
             when {
                 anyOf {
                     expression { params.Action == 'PUSH_TO_XTM' }
-                    allOf {
+                    /*allOf {
                         triggeredBy 'TimerTrigger'
                         expression { calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY }
-                    }
+                    }*/
                 }
                 anyOf {
                     branch 'master'
