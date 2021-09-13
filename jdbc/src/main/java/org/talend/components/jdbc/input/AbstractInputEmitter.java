@@ -73,7 +73,10 @@ public abstract class AbstractInputEmitter implements Serializable {
         if (query == null || query.trim().isEmpty()) {
             throw new IllegalArgumentException(i18n.errorEmptyQuery());
         }
-        if (jdbcDriversService.isNotReadOnlySQLQuery(query)) {
+        if (jdbcDriversService.isNotReadOnlySQLQuery(query) || query.contains(";")) {
+            // We don't want to authorize queries containing ";", because by chaining queries,
+            // a user could perform non readonly operations like dropping a table.
+            // Currently, the check in JdbcService overlook this use case.
             throw new IllegalArgumentException(i18n.errorUnauthorizedQuery());
         }
 
