@@ -23,7 +23,7 @@
 
   <artifactId>azurecommon</artifactId>
 
-  <name>Connectors EE :: Azure :: AzureCommon</name>
+  <name>Connectors SE :: Azure :: AzureCommon</name>
 
   <dependencies>
     <!-- traductions -->

@@ -11,7 +11,7 @@
     <artifactId>azureblob</artifactId>
     <packaging>jar</packaging>
 
-    <name>Connectors EE :: Azure :: AzureBlob</name>
+    <name>Connectors SE :: Azure :: AzureBlob</name>
 
     <properties>
         <!--
