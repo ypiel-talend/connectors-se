@@ -23,7 +23,7 @@
 
   <artifactId>stream-json</artifactId>
 
-  <name>Common :: stream-json</name>
+  <name>Connectors SE :: Common Stream IO :: stream-json</name>
 
   <dependencies>
     <!-- file line formats -->

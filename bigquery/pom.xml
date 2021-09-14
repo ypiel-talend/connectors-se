@@ -10,7 +10,7 @@
 
     <artifactId>bigquery</artifactId>
 
-    <name>Components :: BigQuery</name>
+    <name>Connectors SE :: BigQuery</name>
     <description>Google Big Query</description>
 
     <properties>

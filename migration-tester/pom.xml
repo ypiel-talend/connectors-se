@@ -10,6 +10,8 @@
 
   <artifactId>migration-tester</artifactId>
 
+  <name>Connectors SE :: migration-tester</name>
+
   <dependencies>
    <dependency>
        <groupId>org.talend.components</groupId>

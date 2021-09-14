@@ -9,4 +9,6 @@
     </parent>
 
     <artifactId>register-extension</artifactId>
+
+    <name>Connectors SE :: Extensions ::  Register</name>
 </project>

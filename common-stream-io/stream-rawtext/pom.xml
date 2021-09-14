@@ -10,7 +10,7 @@
 
     <artifactId>stream-rawtext</artifactId>
 
-    <name>Common :: stream-rawtext</name>
+    <name>Connectors SE :: Common Stream IO :: stream-rawtext</name>
 
     <dependencies>
         <dependency>

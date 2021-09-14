@@ -10,7 +10,7 @@
 
   <artifactId>azure-dls-gen2</artifactId>
 
-  <name>Components :: Azure DLS Gen2</name>
+  <name>Connectors SE :: Azure DLS Gen2</name>
   <description>Azure Data Lake Storage Gen2</description>
 
   <properties>

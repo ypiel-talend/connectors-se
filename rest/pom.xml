@@ -10,7 +10,7 @@
 
     <artifactId>rest</artifactId>
 
-    <name>Components :: HTTP Rest</name>
+    <name>Connectors SE :: HTTP Rest</name>
     <description>Rest client connector</description>
 
     <properties>

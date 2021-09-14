@@ -10,7 +10,7 @@
 
   <artifactId>couchbase</artifactId>
 
-  <name>Components :: Couchbase</name>
+  <name>Connectors SE :: Couchbase</name>
 
   <properties>
     <testcontainers.version>1.12.1</testcontainers.version>

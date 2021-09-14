@@ -10,7 +10,7 @@
 
     <artifactId>google-storage</artifactId>
 
-    <name>Components :: Google Storage</name>
+    <name>Connectors SE :: Google Storage</name>
     <description>Google Cloud Storage Connector</description>
 
     <properties>

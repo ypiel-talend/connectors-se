@@ -23,7 +23,7 @@
 
   <artifactId>stream-api</artifactId>
 
-  <name>Common :: stream-api</name>
+  <name>Connectors SE :: Common Stream IO :: stream-api</name>
 
   <dependencies>
     <dependency>

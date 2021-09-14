@@ -10,7 +10,7 @@
 
   <artifactId>mongodb</artifactId>
 
-  <name>Components :: MongoDB</name>
+  <name>Connectors SE :: MongoDB</name>
 
   <properties>
     <mongodb.client.version>3.12.8</mongodb.client.version>

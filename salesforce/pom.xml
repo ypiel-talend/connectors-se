@@ -10,7 +10,7 @@
 
   <artifactId>salesforce</artifactId>
 
-  <name>Components :: Salesforce</name>
+  <name>Connectors SE :: Salesforce</name>
 
   <properties>
     <force-wsc.version>47.0.0</force-wsc.version>

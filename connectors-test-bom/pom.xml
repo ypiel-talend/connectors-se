@@ -11,7 +11,7 @@
     <artifactId>connectors-test-bom</artifactId>
     <packaging>pom</packaging>
 
-    <name>Components :: Testing Dependencies</name>
+    <name>Connectors SE :: Testing Dependencies</name>
 
     <dependencies>
         <dependency>

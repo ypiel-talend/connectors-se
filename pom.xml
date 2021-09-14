@@ -21,7 +21,7 @@
   <version>1.26.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Connectors-se</name>
+  <name>Connectors SE</name>
   <description>SE connectors using Talend Component Kit.</description>
   <url>https://talend.github.com/connectors-se</url>
   <licenses>

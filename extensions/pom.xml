@@ -12,7 +12,7 @@
   <artifactId>extensions</artifactId>
   <packaging>pom</packaging>
 
-  <name>Components :: Extensions</name>
+  <name>Connectors SE :: Extensions</name>
 
   <modules>
       <module>register-extension</module>

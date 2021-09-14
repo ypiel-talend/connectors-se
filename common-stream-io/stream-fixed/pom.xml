@@ -23,7 +23,7 @@
 
   <artifactId>stream-fixed</artifactId>
 
-  <name>Common :: stream-fixed</name>
+  <name>Connectors SE :: Common Stream IO :: stream-fixed</name>
 
   <dependencies>
     <!-- file line formats -->

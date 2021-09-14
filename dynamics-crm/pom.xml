@@ -24,7 +24,7 @@
     <artifactId>dynamics-crm</artifactId>
     <packaging>jar</packaging>
 
-    <name>Components :: Microsoft Dynamics CRM</name>
+    <name>Connectors SE :: Microsoft Dynamics CRM</name>
     <description>Microsoft Dynamics CRM components</description>
 
     <properties>

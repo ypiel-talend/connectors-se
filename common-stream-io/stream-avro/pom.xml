@@ -10,6 +10,8 @@
 
     <artifactId>stream-avro</artifactId>
 
+    <name>Connectors SE :: Common Stream IO :: stream-avro</name>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.avro</groupId>

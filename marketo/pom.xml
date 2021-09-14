@@ -10,7 +10,7 @@
 
     <artifactId>marketo</artifactId>
 
-    <name>Components :: Marketo</name>
+    <name>Connectors SE :: Marketo</name>
     <description>Marketo tacokit implementation</description>
 
     <properties>

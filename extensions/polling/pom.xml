@@ -10,6 +10,8 @@
 
     <artifactId>polling</artifactId>
 
+    <name>Connectors SE :: Extensions :: Polling</name>
+
     <dependencies>
         <dependency>
             <groupId>org.talend.sdk.component</groupId>

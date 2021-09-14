@@ -10,7 +10,7 @@
 
   <artifactId>cosmosDB</artifactId>
 
-  <name>Components :: CosmosDB</name>
+  <name>Connectors SE :: CosmosDB</name>
 
   <dependencies>
     <dependency>

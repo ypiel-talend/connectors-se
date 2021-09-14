@@ -11,7 +11,7 @@
     <artifactId>common-stream-io</artifactId>
     <packaging>pom</packaging>
 
-    <name>Components :: Common IO</name>
+    <name>Connectors SE :: Common Stream IO</name>
 
     <modules>
         <module>common-io</module>

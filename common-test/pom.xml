@@ -10,6 +10,8 @@
 
     <artifactId>common-test</artifactId>
 
+    <name>Connectors SE :: Common Test</name>
+
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

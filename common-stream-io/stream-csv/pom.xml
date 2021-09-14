@@ -23,7 +23,7 @@
 
   <artifactId>stream-csv</artifactId>
 
-  <name>Common :: stream-csv</name>
+  <name>Connectors SE :: Common Stream IO :: stream-csv</name>
 
   <properties>
     <commons-csv.version>1.7.1</commons-csv.version>

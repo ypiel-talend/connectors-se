@@ -9,4 +9,6 @@
     </parent>
 
     <artifactId>common</artifactId>
+
+    <name>Connectors SE :: Common</name>
 </project>

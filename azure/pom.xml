@@ -11,7 +11,7 @@
     <artifactId>azure</artifactId>
     <packaging>pom</packaging>
 
-    <name>Components :: Azure</name>
+    <name>Connectors SE :: Azure</name>
 
     <modules>
         <module>azurecommon</module>
