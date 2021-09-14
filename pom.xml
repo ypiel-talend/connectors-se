@@ -10,7 +10,7 @@
 
     <artifactId>jdbc</artifactId>
 
-    <name>Components :: JDBC</name>
+    <name>Connectors SE :: JDBC</name>
     <description>Suite of JDBC component</description>
 
     <properties>
