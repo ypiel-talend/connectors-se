@@ -93,9 +93,6 @@ spec:
         APP_ID = '579232'
         ARTIFACTORY_REGISTRY = "artifactory.datapwn.com"
         TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX="artifactory.datapwn.com/docker-io-remote/"
-        RELEASE_VERSION = """
-                $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout | cut -d- -f1)
-                """
         REPOSITORY = 'connectors-se'
     }
 
