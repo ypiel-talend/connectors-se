@@ -123,7 +123,7 @@ spec:
                     expression { !env.BRANCH_NAME.startsWith('maintenance/') }
                     expression { env.BRANCH_NAME != 'master' }
                     expression { params.Action == 'STANDARD' }
-                    expression { env.CHANGE_TARGET == "master" || env.CHANGE_TARGET ==~ /maintenance\/[1-9].[0-9][0-9]/) }
+                    expression { env.CHANGE_TARGET == "master" || env.startsWith('maintenance/') }
                 }
             }
             steps {
