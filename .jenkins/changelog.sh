@@ -24,8 +24,8 @@ else
 fi
 
 echo "Last commit sha - ${LAST_COMMIT_SHA}"
-IS_DRAFT=true
-
+echo "Draft - ${env.DRAFT}"
+echo "New release version - ${NEW_RELEASE_VERSION}"
 #Cannot clone repository
 #cd ..
 #git clone https://github.com/Talend/connectivity-tools.git
@@ -35,4 +35,4 @@ IS_DRAFT=true
 #mvn clean install #package
 #cd target
 #JAR_NAME=$(find . -maxdepth 1 -name "*.jar" | cut -d/ -f2)
-#java -jar $JAR_NAME $NEW_RELEASE_VERSION $REPOSITORY $LAST_COMMIT_SHA
+#java -jar ${JAR_NAME} ${NEW_RELEASE_VERSION} ${REPOSITORY} ${LAST_COMMIT_SHA}
