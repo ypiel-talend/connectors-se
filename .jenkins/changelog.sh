@@ -5,12 +5,13 @@
 git config --global credential.username ${GITHUB_LOGIN}
 git config --global credential.helper '!echo password=${GITHUB_TOKEN}; echo'
 git config --global credential.name "jenkins-build"
-
+git fetch --tags
 if [[ ${BRANCH_NAME} == 'master' ]]; then
     NEW_MAINTENANCE="maintenance/${RELEASE_VERSION%.*}"
     LAST_COMMIT_SHA=$(git log --format="%H" origin/${NEW_MAINTENANCE}...master | head -n -1 | tail -n 1)
     NEW_RELEASE_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout | cut -d- -f1)
 else
+  echo "Release version for now ${RELEASE_VERSION}"
   # pushed to related origin maintenance branch
   MAJOR=$(echo ${RELEASE_VERSION} | cut -d. -f1)
   MINOR=$(echo ${RELEASE_VERSION} | cut -d. -f2)

@@ -94,6 +94,7 @@ spec:
         ARTIFACTORY_REGISTRY = "artifactory.datapwn.com"
         TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX="artifactory.datapwn.com/docker-io-remote/"
         REPOSITORY = 'connectors-se'
+        RELEASE_VERSION = '1.21.2'
     }
 
     options {
@@ -362,12 +363,10 @@ spec:
             }
             post {
                 success {
-                    steps {
-                        container('main') {
-                            withCredentials([gitCredentials]) {
-                                script {
-                                    sh "sh .jenkins/changelog.sh"
-                                }
+                    container('main') {
+                        withCredentials([gitCredentials]) {
+                            script {
+                                sh "sh .jenkins/changelog.sh"
                             }
                         }
                     }
