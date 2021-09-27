@@ -5,7 +5,10 @@
 git config --global credential.username ${GITHUB_LOGIN}
 git config --global credential.helper '!echo password=${GITHUB_TOKEN}; echo'
 git config --global credential.name "jenkins-build"
+echo "Fetching all tags."
 git fetch --tags
+
+echo "Getting last commit sha."
 if [[ ${BRANCH_NAME} == 'master' ]]; then
     NEW_MAINTENANCE="maintenance/${RELEASE_VERSION%.*}"
     LAST_COMMIT_SHA=$(git log --format="%H" origin/${NEW_MAINTENANCE}...master | head -n -1 | tail -n 1)
