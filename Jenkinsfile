@@ -14,7 +14,7 @@ def dockerCredentials = usernamePassword(
     usernameVariable: 'ARTIFACTORY_LOGIN')
 def sonarCredentials = usernamePassword(
     credentialsId: 'sonar-credentials',
-    passwordVariable: 'SONAR_PASSWORD', 
+    passwordVariable: 'SONAR_PASSWORD',
     usernameVariable: 'SONAR_LOGIN')
 
 def PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
@@ -35,6 +35,21 @@ def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
 def podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
 
 def EXTRA_BUILD_PARAMS = ""
+
+def removeCommentsByAPrefix(String prefix){
+    for (comment in pullRequest.comments) {
+        echo "Author: ${comment.user}, Comment: ${comment.body}"
+        if (comment.body.startsWith(prefix)) {
+            comment.delete()
+        }
+    }
+}
+
+def failBuildAndCommentPR(String message) {
+    echo "Error: ${message}";
+    pullRequest.comment(message)
+    error(message)
+}
 
 pipeline {
     agent {
@@ -61,7 +76,7 @@ spec:
             hostPath: {path: /var/run/docker.sock}
         -
             name: efs-jenkins-connectors-se-m2
-            persistentVolumeClaim: 
+            persistentVolumeClaim:
                 claimName: efs-jenkins-connectors-se-m2
     imagePullSecrets:
         - name: talend-registry
@@ -78,6 +93,10 @@ spec:
         APP_ID = '579232'
         ARTIFACTORY_REGISTRY = "artifactory.datapwn.com"
         TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX="artifactory.datapwn.com/docker-io-remote/"
+        RELEASE_VERSION = """
+                $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout | cut -d- -f1)
+                """
+        REPOSITORY = 'connectors-se'
     }
 
     options {
@@ -91,7 +110,7 @@ spec:
     }
 
     parameters {
-        choice(name: 'Action', 
+        choice(name: 'Action',
                choices: [ 'STANDARD', 'PUSH_TO_XTM', 'DEPLOY_FROM_XTM', 'RELEASE' ],
                description: 'Kind of running : \nSTANDARD (default), normal building\n PUSH_TO_XTM : Export the project i18n resources to Xtm to be translated. This action can be performed from master or maintenance branches only. \nDEPLOY_FROM_XTM: Download and deploy i18n resources from Xtm to nexus for this branch.\nRELEASE : build release')
         booleanParam(name: 'FORCE_SONAR', defaultValue: false, description: 'Force Sonar analysis')
@@ -100,6 +119,37 @@ spec:
     }
 
     stages {
+        stage('Validate PR') {
+            when {
+                allOf {
+                    expression { env.CHANGE_ID }
+                    expression { !env.BRANCH_NAME.startsWith('maintenance/') }
+                    expression { env.BRANCH_NAME != 'master' }
+                    expression { params.Action == 'STANDARD' }
+                    expression { env.CHANGE_TARGET == "master" || env.CHANGE_TARGET ==~ /maintenance\/[1-9].[0-9][0-9]/) }
+                }
+            }
+            steps {
+                script {
+                    removeCommentsByAPrefix('Failed to validate the PR:')
+                    def validTitle = env.CHANGE_TITLE ==~ /^(fix|feat|chore|doc)\((([A-Z]{2,}-[0-9]+)|(UNTRACKED))\\/[a-zA-Z ]+\)\:\s*(.+)$/
+
+                    if (!validTitle) {
+                        def invalidTitleMessage = "Failed to validate the PR: ❌ [" + env.CHANGE_TITLE + "]" +
+                                " for the branch: [" + env.CHANGE_TARGET + "]" +
+                                "\nPlease change your PR title to match PR title requirements. Make sure you have a JIRA number + scope at the beginning" +
+                                "\nHere is an example of good title: feat(TDI-45001): fix junit." +
+                                "\nIn some rare cases you don't have the jira: chore(UNTRACKED): update build version." +
+                                "\nPlease find PR rules here: https://github.com/Talend/tools/blob/master/tools-root-github/CONTRIBUTING.md" +
+                                "\nRegex used for validation: https://regex101.com/r/w6CzzS/1/tests"
+
+                        failBuildAndCommentPR(invalidTitleMessage);
+                    }
+
+                    echo "The PR is valid!"
+                }
+            }
+        }
         stage('Docker login') {
             steps {
                 container('main') {
@@ -312,6 +362,30 @@ spec:
                         sh "sh .jenkins/release.sh"
               		}
             	}
+            }
+            post {
+                success {
+                    steps {
+                        container('main') {
+                            withCredentials([gitCredentials]) {
+                                script {
+                                    sh "sh .jenkins/changelog.sh"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Create changelog') {
+            steps {
+                container('main') {
+                    withCredentials([gitCredentials]) {
+                        script {
+                            sh "sh .jenkins/changelog.sh"
+                        }
+                    }
+                }
             }
         }
     }
