@@ -110,7 +110,7 @@
     <commons-lang3.version>3.10</commons-lang3.version>
     <httpclient.version>4.5.13</httpclient.version>
     <httpcore.version>4.4.13</httpcore.version> <!-- update this with httpclient -->
-    <compress.version>1.19</compress.version>
+    <compress.version>1.21</compress.version>
     <commons-codec.version>1.14</commons-codec.version>
     <mockito.version>1.10.19</mockito.version>
     <testcontainers.version>1.15.1</testcontainers.version>
