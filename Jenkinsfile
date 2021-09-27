@@ -94,7 +94,6 @@ spec:
         ARTIFACTORY_REGISTRY = "artifactory.datapwn.com"
         TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX="artifactory.datapwn.com/docker-io-remote/"
         REPOSITORY = 'connectors-se'
-        RELEASE_VERSION = '1.21.2'
     }
 
     options {
@@ -354,6 +353,9 @@ spec:
                     expression { BRANCH_NAME.startsWith('maintenance/') }
                 }
             }*/
+            environment {
+                RELEASE_VERSION = sh(returnStdout: true, script: "$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout | cut -d- -f1)").trim()
+            }
             steps {
             	withCredentials([gitCredentials, nexusCredentials]) {
 					container('main') {

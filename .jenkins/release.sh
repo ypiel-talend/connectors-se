@@ -9,4 +9,5 @@ git config --global credential.name "jenkins-build"
 env | sort
 
 pre_release_version=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
-RELEASE_VERSION=$(echo ${pre_release_version} | cut -d- -f1)
+echo "Pre release version ${pre_release_version}"
+echo "Release veersion set to ${RELEASE_VERSION}"
