@@ -24,15 +24,15 @@ else
 fi
 
 echo "Last commit sha - ${LAST_COMMIT_SHA}"
-echo "Draft - ${env.DRAFT}"
+echo "Draft - ${DRAFT}"
 echo "New release version - ${NEW_RELEASE_VERSION}"
 #Cannot clone repository
 cd ..
-git clone https://github.com/Talend/connectivity-tools.git
-cd connectivity-tools
-git checkout mbasiuk/TDI-46073_release_note_app
-cd release-notes
-mvn clean install #package
-cd target
+git clone https://github.com/Talend/connectivity-tools.git && \
+cd connectivity-tools && \
+git checkout mbasiuk/TDI-46073_release_note_app && \
+cd release-notes && \
+mvn clean package > /dev/null && \
+cd target && \
 JAR_NAME=$(find . -maxdepth 1 -name "*.jar" | cut -d/ -f2)
 java -jar ${JAR_NAME} ${NEW_RELEASE_VERSION} ${REPOSITORY} ${LAST_COMMIT_SHA}
