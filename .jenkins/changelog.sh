@@ -32,7 +32,7 @@ git clone https://github.com/Talend/connectivity-tools.git && \
 cd connectivity-tools && \
 git checkout mbasiuk/TDI-46073_release_note_app && \
 cd release-notes && \
-mvn clean package > /dev/null && \
+mvn clean package && \
 cd target && \
 JAR_NAME=$(find . -maxdepth 1 -name "*.jar" | cut -d/ -f2)
 java -jar ${JAR_NAME} ${NEW_RELEASE_VERSION} ${REPOSITORY} ${LAST_COMMIT_SHA}
