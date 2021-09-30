@@ -2,7 +2,7 @@
 
 echo "Fetching all tags."
 #Too many unnecessary logged info
-git fetch --tags -q
+git fetch -all --tags -q
 echo "Release version ${RELEASE_VERSION}"
 echo "Getting last commit sha."
 if [[ ${BRANCH_NAME} != 'master' ]]; then
@@ -16,7 +16,10 @@ else
   PREVIOUS_RELEASE_VERSION=${MAJOR}.${MINOR}.${PATCH}
   LAST_COMMIT_SHA=$(git log --format="%H" release/${PREVIOUS_RELEASE_VERSION}...release/${RELEASE_VERSION} | head -n -1 | tail -n 1)
 fi
-
+if [[ -z "${LAST_COMMIT_SHA}" ]]; then
+    echo "Cannot define last commit SHA."
+    exit 123
+fi
 echo "Previous release version ${PREVIOUS_RELEASE_VERSION}"
 echo "Last commit sha - ${LAST_COMMIT_SHA}"
 echo "Draft - ${DRAFT}"
