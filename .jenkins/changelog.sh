@@ -4,6 +4,7 @@ echo "Fetching all tags."
 #Too many unnecessary logged info
 
 git fetch origin maintenance/1.25:maintenance/1.25
+git fetch origin master:master
 git fetch --tags -q
 echo "Release version ${RELEASE_VERSION}"
 echo "Getting last commit sha."
