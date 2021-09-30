@@ -23,11 +23,10 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.talend.components.azure.common.excel.ExcelFormat;
+import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.runtime.converters.ExcelConverter;
+import org.talend.components.common.converters.ExcelConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.record.Record;
@@ -96,9 +95,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
                     if (getConfig().getExcelOptions().isUseHeader() && getConfig().getExcelOptions().getHeader() >= 1) {
 
                         Row headerRow = sheet.getRow(getConfig().getExcelOptions().getHeader() - 1);
-                        if (converter.getColumnNames() == null) {
-                            converter.inferSchemaNames(headerRow, true);
-                        }
+                        converter.inferSchemaNames(headerRow, true);
                     }
                     boolean isHeaderUsed = getConfig().getExcelOptions().isUseHeader();
 
@@ -194,9 +191,8 @@ public class ExcelBlobFileReader extends BlobFileReader {
                     }
                     if (rowIterator.hasNext()) {
                         Row headerRow = rowIterator.next();
-                        if (converter.getColumnNames() == null) {
-                            converter.inferSchemaNames(headerRow, true);
-                        }
+                        converter.inferSchemaNames(headerRow, true);
+
                     }
                 }
 

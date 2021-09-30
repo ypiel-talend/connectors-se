@@ -20,9 +20,9 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonBuilderFactory;
 
 import org.talend.components.azure.common.exception.BlobRuntimeException;
-import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.common.stream.output.json.RecordToJson;
 import org.talend.sdk.component.api.record.Record;
 

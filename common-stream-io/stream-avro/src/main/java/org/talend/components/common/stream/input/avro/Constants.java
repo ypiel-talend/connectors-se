@@ -12,9 +12,9 @@
  */
 package org.talend.components.common.stream.input.avro;
 
-class Constants {
+public class Constants {
 
-    static final String AVRO_LOGICAL_TYPE = "logicalType";
+    public static final String AVRO_LOGICAL_TYPE = "logicalType";
 
     static final String AVRO_LOGICAL_TYPE_DATE = "date";
 

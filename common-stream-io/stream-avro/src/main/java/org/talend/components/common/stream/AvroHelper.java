@@ -12,11 +12,10 @@
  */
 package org.talend.components.common.stream;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
-
 import org.apache.avro.Schema;
+import static java.util.stream.Collectors.toList;
+import static org.talend.components.common.stream.input.avro.Constants.AVRO_LOGICAL_TYPE;
 
 public class AvroHelper {
 
@@ -38,5 +37,9 @@ public class AvroHelper {
 
     public static org.apache.avro.Schema.Type getFieldType(org.apache.avro.Schema.Field field) {
         return getUnionSchema(field.schema()).getType();
+    }
+
+    public static String getLogicalType(Schema.Field field) {
+        return getUnionSchema(field.schema()).getProp(AVRO_LOGICAL_TYPE);
     }
 }

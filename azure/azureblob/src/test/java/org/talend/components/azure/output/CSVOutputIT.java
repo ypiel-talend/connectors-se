@@ -25,10 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.BlobTestUtils;
 import org.talend.components.azure.common.FileFormat;
-import org.talend.components.azure.common.csv.CSVFormatOptions;
-import org.talend.components.azure.common.csv.RecordDelimiter;
+import org.talend.components.common.formats.csv.CSVFormatOptions;
+import org.talend.components.common.formats.csv.CSVRecordDelimiter;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.runtime.converters.CSVConverter;
+import org.talend.components.common.converters.CSVConverter;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -53,7 +53,7 @@ class CSVOutputIT extends BaseIT {
         dataset.setFileFormat(FileFormat.CSV);
 
         CSVFormatOptions formatOptions = new CSVFormatOptions();
-        formatOptions.setRecordDelimiter(RecordDelimiter.LF);
+        formatOptions.setRecordDelimiter(CSVRecordDelimiter.LF);
         dataset.setCsvOptions(formatOptions);
         dataset.setContainerName(containerName);
         blobOutputProperties = new BlobOutputConfiguration();

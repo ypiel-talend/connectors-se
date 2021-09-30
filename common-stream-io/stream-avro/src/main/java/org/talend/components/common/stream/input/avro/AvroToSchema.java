@@ -33,7 +33,7 @@ public class AvroToSchema {
         Schema.Entry.Builder builder = recordBuilderFactory.newEntryBuilder();
         builder.withName(field.name());
         org.apache.avro.Schema.Type type = AvroHelper.getFieldType(field);
-        String logicalType = field.schema().getProp(Constants.AVRO_LOGICAL_TYPE);
+        String logicalType = AvroHelper.getLogicalType(field);
         // handle NULLable field
         builder.withNullable(true);
         switch (type) {
