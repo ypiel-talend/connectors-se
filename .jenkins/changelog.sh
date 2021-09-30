@@ -5,7 +5,7 @@ echo "Fetching all tags."
 git fetch --tags -q
 echo "Release version ${RELEASE_VERSION}"
 echo "Getting last commit sha."
-if [[ ${BRANCH_NAME} -ne 'master' ]]; then
+if [[ ${BRANCH_NAME} != 'master' ]]; then
     RELEASE_VERSION=1.25.0
     LAST_COMMIT_SHA=$(git log --format="%H" origin/maintenance/${RELEASE_VERSION%.*}...master | head -n -1 | tail -n 1)
 else
