@@ -2,7 +2,7 @@
 
 echo "Fetching all tags."
 #Too many unnecessary logged info
-git fetch -all --tags -q
+git fetch --all --tags -q
 echo "Release version ${RELEASE_VERSION}"
 echo "Getting last commit sha."
 if [[ ${BRANCH_NAME} != 'master' ]]; then
