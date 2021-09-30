@@ -15,7 +15,7 @@ else
   MINOR=$(echo ${RELEASE_VERSION} | cut -d. -f2)
   PATCH=$(($(echo ${RELEASE_VERSION} | cut -d. -f3) - 1))
   PREVIOUS_RELEASE_VERSION=${MAJOR}.${MINOR}.${PATCH}
-  LAST_COMMIT_SHA=$(git log --format="%H" release/${PREVIOUS_RELEASE_VERSION}...release/${NEW_RELEASE_VERSION} | head -n -1 | tail -n 1)
+  LAST_COMMIT_SHA=$(git log --format="%H" release/${PREVIOUS_RELEASE_VERSION}...release/${RELEASE_VERSION} | head -n -1 | tail -n 1)
   #Commented to test changes.
   #$(git log --format="%H" release/${PREVIOUS_RELEASE_VERSION}...release/${NEW_RELEASE_VERSION} | head -n -1 | tail -n 1)
 fi
