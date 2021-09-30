@@ -4,14 +4,13 @@ echo "Fetching all tags."
 git fetch --tags -q
 echo "Release version ${RELEASE_VERSION}"
 echo "Getting last commit sha."
-RELEASE_VERSION=1.25.0
-if [[ ${BRANCH_NAME} != 'master' ]]; then
+if [[ ${BRANCH_NAME} == 'master' ]]; then
     MAINTENANCE_BRANCH=maintenance/${RELEASE_VERSION%.*}
     git fetch origin ${MAINTENANCE_BRANCH}:${MAINTENANCE_BRANCH} -q
     git fetch origin master:master -q
     LAST_COMMIT_SHA=$(git log --format="%H" ${MAINTENANCE_BRANCH}...master | head -n -1 | tail -n 1)
 else
-  # pushed to related origin maintenance branch
+  # Maintenance branch
   MAJOR=$(echo ${RELEASE_VERSION} | cut -d. -f1)
   MINOR=$(echo ${RELEASE_VERSION} | cut -d. -f2)
   PATCH=$(($(echo ${RELEASE_VERSION} | cut -d. -f3) - 1))
