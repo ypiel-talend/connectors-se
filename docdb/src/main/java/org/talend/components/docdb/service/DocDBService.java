@@ -22,9 +22,6 @@ import org.bson.Document;
 import org.bson.json.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.docdb.datastore.Address;
-import org.talend.components.docdb.datastore.Auth;
-import org.talend.components.docdb.datastore.ConnectionParameter;
 import org.talend.components.docdb.datastore.DocDBDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -33,8 +30,6 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,7 +52,7 @@ public class DocDBService {
     @HealthCheck("healthCheck")
     public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final DocDBDataStore dataStore) {
         try (MongoClient client = connectionService.createClient(dataStore)) {
-            String database = dataStore.getDataBase();
+            String database = dataStore.getDatabase();
 
             MongoDatabase md = client.getDatabase(database);
             if (md == null) {// TODO remove it as seems never go in even no that database exists

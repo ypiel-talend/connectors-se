@@ -10,54 +10,24 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.docdb.dataset;
-
-import java.io.Serializable;
+package org.talend.components.mongo.dataset;
 
 import lombok.Data;
-import org.talend.components.docdb.datastore.DocDBDataStore;
-
 import org.talend.components.mongo.Mode;
-import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
-import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
-@Version(1)
 @Data
-@DataSet("DocDBDataSet")
-@GridLayout({
-        @GridLayout.Row({ "dataStore" }),
-        @GridLayout.Row({ "collection" }),
-        @GridLayout.Row({ "useQuery" }),
-        @GridLayout.Row({ "query" }),
-        @GridLayout.Row({ "mode" })
-})
-@Documentation("AWS DocDB Dataset")
-public class DocDBDataSet implements Serializable {
-
-    @Option
-    @Documentation("DocDB Connection")
-    private DocDBDataStore dataStore;
+@GridLayout({ @GridLayout.Row({ "collection" }), @GridLayout.Row({ "mode" }) })
+@Documentation("Mongo common dataSet for mongodb and docdb")
+public class MongoCommonDataSet {
 
     @Option
     @Required
     @Documentation("Collection")
     private String collection;
-
-    @Option
-    @Documentation("Use Query")
-    private boolean useQuery;
-
-    @Option
-    @Documentation("Query")
-    @TextArea
-    @ActiveIf(target = "useQuery", value = "true")
-    private String query = "{}";
 
     @Option
     @Required

@@ -10,19 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.docdb.output;
+package org.talend.components.mongodb.sink;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
-import lombok.Data;
-import org.talend.components.docdb.dataset.DocDBDataSet;
-
 import org.talend.components.mongo.BulkWriteType;
 import org.talend.components.mongo.DataAction;
 import org.talend.components.mongo.KeyMapping;
 import org.talend.components.mongo.WriteConcern;
+import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -30,27 +28,22 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.meta.Documentation;
 
+import lombok.Data;
+
 @Version(1)
 @Data
-@GridLayouts({
-        @GridLayout({
-                @GridLayout.Row({ "dataset" }),
-                @GridLayout.Row({ "setWriteConcern" }),
-                @GridLayout.Row({ "writeConcern" }),
-                @GridLayout.Row({ "bulkWrite" }),
-                @GridLayout.Row({ "bulkWriteType" }),
-                @GridLayout.Row({ "dataAction" }),
-                @GridLayout.Row({ "keyMappings" }),
-                @GridLayout.Row({ "updateAllDocuments" })
-        }),
-        @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }) })
-})
-@Documentation("DocDB output configuration")
-public class DocDBOutputConfiguration implements Serializable {
+@GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataset" }), //
+        @GridLayout.Row({ "setWriteConcern" }), //
+        @GridLayout.Row({ "writeConcern" }), //
+        @GridLayout.Row({ "bulkWrite" }), @GridLayout.Row({ "bulkWriteType" }), @GridLayout.Row({ "dataAction" }),
+        @GridLayout.Row({ "keyMappings" }), @GridLayout.Row({ "updateAllDocuments" }) }),
+        @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }) }) })
+@Documentation("MongoDB sink configuration")
+public class MongoDBSinkConfiguration implements Serializable {
 
     @Option
     @Documentation("Dataset")
-    private DocDBDataSet dataset;
+    private MongoDBReadAndWriteDataSet dataset;
 
     @Option
     @Documentation("Set read preference")
@@ -83,4 +76,12 @@ public class DocDBOutputConfiguration implements Serializable {
     @ActiveIf(target = "dataAction", value = { "SET", "UPSERT_WITH_SET" })
     @Documentation("update all documents")
     private boolean updateAllDocuments = false;
+
+    // this one for work for mapping mode, but seems not necessary now, only whole document(text) and json mode now
+    /*
+     * @Option
+     * 
+     * @Documentation("not generate key without value in json if null")
+     * private boolean skipNullValue = false;
+     */
 }

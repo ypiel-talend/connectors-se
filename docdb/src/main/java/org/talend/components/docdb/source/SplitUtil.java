@@ -30,8 +30,6 @@ import org.talend.components.docdb.dataset.DocDBDataSet;
 import org.talend.components.docdb.datastore.DocDBDataStore;
 import org.talend.components.docdb.service.DocDBConnectionService;
 import org.talend.components.docdb.service.DocDBService;
-import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -51,7 +49,7 @@ public class SplitUtil {
         MongoClient client = null;
         try {
             client = conn.createClient(dataStore);
-            MongoDatabase database = client.getDatabase(dataStore.getDataBase());
+            MongoDatabase database = client.getDatabase(dataStore.getDatabase());
             MongoCollection<Document> collection = database.getCollection(dataSet.getCollection());
 
             result = getQueries4Split(collection, splitCount);
@@ -73,7 +71,7 @@ public class SplitUtil {
         MongoClient client = null;
         try {
             client = conn.createClient(datastore);
-            MongoDatabase database = client.getDatabase(datastore.getDataBase());
+            MongoDatabase database = client.getDatabase(datastore.getDatabase());
             BasicDBObject stat = new BasicDBObject();
             stat.append("collStats", dataset.getCollection());
             Document stats = database.runCommand(stat);

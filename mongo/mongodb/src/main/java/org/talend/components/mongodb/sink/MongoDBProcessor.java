@@ -10,16 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.docdb.output;
-
-import static org.talend.sdk.component.api.component.Icon.IconType.CUSTOM;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+package org.talend.components.mongodb.sink;
 
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -29,40 +20,44 @@ import com.mongodb.client.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.talend.components.common.stream.output.json.RecordToJson;
-import org.talend.components.docdb.dataset.DocDBDataSet;
-import org.talend.components.docdb.datastore.DocDBDataStore;
-import org.talend.components.docdb.service.DocDBConnectionService;
-import org.talend.components.docdb.service.I18nMessage;
-import org.talend.components.docdb.service.DocDBService;
 import org.talend.components.mongo.BulkWriteType;
 import org.talend.components.mongo.KeyMapping;
 import org.talend.components.mongo.Mode;
 import org.talend.components.mongo.service.RecordToDocument;
+import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
+import org.talend.components.mongodb.datastore.MongoDBDataStore;
+import org.talend.components.mongodb.service.I18nMessage;
+import org.talend.components.mongodb.service.MongoDBService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.processor.AfterGroup;
-import org.talend.sdk.component.api.processor.BeforeGroup;
-import org.talend.sdk.component.api.processor.ElementListener;
-import org.talend.sdk.component.api.processor.Input;
-import org.talend.sdk.component.api.processor.Processor;
+import org.talend.sdk.component.api.processor.*;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 
-import org.talend.sdk.component.api.service.connection.Connection;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.json.JsonObject;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.mongodb.WriteConcern.*;
+
 
 @Version(1)
 @Slf4j
-@Icon(value = CUSTOM, custom = "CompanyOutput") // icon is located at src/main/resources/icons/CompanyOutput.svg
-@Processor(name = "Output")
-@Documentation("This component writes data to DocDB")
-public class DocDBOutput implements Serializable {
+@Icon(value = Icon.IconType.CUSTOM, custom = "mongo_db-connector")
+@Processor(name = "Sink")
+@Documentation("This component writes data to MongoDB")
+public class MongoDBProcessor implements Serializable {
 
     private I18nMessage i18n;
 
-    private final DocDBOutputConfiguration configuration;
+    private final MongoDBSinkConfiguration configuration;
 
-    private final DocDBService service;
+    private final MongoDBService service;
 
     private transient MongoClient client;
 
@@ -72,13 +67,9 @@ public class DocDBOutput implements Serializable {
 
     private transient RecordToDocument recordToDocument;
 
-    private transient List<WriteModel<Document>> writeModels;
-
-    @Connection
-    private transient DocDBConnectionService conn;
-
-    public DocDBOutput(@Option("configuration") final DocDBOutputConfiguration configuration,
-            final DocDBService service, final I18nMessage i18n) {
+    public MongoDBProcessor(@Option("configuration") final MongoDBSinkConfiguration configuration,
+            final MongoDBService service,
+            final I18nMessage i18n) {
         this.configuration = configuration;
         this.service = service;
         this.i18n = i18n;
@@ -89,40 +80,41 @@ public class DocDBOutput implements Serializable {
         this.recordToJson = new RecordToJson();
         this.recordToDocument = new RecordToDocument();
 
-        DocDBDataSet dataSet = configuration.getDataset();
-        DocDBDataStore datastore = dataSet.getDataStore();
-        client = getConnService().createClient(datastore);
+        MongoDBReadAndWriteDataSet dataset = configuration.getDataset();
+        MongoDBDataStore datastore = dataset.getDatastore();
+        client = service.createClient(datastore);
         MongoDatabase database = client.getDatabase(datastore.getDatabase());
 
+        // apply to database level too, necessay?
         if (configuration.isSetWriteConcern()) {
             switch (configuration.getWriteConcern()) {
             case ACKNOWLEDGED:
-                database = database.withWriteConcern(com.mongodb.WriteConcern.ACKNOWLEDGED);
+                database = database.withWriteConcern(ACKNOWLEDGED);
                 break;
             case UNACKNOWLEDGED:
-                database = database.withWriteConcern(com.mongodb.WriteConcern.UNACKNOWLEDGED);
+                database = database.withWriteConcern(UNACKNOWLEDGED);
                 break;
             case JOURNALED:
-                database = database.withWriteConcern(com.mongodb.WriteConcern.JOURNALED);
+                database = database.withWriteConcern(JOURNALED);
                 break;
             case REPLICA_ACKNOWLEDGED:
-                database = database.withWriteConcern(com.mongodb.WriteConcern.REPLICA_ACKNOWLEDGED);
+                database = database.withWriteConcern(WriteConcern.REPLICA_ACKNOWLEDGED);
                 break;
             }
         }
 
-        collection = database.getCollection(dataSet.getCollection());
+        collection = database.getCollection(dataset.getCollection());
 
         if (configuration.isSetWriteConcern()) {
             switch (configuration.getWriteConcern()) {
             case ACKNOWLEDGED:
-                collection = collection.withWriteConcern(com.mongodb.WriteConcern.ACKNOWLEDGED);
+                collection = collection.withWriteConcern(ACKNOWLEDGED);
                 break;
             case UNACKNOWLEDGED:
-                collection = collection.withWriteConcern(com.mongodb.WriteConcern.UNACKNOWLEDGED);
+                collection = collection.withWriteConcern(UNACKNOWLEDGED);
                 break;
             case JOURNALED:
-                collection = collection.withWriteConcern(com.mongodb.WriteConcern.JOURNALED);
+                collection = collection.withWriteConcern(JOURNALED);
                 break;
             case REPLICA_ACKNOWLEDGED:
                 collection = collection.withWriteConcern(WriteConcern.REPLICA_ACKNOWLEDGED);
@@ -132,6 +124,8 @@ public class DocDBOutput implements Serializable {
 
         writeModels = new ArrayList<>();
     }
+
+    private transient List<WriteModel<Document>> writeModels;
 
     @BeforeGroup
     public void beforeGroup() {
@@ -149,6 +143,64 @@ public class DocDBOutput implements Serializable {
         if (writeModels != null && !writeModels.isEmpty()) {
             boolean ordered = configuration.getBulkWriteType() == BulkWriteType.ORDERED;
             collection.bulkWrite(writeModels, new BulkWriteOptions().ordered(ordered));
+        }
+    }
+
+    private class DocumentGenerator {
+
+        private Document document;
+
+        private DocumentGenerator() {
+            document = new Document();
+        }
+
+        void put(String parentNodePath, String curentName, Object value) {
+            if (parentNodePath == null || "".equals(parentNodePath)) {
+                document.put(curentName, value);
+            } else {
+                String objNames[] = parentNodePath.split("\\.");
+                Document lastNode = getParentNode(parentNodePath, objNames.length - 1);
+                lastNode.put(curentName, value);
+                Document parentNode = null;
+                for (int i = objNames.length - 1; i >= 0; i--) {
+                    parentNode = getParentNode(parentNodePath, i - 1);
+                    parentNode.put(objNames[i], lastNode);
+                    lastNode = clone(parentNode);
+                }
+                document = lastNode;
+            }
+        }
+
+        private Document clone(Document source) {
+            Document to = new Document();
+            for (java.util.Map.Entry<String, Object> cur : source.entrySet()) {
+                to.append(cur.getKey(), cur.getValue());
+            }
+            return to;
+        }
+
+        public Document getParentNode(String parentNodePath, int index) {
+            Document parentNode = document;
+            if (parentNodePath == null || "".equals(parentNodePath)) {
+                return document;
+            } else {
+                String objNames[] = parentNodePath.split("\\.");
+                for (int i = 0; i <= index; i++) {
+                    parentNode = (Document) parentNode.get(objNames[i]);
+                    if (parentNode == null) {
+                        parentNode = new Document();
+                        return parentNode;
+                    }
+                    if (i == index) {
+                        break;
+                    }
+                }
+                return parentNode;
+            }
+        }
+
+        Document getDocument() {
+            return this.document;
         }
     }
 
@@ -272,23 +324,29 @@ public class DocDBOutput implements Serializable {
              * DocumentGenerator dg = new DocumentGenerator();
              * List<PathMapping> mappings = configuration.getDataset().getPathMappings();
              * Map<String, PathMapping> inputFieldName2PathMapping = new LinkedHashMap<>();
-             *
+             * 
              * // TODO now only use name mapping, improve it with index mapping
              * for (PathMapping mapping : mappings) {
              * String column = mapping.getColumn();
              * inputFieldName2PathMapping.put(column, mapping);
              * }
-             *
+             * 
              * for (Schema.Entry entry : record.getSchema().getEntries()) {// schema from input
              * PathMapping mapping = inputFieldName2PathMapping.get(entry.getName());
              * String originElement = mapping.getOriginElement();
              * dg.put(mapping.getParentNodePath(), originElement != null ? originElement : entry.getName(),
              * record.get(Object.class, entry.getName()));
              * }
-             *
+             * 
              * doDataAction(record, dg.getDocument());
              */
         }
+    }
+
+    private Document convertRecord2Document(@Input Record record) {
+        JsonObject jsonObject = this.recordToJson.fromRecord(record);
+        String jsonContent = jsonObject.toString();
+        return Document.parse(jsonContent);
     }
 
     private Document convertRecord2DocumentDirectly(@Input Record record) {
@@ -384,10 +442,60 @@ public class DocDBOutput implements Serializable {
         service.closeClient(client);
     }
 
-    private DocDBConnectionService getConnService() {
-        if (conn != null) {
-            return conn;
+    // copy from couchbase, not use now, will use it maybe
+    private Object jsonValueFromRecordValue(Schema.Entry entry, Record record) {
+        String entryName = entry.getName();
+        Object value = record.get(Object.class, entryName);
+        if (null == value) {
+            // TODO check use what explain null
+            return "";
         }
-        return new DocDBConnectionService();
+        switch (entry.getType()) {
+        case INT:
+            return record.getInt(entryName);
+        case LONG:
+            return record.getLong(entryName);
+        case BYTES:
+            return java.util.Base64.getEncoder().encodeToString(record.getBytes(entryName));
+        case FLOAT:
+            return Double.parseDouble(String.valueOf(record.getFloat(entryName)));
+        case DOUBLE:
+            return record.getDouble(entryName);
+        case STRING:
+            return createJsonFromString(record.getString(entryName));
+        case BOOLEAN:
+            return record.getBoolean(entryName);
+        case ARRAY:
+            return record.getArray(List.class, entryName);
+        case DATETIME:
+            return record.getDateTime(entryName).toString();
+        case RECORD:
+            return record.getRecord(entryName);
+        default:
+            throw new IllegalArgumentException("Unknown Type " + entry.getType());
+        }
     }
+
+    private Object createJsonFromString(String str) {
+        Object value = null;
+        try {
+            value = Document.parse(str);
+        } catch (Exception e) {
+            // can't create JSON object from String ignore exception
+            // and try to create JSON array
+        } finally {
+            if (value != null)
+                return value;
+        }
+        // TODO consider array case
+        /*
+         * try {
+         * value = Document.fromArray(str);
+         * } catch (Exception e) {
+         * value = str;
+         * }
+         */
+        return value;
+    }
+
 }

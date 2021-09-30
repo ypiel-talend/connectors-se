@@ -16,10 +16,10 @@ import com.mongodb.*;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.docdb.datastore.Address;
-import org.talend.components.docdb.datastore.Auth;
-import org.talend.components.docdb.datastore.ConnectionParameter;
 import org.talend.components.docdb.datastore.DocDBDataStore;
+import org.talend.components.mongo.Address;
+import org.talend.components.mongo.Auth;
+import org.talend.components.mongo.ConnectionParameter;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
@@ -72,7 +72,7 @@ public class DocDBConnectionService {
             return null;
         }
 
-        String authDatabase = auth.isUseAuthDatabase() ? auth.getAuthDatabase() : dataStore.getDataBase();
+        String authDatabase = auth.isUseAuthDatabase() ? auth.getAuthDatabase() : dataStore.getDatabase();
         switch (auth.getAuthMech()) {
         case NEGOTIATE:
             return MongoCredential.createCredential(auth.getUsername(), authDatabase, auth.getPassword().toCharArray());
