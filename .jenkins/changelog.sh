@@ -2,12 +2,12 @@
 
 echo "Fetching all tags."
 #Too many unnecessary logged info
-git fetch --all --tags -q
+git fetch --all --tags
 echo "Release version ${RELEASE_VERSION}"
 echo "Getting last commit sha."
 if [[ ${BRANCH_NAME} != 'master' ]]; then
     RELEASE_VERSION=1.25.0
-    LAST_COMMIT_SHA=$(git log --format="%H" maintenance/${RELEASE_VERSION%.*}...master | head -n -1 | tail -n 1)
+    LAST_COMMIT_SHA=$(git log --format="%H" origin/maintenance/${RELEASE_VERSION%.*}...master | head -n -1 | tail -n 1)
 else
   # pushed to related origin maintenance branch
   MAJOR=$(echo ${RELEASE_VERSION} | cut -d. -f1)
