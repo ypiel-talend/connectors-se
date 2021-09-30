@@ -360,7 +360,6 @@ spec:
 					container('main') {
                         script {
                             RELEASE_VERSION = sh(returnStdout: true, script: "mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout | cut -d- -f1").trim()
-                            echo "Release version in step - ${RELEASE_VERSION}"
                             withEnv(["RELEASE_VERSION=${RELEASE_VERSION}"]) {
                                 sh "sh .jenkins/release.sh"
                             }
@@ -377,24 +376,6 @@ spec:
                                     sh "sh .jenkins/changelog.sh"
                                 }
                             }
-                        }
-                    }
-                }
-            }
-        }
-        stage('Create changelog') {
-            when {
-                expression { params.Action == 'RELEASE' }
-                anyOf {
-                    branch 'master'
-                    expression { BRANCH_NAME.startsWith('maintenance/') }
-                }
-            }
-            steps {
-                container('main') {
-                    withCredentials([gitCredentials]) {
-                        script {
-                            sh "sh .jenkins/changelog.sh"
                         }
                     }
                 }
