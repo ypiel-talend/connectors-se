@@ -107,17 +107,15 @@ public class AvroToRecord {
         recordBuilder.withArray(entry, objectArray);
     }
 
-    protected void buildField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder,
-            Entry entry) {
-        String logicalType = AvroHelper.getLogicalType(field);
+    protected void buildField(org.apache.avro.Schema.Field field, Object value, Record.Builder recordBuilder, Entry entry) {
+        String logicalType = field.schema().getProp(Constants.AVRO_LOGICAL_TYPE);
         org.apache.avro.Schema.Type fieldType = AvroHelper.getFieldType(field);
         switch (fieldType) {
         case RECORD:
             final Schema schema = entry.getElementSchema();
             final Record.Builder builder = recordBuilderFactory.newRecordBuilder(schema);
             recordBuilder.withRecord(entry,
-                    avroToRecord((GenericRecord) value, ((GenericRecord) value).getSchema().getFields(), builder,
-                            schema));
+                    avroToRecord((GenericRecord) value, ((GenericRecord) value).getSchema().getFields(), builder, schema));
             break;
         case ARRAY:
             if (value instanceof Collection<?>) {
@@ -135,8 +133,7 @@ public class AvroToRecord {
             int ivalue = value != null ? (Integer) value : 0;
             if (Constants.AVRO_LOGICAL_TYPE_DATE.equals(logicalType)
                     || Constants.AVRO_LOGICAL_TYPE_TIME_MILLIS.equals(logicalType)) {
-                recordBuilder.withDateTime(entry,
-                        ZonedDateTime.ofInstant(Instant.ofEpochMilli(ivalue), ZoneOffset.UTC));
+                recordBuilder.withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(ivalue), ZoneOffset.UTC));
             } else {
                 recordBuilder.withInt(entry, ivalue);
             }
@@ -153,8 +150,7 @@ public class AvroToRecord {
         case LONG:
             long lvalue = value != null ? (Long) value : 0;
             if (Constants.AVRO_LOGICAL_TYPE_TIMESTAMP_MILLIS.equals(logicalType)) {
-                recordBuilder.withDateTime(entry,
-                        ZonedDateTime.ofInstant(Instant.ofEpochMilli(lvalue), ZoneOffset.UTC));
+                recordBuilder.withDateTime(entry, ZonedDateTime.ofInstant(Instant.ofEpochMilli(lvalue), ZoneOffset.UTC));
             } else {
                 recordBuilder.withLong(entry, lvalue);
             }

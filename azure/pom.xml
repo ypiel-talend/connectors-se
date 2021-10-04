@@ -16,7 +16,6 @@
     <modules>
         <module>azurecommon</module>
         <module>azureblob</module>
-        <module>azure-dls-gen2</module>
     </modules>
 
     <properties>
@@ -37,9 +36,6 @@
         TIP: it is recommended to set this property into your settings.xml in an active by default profile.
         -->
         <talend.component.studioHome />
-
-        <hadoop-common.version>3.2.2</hadoop-common.version>
-        <hadoop-azure.version>3.2.2.1</hadoop-azure.version>
     </properties>
 
     <dependencies>

@@ -21,10 +21,10 @@ import java.util.Iterator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.talend.components.common.formats.Encoding;
+import org.talend.components.azure.common.Encoding;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.common.converters.CSVConverter;
+import org.talend.components.azure.runtime.converters.CSVConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.record.Record;
@@ -69,7 +69,7 @@ public class CSVBlobFileReader extends BlobFileReader {
             super(blobItemsList, recordBuilderFactory);
             this.encodingValue = getConfig().getCsvOptions().getEncoding() == Encoding.OTHER
                     ? getConfig().getCsvOptions().getCustomEncoding()
-                    : getConfig().getCsvOptions().getEncoding().getEncodingCharsetValue();
+                    : getConfig().getCsvOptions().getEncoding().getEncodingValue();
 
             takeFirstItem();
         }

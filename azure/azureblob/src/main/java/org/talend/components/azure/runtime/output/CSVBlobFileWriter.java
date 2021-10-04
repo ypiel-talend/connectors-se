@@ -18,20 +18,22 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.UUID;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.talend.components.azure.common.csv.CSVFormatOptions;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
+import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
+import org.talend.components.azure.runtime.converters.CSVConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
-import org.talend.components.azure.service.AzureBlobFormatUtils;
-import org.talend.components.common.converters.CSVConverter;
-import org.talend.components.common.formats.FormatUtils;
-import org.talend.components.common.formats.csv.CSVFormatOptions;
-import org.talend.components.common.service.azureblob.AzureComponentServices;
+import org.talend.components.azure.service.FormatUtils;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudAppendBlob;
+import com.microsoft.azure.storage.blob.CloudBlob;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -90,10 +92,11 @@ public class CSVBlobFileWriter extends BlobFileWriter {
             appendHeader();
         }
 
-        byte[] contentBytes = content.getBytes(AzureBlobFormatUtils.getUsedEncodingValue(config.getDataset()));
+        byte[] contentBytes = content.getBytes(FormatUtils.getUsedEncodingValue(config.getDataset()));
         ((CloudAppendBlob) getCurrentItem())
                 .appendFromByteArray(contentBytes, 0, contentBytes.length, null, null,
                         AzureComponentServices.getTalendOperationContext());
+
         fileIsEmpty = false;
 
         getBatch().clear();

@@ -118,12 +118,8 @@ class AvroToRecordTest {
         assertNotNull(s);
         assertEquals(7, s.getEntries().size());
         assertTrue(s.getType().equals(Schema.Type.RECORD));
-        assertTrue(s.getEntries()
-                .stream()
-                .map(Entry::getName)
-                .collect(toList())
-                .containsAll(
-                        Stream.of("string", "int", "long", "double", "boolean", "array", "object").collect(toList())));
+        assertTrue(s.getEntries().stream().map(Entry::getName).collect(toList())
+                .containsAll(Stream.of("string", "int", "long", "double", "boolean", "array", "object").collect(toList())));
     }
 
     @Test
@@ -151,8 +147,7 @@ class AvroToRecordTest {
     @Test
     void toRecordFile() throws IOException {
 
-        try (final InputStream input = Thread.currentThread()
-                .getContextClassLoader()
+        try (final InputStream input = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("customers_orders.avro")) {
             final DatumReader<GenericRecord> userDatumReader = new GenericDatumReader<>();
             final DataFileStream<GenericRecord> fstream = new DataFileStream<>(input, userDatumReader);
@@ -170,12 +165,8 @@ class AvroToRecordTest {
     }
 
     boolean exploreRecord(final Record tckRecord) {
-        return tckRecord.getSchema()
-                .getEntries()
-                .stream()
-                .filter(
-                        (Schema.Entry e) -> Schema.Type.ARRAY == e.getType()
-                                && e.getElementSchema().getType() == Schema.Type.RECORD)
+        return tckRecord.getSchema().getEntries().stream().filter(
+                (Schema.Entry e) -> Schema.Type.ARRAY == e.getType() && e.getElementSchema().getType() == Schema.Type.RECORD)
                 .allMatch((Schema.Entry arrayField) -> {
                     final Collection<Record> array = tckRecord.getArray(Record.class, arrayField.getName());
                     return array.stream().allMatch((Record r) -> r.getSchema().equals(arrayField.getElementSchema()));
@@ -186,11 +177,9 @@ class AvroToRecordTest {
 
         org.apache.avro.Schema avroSchema;
         if (avroSchemaInput.getType() == org.apache.avro.Schema.Type.UNION) {
-            avroSchema = avroSchemaInput.getTypes()
-                    .stream() //
+            avroSchema = avroSchemaInput.getTypes().stream() //
                     .filter((org.apache.avro.Schema as) -> as.getType() != org.apache.avro.Schema.Type.NULL) //
-                    .findFirst()
-                    .get();
+                    .findFirst().get();
         } else {
             avroSchema = avroSchemaInput;
         }

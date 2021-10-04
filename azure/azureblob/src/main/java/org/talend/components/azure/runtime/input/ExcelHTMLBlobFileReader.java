@@ -15,26 +15,25 @@ package org.talend.components.azure.runtime.input;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.runtime.converters.HTMLConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
-import org.talend.components.common.stream.input.excel.HTMLToRecord;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
-    private HTMLToRecord converter;
-
-    private Schema columns;
+    private HTMLConverter converter;
 
     public ExcelHTMLBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
             AzureBlobComponentServices connectionServices, MessageService messageService)
@@ -61,7 +60,7 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
             try (InputStream input = getCurrentItem().openInputStream()) {
                 Document document =
-                        Jsoup.parse(input, getConfig().getExcelOptions().getEncoding().getEncodingCharsetValue(), "");
+                        Jsoup.parse(input, getConfig().getExcelOptions().getEncoding().getEncodingValue(), "");
                 Element body = document.body();
                 Elements rows = body.getElementsByTag("tr");
                 rowIterator = rows.iterator();
@@ -87,13 +86,10 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
         @Override
         protected Record convertToRecord(Element row) {
             if (converter == null) {
-                converter = new HTMLToRecord(getRecordBuilderFactory());
+                converter = HTMLConverter.of(getRecordBuilderFactory());
             }
 
-            if (columns == null) {
-                columns = converter.inferSchema(row);
-            }
-            return converter.toRecord(columns, row);
+            return converter.toRecord(row);
         }
 
         @Override

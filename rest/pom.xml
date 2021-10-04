@@ -47,7 +47,6 @@
         <dependency>
             <groupId>org.talend.components</groupId>
             <artifactId>common</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.talend.components.extension</groupId>

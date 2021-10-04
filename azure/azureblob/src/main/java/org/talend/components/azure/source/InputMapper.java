@@ -34,8 +34,7 @@ import org.talend.components.azure.service.AzureBlobComponentServices;
 //
 // this class role is to enable the work to be distributed in environments supporting it.
 //
-@Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a
-            // migrationHandler
+@Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
 @Icon(value = Icon.IconType.CUSTOM, custom = "azure-blob-input")
 @PartitionMapper(name = "Input")
 @Documentation("Mapper for AzureBlobStorage Readers")
@@ -49,8 +48,7 @@ public class InputMapper implements Serializable {
 
     private final MessageService messageService;
 
-    public InputMapper(@Option("configuration") final BlobInputProperties configuration,
-            final AzureBlobComponentServices service,
+    public InputMapper(@Option("configuration") final BlobInputProperties configuration, final AzureBlobComponentServices service,
             final RecordBuilderFactory recordBuilderFactory, final MessageService messageService) {
         this.configuration = configuration;
         this.service = service;
