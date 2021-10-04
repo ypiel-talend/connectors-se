@@ -12,17 +12,8 @@
  */
 package org.talend.components.rest.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.talend.components.common.service.http.RedirectContext;
 import org.talend.components.common.service.http.RedirectService;
 import org.talend.components.common.service.http.ValidateSites;
@@ -30,25 +21,24 @@ import org.talend.components.common.service.http.common.UserNamePassword;
 import org.talend.components.common.service.http.digest.DigestAuthContext;
 import org.talend.components.common.service.http.digest.DigestAuthService;
 import org.talend.components.common.text.Substitutor;
-import org.talend.components.rest.configuration.Datastore;
 import org.talend.components.rest.configuration.Param;
 import org.talend.components.rest.configuration.RequestConfig;
 import org.talend.components.rest.configuration.auth.Authentication;
 import org.talend.components.rest.configuration.auth.Authorization;
 import org.talend.components.rest.service.client.Body;
 import org.talend.components.rest.service.client.Client;
-import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.RecordPointerFactory;
 import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.asyncvalidation.AsyncValidation;
-import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
-import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
-import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.http.Response;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -239,8 +229,9 @@ public class RestService {
 
     public void checkBaseURL(final String base) {
         if (!ValidateSites.isValidSite(base)) {
-            throw new RuntimeException(
-                    i18n.notValidAddress(ValidateSites.CAN_ACCESS_LOCAL, ValidateSites.ENABLE_MULTICAST_ACCESS));
+            log.warn("Not valid base {}", base);
+            final String errorMessage = ValidateSites.buildErrorMessage(i18n::notValidAddress, base);
+            throw new ComponentException(ComponentException.ErrorOrigin.USER, errorMessage);
         }
     }
 

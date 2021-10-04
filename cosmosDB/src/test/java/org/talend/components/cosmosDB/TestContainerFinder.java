@@ -10,24 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.cosmosDB.service;
+package org.talend.components.cosmosDB;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import org.talend.sdk.component.runtime.serialization.LightContainer;
+import org.talend.sdk.component.runtime.serialization.TCCLContainerFinder;
 
-@Internationalized
-public interface I18nMessage {
+public class TestContainerFinder extends TCCLContainerFinder {
 
-    String noResultFetched();
-
-    String databaseNotExist(String database);
-
-    String destinationUnreachable();
-
-    String connectionKODetailed(String details);
-
-    String vacantDBID();
-
-    String connectionSuccess();
-
-    String notValidAddress(String endpoint);
+    @Override
+    public LightContainer find(String plugin) {
+        return new LightTestContainer();
+    }
 }

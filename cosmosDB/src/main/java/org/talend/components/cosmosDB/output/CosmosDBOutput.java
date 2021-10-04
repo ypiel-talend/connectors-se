@@ -49,8 +49,6 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("This component writes data to cosmosDB")
 public class CosmosDBOutput implements Serializable {
 
-    private I18nMessage i18n;
-
     private final CosmosDBOutputConfiguration configuration;
 
     private final CosmosDBService service;
@@ -60,11 +58,9 @@ public class CosmosDBOutput implements Serializable {
     private OutputParserFactory.IOutputParser out;
 
     public CosmosDBOutput(@Option("configuration") final CosmosDBOutputConfiguration configuration,
-            final CosmosDBService service,
-            final I18nMessage i18n) {
+            final CosmosDBService service) {
         this.configuration = configuration;
         this.service = service;
-        this.i18n = i18n;
     }
 
     @PostConstruct

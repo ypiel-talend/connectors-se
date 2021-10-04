@@ -10,24 +10,29 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.cosmosDB.service;
+package org.talend.components.cosmosDB.dataset;
 
-import org.talend.sdk.component.api.internationalization.Internationalized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-@Internationalized
-public interface I18nMessage {
+import static org.junit.jupiter.api.Assertions.*;
 
-    String noResultFetched();
+class QueryDatasetTest {
 
-    String databaseNotExist(String database);
+    @Test
+    void equalsTest() {
+        QueryDataset q1 = new QueryDataset();
+        QueryDataset q2 = new QueryDataset();
+        q1.setQuery("TheQuery");
+        q1.setUseQuery(true);
+        q1.setCollectionID("c1");
 
-    String destinationUnreachable();
+        q2.setQuery("TheQuery");
+        q2.setUseQuery(true);
+        q2.setCollectionID("c2");
 
-    String connectionKODetailed(String details);
+        final boolean equals = q1.equals(q2);
+        Assertions.assertFalse(equals);
+    }
 
-    String vacantDBID();
-
-    String connectionSuccess();
-
-    String notValidAddress(String endpoint);
 }

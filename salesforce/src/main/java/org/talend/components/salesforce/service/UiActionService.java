@@ -28,6 +28,7 @@ import com.sforce.ws.ConnectionException;
 
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
@@ -61,7 +62,8 @@ public class UiActionService {
     public HealthCheckStatus validateBasicConnection(@Option final BasicDataStore datastore, final Messages i18n) {
         try {
             this.service.connect(datastore, localConfiguration);
-        } catch (ConnectionException ex) {
+            return new HealthCheckStatus(OK, i18n.healthCheckOk());
+        } catch (ConnectionException | ComponentException ex) {
             String error;
             if (ApiFault.class.isInstance(ex)) {
                 final ApiFault fault = ApiFault.class.cast(ex);
@@ -71,7 +73,6 @@ public class UiActionService {
             }
             return new HealthCheckStatus(KO, i18n.healthCheckFailed(error));
         }
-        return new HealthCheckStatus(OK, i18n.healthCheckOk());
     }
 
     @Suggestions("loadSalesforceModules")

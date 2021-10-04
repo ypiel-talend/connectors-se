@@ -12,74 +12,188 @@
  */
 package org.talend.components.common.service.http;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.Locale;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Slf4j
 public class ValidateSites {
 
-    public final static boolean CAN_ACCESS_LOCAL = Boolean
-            .valueOf(System
-                    .getProperty("connectors.enable_local_network_access",
-                            System.getenv().getOrDefault("CONNECTORS_ENABLE_LOCAL_NETWORK_ACCESS", "true")));
+    private final static List<String> ADDITIONAL_LOCAL_HOSTS = Arrays.asList(
+            // local multicast from 224.0.0.0 to 224.0.0.255
+            "224.0.0.");
 
-    public final static boolean ENABLE_MULTICAST_ACCESS = Boolean
-            .valueOf(System
-                    .getProperty("connectors.enable_multicast_network_access",
-                            System.getenv().getOrDefault("CONNECTORS_ENABLE_MULTICAST_NETWORK_ACCESS", "true")));
+    private final static class Constants {
 
-    private final static List<String> ADDITIONAL_LOCAL_HOSTS = Arrays.asList(new String[] { "224.0.0." // local
-                                                                                                       // multicast :
-                                                                                                       // from
-            // 224.0.0.0 to 224.0.0.255
-    });
+        private Constants() {
+        }
+
+        // Constants for local access (env for system.getEnv, jvm for System.getProperty (-D option)).
+        private static final String ENV_ENABLE_LOCAL_NETWORK_ACCESS = "CONNECTORS_ENABLE_LOCAL_NETWORK_ACCESS";
+
+        private static final String JVM_ENABLE_LOCAL_NETWORK_ACCESS = "connectors.enable_local_network_access";
+
+        // Constants for multicast access (env for system.getEnv, jvm for System.getProperty (-D option)).
+        private static final String ENV_ENABLE_MULTICAST_NETWORK_ACCESS = "CONNECTORS_ENABLE_MULTICAST_NETWORK_ACCESS";
+
+        private static final String JVM_ENABLE_MULTICAST_NETWORK_ACCESS = "connectors.enable_multicast_network_access";
+
+        // Constants for uncrypted access (env for system.getEnv, jvm for System.getProperty (-D option)).
+        private static final String ENV_ENABLE_NON_SECURED_ACCESS = "CONNECTORS_ENABLE_NON_SECURED_ACCESS";
+
+        private static final String JVM_ENABLE_NON_SECURED_ACCESS = "connectors.enable_non_secured_access";
+    }
+
+    /**
+     * Check if url / inetAddress is authorized or not.
+     */
+    @FunctionalInterface
+    interface AccessChecker {
+
+        boolean isAuthorized(final URL url, final InetAddress inetAddress);
+    }
+
+    /**
+     * interface for environment.
+     */
+    @FunctionalInterface
+    public interface Environment {
+
+        boolean getValue(final String globalName, final String localName, final String defaultValue);
+    }
+
+    /** default system environment check jvm property first, then system env then defualt value */
+    public static final Environment systemEnvironment =
+            (String globalName, String localName, String defaultValue) -> Boolean.parseBoolean(
+                    System.getProperty(localName, System.getenv().getOrDefault(globalName, defaultValue)));
+
+    /**
+     * Composed checker to Chain several checkers.
+     */
+    public static class GlobalAccessChecker implements AccessChecker {
+
+        private final List<AccessChecker> elements;
+
+        public GlobalAccessChecker(final List<AccessChecker> ba) {
+            this.elements = new ArrayList<>(ba.size());
+            this.elements.addAll(ba);
+        }
+
+        @Override
+        public boolean isAuthorized(URL url, InetAddress inetAddress) {
+            return this.elements.stream().allMatch((AccessChecker b) -> b.isAuthorized(url, inetAddress));
+        }
+    }
+
+    /** build all checker based on AccessControls enum & environment. */
+    public static AccessChecker buildChecker(final Environment env) {
+        final ArrayList<AccessChecker> accesses = new ArrayList<>();
+        for (AccessControls ac : AccessControls.values()) {
+            if (!ac.isAuthorized.test(env)) {
+                accesses.add(ac.accessChecker);
+            }
+        }
+        accesses.trimToSize();
+        if (accesses.size() == 0) {
+            return (final URL url, final InetAddress inetAddress) -> true;
+        }
+        return new GlobalAccessChecker(accesses);
+    }
+
+    @RequiredArgsConstructor
+    public enum AccessControls {
+
+        LOCAL(
+                (final URL url, final InetAddress inetAddress) -> !AccessControls.isLocalAddress(inetAddress)
+                        && ADDITIONAL_LOCAL_HOSTS.stream()
+                                .noneMatch(h -> url.getHost().contains(h)),
+                (Environment env) -> env.getValue(Constants.ENV_ENABLE_LOCAL_NETWORK_ACCESS,
+                        Constants.JVM_ENABLE_LOCAL_NETWORK_ACCESS, "true"),
+                "[local]"),
+        MULTICAST(
+                (final URL url, final InetAddress inetAddress) -> !inetAddress.isMulticastAddress(),
+                (Environment env) -> env.getValue(Constants.ENV_ENABLE_MULTICAST_NETWORK_ACCESS,
+                        Constants.JVM_ENABLE_MULTICAST_NETWORK_ACCESS, "true"),
+                "[multicast]"),
+
+        NON_SECURED(
+                (final URL url, final InetAddress inetAddress) -> "HTTPS"
+                        .equals(url.getProtocol().toUpperCase(Locale.ENGLISH)),
+                (Environment env) -> env.getValue(Constants.ENV_ENABLE_NON_SECURED_ACCESS,
+                        Constants.JVM_ENABLE_NON_SECURED_ACCESS, "true"),
+                "[non_secured]");
+
+        private final AccessChecker accessChecker;
+
+        public final Predicate<Environment> isAuthorized;
+
+        final String messageToken;
+
+        void replaceToken(final StringBuilder builder, final Environment env) {
+            final int start = builder.indexOf(this.messageToken);
+            if (start >= 0) {
+                final boolean value = this.isAuthorized.test(env);
+                builder.replace(start, start + this.messageToken.length(), Boolean.toString(value));
+            }
+        }
+
+        private static boolean isLocalAddress(final InetAddress inetAddress) {
+            return inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress()
+                    || inetAddress.isLinkLocalAddress() || inetAddress.isAnyLocalAddress() // Unicast
+                    || inetAddress.isMCLinkLocal() || inetAddress.isMCSiteLocal() || inetAddress.isMCNodeLocal()
+                    || inetAddress.isMCOrgLocal(); // Multicast
+        }
+    }
 
     private ValidateSites() {
     }
 
     public static boolean isValidSite(final String base) {
-        return isValidSite(base, CAN_ACCESS_LOCAL, ENABLE_MULTICAST_ACCESS);
+        return isValidSite(base, ValidateSites.systemEnvironment);
     }
 
-    /**
-     * This method returns if the given url is valid depending of paremeter.
-     * We can make local sites and multicast class of addresses invalid.
-     *
-     * @param surl
-     * @param can_access_local
-     * @param enable_multicast_access
-     * @return
-     */
-    public static boolean isValidSite(final String surl, final boolean can_access_local,
-            final boolean enable_multicast_access) {
+    public static boolean isValidSite(final String base, final Environment env) {
+        final AccessChecker accessChecker = buildChecker(env);
+        return isValidSite(base, accessChecker);
+    }
+
+    public static boolean isValidSite(final String surl, final AccessChecker access) {
         try {
             final URL url = new URL(surl);
             final String host = url.getHost();
             final InetAddress inetAddress = InetAddress.getByName(host);
 
-            if (!enable_multicast_access && inetAddress.isMulticastAddress()) {
-                // Multicast addresses are forbidden
-                return false;
-            }
-
-            if (can_access_local) {
-                // we can access local sites
-                return true;
-            }
-
-            return !inetAddress.isSiteLocalAddress() && !inetAddress.isLoopbackAddress()
-                    && !ADDITIONAL_LOCAL_HOSTS.stream().filter(h -> host.contains(h)).findFirst().isPresent();
+            return access.isAuthorized(url, inetAddress);
         } catch (MalformedURLException e) {
             log.error(e.getMessage(), e);
             return false;
         } catch (UnknownHostException e) {
             return true;
         }
+    }
+
+    public static String buildErrorMessage(final Function<String, String> msgBuilder,
+            final String endPoint) {
+        return buildErrorMessage(msgBuilder, endPoint, ValidateSites.systemEnvironment);
+    }
+
+    public static String buildErrorMessage(final Function<String, String> msgBuilder,
+            final String endPoint,
+            final Environment env) {
+        final StringBuilder builder = new StringBuilder(msgBuilder.apply(endPoint));
+        Arrays.stream(AccessControls.values())
+                .forEach(
+                        (ValidateSites.AccessControls ctrl) -> ctrl.replaceToken(builder, env));
+        return builder.toString();
     }
 }

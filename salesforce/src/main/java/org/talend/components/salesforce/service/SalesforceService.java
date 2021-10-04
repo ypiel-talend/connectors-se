@@ -12,42 +12,31 @@
  */
 package org.talend.components.salesforce.service;
 
-import java.net.Proxy;
-import java.net.ProxySelector;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.xml.namespace.QName;
-
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BulkConnection;
-import com.sforce.soap.partner.DescribeSObjectResult;
-import com.sforce.soap.partner.Field;
-import com.sforce.soap.partner.FieldType;
-import com.sforce.soap.partner.IDescribeSObjectResult;
-import com.sforce.soap.partner.IField;
-import com.sforce.soap.partner.LoginResult;
-import com.sforce.soap.partner.PartnerConnection;
+import com.sforce.soap.partner.*;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.SessionRenewer;
-
+import lombok.extern.slf4j.Slf4j;
+import org.talend.components.common.service.http.ValidateSites;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.components.salesforce.service.operation.ConnectionFacade;
 import org.talend.components.salesforce.service.operation.ConnectionFacade.ConnectionImpl;
 import org.talend.components.salesforce.soql.FieldDescription;
 import org.talend.components.salesforce.soql.SoqlQuery;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import lombok.extern.slf4j.Slf4j;
+import javax.xml.namespace.QName;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.URI;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -100,7 +89,7 @@ public class SalesforceService {
      */
     public PartnerConnection connect(final BasicDataStore datastore, final LocalConfiguration localConfiguration)
             throws ConnectionException {
-        final Integer timeout = (localConfiguration != null && localConfiguration.get(TIMEOUT_PROPERTY_KEY) != null)
+        final int timeout = (localConfiguration != null && localConfiguration.get(TIMEOUT_PROPERTY_KEY) != null)
                 ? Integer.parseInt(localConfiguration.get(TIMEOUT_PROPERTY_KEY))
                 : DEFAULT_TIMEOUT;
         String endpoint = getEndpoint(datastore, localConfiguration);
@@ -175,14 +164,22 @@ public class SalesforceService {
                 endpoint = localConfiguration.get(ENDPOINT_PROPERTY_KEY);
             }
         }
+
+        final String realEndPoint;
         if (endpoint != null && !endpoint.isEmpty()) {
             if (endpoint.contains(RETIRED_ENDPOINT)) {
                 endpoint = endpoint.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
             }
-            return endpoint;
+            realEndPoint = endpoint;
         } else {
-            return URL;
+            realEndPoint = URL;
         }
+        if (!ValidateSites.isValidSite(realEndPoint)) {
+            log.warn("Not valid base {}", realEndPoint);
+            final String errorMessage = ValidateSites.buildErrorMessage(messages::notValidAddress, realEndPoint);
+            throw new ComponentException(ComponentException.ErrorOrigin.USER, errorMessage);
+        }
+        return realEndPoint;
     }
 
     private ConnectorConfig newConnectorConfig(final String ep) {

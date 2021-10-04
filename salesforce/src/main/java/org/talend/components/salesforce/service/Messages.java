@@ -26,4 +26,6 @@ public interface Messages {
     String errorPasswordExpired();
 
     String failedPipeline(final String operationName, final String errorData);
+
+    String notValidAddress(String address);
 }

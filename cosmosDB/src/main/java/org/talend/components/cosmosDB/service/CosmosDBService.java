@@ -20,12 +20,14 @@ import com.microsoft.azure.documentdb.DocumentClientException;
 import com.microsoft.azure.documentdb.RetryOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.talend.components.common.service.http.ValidateSites;
 import org.talend.components.cosmosDB.dataset.QueryDataset;
 import org.talend.components.cosmosDB.datastore.CosmosDBDataStore;
 import org.talend.components.cosmosDB.input.CosmosDBInput;
 import org.talend.components.cosmosDB.input.CosmosDBInputConfiguration;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
@@ -59,6 +61,13 @@ public class CosmosDBService {
      * Create a document client from specified configuration.
      */
     public DocumentClient documentClientFrom(CosmosDBDataStore datastore) {
+
+        if (!ValidateSites.isValidSite(datastore.getServiceEndpoint())) {
+            log.warn("The endpoint {} is not authorized", datastore.getServiceEndpoint());
+            final String errorMessage =
+                    ValidateSites.buildErrorMessage(i18n::notValidAddress, datastore.getServiceEndpoint());
+            throw new ComponentException(ComponentException.ErrorOrigin.USER, errorMessage);
+        }
 
         ConnectionPolicy policy = new ConnectionPolicy();
         RetryOptions retryOptions = new RetryOptions();
@@ -107,7 +116,7 @@ public class CosmosDBService {
     public Schema addColumns(@Option("dataset") final QueryDataset dataset) {
         CosmosDBInputConfiguration configuration = new CosmosDBInputConfiguration();
         configuration.setDataset(dataset);
-        CosmosDBInput cosmosDBInput = new CosmosDBInput(configuration, this, builderFactory, i18n);
+        CosmosDBInput cosmosDBInput = new CosmosDBInput(configuration, this, builderFactory);
         cosmosDBInput.init();
         Record record = cosmosDBInput.next();
         cosmosDBInput.release();

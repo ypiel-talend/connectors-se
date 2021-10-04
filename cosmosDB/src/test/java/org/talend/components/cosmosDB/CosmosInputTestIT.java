@@ -37,7 +37,7 @@ public class CosmosInputTestIT extends CosmosDbTestBase {
                         "SELECT {\"Name\":f.id, \"City\":f.address.city} AS Family\n" + " FROM " + collectionID + " f\n"
                                 + " WHERE f.address.city = f.address.state");
         config.setDataset(dataSet);
-        CosmosDBInput input = new CosmosDBInput(config, service, recordBuilderFactory, i18n);
+        CosmosDBInput input = new CosmosDBInput(config, service, recordBuilderFactory);
         input.init();
         Record next = input.next();
         System.out.println(next);
@@ -53,7 +53,7 @@ public class CosmosInputTestIT extends CosmosDbTestBase {
                 .setQuery("SELECT {\"Name\":f.id, \"City\":f.address.city} AS Family   FROM " + collectionID
                         + " f  WHERE f.address.county = \"Manhattan\"");
         config.setDataset(dataSet);
-        CosmosDBInput input = new CosmosDBInput(config, service, recordBuilderFactory, i18n);
+        CosmosDBInput input = new CosmosDBInput(config, service, recordBuilderFactory);
         input.init();
         Record next = input.next();
         input.release();

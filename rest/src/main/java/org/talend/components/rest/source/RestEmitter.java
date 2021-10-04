@@ -64,13 +64,12 @@ public class RestEmitter implements Serializable {
 
     @Producer
     public Record next() {
-        if (done && items == null) {
-            return null;
-        }
-
         if (items == null && !done) {
             done = true;
             items = recordBuilder.buildFixedRecord(client.execute(config), config);
+        }
+        if (items == null) {
+            return null;
         }
 
         final Record r = items.hasNext() ? items.next() : null;

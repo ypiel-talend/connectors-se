@@ -27,6 +27,10 @@
       <artifactId>salesforce-locales</artifactId>
       <version>${locales.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.talend.components</groupId>
+      <artifactId>common</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>com.force.api</groupId>

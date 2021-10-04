@@ -37,7 +37,7 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
     @Test
     public void outputTest() throws DocumentClientException {
         config.setAutoIDGeneration(true);
-        CosmosDBOutput cosmosDBOutput = new CosmosDBOutput(config, service, i18n);
+        CosmosDBOutput cosmosDBOutput = new CosmosDBOutput(config, service);
         cosmosDBOutput.init();
         Record record = createData(1).get(0);
         cosmosDBOutput.onNext(record);
@@ -54,7 +54,7 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
         config.setDataset(dataSet);
         config.setPartitionKey("/id2");
         config.setCreateCollection(true);
-        CosmosDBOutput cosmosDBOutput = new CosmosDBOutput(config, service, i18n);
+        CosmosDBOutput cosmosDBOutput = new CosmosDBOutput(config, service);
         cosmosDBOutput.init();
         Record record = createData(1).get(0);
         cosmosDBOutput.onNext(record);
@@ -71,7 +71,7 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
         config.setDataAction(DataAction.DELETE);
         config.setPartitionKeyForDelete("lastName");
         config.setCreateCollection(true);
-        CosmosDBOutput cosmosDBOutput = new CosmosDBOutput(config, service, i18n);
+        CosmosDBOutput cosmosDBOutput = new CosmosDBOutput(config, service);
         cosmosDBOutput.init();
         Record record = createData3().get(0);
         cosmosDBOutput.onNext(record);
