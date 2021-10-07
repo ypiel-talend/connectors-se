@@ -347,13 +347,13 @@ spec:
             }
         }
         stage('Release') {
-            /*when {
+            when {
                 expression { params.Action == 'RELEASE' }
                 anyOf {
                     branch 'master'
                     expression { BRANCH_NAME.startsWith('maintenance/') }
                 }
-            }*/
+            }
             steps {
             	withCredentials([gitCredentials, nexusCredentials]) {
 					container('main') {
