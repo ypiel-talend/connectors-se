@@ -17,10 +17,12 @@ import java.util.ResourceBundle;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.talend.components.common.stream.api.input.RecordReaderSupplier;
 import org.talend.components.common.stream.api.output.RecordWriterSupplier;
 import org.talend.components.common.stream.api.reader.FakeReaderSupplier;
 import org.talend.components.common.stream.api.writer.FakeWriterSupplier;
+import org.talend.components.common.stream.format.ContentFormat;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit5.WithComponents;
 
@@ -44,6 +46,17 @@ class RecordIORepositoryTest {
         Assertions
                 .assertTrue(FakeWriterSupplier.class.isInstance(writer),
                         () -> "wrong reader class " + writer.getClass().getName());
+    }
+
+    @Test
+    public void testRepoUnexist() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> this.repo.findReader(UnexistingConfig.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> this.repo.findWriter(UnexistingConfig.class));
+    }
+
+    private static class UnexistingConfig implements ContentFormat {
+
+        private static final long serialVersionUID = 733961508822081722L;
     }
 
     @Test

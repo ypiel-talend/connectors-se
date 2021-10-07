@@ -27,6 +27,7 @@ import javax.json.JsonReader;
 import javax.json.JsonReaderFactory;
 import javax.json.JsonValue;
 
+import lombok.extern.slf4j.Slf4j;
 import org.talend.components.common.stream.api.input.RecordReaderSupplier;
 import org.talend.components.common.stream.api.output.RecordWriterSupplier;
 import org.talend.components.common.stream.format.ContentFormat;
@@ -35,6 +36,7 @@ import org.talend.sdk.component.api.service.Service;
 /**
  * Service to group record reader and writer suppliers (one reader/writer for each configuration).
  */
+@Slf4j
 @Service
 public class RecordIORepository {
 
@@ -66,6 +68,7 @@ public class RecordIORepository {
             Collections
                     .list(loader.getResources("TALEND-INF/components/format.json"))
                     .stream() //
+                    .peek((URL loadedURL) -> log.info("Load format file {}", loadedURL.getPath())) //
                     .map(this::readJson) // url -> json object
                     .forEach((JsonObject json) -> this.loadJson(loader, json)); // load json to update readers & writers
         } catch (IOException exIO) {
@@ -156,11 +159,21 @@ public class RecordIORepository {
     }
 
     public <T extends ContentFormat> RecordReaderSupplier findReader(Class<T> clazz) {
-        return this.readers.get(clazz);
+        final RecordReaderSupplier reader = this.readers.get(clazz);
+        if (reader == null) {
+            log.error("Can't find reader for class {}", clazz.getName());
+            throw new IllegalArgumentException("Can't find reader for class " + clazz.getName());
+        }
+        return reader;
     }
 
     public <T extends ContentFormat> RecordWriterSupplier findWriter(Class<T> clazz) {
-        return this.writers.get(clazz);
+        final RecordWriterSupplier writer = this.writers.get(clazz);
+        if (writer == null) {
+            log.error("Can't find writer for class {}", clazz.getName());
+            throw new IllegalArgumentException("Can't find writer for class " + clazz.getName());
+        }
+        return writer;
     }
 
 }
