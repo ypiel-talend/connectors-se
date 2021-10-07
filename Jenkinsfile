@@ -94,7 +94,7 @@ spec:
         ARTIFACTORY_REGISTRY = "artifactory.datapwn.com"
         TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX="artifactory.datapwn.com/docker-io-remote/"
         REPOSITORY = 'connectors-se'
-        DRAFT = 'true'
+        DRAFT = true
     }
 
     options {
@@ -114,6 +114,7 @@ spec:
         booleanParam(name: 'FORCE_SONAR', defaultValue: false, description: 'Force Sonar analysis')
         string(name: 'EXTRA_BUILD_PARAMS', defaultValue: "", description: 'Add some extra parameters to maven commands. Applies to all maven calls.')
         string(name: 'POST_LOGIN_SCRIPT', defaultValue: "", description: 'Execute a shell command after login. Useful for maintenance.')
+        booleanParam(name: 'DRAFT', defaultValue: true, description: 'Create a draft changelog.')
     }
 
     stages {
@@ -369,6 +370,7 @@ spec:
                     container('main') {
                         withCredentials([gitCredentials]) {
                             script {
+                                env.DRAFT = params.DRAFT
                                 sh "sh .jenkins/changelog.sh"
                             }
                         }
