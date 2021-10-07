@@ -94,7 +94,6 @@ spec:
         ARTIFACTORY_REGISTRY = "artifactory.datapwn.com"
         TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX="artifactory.datapwn.com/docker-io-remote/"
         REPOSITORY = 'connectors-se'
-        DRAFT = true
     }
 
     options {
