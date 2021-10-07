@@ -28,19 +28,20 @@ else
   echo "Previous release version ${PREVIOUS_RELEASE_VERSION}"
   LAST_COMMIT_SHA=$(git log --format="%H" release/${PREVIOUS_RELEASE_VERSION}...release/${RELEASE_VERSION} | head -n -1 | tail -n 1)
 fi
+
 if [[ -z "${LAST_COMMIT_SHA}" ]]; then
     echo "Cannot evaluate last commit SHA."
-    exit 123
-fi
-echo "Last commit sha - ${LAST_COMMIT_SHA}"
-echo "Draft - ${DRAFT}"
+else
+    echo "Last commit sha - ${LAST_COMMIT_SHA}"
+    echo "Draft - ${DRAFT}"
 
-# Checkout piece will be removed when the application is merged
-cd .. && \
-git clone https://github.com/Talend/connectivity-tools.git && \
-cd connectivity-tools && \
-cd release-notes && \
-mvn clean package && \
-cd target
-JAR_NAME=$(find . -maxdepth 1 -name "*.jar" | cut -d/ -f2)
-java -jar ${JAR_NAME} ${LAST_COMMIT_SHA}
+    # Checkout piece will be removed when the application is merged
+    cd .. && \
+    git clone https://github.com/Talend/connectivity-tools.git && \
+    cd connectivity-tools && \
+    cd release-notes && \
+    mvn clean package && \
+    cd target
+    JAR_NAME=$(find . -maxdepth 1 -name "*.jar" | cut -d/ -f2)
+    java -jar ${JAR_NAME} ${LAST_COMMIT_SHA}
+fi
