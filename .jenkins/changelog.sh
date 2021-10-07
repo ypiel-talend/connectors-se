@@ -13,6 +13,8 @@ echo "Fetching all tags."
 git fetch --tags -q
 echo "Release version ${RELEASE_VERSION}"
 echo "Getting last commit sha."
+BRANCH_NAME=master
+RELEASE_VERSION=1.25.0
 
 if [[ ${BRANCH_NAME} == 'master' ]]; then
     MAINTENANCE_BRANCH=maintenance/${RELEASE_VERSION%.*}
