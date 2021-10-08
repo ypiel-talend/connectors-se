@@ -45,7 +45,6 @@ import java.util.List;
 
 import static com.mongodb.WriteConcern.*;
 
-
 @Version(1)
 @Slf4j
 @Icon(value = Icon.IconType.CUSTOM, custom = "mongo_db-connector")
@@ -205,7 +204,7 @@ public class MongoDBProcessor implements Serializable {
     }
 
     private Document getKeysQueryDocumentAndRemoveKeysFromSourceDocument(List<KeyMapping> keyMappings, Record record,
-                                                                         Document document) {
+            Document document) {
         Document keysQueryDocument = new Document();
         if (keyMappings == null || keyMappings.isEmpty()) {
             throw new RuntimeException("need at least one key for set update/upsert action.");

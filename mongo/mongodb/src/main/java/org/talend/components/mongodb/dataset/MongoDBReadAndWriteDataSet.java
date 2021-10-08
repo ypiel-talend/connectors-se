@@ -26,7 +26,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Data
 @Icon(value = Icon.IconType.CUSTOM, custom = "mongo_db-connector")
 @DataSet("MongoDBReadAndWriteDataSet")
-@GridLayout({ @GridLayout.Row({ "datastore" })})
+@GridLayout({ @GridLayout.Row({ "datastore" }) })
 // @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "todo" }) })
 @Documentation("MongoDB DataSet for read and write both")
 public class MongoDBReadAndWriteDataSet extends MongoCommonDataSet implements BaseDataSet {

@@ -35,7 +35,6 @@
   <modules>
     <module>jdbc</module>
     <module>salesforce</module>
-    <module>mongodb</module>
     <module>couchbase</module>
     <module>azure</module>
     <module>rest</module>
@@ -49,6 +48,7 @@
     <module>cosmosDB</module>
     <module>google-storage</module>
     <module>migration-tester</module>
+    <module>mongo</module>
     <module>common-test</module>
   </modules>
 

@@ -957,7 +957,7 @@ public class MongoDBTest {
         MongoDBSinkConfiguration config = new MongoDBSinkConfiguration();
         config.setDataset(dataset);
         config.setSetWriteConcern(true);
-        config.setWriteConcern(WriteConcern.UNACKNOWLEDGED);
+        // config.setWriteConcern(WriteConcern.UNACKNOWLEDGED);
 
         componentsHandler.setInputData(getDuplicatedKeyTestData());
         executeSinkTestJob(config);

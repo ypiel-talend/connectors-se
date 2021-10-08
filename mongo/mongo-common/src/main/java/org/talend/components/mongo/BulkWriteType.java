@@ -14,5 +14,5 @@ package org.talend.components.mongo;
 
 public enum BulkWriteType {
     ORDERED,
-    UNORDERED,
+    UNORDERED
 }
