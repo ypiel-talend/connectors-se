@@ -7,7 +7,7 @@
     "target": "./target/i18n"
   },
   "load": {
-    "project": "Connectors-se",
+    "project": "Connectors-see",
     "fixQuote": true
   },
   "github": {
