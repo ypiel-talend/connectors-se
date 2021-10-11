@@ -36,21 +36,6 @@ def podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
 
 def EXTRA_BUILD_PARAMS = ""
 
-def removeCommentsByAPrefix(String prefix){
-    for (comment in pullRequest.comments) {
-        echo "Author: ${comment.user}, Comment: ${comment.body}"
-        if (comment.body.startsWith(prefix)) {
-            comment.delete()
-        }
-    }
-}
-
-def failBuildAndCommentPR(String message) {
-    echo "Error: ${message}";
-    pullRequest.comment(message)
-    error(message)
-}
-
 pipeline {
     agent {
         kubernetes {
@@ -117,37 +102,6 @@ spec:
     }
 
     stages {
-        stage('Validate PR') {
-            when {
-                allOf {
-                    expression { env.CHANGE_ID }
-                    expression { !env.BRANCH_NAME.startsWith('maintenance/') }
-                    expression { env.BRANCH_NAME != 'master' }
-                    expression { params.Action == 'STANDARD' }
-                    expression { env.CHANGE_TARGET == "master" || env.startsWith('maintenance/') }
-                }
-            }
-            steps {
-                script {
-                    removeCommentsByAPrefix('Failed to validate the PR:')
-                    def validTitle = env.CHANGE_TITLE ==~ /^(fix|feat|chore|doc)\((([A-Z]{2,}-[0-9]+)|(UNTRACKED))\\/[a-zA-Z ]+\)\:\s*(.+)$/
-
-                    if (!validTitle) {
-                        def invalidTitleMessage = "Failed to validate the PR: ❌ [" + env.CHANGE_TITLE + "]" +
-                                " for the branch: [" + env.CHANGE_TARGET + "]" +
-                                "\nPlease change your PR title to match PR title requirements. Make sure you have a JIRA number + scope at the beginning" +
-                                "\nHere is an example of good title: feat(TDI-45001): fix junit." +
-                                "\nIn some rare cases you don't have the jira: chore(UNTRACKED): update build version." +
-                                "\nPlease find PR rules here: https://github.com/Talend/tools/blob/master/tools-root-github/CONTRIBUTING.md" +
-                                "\nRegex used for validation: https://regex101.com/r/w6CzzS/1/tests"
-
-                        failBuildAndCommentPR(invalidTitleMessage);
-                    }
-
-                    echo "The PR is valid!"
-                }
-            }
-        }
         stage('Docker login') {
             steps {
                 container('main') {
@@ -347,13 +301,13 @@ spec:
             }
         }
         stage('Release') {
-            /*when {
+            when {
                 expression { params.Action == 'RELEASE' }
                 anyOf {
                     branch 'master'
                     expression { BRANCH_NAME.startsWith('maintenance/') }
                 }
-            }*/
+            }
             steps {
                 withCredentials([gitCredentials, nexusCredentials]) {
                     container('main') {

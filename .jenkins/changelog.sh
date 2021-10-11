@@ -9,14 +9,8 @@ git config --global credential.name "jenkins-build"
 env | sort
 
 echo "Release version ${RELEASE_VERSION}"
-
-#These parameters ONLY for testing purpose, original values will be set by Jenkins and evaluated on release stage.
-#BRANCH_NAME=master
-#RELEASE_VERSION=1.25.0
-
-BRANCH_NAME=maintenance/1.21
-RELEASE_VERSION=1.21.2
 echo "Getting last commit hash."
+
 if [[ ${BRANCH_NAME} == 'master' ]]; then
     MAINTENANCE_BRANCH=maintenance/${RELEASE_VERSION%.*}
     git fetch origin ${MAINTENANCE_BRANCH}:${MAINTENANCE_BRANCH} -q
@@ -36,17 +30,14 @@ else
 fi
 
 if [[ -z "${LAST_COMMIT_HASH}" ]]; then
-    echo "Cannot evaluate last commit hash. Changelog won't be genarated."
+    echo "Cannot evaluate last commit hash. Changelog won't be generated."
 else
     echo "Last commit hash - ${LAST_COMMIT_HASH}"
     echo "Draft - ${DRAFT}"
 
-    # Checkout piece will be removed when the application is merged
     cd .. && \
     git clone https://github.com/Talend/connectivity-tools.git && \
-    cd connectivity-tools && \
-    git checkout mbasiuk/TDI-46073_release_note_app && \
-    cd release-notes && \
+    cd connectivity-tools/release-notes && \
     mvn clean package
 
     java -jar target/$(find target -maxdepth 1 -name "*.jar" | cut -d/ -f2) ${LAST_COMMIT_HASH}
