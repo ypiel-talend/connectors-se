@@ -11,9 +11,11 @@ env | sort
 echo "Release version ${RELEASE_VERSION}"
 
 #These parameters ONLY for testing purpose, original values will be set by Jenkins and evaluated on release stage.
-BRANCH_NAME=master
-RELEASE_VERSION=1.25.0
+#BRANCH_NAME=master
+#RELEASE_VERSION=1.25.0
 
+BRANCH_NAME=maintenance/1.21
+RELEASE_VERSION=1.21.2
 echo "Getting last commit hash."
 if [[ ${BRANCH_NAME} == 'master' ]]; then
     MAINTENANCE_BRANCH=maintenance/${RELEASE_VERSION%.*}
