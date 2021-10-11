@@ -355,14 +355,14 @@ spec:
                 }
             }*/
             steps {
-            	withCredentials([gitCredentials, nexusCredentials]) {
-					container('main') {
+                withCredentials([gitCredentials, nexusCredentials]) {
+                    container('main') {
                         script {
                             env.RELEASE_VERSION = sh(returnStdout: true, script: "mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout | cut -d- -f1").trim()
                             sh "sh .jenkins/release.sh"
                         }
-              		}
-            	}
+                    }
+                }
             }
             post {
                 success {
