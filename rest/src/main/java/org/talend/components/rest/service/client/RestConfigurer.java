@@ -52,9 +52,8 @@ public class RestConfigurer implements Configurer {
                         .headers()
                         .entrySet()
                         .stream()
-                        .filter(h -> ContentType.HEADER_KEY.toLowerCase().equals(h.getKey().toLowerCase()))
-                        .findFirst()
-                        .orElse(null) != null;
+                        .anyMatch(h -> ContentType.HEADER_KEY.equalsIgnoreCase(h.getKey()));
+
                 if (!contentTypeAlreadySet) {
                     final String value = config.getDataset().getBody().getType().getContentType();
                     log.info(i18n.addContentTypeHeader(ContentType.HEADER_KEY, value));
