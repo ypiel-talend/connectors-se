@@ -45,14 +45,19 @@ class AvroRecordWriterTest {
         final AvroConfiguration cfg = new AvroConfiguration();
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final RecordWriterSupplier writerSupplier = new AvroWriterSupplier();
-
+        prepareTestRecords();
         try (RecordWriter writer = writerSupplier.getWriter(() -> out, cfg)) {
-            prepareTestRecords();
             writer.add(versatileRecord);
+            writer.flush();
+            final String res = out.toString();
+            Assertions.assertFalse(res.isEmpty());
+        }
+        final ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+        try (RecordWriter writer = writerSupplier.getWriter(() -> out2, cfg)) {
             writer.add(complexRecord);
 
             writer.flush();
-            String res = out.toString();
+            final String res = out2.toString();
             Assertions.assertFalse(res.isEmpty());
         }
     }

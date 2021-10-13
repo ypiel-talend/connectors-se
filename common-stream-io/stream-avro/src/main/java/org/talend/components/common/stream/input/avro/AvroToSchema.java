@@ -30,12 +30,12 @@ public class AvroToSchema {
     }
 
     private Schema.Entry inferAvroField(org.apache.avro.Schema.Field field) {
-        Schema.Entry.Builder builder = recordBuilderFactory.newEntryBuilder();
+        final Schema.Entry.Builder builder = recordBuilderFactory.newEntryBuilder();
         builder.withName(field.name());
-        org.apache.avro.Schema.Type type = AvroHelper.getFieldType(field);
-        String logicalType = field.schema().getProp(Constants.AVRO_LOGICAL_TYPE);
+        final org.apache.avro.Schema.Type type = AvroHelper.getFieldType(field);
+        final String logicalType = field.schema().getProp(Constants.AVRO_LOGICAL_TYPE);
         // handle NULLable field
-        builder.withNullable(true);
+        builder.withNullable(this.isNullable(field.schema()));
         switch (type) {
         case RECORD: {
             builder.withType(Schema.Type.RECORD);
@@ -51,25 +51,9 @@ public class AvroToSchema {
             builder.withType(Schema.Type.ARRAY);
             org.apache.avro.Schema extractedSchema = AvroHelper
                     .getUnionSchema(AvroHelper.getUnionSchema(field.schema()).getElementType());
-            Schema.Type toType = translateToRecordType((extractedSchema.getType()));
-            final Schema.Builder subBuilder = recordBuilderFactory.newSchemaBuilder(toType);
-            switch (toType) {
-            case RECORD:
-            case ARRAY:
-                extractedSchema.getFields().stream().map(this::inferAvroField).forEach(subBuilder::withEntry);
-                builder.withElementSchema(subBuilder.build());
-                break;
-            case STRING:
-            case BYTES:
-            case INT:
-            case LONG:
-            case FLOAT:
-            case DOUBLE:
-            case BOOLEAN:
-            case DATETIME:
-                builder.withElementSchema(subBuilder.build());
-                break;
-            }
+            final Schema innerSchema = this.inferInnerSchema(extractedSchema);
+            builder.withElementSchema(innerSchema);
+
             break;
         case INT:
         case LONG:
@@ -87,8 +71,35 @@ public class AvroToSchema {
         case NULL:
             builder.withType(translateToRecordType(type));
             break;
+        default:
+            break;
         }
         return builder.build();
+    }
+
+    private boolean isNullable(final org.apache.avro.Schema schema) {
+        boolean isNullable = org.apache.avro.Schema.Type.NULL.equals(schema.getType());
+        if (!isNullable && org.apache.avro.Schema.Type.UNION.equals(schema.getType())) {
+            isNullable = schema.getTypes().stream().anyMatch(this::isNullable);
+        }
+        return isNullable;
+    }
+
+    private Schema inferInnerSchema(final org.apache.avro.Schema schema) {
+        final Schema.Type toType = this.translateToRecordType(schema.getType());
+        final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(toType);
+        if (toType == Schema.Type.RECORD) {
+            schema.getFields()
+                    .stream() //
+                    .map(this::inferAvroField) //
+                    .forEach(schemaBuilder::withEntry);
+        } else if (toType == Schema.Type.ARRAY) {
+            final org.apache.avro.Schema elementType = schema.getElementType();
+            final Schema innerSchema = this.inferInnerSchema(AvroHelper.getUnionSchema(elementType));
+            schemaBuilder.withElementSchema(innerSchema);
+        }
+
+        return schemaBuilder.build();
     }
 
     protected Schema.Type translateToRecordType(org.apache.avro.Schema.Type type) {

@@ -32,10 +32,14 @@ import org.apache.avro.io.DatumReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.talend.components.common.stream.output.avro.RecordToAvro;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.runtime.beam.spi.AvroRecordBuilderFactoryProvider;
 import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 
 import lombok.RequiredArgsConstructor;
@@ -118,8 +122,12 @@ class AvroToRecordTest {
         assertNotNull(s);
         assertEquals(7, s.getEntries().size());
         assertTrue(s.getType().equals(Schema.Type.RECORD));
-        assertTrue(s.getEntries().stream().map(Entry::getName).collect(toList())
-                .containsAll(Stream.of("string", "int", "long", "double", "boolean", "array", "object").collect(toList())));
+        assertTrue(s.getEntries()
+                .stream()
+                .map(Entry::getName)
+                .collect(toList())
+                .containsAll(
+                        Stream.of("string", "int", "long", "double", "boolean", "array", "object").collect(toList())));
     }
 
     @Test
@@ -145,10 +153,10 @@ class AvroToRecordTest {
     }
 
     @Test
-    void toRecordFile() throws IOException {
+    void propFile() throws IOException {
 
-        try (final InputStream input = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("customers_orders.avro")) {
+        try (final InputStream input =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("properties.avro")) {
             final DatumReader<GenericRecord> userDatumReader = new GenericDatumReader<>();
             final DataFileStream<GenericRecord> fstream = new DataFileStream<>(input, userDatumReader);
 
@@ -156,17 +164,85 @@ class AvroToRecordTest {
 
             final GenericRecord record = fstream.next();
             final Record tckRecord = toRecord.toRecord(record);
+            Assertions.assertNotNull(tckRecord);
 
-            final org.apache.avro.Schema avroSchema = record.getSchema();
-            final Schema tckSchema = tckRecord.getSchema();
-            Assertions.assertTrue(this.equalsSchema(avroSchema, tckSchema));
-            Assertions.assertTrue(this.exploreRecord(tckRecord));
+            final Collection<Collection> properties = tckRecord.getArray(Collection.class, "properties");
+            Assertions.assertEquals(2, properties.size());
+            final Collection next = properties.iterator().next();
+            Assertions.assertEquals(2, next.size());
+            final Object recordObject = next.iterator().next();
+            Assertions.assertTrue(recordObject instanceof Record);
+            Record rec = (Record) recordObject;
+            Assertions.assertEquals("v11", rec.getString("val"));
+        }
+    }
+
+    @Test
+    void propFileAvroRec() throws IOException {
+
+        final AvroRecordBuilderFactoryProvider provider = new AvroRecordBuilderFactoryProvider();
+        System.setProperty("talend.component.beam.record.factory.impl", "avro");
+        final RecordBuilderFactory factory = provider.apply("test");
+        try (final InputStream input =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("properties.avro")) {
+            final DatumReader<GenericRecord> userDatumReader = new GenericDatumReader<>();
+            final DataFileStream<GenericRecord> fstream = new DataFileStream<>(input, userDatumReader);
+
+            final AvroToRecord toRecord = new AvroToRecord(factory);
+
+            final GenericRecord record = fstream.next();
+            final Record tckRecord = toRecord.toRecord(record);
+            Assertions.assertNotNull(tckRecord);
+
+            final Collection<Collection> properties = tckRecord.getArray(Collection.class, "properties");
+            Assertions.assertEquals(2, properties.size());
+            final Collection next = properties.iterator().next();
+            Assertions.assertEquals(2, next.size());
+            final Object recordObject = next.iterator().next();
+            Assertions.assertNotNull(recordObject);
+            /*
+             * Assertions.assertTrue(recordObject instanceof Record, recordObject.getClass().getName());
+             * Record rec = (Record) recordObject;
+             * Assertions.assertEquals("v11", rec.getString("val"));
+             */
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "customers_orders.avro", "properties.avro" })
+    void compareAvro(final String avroFile) throws IOException {
+        final GenericRecord avroRecord = this.getRecord(avroFile);
+
+        final AvroToRecord toRecord = new AvroToRecord(this.recordBuilderFactory);
+        final Record tckRecord = toRecord.toRecord(avroRecord);
+
+        final RecordToAvro toAvro = new RecordToAvro("test");
+        final GenericRecord avroRecord2 = toAvro.fromRecord(tckRecord);
+
+        final AvroToRecord toRecord2 = new AvroToRecord(this.recordBuilderFactory);
+        final Record tckRecord2 = toRecord2.toRecord(avroRecord2);
+        Assertions.assertNotNull(tckRecord2);
+        Assertions.assertTrue(this.equalsSchema(avroRecord.getSchema(), tckRecord.getSchema()));
+        Assertions.assertEquals(tckRecord.getSchema(), tckRecord2.getSchema());
+    }
+
+    private GenericRecord getRecord(final String filePath) throws IOException {
+        try (final InputStream input = Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(filePath)) {
+            final DatumReader<GenericRecord> userDatumReader = new GenericDatumReader<>();
+            final DataFileStream<GenericRecord> fstream = new DataFileStream<>(input, userDatumReader);
+            return fstream.next();
         }
     }
 
     boolean exploreRecord(final Record tckRecord) {
-        return tckRecord.getSchema().getEntries().stream().filter(
-                (Schema.Entry e) -> Schema.Type.ARRAY == e.getType() && e.getElementSchema().getType() == Schema.Type.RECORD)
+        return tckRecord.getSchema()
+                .getEntries()
+                .stream()
+                .filter(
+                        (Schema.Entry e) -> Schema.Type.ARRAY == e.getType()
+                                && e.getElementSchema().getType() == Schema.Type.RECORD)
                 .allMatch((Schema.Entry arrayField) -> {
                     final Collection<Record> array = tckRecord.getArray(Record.class, arrayField.getName());
                     return array.stream().allMatch((Record r) -> r.getSchema().equals(arrayField.getElementSchema()));
@@ -175,11 +251,13 @@ class AvroToRecordTest {
 
     boolean equalsSchema(final org.apache.avro.Schema avroSchemaInput, final Schema tckSchema) {
 
-        org.apache.avro.Schema avroSchema;
+        final org.apache.avro.Schema avroSchema;
         if (avroSchemaInput.getType() == org.apache.avro.Schema.Type.UNION) {
-            avroSchema = avroSchemaInput.getTypes().stream() //
+            avroSchema = avroSchemaInput.getTypes()
+                    .stream() //
                     .filter((org.apache.avro.Schema as) -> as.getType() != org.apache.avro.Schema.Type.NULL) //
-                    .findFirst().get();
+                    .findFirst()
+                    .get();
         } else {
             avroSchema = avroSchemaInput;
         }
@@ -195,6 +273,7 @@ class AvroToRecordTest {
                 if (field == null) {
                     return false;
                 }
+
                 if (e.getType() == Schema.Type.ARRAY) {
                     if (!equalsSchema(field.schema().getElementType(), e.getElementSchema())) {
                         return false;

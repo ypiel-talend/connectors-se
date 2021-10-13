@@ -22,7 +22,7 @@ public class AvroReaderSupplier implements RecordReaderSupplier {
 
     @Override
     public RecordReader getReader(RecordBuilderFactory factory, ContentFormat config, Object extraParameter) {
-        if (!AvroConfiguration.class.isInstance(config)) {
+        if (!(config instanceof AvroConfiguration)) {
             throw new IllegalArgumentException("Try to get avro-reader with other than avro config.");
         }
 

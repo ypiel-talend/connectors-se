@@ -46,7 +46,7 @@ public abstract class AvroOutput implements AutoCloseable {
         }
     }
 
-    public AvroOutput(final TargetFinder destination) {
+    protected AvroOutput(final TargetFinder destination) {
         this.destination = destination;
     }
 

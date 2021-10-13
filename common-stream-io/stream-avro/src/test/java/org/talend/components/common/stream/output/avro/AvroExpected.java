@@ -64,7 +64,7 @@ public class AvroExpected implements AssertionsBuilder<GenericRecord> {
     private void checkContains(final GenericRecord record, final Schema.Entry field, final Object expectedValue) {
         final Object value = record.get(field.getName());
         if (expectedValue == null) {
-            Assertions.assertNull(value);
+            Assertions.assertNull(value, "Field " + field.getName() + " not null");
             return;
         }
         Assertions.assertNotNull(value);
