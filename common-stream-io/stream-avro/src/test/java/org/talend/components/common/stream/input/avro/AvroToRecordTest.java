@@ -154,7 +154,6 @@ class AvroToRecordTest {
 
     @Test
     void propFile() throws IOException {
-
         try (final InputStream input =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("properties.avro")) {
             final DatumReader<GenericRecord> userDatumReader = new GenericDatumReader<>();

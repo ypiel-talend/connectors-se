@@ -18,6 +18,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.talend.components.azure.common.exception.BlobRuntimeException;
+import org.talend.components.azure.migration.AzureStorageRuntimeDatasetMigration;
 import org.talend.components.azure.runtime.output.BlobFileWriter;
 import org.talend.components.azure.runtime.output.BlobFileWriterFactory;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -33,7 +34,7 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 
-@Version(1)
+@Version(value = 2, migrationHandler = AzureStorageRuntimeDatasetMigration.class)
 @Icon(value = Icon.IconType.CUSTOM, custom = "azure-blob-output")
 @Processor(name = "Output")
 @Documentation("Azure Blob Storage Writer")

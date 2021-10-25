@@ -17,16 +17,14 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.BlobTestUtils;
-import org.talend.components.azure.common.Encoding;
+import org.talend.components.common.formats.Encoding;
 import org.talend.components.azure.common.FileFormat;
-import org.talend.components.azure.common.excel.ExcelFormat;
-import org.talend.components.azure.common.excel.ExcelFormatOptions;
+import org.talend.components.common.formats.excel.ExcelFormat;
+import org.talend.components.common.formats.excel.ExcelFormatOptions;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -47,7 +45,7 @@ class HTMLInputIT extends BaseIT {
         dataset.setFileFormat(FileFormat.EXCEL);
         ExcelFormatOptions excelFormatOptions = new ExcelFormatOptions();
         excelFormatOptions.setExcelFormat(ExcelFormat.HTML);
-        excelFormatOptions.setEncoding(Encoding.UFT8);
+        excelFormatOptions.setEncoding(Encoding.UTF8);
         dataset.setExcelOptions(excelFormatOptions);
 
         dataset.setContainerName(containerName);

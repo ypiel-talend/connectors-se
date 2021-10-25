@@ -22,10 +22,11 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
-import org.talend.components.azure.common.service.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.azure.runtime.converters.AvroConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.common.Constants;
+import org.talend.components.common.service.azureblob.AzureComponentServices;
+import org.talend.components.common.stream.output.avro.RecordToAvro;
 import org.talend.sdk.component.api.record.Record;
 
 import com.microsoft.azure.storage.StorageException;
@@ -35,13 +36,13 @@ public class AvroBlobFileWriter extends BlobFileWriter {
 
     private BlobOutputConfiguration config;
 
-    private AvroConverter converter;
+    private RecordToAvro converter;
 
     public AvroBlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
             throws Exception {
         super(config, connectionServices);
         this.config = config;
-        converter = AvroConverter.of(null);
+        converter = new RecordToAvro(Constants.AZURE_BLOB_NAMESPACE);
     }
 
     @Override
@@ -82,7 +83,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>();
         DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
-        dataFileWriter.create(converter.inferAvroSchema(getSchema()), byteBuffer);
+        dataFileWriter.create(converter.fromRecordSchema(getSchema()), byteBuffer);
         for (Record record : getBatch()) {
             dataFileWriter.append(converter.fromRecord(record));
         }

@@ -150,7 +150,7 @@ public class AvroToRecord {
         if (value == null) {
             return;
         }
-        String logicalType = field.schema().getProp(Constants.AVRO_LOGICAL_TYPE);
+        String logicalType = AvroHelper.getLogicalType(field);
         org.apache.avro.Schema.Type fieldType = AvroHelper.getFieldType(field);
         switch (fieldType) {
         case RECORD: {

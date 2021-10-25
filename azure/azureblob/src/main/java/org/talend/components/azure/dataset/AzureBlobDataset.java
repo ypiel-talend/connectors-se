@@ -15,10 +15,12 @@ package org.talend.components.azure.dataset;
 import java.io.Serializable;
 
 import org.talend.components.azure.common.FileFormat;
-import org.talend.components.azure.common.csv.CSVFormatOptions;
-import org.talend.components.azure.common.excel.ExcelFormatOptions;
+import org.talend.components.azure.migration.AzureStorageDatasetMigration;
+import org.talend.components.common.formats.csv.CSVFormatOptions;
+import org.talend.components.common.formats.excel.ExcelFormatOptions;
 import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -33,6 +35,7 @@ import lombok.Data;
         @GridLayout.Row("fileFormat"), @GridLayout.Row("csvOptions"), @GridLayout.Row("excelOptions") })
 @Data
 @DataSet("AzureDataSet")
+@Version(value = 2, migrationHandler = AzureStorageDatasetMigration.class)
 public class AzureBlobDataset implements Serializable {
 
     @Option
