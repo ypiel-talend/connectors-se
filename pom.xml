@@ -117,6 +117,7 @@
     <jna.version>5.5.0</jna.version>
 
     <jersey.version>2.22.2</jersey.version>
+    <jersey-common.version>2.33</jersey-common.version>
 
     <json-smart.version>2.4.7</json-smart.version>
 
@@ -391,6 +392,11 @@
             <artifactId>jersey-media-jaxb</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-common</artifactId>
+        <version>${jersey-common.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.zookeeper</groupId>
