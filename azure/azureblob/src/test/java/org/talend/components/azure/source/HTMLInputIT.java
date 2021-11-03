@@ -31,6 +31,7 @@ import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import com.microsoft.azure.storage.StorageException;
+import lombok.SneakyThrows;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
@@ -172,5 +173,33 @@ class HTMLInputIT extends BaseIT {
         Assertions
                 .assertTrue(firstRecord.getString("Billing_State_Province").isEmpty(),
                         "Billing_State_Province should be empty");
+    }
+
+    @SneakyThrows
+    @Test
+    void testCustomEncoding() {
+        int expectedNumberOfRecords = 26;
+        String specialSymbolStrings = "テスト";
+
+        blobInputProperties.getDataset().getExcelOptions().setEncoding(Encoding.OTHER);
+        blobInputProperties.getDataset().getExcelOptions().setCustomEncoding("SJIS");
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "excelHTML/report_encodingshif.html",
+                        "report_encodingshif.html");
+
+        String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
+        Job
+                .components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run();
+        List<Record> records = componentsHandler.getCollectedData(Record.class);
+
+        Assertions.assertEquals(expectedNumberOfRecords, records.size());
+        Assertions.assertEquals(specialSymbolStrings, records.get(0).getString("Subject"));
     }
 }

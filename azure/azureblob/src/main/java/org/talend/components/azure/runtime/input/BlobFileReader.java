@@ -15,16 +15,14 @@ package org.talend.components.azure.runtime.input;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
 import java.util.Iterator;
-
-import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.components.azure.common.exception.BlobRuntimeException;
-import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
+import org.talend.components.common.formats.excel.ExcelFormat;
+import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.BlobListingDetails;
@@ -37,6 +35,7 @@ import lombok.Getter;
 
 public abstract class BlobFileReader {
 
+    @Getter(AccessLevel.PROTECTED)
     private final MessageService messageService;
 
     @Getter(AccessLevel.PROTECTED)

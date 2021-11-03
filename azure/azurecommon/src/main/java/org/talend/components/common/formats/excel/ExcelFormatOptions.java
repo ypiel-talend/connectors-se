@@ -13,17 +13,20 @@
 package org.talend.components.common.formats.excel;
 
 import java.io.Serializable;
-
+import java.nio.charset.Charset;
+import java.util.function.Function;
 import org.talend.components.common.formats.Encoding;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.meta.Documentation;
-
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @GridLayout({ @GridLayout.Row("excelFormat"), @GridLayout.Row("sheetName"), @GridLayout.Row("encoding"),
         @GridLayout.Row("customEncoding"), @GridLayout.Row("useHeader"), @GridLayout.Row("header"),
         @GridLayout.Row("useFooter"),
@@ -75,4 +78,21 @@ public class ExcelFormatOptions implements Serializable {
     @Documentation("")
     @Min(0)
     private int footer = 1;
+
+    public String effectiveHTMLFileEncoding(final Function<String, String> errorMsgBuilder) {
+        if (excelFormat != ExcelFormat.HTML) {
+            throw new IllegalStateException("Only HTML format supports encoding configuration"); // should not be here
+        }
+        if (Encoding.OTHER == getEncoding()) {
+            try {
+                Charset.forName(customEncoding);
+                return getCustomEncoding();
+            } catch (Exception e) {
+                log.error("[effectiveFileEncoding] {}", e.getMessage());
+                throw new ComponentException(errorMsgBuilder.apply(getCustomEncoding()));
+            }
+        } else {
+            return getEncoding().getEncodingCharsetValue();
+        }
+    }
 }

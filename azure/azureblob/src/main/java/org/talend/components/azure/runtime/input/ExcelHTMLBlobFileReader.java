@@ -61,7 +61,8 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
             try (InputStream input = getCurrentItem().openInputStream()) {
                 Document document =
-                        Jsoup.parse(input, getConfig().getExcelOptions().getEncoding().getEncodingCharsetValue(), "");
+                        Jsoup.parse(input, getConfig().getExcelOptions()
+                                .effectiveHTMLFileEncoding(getMessageService()::encodingNotSupported), "");
                 Element body = document.body();
                 Elements rows = body.getElementsByTag("tr");
                 rowIterator = rows.iterator();

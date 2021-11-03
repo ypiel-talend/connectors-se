@@ -28,4 +28,6 @@ public interface MessageService {
     String cantStartReadBlobItems(String message);
 
     String containerNotExist();
+
+    String encodingNotSupported(String incorrectEncoding);
 }
