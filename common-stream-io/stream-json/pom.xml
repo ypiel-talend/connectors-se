@@ -18,13 +18,13 @@
   <parent>
     <groupId>org.talend.components</groupId>
     <artifactId>common-stream-io</artifactId>
-    <version>1.27.0-SNAPSHOT</version>
+    <version>1.27.0</version>
   </parent>
 
   <artifactId>stream-json</artifactId>
 
   <name>Connectors SE :: Common Stream IO :: stream-json</name>
-  
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -34,19 +34,17 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  
-
   <dependencies>
     <!-- file line formats -->
     <dependency>
       <groupId>org.talend.components</groupId>
       <artifactId>common</artifactId>
-      <version>1.27.0-SNAPSHOT</version>
+      <version>1.27.0</version>
     </dependency>
     <dependency>
       <groupId>org.talend.components</groupId>
       <artifactId>stream-api</artifactId>
-      <version>1.27.0-SNAPSHOT</version>
+      <version>1.27.0</version>
     </dependency>
     <!-- Testing -->
     <dependency>
