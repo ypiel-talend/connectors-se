@@ -13,7 +13,7 @@
 package org.talend.components.couchbase.source.parsers;
 
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.document.StringDocument;
+import com.couchbase.client.java.codec.RawStringTranscoder;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +41,9 @@ public class StringParser implements DocumentParser {
 
     @Override
     public Record parse(Bucket bucket, String id) {
-        StringDocument doc;
+    	RawStringTranscoder doc;
         try {
-            doc = bucket.get(id, StringDocument.class);
+            doc = bucket.get(id, RawStringTranscoder.class);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw e;

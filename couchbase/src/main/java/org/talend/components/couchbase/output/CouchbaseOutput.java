@@ -116,7 +116,8 @@ public class CouchbaseOutput implements Serializable {
 
     @PreDestroy
     public void release() {
-        service.closeBucket(bucket);
+    	//TODO: Seems no need to close bucket now.
+        // service.closeBucket(bucket);
         service.closeConnection(configuration.getDataSet().getDatastore());
     }
 

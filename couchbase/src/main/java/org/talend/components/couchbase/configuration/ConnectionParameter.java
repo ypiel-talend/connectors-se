@@ -15,6 +15,5 @@ package org.talend.components.couchbase.configuration;
 public enum ConnectionParameter {
     CONNECTION_TIMEOUT,
     QUERY_TIMEOUT,
-    ANALYTICS_TIMEOUT,
-    MAX_REQUEST_LIFETIME
+    ANALYTICS_TIMEOUT
 }
