@@ -40,15 +40,20 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.analytics.AnalyticsQuery;
 import com.couchbase.client.java.analytics.AnalyticsQueryResult;
 import com.couchbase.client.java.analytics.AnalyticsQueryRow;
+import com.couchbase.client.java.analytics.AnalyticsResult;
 import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.document.json.JsonObject;
+
 import com.couchbase.client.java.error.TranscodingException;
+import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.manager.query.QueryIndexManager;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
+import com.couchbase.client.java.query.QueryResult;
 import com.couchbase.client.java.query.Select;
 import com.couchbase.client.java.query.Statement;
 import com.couchbase.client.java.query.consistency.ScanConsistency;
@@ -75,11 +80,13 @@ public class CouchbaseInput implements Serializable {
 
     private Set<String> columnsSet;
 
-    private Iterator<N1qlQueryRow> n1ql_index = null;
-
-    private Iterator<AnalyticsQueryRow> analytics_index = null;
-
+    private Iterator<JsonObject> resultIterator = null;
+    
+    private Cluster cluster;
+    
     private Bucket bucket;
+
+    private Collection collection;
 
     public static final String META_ID_FIELD = "_meta_id_";
 
@@ -93,60 +100,54 @@ public class CouchbaseInput implements Serializable {
 
     @PostConstruct
     public void init() {
-        Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
-        bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
+        cluster = service.openConnection(configuration.getDataSet().getDatastore());
+        bucket = cluster.bucket(configuration.getDataSet().getBucket());
+        collection = service.openCollection(cluster, configuration.getDataSet().getBucket());
         if (configuration.isCreatePrimaryIndex()) {
-            bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+        	cluster.queryIndexes().createPrimaryIndex(bucket.name());
         }
         columnsSet = new HashSet<>();
 
         if (configuration.getSelectAction() == SelectAction.ANALYTICS) {
-            AnalyticsQuery analyticsQuery = AnalyticsQuery.simple(configuration.getQuery());
-            AnalyticsQueryResult queryResult = bucket.query(analyticsQuery);
-            checkForErrors(queryResult.errors());
-            analytics_index = queryResult.rows();
+        	AnalyticsResult analyticsResult = null;
+            try {
+				analyticsResult = cluster.analyticsQuery(configuration.getQuery());
+			} catch (Exception e) {
+				LOG.error(i18n.queryResultError(e.getMessage()));
+				throw new ComponentException(e.toString());
+			}
+            resultIterator = analyticsResult.rowsAsObject().iterator();
         } else {
-            N1qlQuery n1qlQuery;
+        	// TODO: DSL API (Statement, AsPath classes etc. was deprecated, cannot use it anymore!)
+        	// In most cases, a simple string statement is the best replacement.
+
+            QueryResult  queryResult;
             switch (configuration.getSelectAction()) {
             case ALL:
-                Statement statement;
-                AsPath asPath = Select
-                        .select("meta().id as " + Expression.i(META_ID_FIELD), "*")
-                        .from(Expression.i(bucket.name()));
+                StringBuilder statementBuilder = new StringBuilder();
+                statementBuilder.append("SELECT * FROM `").append(bucket.name()).append("`");
                 if (!configuration.getLimit().isEmpty()) {
-                    statement = asPath.limit(Integer.parseInt(configuration.getLimit().trim()));
-                } else {
-                    statement = asPath;
+                	statementBuilder.append(" LIMIT ").append(configuration.getLimit().trim());
                 }
-                n1qlQuery = N1qlQuery.simple(statement);
+                queryResult = cluster.query(statementBuilder.toString());
                 break;
             case N1QL:
                 /*
                  * should contain "meta().id as `_meta_id_`" field for non-json (binary) documents
                  */
-                n1qlQuery = N1qlQuery.simple(configuration.getQuery());
+                queryResult = cluster.query(configuration.getQuery());
                 break;
             case ONE:
                 Statement pathToOneDocument = Select
                         .select("meta().id as " + Expression.i(META_ID_FIELD), "*")
                         .from(Expression.i(bucket.name()))
                         .useKeysValues(configuration.getDocumentId());
-                n1qlQuery = N1qlQuery.simple(pathToOneDocument);
+                queryResult = N1qlQuery.simple(pathToOneDocument);
                 break;
             default:
                 throw new ComponentException("Select action: '" + configuration.getSelectAction() + "' is unsupported");
             }
-            n1qlQuery.params().consistency(ScanConsistency.REQUEST_PLUS);
-            N1qlQueryResult n1qlQueryRows = bucket.query(n1qlQuery);
-            checkForErrors(n1qlQueryRows.errors());
-            n1ql_index = n1qlQueryRows.rows();
-        }
-    }
-
-    private void checkForErrors(List<JsonObject> errors) {
-        if (!errors.isEmpty()) {
-            LOG.error(i18n.queryResultError(errors.toString()));
-            throw new ComponentException(errors.toString());
+            resultIterator = queryResult.rowsAsObject().iterator();
         }
     }
 

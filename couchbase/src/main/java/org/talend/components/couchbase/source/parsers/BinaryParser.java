@@ -19,8 +19,8 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.couchbase.client.deps.io.netty.util.ReferenceCountUtil;
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.document.BinaryDocument;
+import com.couchbase.client.java.Collection;
+import com.couchbase.client.java.codec.RawBinaryTranscoder;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,10 +43,10 @@ public class BinaryParser implements DocumentParser {
     }
 
     @Override
-    public Record parse(Bucket bucket, String id) {
-        BinaryDocument doc;
+    public Record parse(Collection collection, String id) {
+    	RawBinaryTranscoder doc;
         try {
-            doc = bucket.get(id, BinaryDocument.class);
+            doc = bucket.get(id, RawBinaryTranscoder.class);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw e;

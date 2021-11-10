@@ -59,6 +59,7 @@ import com.couchbase.client.core.env.TimeoutConfig;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.ClusterOptions;
+import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.env.ClusterEnvironment;
 import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.json.JsonObject;
@@ -196,15 +197,17 @@ public class CouchbaseService implements Serializable {
         return new SuggestionValues(false, emptyList());
     }
 
-    public Bucket openBucket(Cluster cluster, String bucketName) {
+    public Collection openCollection(Cluster cluster, String bucketName) {
         Bucket bucket;
+        Collection collection;
         try {
             bucket = cluster.bucket(bucketName);
+            collection = bucket.defaultCollection();
         } catch (Exception e) {
             LOG.error(i18n.cannotOpenBucket());
             throw new ComponentException(e);
         }
-        return bucket;
+        return collection;
     }
 
     // TODO: seems no need to close bucket now; need to verify.

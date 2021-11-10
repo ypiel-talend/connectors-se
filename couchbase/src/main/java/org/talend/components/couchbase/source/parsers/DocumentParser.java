@@ -12,10 +12,11 @@
  */
 package org.talend.components.couchbase.source.parsers;
 
-import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Collection;
+
 import org.talend.sdk.component.api.record.Record;
 
 public interface DocumentParser {
 
-    Record parse(Bucket bucket, String id);
+    Record parse(Collection collection, String id);
 }
