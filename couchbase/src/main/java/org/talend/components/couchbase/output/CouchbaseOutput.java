@@ -34,18 +34,22 @@ import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
-import com.couchbase.client.deps.io.netty.buffer.ByteBuf;
-import com.couchbase.client.deps.io.netty.buffer.Unpooled;
+import com.couchbase.client.core.deps.io.netty.buffer.ByteBuf;
+import com.couchbase.client.core.deps.io.netty.buffer.Unpooled;
+import com.couchbase.client.core.deps.io.netty.handler.codec.base64.Base64;
+import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.document.BinaryDocument;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.StringDocument;
-import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.N1qlQuery;
-import com.couchbase.client.java.query.N1qlQueryResult;
-import com.couchbase.client.java.subdoc.MutateInBuilder;
+import com.couchbase.client.java.Collection;
+import com.couchbase.client.java.codec.JsonTranscoder;
+import com.couchbase.client.java.codec.RawBinaryTranscoder;
+import com.couchbase.client.java.codec.RawJsonTranscoder;
+import com.couchbase.client.java.codec.RawStringTranscoder;
+import com.couchbase.client.java.json.JsonArray;
+import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.kv.UpsertOptions;
+import com.couchbase.client.java.query.QueryOptions;
+import com.couchbase.client.java.query.QueryResult;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,7 +60,11 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("This component writes data to Couchbase.")
 public class CouchbaseOutput implements Serializable {
 
+    private Cluster cluster;
+
     private Bucket bucket;
+
+    private Collection collection;
 
     private String idFieldName;
 
@@ -74,8 +82,8 @@ public class CouchbaseOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        Cluster cluster = service.openConnection(configuration.getDataSet().getDatastore());
-        bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
+        cluster = service.openConnection(configuration.getDataSet().getDatastore());
+        // bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
         idFieldName = configuration.getIdFieldName();
     }
 
@@ -88,27 +96,28 @@ public class CouchbaseOutput implements Serializable {
                     .collect(
                             Collectors.toMap(N1QLQueryParameter::getColumn, N1QLQueryParameter::getQueryParameterName));
             JsonObject namedParams = buildJsonObject(record, mappings);
-            final N1qlQueryResult queryResult =
-                    bucket.query(N1qlQuery.parameterized(configuration.getQuery(), namedParams));
-            if (!queryResult.finalSuccess()) {
-                final String errors = queryResult
-                        .errors()
-                        .stream()
-                        .map(error -> String.format("[%d] %s", error.getInt("code"), error.getString("msg")))
-                        .collect(Collectors.joining("\n"));
-                log.error("N1QL failed: {}.", errors);
-                throw new ComponentException(errors);
+            QueryResult queryResult;
+            try {
+                queryResult =
+                        cluster.query(configuration.getQuery(), QueryOptions.queryOptions().parameters(namedParams));
+            } catch (CouchbaseException ex) {
+                log.error("N1QL failed: {}.", ex.getMessage());
+                throw new ComponentException(ex.getMessage());
             }
         } else {
             if (configuration.isPartialUpdate()) {
-                updatePartiallyDocument(record);
+                // do nothing for now
+                // updatePartiallyDocument(record);
             } else {
                 if (configuration.getDataSet().getDocumentType() == DocumentType.BINARY) {
-                    bucket.upsert(toBinaryDocument(idFieldName, record));
+                    collection.upsert(idFieldName, record,
+                            UpsertOptions.upsertOptions().transcoder(RawBinaryTranscoder.INSTANCE));
                 } else if (configuration.getDataSet().getDocumentType() == DocumentType.STRING) {
-                    bucket.upsert(toStringDocument(idFieldName, record));
+                    collection.upsert(idFieldName, record,
+                            UpsertOptions.upsertOptions().transcoder(RawStringTranscoder.INSTANCE));
                 } else {
-                    bucket.upsert(toJsonDocument(idFieldName, record));
+                    collection.upsert(idFieldName, buildJsonObjectWithoutId(record),
+                            UpsertOptions.upsertOptions().transcoder(RawJsonTranscoder.INSTANCE));
                 }
             }
         }
@@ -116,32 +125,36 @@ public class CouchbaseOutput implements Serializable {
 
     @PreDestroy
     public void release() {
-    	//TODO: Seems no need to close bucket now.
+        // TODO: Seems no need to close bucket now.
         // service.closeBucket(bucket);
         service.closeConnection(configuration.getDataSet().getDatastore());
     }
 
-    private BinaryDocument toBinaryDocument(String idFieldName, Record record) {
-        ByteBuf toWrite = Unpooled.copiedBuffer(record.getBytes(CONTENT_FIELD_NAME));
-        return BinaryDocument.create(record.getString(idFieldName), toWrite);
-    }
+    /*
+     * private RawBinaryTranscoder toBinaryDocument(String idFieldName, Record record) {
+     * ByteBuf toWrite = Unpooled.copiedBuffer(record.getBytes(CONTENT_FIELD_NAME));
+     * return RawBinaryTranscoder.create(record.getString(idFieldName), toWrite);
+     * }
+     * 
+     * private RawStringTranscoder toStringDocument(String idFieldName, Record record) {
+     * String content = record.getString(CONTENT_FIELD_NAME);
+     * return RawStringTranscoder.create(record.getString(idFieldName), content);
+     * }
+     */
 
-    private StringDocument toStringDocument(String idFieldName, Record record) {
-        String content = record.getString(CONTENT_FIELD_NAME);
-        return StringDocument.create(record.getString(idFieldName), content);
-    }
-
-    private void updatePartiallyDocument(Record record) {
-        final MutateInBuilder[] mutateBuilder = { bucket.mutateIn(record.getString(idFieldName)) };
-        record
-                .getSchema()
-                .getEntries()
-                .stream()
-                .filter(e -> !idFieldName.equals(e.getName()))
-                .forEach(e -> mutateBuilder[0] =
-                        mutateBuilder[0].upsert(e.getName(), jsonValueFromRecordValue(e, record)));
-        mutateBuilder[0].execute();
-    }
+    /*
+     * private void updatePartiallyDocument(Record record) {
+     * final MutateInBuilder[] mutateBuilder = { collection.mutateIn(record.getString(idFieldName)) };
+     * record
+     * .getSchema()
+     * .getEntries()
+     * .stream()
+     * .filter(e -> !idFieldName.equals(e.getName()))
+     * .forEach(e -> mutateBuilder[0] =
+     * mutateBuilder[0].upsert(e.getName(), jsonValueFromRecordValue(e, record)));
+     * mutateBuilder[0].execute();
+     * }
+     */
 
     private Object jsonValueFromRecordValue(Schema.Entry entry, Record record) {
         String entryName = entry.getName();
@@ -155,7 +168,7 @@ public class CouchbaseOutput implements Serializable {
         case LONG:
             return record.getLong(entryName);
         case BYTES:
-            return com.couchbase.client.core.utils.Base64.encode(record.getBytes(entryName));
+            return Base64.encode(Unpooled.copiedBuffer(record.getBytes(entryName)));
         case FLOAT:
             return Double.parseDouble(String.valueOf(record.getFloat(entryName)));
         case DOUBLE:
@@ -195,9 +208,11 @@ public class CouchbaseOutput implements Serializable {
         return buildJsonObject(record, Collections.emptyMap()).removeKey(idFieldName);
     }
 
-    public JsonDocument toJsonDocument(String idFieldName, Record record) {
-        return JsonDocument.create(record.getString(idFieldName), buildJsonObjectWithoutId(record));
-    }
+    /*
+     * public JsonTranscoder toJsonDocument(String idFieldName, Record record) {
+     * return JsonTranscoder.create(record.getString(idFieldName), buildJsonObjectWithoutId(record));
+     * }
+     */
 
     private Object createJsonFromString(String str) {
         Object value = null;

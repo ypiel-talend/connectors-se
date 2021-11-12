@@ -36,6 +36,7 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
+import com.couchbase.client.core.diagnostics.EndpointPingReport;
 import com.couchbase.client.core.message.internal.PingReport;
 import com.couchbase.client.core.message.internal.PingServiceHealth;
 import com.couchbase.client.core.service.ServiceType;
@@ -47,7 +48,7 @@ import com.couchbase.client.java.analytics.AnalyticsQueryResult;
 import com.couchbase.client.java.document.BinaryDocument;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.StringDocument;
-import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.json.JsonObject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,7 +56,7 @@ import lombok.extern.slf4j.Slf4j;
 @WithComponents("org.talend.components.couchbase")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of CouchbaseInput component")
-public class CouchbaseInputTest extends CouchbaseUtilTest {
+class CouchbaseInputTest extends CouchbaseUtilTest {
 
     private void executeJob(CouchbaseInputConfiguration configuration) {
         final String inputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
@@ -200,7 +201,7 @@ public class CouchbaseInputTest extends CouchbaseUtilTest {
         // We need to wait until ping state is OK for Analytics Service. We'll limit it with 10 seconds. Usually
         // it should take less time.
         long waitingStartTime = System.currentTimeMillis();
-        PingReport pingReport = bucket.ping(Collections.singletonList(ServiceType.ANALYTICS));
+        EndpointPingReport pingReport = bucket.ping(Collections.singletonList(ServiceType.ANALYTICS));
         while (pingReport.services().get(0).state() != PingServiceHealth.PingState.OK) {
             try {
                 Thread.sleep(250);

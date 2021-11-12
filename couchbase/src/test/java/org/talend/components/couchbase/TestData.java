@@ -18,11 +18,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.couchbase.client.java.document.json.JsonObject;
-
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
+import com.couchbase.client.java.json.JsonObject;
 
 import lombok.Data;
 

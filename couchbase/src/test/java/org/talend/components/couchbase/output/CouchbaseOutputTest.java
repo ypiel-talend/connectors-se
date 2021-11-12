@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 @WithComponents("org.talend.components.couchbase")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of CouchbaseOutput component")
-public class CouchbaseOutputTest extends CouchbaseUtilTest {
+class CouchbaseOutputTest extends CouchbaseUtilTest {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -62,7 +62,7 @@ public class CouchbaseOutputTest extends CouchbaseUtilTest {
     private RecordBuilderFactory recordBuilderFactory;
 
     private List<JsonDocument> retrieveDataFromDatabase(String prefix, int count) {
-        Bucket bucket = couchbaseCluster.openBucket(BUCKET_NAME, BUCKET_PASSWORD);
+        Bucket bucket = cluster.bucket(BUCKET_NAME);
         List<JsonDocument> resultList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             JsonDocument doc1 = bucket.get(generateDocId(prefix, i));

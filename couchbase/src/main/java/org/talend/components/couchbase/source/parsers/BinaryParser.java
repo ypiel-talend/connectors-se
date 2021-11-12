@@ -14,13 +14,17 @@ package org.talend.components.couchbase.source.parsers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.couchbase.client.deps.io.netty.util.ReferenceCountUtil;
+import com.couchbase.client.core.deps.io.netty.handler.timeout.TimeoutException;
+import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.codec.RawBinaryTranscoder;
+import com.couchbase.client.java.kv.GetOptions;
+import com.couchbase.client.java.kv.GetResult;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,16 +48,14 @@ public class BinaryParser implements DocumentParser {
 
     @Override
     public Record parse(Collection collection, String id) {
-    	RawBinaryTranscoder doc;
+        GetResult result;
         try {
-            doc = bucket.get(id, RawBinaryTranscoder.class);
-        } catch (Exception e) {
+            result = collection.get(id, GetOptions.getOptions().transcoder(RawBinaryTranscoder.INSTANCE));
+        } catch (TimeoutException | CouchbaseException e) {
             LOG.error(e.getMessage());
-            throw e;
+            throw new ComponentException(e.getMessage());
         }
-        byte[] data = new byte[doc.content().readableBytes()];
-        doc.content().readBytes(data);
-        ReferenceCountUtil.release(doc.content());
+        byte[] data = result.contentAs(byte[].class);
 
         final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schemaBinaryDocument);
         recordBuilder.withString("id", id);

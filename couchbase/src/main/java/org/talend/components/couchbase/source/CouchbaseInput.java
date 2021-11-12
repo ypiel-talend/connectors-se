@@ -41,24 +41,10 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.Collection;
-import com.couchbase.client.java.analytics.AnalyticsQuery;
-import com.couchbase.client.java.analytics.AnalyticsQueryResult;
-import com.couchbase.client.java.analytics.AnalyticsQueryRow;
 import com.couchbase.client.java.analytics.AnalyticsResult;
-import com.couchbase.client.java.document.json.JsonArray;
-
-import com.couchbase.client.java.error.TranscodingException;
+import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.json.JsonObject;
-import com.couchbase.client.java.manager.query.QueryIndexManager;
-import com.couchbase.client.java.query.N1qlQuery;
-import com.couchbase.client.java.query.N1qlQueryResult;
-import com.couchbase.client.java.query.N1qlQueryRow;
 import com.couchbase.client.java.query.QueryResult;
-import com.couchbase.client.java.query.Select;
-import com.couchbase.client.java.query.Statement;
-import com.couchbase.client.java.query.consistency.ScanConsistency;
-import com.couchbase.client.java.query.dsl.Expression;
-import com.couchbase.client.java.query.dsl.path.AsPath;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -81,9 +67,9 @@ public class CouchbaseInput implements Serializable {
     private Set<String> columnsSet;
 
     private Iterator<JsonObject> resultIterator = null;
-    
+
     private Cluster cluster;
-    
+
     private Bucket bucket;
 
     private Collection collection;
@@ -104,30 +90,31 @@ public class CouchbaseInput implements Serializable {
         bucket = cluster.bucket(configuration.getDataSet().getBucket());
         collection = service.openCollection(cluster, configuration.getDataSet().getBucket());
         if (configuration.isCreatePrimaryIndex()) {
-        	cluster.queryIndexes().createPrimaryIndex(bucket.name());
+            cluster.queryIndexes().createPrimaryIndex(bucket.name());
         }
         columnsSet = new HashSet<>();
 
         if (configuration.getSelectAction() == SelectAction.ANALYTICS) {
-        	AnalyticsResult analyticsResult = null;
+            AnalyticsResult analyticsResult = null;
             try {
-				analyticsResult = cluster.analyticsQuery(configuration.getQuery());
-			} catch (Exception e) {
-				LOG.error(i18n.queryResultError(e.getMessage()));
-				throw new ComponentException(e.toString());
-			}
+                analyticsResult = cluster.analyticsQuery(configuration.getQuery());
+            } catch (Exception e) {
+                LOG.error(i18n.queryResultError(e.getMessage()));
+                throw new ComponentException(e.toString());
+            }
             resultIterator = analyticsResult.rowsAsObject().iterator();
         } else {
-        	// TODO: DSL API (Statement, AsPath classes etc. was deprecated, cannot use it anymore!)
-        	// In most cases, a simple string statement is the best replacement.
+            // TODO: DSL API (Statement, AsPath classes etc. was deprecated, cannot use it anymore!)
+            // In most cases, a simple string statement is the best replacement.
 
-            QueryResult  queryResult;
+            QueryResult queryResult;
+            StringBuilder statementBuilder;
             switch (configuration.getSelectAction()) {
             case ALL:
-                StringBuilder statementBuilder = new StringBuilder();
-                statementBuilder.append("SELECT * FROM `").append(bucket.name()).append("`");
+                statementBuilder = new StringBuilder();
+                statementBuilder.append("SELECT meta().id as `_meta_id_`, * FROM `").append(bucket.name()).append("`");
                 if (!configuration.getLimit().isEmpty()) {
-                	statementBuilder.append(" LIMIT ").append(configuration.getLimit().trim());
+                    statementBuilder.append(" LIMIT ").append(configuration.getLimit().trim());
                 }
                 queryResult = cluster.query(statementBuilder.toString());
                 break;
@@ -138,11 +125,10 @@ public class CouchbaseInput implements Serializable {
                 queryResult = cluster.query(configuration.getQuery());
                 break;
             case ONE:
-                Statement pathToOneDocument = Select
-                        .select("meta().id as " + Expression.i(META_ID_FIELD), "*")
-                        .from(Expression.i(bucket.name()))
-                        .useKeysValues(configuration.getDocumentId());
-                queryResult = N1qlQuery.simple(pathToOneDocument);
+                statementBuilder = new StringBuilder();
+                statementBuilder.append("SELECT meta().id as `_meta_id_`, * FROM `").append(bucket.name()).append("`");
+                statementBuilder.append(" USE KEYS \"").append(configuration.getDocumentId()).append("\"");
+                queryResult = cluster.query(statementBuilder.toString());
                 break;
             default:
                 throw new ComponentException("Select action: '" + configuration.getSelectAction() + "' is unsupported");
@@ -153,17 +139,10 @@ public class CouchbaseInput implements Serializable {
 
     @Producer
     public Record next() {
-        if (analytics_index != null) {
-            while (analytics_index.hasNext()) {
-                JsonObject jsonObject = analytics_index.next().value();
-                if (configuration.getDataSet().getDocumentType() == DocumentType.JSON) {
-                    return createJsonRecord(jsonObject);
-                }
-            }
-        } else {
+        if (resultIterator != null) {
             // loop to find first document with appropriate type (for non-json documents)
-            while (n1ql_index.hasNext()) {
-                JsonObject jsonObject = n1ql_index.next().value();
+            while (resultIterator.hasNext()) {
+                JsonObject jsonObject = resultIterator.next();
 
                 if (configuration.getDataSet().getDocumentType() == DocumentType.JSON) {
                     try {
@@ -172,19 +151,15 @@ public class CouchbaseInput implements Serializable {
                         // document is a non-json, try to get next document
                     }
                 } else {
-                    try {
-                        String id = jsonObject.getString(META_ID_FIELD);
-                        if (id == null) {
-                            LOG
-                                    .error("Cannot find '_meta_id_' field. The query should contain 'meta().id as _meta_id_' field");
-                            return null;
-                        }
-                        DocumentParser documentParser = ParserFactory
-                                .createDocumentParser(configuration.getDataSet().getDocumentType(), builderFactory);
-                        return documentParser.parse(bucket, id);
-                    } catch (TranscodingException e) {
-                        // document is not a non-json, try to get next document
+                    String id = jsonObject.getString(META_ID_FIELD);
+                    if (id == null) {
+                        LOG
+                                .error("Cannot find '_meta_id_' field. The query should contain 'meta().id as _meta_id_' field");
+                        return null;
                     }
+                    DocumentParser documentParser = ParserFactory
+                            .createDocumentParser(configuration.getDataSet().getDocumentType(), builderFactory);
+                    return documentParser.parse(collection, id);
                 }
             }
         }
@@ -222,7 +197,7 @@ public class CouchbaseInput implements Serializable {
 
     @PreDestroy
     public void release() {
-        service.closeBucket(bucket);
+        // service.closeBucket(bucket);
         service.closeConnection(configuration.getDataSet().getDatastore());
     }
 

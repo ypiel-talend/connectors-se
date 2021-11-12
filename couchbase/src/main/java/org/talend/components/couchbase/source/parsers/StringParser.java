@@ -12,12 +12,16 @@
  */
 package org.talend.components.couchbase.source.parsers;
 
-import com.couchbase.client.java.Bucket;
+import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.codec.RawStringTranscoder;
+import com.couchbase.client.java.kv.GetOptions;
+import com.couchbase.client.java.kv.GetResult;
+
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -42,14 +46,14 @@ public class StringParser implements DocumentParser {
 
     @Override
     public Record parse(Collection collection, String id) {
-    	RawStringTranscoder doc;
+        GetResult result;
         try {
-            doc = collection.get(id, RawStringTranscoder.class);
-        } catch (Exception e) {
+            result = collection.get(id, GetOptions.getOptions().transcoder(RawStringTranscoder.INSTANCE));
+        } catch (CouchbaseException e) {
             LOG.error(e.getMessage());
-            throw e;
+            throw new ComponentException(e.getMessage());
         }
-        String data = doc.content();
+        String data = result.contentAs(String.class);
 
         final Record.Builder recordBuilder = builderFactory.newRecordBuilder(schemaStringDocument);
         recordBuilder.withString("id", id);

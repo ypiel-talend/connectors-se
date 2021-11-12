@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @WithComponents("org.talend.components.couchbase")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of CouchbaseService class")
-public class CouchbaseServiceTest extends CouchbaseUtilTest {
+class CouchbaseServiceTest extends CouchbaseUtilTest {
 
     @Service
     private CouchbaseService couchbaseService;
@@ -56,7 +56,7 @@ public class CouchbaseServiceTest extends CouchbaseUtilTest {
     @DisplayName("Two bootstrap nodes without spaces")
     void resolveAddressesTest() {
         String inputUrl = "192.168.0.1,192.168.0.2";
-        String[] resultArrayWithUrls = couchbaseService.resolveAddresses(inputUrl);
+        String[] resultArrayWithUrls = couchbaseService.resolveAddresses(inputUrl).split(",");
         assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
         assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
     }
@@ -65,7 +65,7 @@ public class CouchbaseServiceTest extends CouchbaseUtilTest {
     @DisplayName("Two bootstrap nodes with extra spaces")
     void resolveAddressesWithSpacesTest() {
         String inputUrl = " 192.168.0.1, 192.168.0.2";
-        String[] resultArrayWithUrls = couchbaseService.resolveAddresses(inputUrl);
+        String[] resultArrayWithUrls = couchbaseService.resolveAddresses(inputUrl).split(",");
         assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
         assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
     }

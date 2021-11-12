@@ -83,7 +83,7 @@ public class CouchbaseService implements Serializable {
     private RecordBuilderFactory builderFactory;
 
     public String resolveAddresses(String nodes) {
-    	String formattedNodes = nodes.replace(" ", "");
+        String formattedNodes = nodes.replace(" ", "");
         String[] addresses = formattedNodes.split(",");
         for (int i = 1; i <= addresses.length; i++) {
             LOG.info(i18n.bootstrapNodes(i, addresses[i]));
@@ -107,15 +107,18 @@ public class CouchbaseService implements Serializable {
                                     parseValue(conf.getParameterValue())));
                 }
                 ClusterEnvironment environment = envBuilder.build();
-                Cluster cluster = Cluster.connect(urls, ClusterOptions.clusterOptions(username, password).environment(environment));
-               
+                Cluster cluster = Cluster.connect(urls,
+                        ClusterOptions.clusterOptions(username, password).environment(environment));
+
                 return new ClusterHolder(environment, cluster);
             });
             holder.use();
-            /* TODO: skip for now, as no equivalent in SDK v3
-            String clusterName = cluster.clusterManager().info().raw().get("name").toString();
-            LOG.debug(i18n.connectedToCluster(clusterName)); */
-            return  holder.getCluster();
+            /*
+             * TODO: skip for now, as no equivalent in SDK v3
+             * String clusterName = cluster.clusterManager().info().raw().get("name").toString();
+             * LOG.debug(i18n.connectedToCluster(clusterName));
+             */
+            return holder.getCluster();
         } catch (Exception e) {
             LOG.error(i18n.connectionKO());
             throw new ComponentException(e);
@@ -127,10 +130,10 @@ public class CouchbaseService implements Serializable {
         if (parameterName == ConnectionParameter.CONNECTION_TIMEOUT) {
             envBuilder.timeoutConfig(TimeoutConfig.connectTimeout(Duration.ofMillis(value)));
         } else if (parameterName == ConnectionParameter.QUERY_TIMEOUT) {
-        	envBuilder.timeoutConfig(TimeoutConfig.queryTimeout(Duration.ofMillis(value)));
+            envBuilder.timeoutConfig(TimeoutConfig.queryTimeout(Duration.ofMillis(value)));
         } else { // Analytics timeout
-        	envBuilder.timeoutConfig(TimeoutConfig.analyticsTimeout(Duration.ofMillis(value)));
-        } 
+            envBuilder.timeoutConfig(TimeoutConfig.analyticsTimeout(Duration.ofMillis(value)));
+        }
     }
 
     private long parseValue(String value) {
@@ -149,10 +152,12 @@ public class CouchbaseService implements Serializable {
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK");
         } catch (Exception exception) {
             String message = "";
-            /* TODO: skip for now, as no equivalent in SDK v3
-            if (exception.getCause() instanceof InvalidPasswordException) {
-                message = i18n.invalidPassword();
-            } else */ if (exception.getCause() instanceof RuntimeException
+            /*
+             * TODO: skip for now, as no equivalent in SDK v3
+             * if (exception.getCause() instanceof InvalidPasswordException) {
+             * message = i18n.invalidPassword();
+             * } else
+             */ if (exception.getCause() instanceof RuntimeException
                     && exception.getCause().getCause() instanceof TimeoutException) {
                 message = i18n.destinationUnreachable();
             } else {
@@ -211,15 +216,17 @@ public class CouchbaseService implements Serializable {
     }
 
     // TODO: seems no need to close bucket now; need to verify.
-    /*public void closeBucket(Bucket bucket) {
-        if (bucket != null) {
-            if (Boolean.TRUE.equals(bucket.close())) {
-                LOG.debug(i18n.bucketWasClosed(bucket.name()));
-            } else {
-                LOG.debug(i18n.cannotCloseBucket(bucket.name()));
-            }
-        }
-    } */
+    /*
+     * public void closeBucket(Bucket bucket) {
+     * if (bucket != null) {
+     * if (Boolean.TRUE.equals(bucket.close())) {
+     * LOG.debug(i18n.bucketWasClosed(bucket.name()));
+     * } else {
+     * LOG.debug(i18n.cannotCloseBucket(bucket.name()));
+     * }
+     * }
+     * }
+     */
 
     public void closeConnection(CouchbaseDataStore ds) {
         ClusterHolder holder = clustersPool.get(ds);
@@ -234,18 +241,18 @@ public class CouchbaseService implements Serializable {
         Cluster cluster = holder.getCluster();
         ClusterEnvironment environment = holder.getEnv();
         if (cluster != null) {
-            try{
-            	cluster.disconnect();
-            	log.debug(i18n.clusterWasClosed());
-            }catch (ComponentException e) {
+            try {
+                cluster.disconnect();
+                log.debug(i18n.clusterWasClosed());
+            } catch (ComponentException e) {
                 log.debug(i18n.cannotCloseCluster());
             }
         }
         if (environment != null) {
-        	try{
-        		environment.shutdown();
-        		log.debug(i18n.couchbaseEnvWasClosed());
-        	}catch (ComponentException e) {
+            try {
+                environment.shutdown();
+                log.debug(i18n.couchbaseEnvWasClosed());
+            } catch (ComponentException e) {
                 log.debug(i18n.cannotCloseCouchbaseEnv());
             }
         }

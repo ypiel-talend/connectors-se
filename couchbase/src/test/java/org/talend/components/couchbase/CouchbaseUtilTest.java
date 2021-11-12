@@ -12,21 +12,22 @@
  */
 package org.talend.components.couchbase;
 
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
+import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
+import org.testcontainers.couchbase.CouchbaseService;
 
-import com.couchbase.client.java.CouchbaseCluster;
-import com.couchbase.client.java.bucket.BucketType;
-import com.couchbase.client.java.cluster.DefaultBucketSettings;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.ClusterOptions;
 
 public abstract class CouchbaseUtilTest {
 
@@ -50,7 +51,7 @@ public abstract class CouchbaseUtilTest {
 
     private static final CouchbaseContainer COUCHBASE_CONTAINER;
 
-    protected final CouchbaseCluster couchbaseCluster;
+    protected final Cluster couchbaseCluster;
 
     protected final CouchbaseDataStore couchbaseDataStore;
 
@@ -61,7 +62,12 @@ public abstract class CouchbaseUtilTest {
     protected RecordBuilderFactory recordBuilderFactory;
 
     static {
-        COUCHBASE_CONTAINER = new AnalyticsCouchbaseContainer(
+    	BucketDefinition bucketDefinition = new BucketDefinition(BUCKET_NAME);
+    	COUCHBASE_CONTAINER = new AnalyticsCouchbaseContainer(
+                System.getenv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX") + "couchbase/server:5.5.1")
+    			.withBucket(bucketDefinition)
+    			.withCredentials(BUCKET_NAME, BUCKET_PASSWORD);
+        /*COUCHBASE_CONTAINER = new AnalyticsCouchbaseContainer(
                 System.getenv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX") + "couchbase/server:5.5.1")
                         .withClusterAdmin(CLUSTER_USERNAME, CLUSTER_PASSWORD)
                         .withNewBucket(DefaultBucketSettings.builder()
@@ -70,9 +76,10 @@ public abstract class CouchbaseUtilTest {
                                 .password(BUCKET_PASSWORD)
                                 .quota(BUCKET_QUOTA)
                                 .type(BucketType.COUCHBASE)
-                                .build());
+                                .build());*/
         COUCHBASE_CONTAINER.setPortBindings(ports);
         COUCHBASE_CONTAINER.start();
+        
     }
 
     public CouchbaseUtilTest() {
@@ -81,7 +88,11 @@ public abstract class CouchbaseUtilTest {
         couchbaseDataStore.setUsername(CLUSTER_USERNAME);
         couchbaseDataStore.setPassword(CLUSTER_PASSWORD);
 
-        couchbaseCluster = COUCHBASE_CONTAINER.getCouchbaseCluster();
+        couchbaseCluster = Cluster.connect(
+        		COUCHBASE_CONTAINER.getConnectionString(),
+        		ClusterOptions.clusterOptions(COUCHBASE_CONTAINER.getUsername(), COUCHBASE_CONTAINER.getPassword())
+        	);
+        		
     }
 
     protected String generateDocId(String prefix, int number) {
@@ -93,12 +104,14 @@ public abstract class CouchbaseUtilTest {
         public AnalyticsCouchbaseContainer(String name) {
             super(name);
         }
-
-        public void callCouchbaseRestAPI(String url, String payload) throws IOException {
-            if (url.equals("/node/controller/setupServices")) {
-                payload += URLEncoder.encode("cbas,", "UTF-8");
-            }
-            super.callCouchbaseRestAPI(url, payload);
-        }
+        
+        public Set<CouchbaseService> enabledServices = EnumSet.of(
+                CouchbaseService.KV,
+                CouchbaseService.QUERY,
+                CouchbaseService.SEARCH,
+                CouchbaseService.INDEX,
+                CouchbaseService.ANALYTICS
+            );
+        
     }
 }
