@@ -17,13 +17,11 @@
   </properties>
 
   <dependencies>
-    <!--
     <dependency>
       <groupId>org.talend.components</groupId>
       <artifactId>mongodb-locales</artifactId>
       <version>${locales.version}</version>
     </dependency>
-    -->
 
     <dependency>
       <groupId>org.mongodb</groupId>
