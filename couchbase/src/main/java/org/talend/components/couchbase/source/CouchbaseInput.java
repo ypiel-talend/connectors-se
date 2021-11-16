@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +37,7 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.Collection;
@@ -66,7 +66,7 @@ public class CouchbaseInput implements Serializable {
 
     private Set<String> columnsSet;
 
-    private Iterator<JsonObject> resultIterator = null;
+    private List<JsonObject> queryResults = null;
 
     private Cluster cluster;
 
@@ -98,16 +98,16 @@ public class CouchbaseInput implements Serializable {
             AnalyticsResult analyticsResult = null;
             try {
                 analyticsResult = cluster.analyticsQuery(configuration.getQuery());
-            } catch (Exception e) {
+            } catch (CouchbaseException e) {
                 LOG.error(i18n.queryResultError(e.getMessage()));
                 throw new ComponentException(e.toString());
             }
-            resultIterator = analyticsResult.rowsAsObject().iterator();
+            queryResults = analyticsResult.rowsAsObject();
         } else {
             // TODO: DSL API (Statement, AsPath classes etc. was deprecated, cannot use it anymore!)
             // In most cases, a simple string statement is the best replacement.
 
-            QueryResult queryResult;
+            QueryResult N1QLResult;
             StringBuilder statementBuilder;
             switch (configuration.getSelectAction()) {
             case ALL:
@@ -116,51 +116,46 @@ public class CouchbaseInput implements Serializable {
                 if (!configuration.getLimit().isEmpty()) {
                     statementBuilder.append(" LIMIT ").append(configuration.getLimit().trim());
                 }
-                queryResult = cluster.query(statementBuilder.toString());
+                N1QLResult = cluster.query(statementBuilder.toString());
                 break;
             case N1QL:
                 /*
                  * should contain "meta().id as `_meta_id_`" field for non-json (binary) documents
                  */
-                queryResult = cluster.query(configuration.getQuery());
+                N1QLResult = cluster.query(configuration.getQuery());
                 break;
             case ONE:
                 statementBuilder = new StringBuilder();
                 statementBuilder.append("SELECT meta().id as `_meta_id_`, * FROM `").append(bucket.name()).append("`");
                 statementBuilder.append(" USE KEYS \"").append(configuration.getDocumentId()).append("\"");
-                queryResult = cluster.query(statementBuilder.toString());
+                N1QLResult = cluster.query(statementBuilder.toString());
                 break;
             default:
                 throw new ComponentException("Select action: '" + configuration.getSelectAction() + "' is unsupported");
             }
-            resultIterator = queryResult.rowsAsObject().iterator();
+            queryResults = N1QLResult.rowsAsObject();
         }
     }
 
     @Producer
     public Record next() {
-        if (resultIterator != null) {
-            // loop to find first document with appropriate type (for non-json documents)
-            while (resultIterator.hasNext()) {
-                JsonObject jsonObject = resultIterator.next();
-
-                if (configuration.getDataSet().getDocumentType() == DocumentType.JSON) {
-                    try {
-                        return createJsonRecord(jsonObject);
-                    } catch (ClassCastException e) {
-                        // document is a non-json, try to get next document
-                    }
-                } else {
-                    String id = jsonObject.getString(META_ID_FIELD);
-                    if (id == null) {
-                        LOG
-                                .error("Cannot find '_meta_id_' field. The query should contain 'meta().id as _meta_id_' field");
-                        return null;
-                    }
-                    DocumentParser documentParser = ParserFactory
-                            .createDocumentParser(configuration.getDataSet().getDocumentType(), builderFactory);
-                    return documentParser.parse(collection, id);
+        // loop to find first document with appropriate type (for non-json documents)
+        for (JsonObject jsonObject : queryResults) {
+            if (configuration.getDataSet().getDocumentType() == DocumentType.JSON) {
+                try {
+                    return createJsonRecord(jsonObject);
+                } catch (ClassCastException e) {
+                    // document is a non-json, try to get next document
                 }
+            } else {
+                String id = jsonObject.getString(META_ID_FIELD);
+                if (id == null) {
+                    LOG.error("Cannot find '_meta_id_' field. The query should contain 'meta().id as _meta_id_' field");
+                    return null;
+                }
+                DocumentParser documentParser = ParserFactory
+                        .createDocumentParser(configuration.getDataSet().getDocumentType(), builderFactory);
+                return documentParser.parse(collection, id);
             }
         }
         return null;

@@ -13,9 +13,7 @@
 package org.talend.components.couchbase;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.service.Service;
@@ -24,30 +22,26 @@ import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
-import org.testcontainers.couchbase.CouchbaseService;
 
 import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.ClusterOptions;
 
 public abstract class CouchbaseUtilTest {
 
-    protected static final String BUCKET_NAME = "student";
+    protected static final String BUCKET_NAME = "Administrator";
 
-    protected static final String BUCKET_PASSWORD = "secret";
+    private static final String CLUSTER_USERNAME = "Administrator";
 
-    private static final int BUCKET_QUOTA = 100;
+    private static final String CLUSTER_PASSWORD = "password";
 
-    private static final String CLUSTER_USERNAME = "student";
+    /*
+     * TODO: Check if this can be safely removed
+     * protected static final String ANALYTICS_BUCKET = "typesBucket";
+     * 
+     * protected static final String ANALYTICS_DATASET = "typesDataset";
+     */
 
-    private static final String CLUSTER_PASSWORD = "secret";
-
-    protected static final String ANALYTICS_BUCKET = "typesBucket";
-
-    protected static final String ANALYTICS_DATASET = "typesDataset";
-
-    private static final List<String> ports =
-            Arrays.asList("8091:8091", "8092:8092", "8093:8093", "8094:8094", "8095:8095",
-                    "11210:11210");
+    private static final List<Integer> ports =
+            Arrays.asList(8091, 8092, 8093, 8094, 8095, 11210);
 
     private static final CouchbaseContainer COUCHBASE_CONTAINER;
 
@@ -62,56 +56,28 @@ public abstract class CouchbaseUtilTest {
     protected RecordBuilderFactory recordBuilderFactory;
 
     static {
-    	BucketDefinition bucketDefinition = new BucketDefinition(BUCKET_NAME);
-    	COUCHBASE_CONTAINER = new AnalyticsCouchbaseContainer(
-                System.getenv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX") + "couchbase/server:5.5.1")
-    			.withBucket(bucketDefinition)
-    			.withCredentials(BUCKET_NAME, BUCKET_PASSWORD);
-        /*COUCHBASE_CONTAINER = new AnalyticsCouchbaseContainer(
-                System.getenv("TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX") + "couchbase/server:5.5.1")
-                        .withClusterAdmin(CLUSTER_USERNAME, CLUSTER_PASSWORD)
-                        .withNewBucket(DefaultBucketSettings.builder()
-                                .enableFlush(true)
-                                .name(BUCKET_NAME)
-                                .password(BUCKET_PASSWORD)
-                                .quota(BUCKET_QUOTA)
-                                .type(BucketType.COUCHBASE)
-                                .build());*/
-        COUCHBASE_CONTAINER.setPortBindings(ports);
+        COUCHBASE_CONTAINER = new CouchbaseContainer("couchbase/server:7.0.2")
+                .withBucket(new BucketDefinition(BUCKET_NAME))
+                .withCredentials(CLUSTER_USERNAME, CLUSTER_PASSWORD)
+                .withAnalyticsService();
+        COUCHBASE_CONTAINER.setExposedPorts(ports);
         COUCHBASE_CONTAINER.start();
-        
+
     }
 
     public CouchbaseUtilTest() {
         couchbaseDataStore = new CouchbaseDataStore();
-        couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getContainerIpAddress());
+        couchbaseDataStore.setBootstrapNodes(COUCHBASE_CONTAINER.getConnectionString());
         couchbaseDataStore.setUsername(CLUSTER_USERNAME);
         couchbaseDataStore.setPassword(CLUSTER_PASSWORD);
 
-        couchbaseCluster = Cluster.connect(
-        		COUCHBASE_CONTAINER.getConnectionString(),
-        		ClusterOptions.clusterOptions(COUCHBASE_CONTAINER.getUsername(), COUCHBASE_CONTAINER.getPassword())
-        	);
-        		
+        couchbaseCluster = Cluster.connect(COUCHBASE_CONTAINER.getConnectionString(), CLUSTER_USERNAME,
+                CLUSTER_PASSWORD);
+
     }
 
     protected String generateDocId(String prefix, int number) {
         return prefix + "_" + number;
     }
 
-    private static class AnalyticsCouchbaseContainer extends CouchbaseContainer {
-
-        public AnalyticsCouchbaseContainer(String name) {
-            super(name);
-        }
-        
-        public Set<CouchbaseService> enabledServices = EnumSet.of(
-                CouchbaseService.KV,
-                CouchbaseService.QUERY,
-                CouchbaseService.SEARCH,
-                CouchbaseService.INDEX,
-                CouchbaseService.ANALYTICS
-            );
-        
-    }
 }

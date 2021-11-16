@@ -55,7 +55,11 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
+import com.couchbase.client.core.diagnostics.PingResult;
+import com.couchbase.client.core.endpoint.CircuitBreakerConfig;
+import com.couchbase.client.core.env.IoConfig;
 import com.couchbase.client.core.env.TimeoutConfig;
+import com.couchbase.client.core.error.AuthenticationFailureException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.ClusterOptions;
@@ -85,8 +89,8 @@ public class CouchbaseService implements Serializable {
     public String resolveAddresses(String nodes) {
         String formattedNodes = nodes.replace(" ", "");
         String[] addresses = formattedNodes.split(",");
-        for (int i = 1; i <= addresses.length; i++) {
-            LOG.info(i18n.bootstrapNodes(i, addresses[i]));
+        for (int i = 0; i < addresses.length; i++) {
+            LOG.info(i18n.bootstrapNodes(i + 1, addresses[i]));
         }
         return formattedNodes;
     }
@@ -95,31 +99,31 @@ public class CouchbaseService implements Serializable {
         String bootStrapNodes = dataStore.getBootstrapNodes();
         String username = dataStore.getUsername();
         String password = dataStore.getPassword();
-
         String urls = resolveAddresses(bootStrapNodes);
+
         try {
             ClusterHolder holder = clustersPool.computeIfAbsent(dataStore, ds -> {
                 ClusterEnvironment.Builder envBuilder = ClusterEnvironment.builder();
+
                 if (dataStore.isUseConnectionParameters()) {
-                    dataStore
-                            .getConnectionParametersList()
-                            .forEach(conf -> setTimeout(envBuilder, conf.getParameterName(),
-                                    parseValue(conf.getParameterValue())));
+                    dataStore.getConnectionParametersList()
+                            .forEach(conf -> setTimeout(envBuilder,
+                                    conf.getParameterName(), parseValue(conf.getParameterValue())));
                 }
                 ClusterEnvironment environment = envBuilder.build();
                 Cluster cluster = Cluster.connect(urls,
                         ClusterOptions.clusterOptions(username, password).environment(environment));
-
+                cluster.waitUntilReady(Duration.ofSeconds(5));
                 return new ClusterHolder(environment, cluster);
             });
             holder.use();
-            /*
-             * TODO: skip for now, as no equivalent in SDK v3
-             * String clusterName = cluster.clusterManager().info().raw().get("name").toString();
-             * LOG.debug(i18n.connectedToCluster(clusterName));
-             */
-            return holder.getCluster();
-        } catch (Exception e) {
+            Cluster cluster = holder.getCluster();
+            // connection is lazily initialized; need to send actual request to test it
+            cluster.buckets().getAllBuckets();
+            PingResult pingResult = cluster.ping();
+            LOG.debug(i18n.connectedToCluster(pingResult.id()));
+            return cluster;
+        } catch (AuthenticationFailureException e) {
             LOG.error(i18n.connectionKO());
             throw new ComponentException(e);
         }
@@ -145,19 +149,16 @@ public class CouchbaseService implements Serializable {
     }
 
     @HealthCheck("healthCheck")
-    public HealthCheckStatus
-            healthCheck(@Option("configuration.dataset.connection") final CouchbaseDataStore datastore) {
+    public HealthCheckStatus healthCheck(
+            @Option("configuration.dataset.connection") final CouchbaseDataStore datastore) {
         try {
             openConnection(datastore);
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection OK");
         } catch (Exception exception) {
             String message = "";
-            /*
-             * TODO: skip for now, as no equivalent in SDK v3
-             * if (exception.getCause() instanceof InvalidPasswordException) {
-             * message = i18n.invalidPassword();
-             * } else
-             */ if (exception.getCause() instanceof RuntimeException
+            if (exception.getCause() instanceof AuthenticationFailureException) {
+                message = i18n.invalidPassword();
+            } else if (exception.getCause() instanceof RuntimeException
                     && exception.getCause().getCause() instanceof TimeoutException) {
                 message = i18n.destinationUnreachable();
             } else {
