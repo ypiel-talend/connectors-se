@@ -95,7 +95,9 @@ public abstract class AbstractInputEmitter implements Serializable {
                 return null;
             }
 
-            final ResultSetMetaData metaData = resultSet.getMetaData();
+            log.info("Hello from optimized version!!");
+            final ResultSetMetaData metaData = new CachedResultSetMetaData(resultSet.getMetaData());
+            // final ResultSetMetaData metaData = resultSet.getMetaData();
             if (schema == null) {
                 final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
                 IntStream
