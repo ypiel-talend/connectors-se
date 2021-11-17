@@ -9,6 +9,7 @@
     </parent>
 
     <artifactId>jdbc</artifactId>
+    <version>1.27.7</version>
 
     <name>Connectors SE :: JDBC</name>
     <description>Suite of JDBC component</description>

@@ -53,6 +53,8 @@ public abstract class AbstractInputEmitter implements Serializable {
 
     private ResultSet resultSet;
 
+    private ResultSetMetaData metaData;
+
     private JdbcService.JdbcDatasource dataSource;
 
     private transient Schema schema;
@@ -83,6 +85,7 @@ public abstract class AbstractInputEmitter implements Serializable {
             statement = connection.createStatement();
             statement.setFetchSize(inputConfig.getDataSet().getFetchSize());
             resultSet = statement.executeQuery(query);
+            metaData = new CachedResultSetMetaData(resultSet.getMetaData());
         } catch (final SQLException e) {
             throw toIllegalStateException(e);
         }
@@ -94,11 +97,9 @@ public abstract class AbstractInputEmitter implements Serializable {
             if (!resultSet.next()) {
                 return null;
             }
-
-            log.info("Hello from optimized version!!");
-            final ResultSetMetaData metaData = new CachedResultSetMetaData(resultSet.getMetaData());
             // final ResultSetMetaData metaData = resultSet.getMetaData();
             if (schema == null) {
+                log.info("Hello from optimized version!!");
                 final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
                 IntStream
                         .rangeClosed(1, metaData.getColumnCount())
