@@ -27,7 +27,11 @@ public interface MessageService {
 
     String cantStartReadBlobItems(String message);
 
-    String containerNotExist();
+    String containerNotExist(String containerName);
+
+    String authTypeNotSupportedForParquet();
 
     String encodingNotSupported(String incorrectEncoding);
+
+    String fileIsNotValidExcelHTML();
 }

@@ -17,7 +17,6 @@ import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.migration.AzureStorageRuntimeDatasetMigration;
 import org.talend.components.azure.runtime.output.BlobFileWriter;
 import org.talend.components.azure.runtime.output.BlobFileWriterFactory;
@@ -26,6 +25,7 @@ import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.AfterGroup;
 import org.talend.sdk.component.api.processor.BeforeGroup;
@@ -60,7 +60,7 @@ public class BlobOutput implements Serializable {
         try {
             this.fileWriter = BlobFileWriterFactory.getWriter(configuration, service);
         } catch (Exception e) {
-            throw new BlobRuntimeException(messageService.errorCreateBlobItem(), e);
+            throw new ComponentException(messageService.errorCreateBlobItem(), e);
         }
     }
 
@@ -79,7 +79,7 @@ public class BlobOutput implements Serializable {
         try {
             fileWriter.flush();
         } catch (Exception e) {
-            throw new BlobRuntimeException(messageService.errorSubmitRows(), e);
+            throw new ComponentException(messageService.errorSubmitRows(), e);
         }
     }
 
@@ -90,7 +90,7 @@ public class BlobOutput implements Serializable {
                 fileWriter.complete();
             }
         } catch (Exception e) {
-            throw new BlobRuntimeException(messageService.errorSubmitRows(), e);
+            throw new ComponentException(messageService.errorSubmitRows(), e);
         }
     }
 }

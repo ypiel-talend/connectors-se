@@ -18,20 +18,17 @@ import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
-
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.talend.components.common.formats.excel.ExcelFormat;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.common.converters.ExcelConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.monitorjbl.xlsx.StreamingReader;
@@ -112,7 +109,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
                 }
 
             } catch (StorageException | IOException e) {
-                throw new BlobRuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
 
@@ -203,7 +200,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
                     }
                 }
             } catch (StorageException e) {
-                throw new BlobRuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
 

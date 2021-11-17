@@ -22,7 +22,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.talend.components.common.formats.Encoding;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.common.converters.CSVConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -109,7 +108,7 @@ public class CSVBlobFileReader extends BlobFileReader {
                     }
                 }
             } catch (Exception e) {
-                throw new BlobRuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
 

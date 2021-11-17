@@ -16,14 +16,17 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import org.jsoup.Jsoup;
+import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.ParseError;
+import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.components.common.stream.input.excel.HTMLToRecord;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -63,15 +66,19 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
                 Document document =
                         Jsoup.parse(input, getConfig().getExcelOptions()
                                 .effectiveHTMLFileEncoding(getMessageService()::encodingNotSupported), "");
+
                 Element body = document.body();
                 Elements rows = body.getElementsByTag("tr");
+                if (rows.isEmpty()) {
+                    throw new ComponentException(getMessageService().fileIsNotValidExcelHTML());
+                }
                 rowIterator = rows.iterator();
                 if (rows.first().getElementsByTag("th").size() > 0) {
                     // infer schema of html header row and ignore result
                     convertToRecord(rowIterator.next());
                 }
             } catch (Exception e) {
-                throw new BlobRuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
 

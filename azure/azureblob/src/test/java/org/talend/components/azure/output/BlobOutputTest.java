@@ -22,11 +22,11 @@ import org.talend.components.azure.common.FileFormat;
 import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.components.common.formats.excel.ExcelFormatOptions;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
+import org.talend.sdk.component.api.exception.ComponentException;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -62,7 +62,7 @@ public class BlobOutputTest {
 
         BlobOutput output =
                 new BlobOutput(outputConfiguration, blobComponentServicesMock, Mockito.mock(MessageService.class));
-        BlobRuntimeException thrownException = Assertions.assertThrows(BlobRuntimeException.class, output::init);
+        ComponentException thrownException = Assertions.assertThrows(ComponentException.class, output::init);
 
         Assertions
                 .assertEquals(expectedExceptionMessage, thrownException.getCause().getMessage(),

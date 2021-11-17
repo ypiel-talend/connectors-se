@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.UUID;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.AzureBlobFormatUtils;
@@ -73,7 +72,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
             try {
                 generateFile();
             } catch (Exception e) {
-                throw new BlobRuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
     }

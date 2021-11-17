@@ -23,7 +23,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetFileWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.common.converters.ParquetConverter;
@@ -54,7 +53,7 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
         try {
             generateFile();
         } catch (Exception e) {
-            throw new BlobRuntimeException(e);
+            throw new RuntimeException(e);
         }
 
     }
@@ -97,7 +96,7 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
             blobOutputStream.flush();
             blobOutputStream.close();
         } catch (IOException | StorageException e) {
-            throw new BlobRuntimeException(e);
+            throw new RuntimeException(e);
         } finally {
             getBatch().clear();
             if (tempFilePath != null) {

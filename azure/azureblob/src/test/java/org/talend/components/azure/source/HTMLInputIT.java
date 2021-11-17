@@ -21,12 +21,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.BlobTestUtils;
+import org.talend.components.azure.service.MessageService;
 import org.talend.components.common.formats.Encoding;
 import org.talend.components.azure.common.FileFormat;
 import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.components.common.formats.excel.ExcelFormatOptions;
 import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
@@ -38,6 +41,9 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 class HTMLInputIT extends BaseIT {
 
     private static BlobInputProperties blobInputProperties;
+
+    @Service
+    private MessageService messageService;
 
     @BeforeEach
     void initDataset() {
@@ -201,5 +207,25 @@ class HTMLInputIT extends BaseIT {
 
         Assertions.assertEquals(expectedNumberOfRecords, records.size());
         Assertions.assertEquals(specialSymbolStrings, records.get(0).getString("Subject"));
+    }
+
+    @SneakyThrows
+    @Test
+    void testReadCsvAsHTMLException() {
+        BlobTestUtils
+                .uploadTestFile(storageAccount, blobInputProperties, "avro/testAvro1Record.avro",
+                        "testAvro1Record.html");
+
+        String inputConfig = configurationByExample().forInstance(blobInputProperties).configured().toQueryString();
+        ComponentException expectedException = Assertions.assertThrows(ComponentException.class, () -> Job.components()
+                .component("azureInput", "Azure://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("azureInput")
+                .to("collector")
+                .build()
+                .run());
+        
+        Assertions.assertTrue(expectedException.getMessage().contains(messageService.fileIsNotValidExcelHTML()));
     }
 }

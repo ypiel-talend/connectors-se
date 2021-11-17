@@ -21,7 +21,6 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.common.Constants;
@@ -64,7 +63,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
         try {
             generateFile();
         } catch (Exception e) {
-            throw new BlobRuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 

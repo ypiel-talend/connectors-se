@@ -35,6 +35,7 @@ import org.talend.components.azure.service.AzureBlobComponentServices;
 //
 // this class role is to enable the work to be distributed in environments supporting it.
 //
+
 @Version(value = 2, migrationHandler = AzureStorageRuntimeDatasetMigration.class)
 @Icon(value = Icon.IconType.CUSTOM, custom = "azure-blob-input")
 @PartitionMapper(name = "Input")

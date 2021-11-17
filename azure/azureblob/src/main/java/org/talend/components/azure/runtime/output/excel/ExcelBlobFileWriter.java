@@ -24,7 +24,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.talend.components.common.formats.excel.ExcelFormat;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.common.converters.ExcelConverter;
@@ -96,7 +95,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
                 newBatch();
             }
         } catch (Exception e) {
-            throw new BlobRuntimeException("Failed to split oversized batch", e);
+            throw new RuntimeException("Failed to split oversized batch", e);
         }
     }
 
@@ -106,7 +105,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         try {
             generateFile();
         } catch (Exception e) {
-            throw new BlobRuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 

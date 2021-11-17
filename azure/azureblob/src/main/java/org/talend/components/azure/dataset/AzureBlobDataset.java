@@ -16,10 +16,10 @@ import java.io.Serializable;
 
 import org.talend.components.azure.common.FileFormat;
 import org.talend.components.azure.migration.AzureStorageDatasetMigration;
-import org.talend.components.common.formats.csv.CSVFormatOptions;
-import org.talend.components.common.formats.excel.ExcelFormatOptions;
 import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.common.formats.csv.CSVFormatOptions;
+import org.talend.components.common.formats.excel.ExcelFormatOptions;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;

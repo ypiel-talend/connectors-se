@@ -15,23 +15,20 @@ package org.talend.components.azure.service;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.talend.components.azure.common.exception.BlobRuntimeException;
-import org.talend.components.common.service.azureblob.AzureComponentServices;
+import javax.json.JsonBuilderFactory;
 import org.talend.components.azure.datastore.AzureCloudConnection;
+import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import lombok.Getter;
-
-import javax.json.JsonBuilderFactory;
 
 @Service
 public class AzureBlobComponentServices {
@@ -91,7 +88,7 @@ public class AzureBlobComponentServices {
             }
 
         } catch (Exception e) {
-            throw new BlobRuntimeException(i18nService.errorRetrieveContainers(), e);
+            throw new ComponentException(i18nService.errorRetrieveContainers(), e);
         }
 
         return new SuggestionValues(true, containerNames);

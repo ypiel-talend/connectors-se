@@ -15,12 +15,13 @@ package org.talend.components.azure.runtime.input;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
 import java.util.Iterator;
-import org.talend.components.azure.common.exception.BlobRuntimeException;
+
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -69,7 +70,7 @@ public abstract class BlobFileReader {
                 .listBlobs(directoryName, false, EnumSet.noneOf(BlobListingDetails.class),
                         null, AzureComponentServices.getTalendOperationContext());
         if (!blobItems.iterator().hasNext()) {
-            throw new BlobRuntimeException("Folder doesn't exist/is empty");
+            throw new RuntimeException("Folder doesn't exist/is empty");
         }
         this.iterator = initItemRecordIterator(blobItems);
     }
@@ -80,10 +81,10 @@ public abstract class BlobFileReader {
 
         try {
             if (!container.exists()) {
-                throw new BlobRuntimeException(messageService.containerNotExist());
+                throw new ComponentException(messageService.containerNotExist(container.getName()));
             }
         } catch (StorageException e) {
-            throw new BlobRuntimeException(messageService.illegalContainerName(), e);
+            throw new ComponentException(messageService.illegalContainerName(), e);
         }
         return container;
     }
