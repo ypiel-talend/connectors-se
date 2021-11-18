@@ -33,13 +33,7 @@ public abstract class CouchbaseUtilTest {
 
     private static final String CLUSTER_PASSWORD = "password";
 
-    /*
-     * TODO: Check if this can be safely removed
-     * protected static final String ANALYTICS_BUCKET = "typesBucket";
-     * 
-     * protected static final String ANALYTICS_DATASET = "typesDataset";
-     */
-
+    // TODO: check if we still need these ports.
     private static final List<Integer> ports =
             Arrays.asList(8091, 8092, 8093, 8094, 8095, 11210);
 

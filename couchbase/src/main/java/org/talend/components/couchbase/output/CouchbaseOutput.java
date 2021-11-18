@@ -130,17 +130,15 @@ public class CouchbaseOutput implements Serializable {
         service.closeConnection(configuration.getDataSet().getDatastore());
     }
 
-    /*
-     * private RawBinaryTranscoder toBinaryDocument(String idFieldName, Record record) {
-     * ByteBuf toWrite = Unpooled.copiedBuffer(record.getBytes(CONTENT_FIELD_NAME));
-     * return RawBinaryTranscoder.create(record.getString(idFieldName), toWrite);
-     * }
-     * 
-     * private RawStringTranscoder toStringDocument(String idFieldName, Record record) {
-     * String content = record.getString(CONTENT_FIELD_NAME);
-     * return RawStringTranscoder.create(record.getString(idFieldName), content);
-     * }
-     */
+    // private RawBinaryTranscoder toBinaryDocument(String idFieldName, Record record) {
+    // ByteBuf toWrite = Unpooled.copiedBuffer(record.getBytes(CONTENT_FIELD_NAME));
+    // return RawBinaryTranscoder.create(record.getString(idFieldName), toWrite);
+    // }
+
+    // private RawStringTranscoder toStringDocument(String idFieldName, Record record) {
+    // String content = record.getString(CONTENT_FIELD_NAME);
+    // return RawStringTranscoder.create(record.getString(idFieldName), content);
+    // }
 
     /*
      * private void updatePartiallyDocument(Record record) {

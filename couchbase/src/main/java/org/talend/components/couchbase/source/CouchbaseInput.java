@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +45,7 @@ import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.analytics.AnalyticsResult;
 import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.manager.query.CreatePrimaryQueryIndexOptions;
 import com.couchbase.client.java.query.QueryResult;
 
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +68,7 @@ public class CouchbaseInput implements Serializable {
 
     private Set<String> columnsSet;
 
-    private List<JsonObject> queryResults = null;
+    private Iterator<JsonObject> queryResultsIterator = null;
 
     private Cluster cluster;
 
@@ -86,11 +88,13 @@ public class CouchbaseInput implements Serializable {
 
     @PostConstruct
     public void init() {
-        cluster = service.openConnection(configuration.getDataSet().getDatastore());
-        bucket = cluster.bucket(configuration.getDataSet().getBucket());
-        collection = service.openCollection(cluster, configuration.getDataSet().getBucket());
+        this.cluster = service.openConnection(configuration.getDataSet().getDatastore());
+        this.bucket = cluster.bucket(configuration.getDataSet().getBucket());
+        this.collection = service.openDefaultCollection(cluster, configuration.getDataSet().getBucket());
         if (configuration.isCreatePrimaryIndex()) {
-            cluster.queryIndexes().createPrimaryIndex(bucket.name());
+            cluster.queryIndexes()
+                    .createPrimaryIndex(bucket.name(),
+                            CreatePrimaryQueryIndexOptions.createPrimaryQueryIndexOptions().ignoreIfExists(true));
         }
         columnsSet = new HashSet<>();
 
@@ -102,12 +106,12 @@ public class CouchbaseInput implements Serializable {
                 LOG.error(i18n.queryResultError(e.getMessage()));
                 throw new ComponentException(e.toString());
             }
-            queryResults = analyticsResult.rowsAsObject();
+            queryResultsIterator = analyticsResult.rowsAsObject().iterator();
         } else {
             // TODO: DSL API (Statement, AsPath classes etc. was deprecated, cannot use it anymore!)
             // In most cases, a simple string statement is the best replacement.
 
-            QueryResult N1QLResult;
+            QueryResult n1qlResult;
             StringBuilder statementBuilder;
             switch (configuration.getSelectAction()) {
             case ALL:
@@ -116,31 +120,32 @@ public class CouchbaseInput implements Serializable {
                 if (!configuration.getLimit().isEmpty()) {
                     statementBuilder.append(" LIMIT ").append(configuration.getLimit().trim());
                 }
-                N1QLResult = cluster.query(statementBuilder.toString());
+                n1qlResult = cluster.query(statementBuilder.toString());
                 break;
             case N1QL:
                 /*
                  * should contain "meta().id as `_meta_id_`" field for non-json (binary) documents
                  */
-                N1QLResult = cluster.query(configuration.getQuery());
+                n1qlResult = cluster.query(configuration.getQuery());
                 break;
             case ONE:
                 statementBuilder = new StringBuilder();
                 statementBuilder.append("SELECT meta().id as `_meta_id_`, * FROM `").append(bucket.name()).append("`");
                 statementBuilder.append(" USE KEYS \"").append(configuration.getDocumentId()).append("\"");
-                N1QLResult = cluster.query(statementBuilder.toString());
+                n1qlResult = cluster.query(statementBuilder.toString());
                 break;
             default:
                 throw new ComponentException("Select action: '" + configuration.getSelectAction() + "' is unsupported");
             }
-            queryResults = N1QLResult.rowsAsObject();
+            queryResultsIterator = n1qlResult.rowsAsObject().iterator();
         }
     }
 
     @Producer
     public Record next() {
         // loop to find first document with appropriate type (for non-json documents)
-        for (JsonObject jsonObject : queryResults) {
+        while (queryResultsIterator.hasNext()) {
+            JsonObject jsonObject = queryResultsIterator.next();
             if (configuration.getDataSet().getDocumentType() == DocumentType.JSON) {
                 try {
                     return createJsonRecord(jsonObject);

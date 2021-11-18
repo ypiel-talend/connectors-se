@@ -203,7 +203,7 @@ public class CouchbaseService implements Serializable {
         return new SuggestionValues(false, emptyList());
     }
 
-    public Collection openCollection(Cluster cluster, String bucketName) {
+    public Collection openDefaultCollection(Cluster cluster, String bucketName) {
         Bucket bucket;
         Collection collection;
         try {
