@@ -62,11 +62,12 @@ class CouchbaseOutputTest extends CouchbaseUtilTest {
     private List<JsonObject> retrieveDataFromDatabase(String prefix, int count) {
         List<JsonObject> resultList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            List<JsonObject> rowsAsObject = couchbaseCluster.query(generateDocId(prefix, i)).rowsAsObject();
-            for (JsonObject jsonObject : rowsAsObject) {
-                jsonObject.put(META_ID_FIELD, generateDocId(prefix, i));
-                resultList.add(jsonObject);
-            }
+            JsonObject jsonObject = couchbaseCluster.bucket(BUCKET_NAME)
+                    .defaultCollection()
+                    .get(generateDocId(prefix, i))
+                    .contentAsObject();
+            jsonObject.put(META_ID_FIELD, generateDocId(prefix, i));
+            resultList.add(jsonObject);
         }
         return resultList;
     }
@@ -83,41 +84,41 @@ class CouchbaseOutputTest extends CouchbaseUtilTest {
                 .run();
     }
 
-    // @Test
-    // @DisplayName("Check fields from retrieved data")
-    // void simpleOutputTest() {
-    // log.info("Test start: simpleOutputTest");
-    // final String SIMPLE_OUTPUT_TEST_ID = "simpleOutputTest";
-    // List<Record> records = createRecords(new TestData(), SIMPLE_OUTPUT_TEST_ID);
-    // componentsHandler.setInputData(records);
-    // executeJob(getOutputConfiguration());
-    //
-    // List<JsonObject> resultList = retrieveDataFromDatabase(SIMPLE_OUTPUT_TEST_ID, 2);
-    // assertEquals(2, resultList.size());
-    // assertJsonEquals(new TestData(), resultList.get(0));
-    // }
-    //
-    // private void assertJsonEquals(TestData expected, JsonObject actual) {
-    // assertEquals(Integer.valueOf(expected.getColIntMin()), actual.getInt("t_int_min"));
-    // assertEquals(Integer.valueOf(expected.getColIntMax()), actual.getInt("t_int_max"));
-    // assertEquals(Long.valueOf(expected.getColLongMin()), actual.getLong("t_long_min"));
-    // assertEquals(Long.valueOf(expected.getColLongMax()), actual.getLong("t_long_max"));
-    // assertEquals(expected.getColFloatMin(), actual.getNumber("t_float_min").floatValue());
-    // assertEquals(expected.getColFloatMax(), actual.getNumber("t_float_max").floatValue());
-    // assertEquals(expected.getColDoubleMin(), actual.getDouble("t_double_min"));
-    // assertEquals(expected.getColDoubleMax(), actual.getDouble("t_double_max"));
-    // assertEquals(expected.isColBoolean(), actual.getBoolean("t_boolean"));
-    // assertEquals(expected.getColDateTime().toString(), actual.getString("t_datetime"));
-    // Assertions.assertArrayEquals(expected.getColList().toArray(), actual.getArray("t_array").toList().toArray());
-    // }
-    //
-    // private List<Record> createRecords(TestData testData, String id) {
-    // List<Record> records = new ArrayList<>();
-    // for (int i = 0; i < 2; i++) {
-    // records.add(testData.createRecord(recordBuilderFactory, generateDocId(id, i)));
-    // }
-    // return records;
-    // }
+    @Test
+    @DisplayName("Check fields from retrieved data")
+    void simpleOutputTest() {
+        log.info("Test start: simpleOutputTest");
+        final String SIMPLE_OUTPUT_TEST_ID = "simpleOutputTest";
+        List<Record> records = createRecords(new TestData(), SIMPLE_OUTPUT_TEST_ID);
+        componentsHandler.setInputData(records);
+        executeJob(getOutputConfiguration());
+
+        List<JsonObject> resultList = retrieveDataFromDatabase(SIMPLE_OUTPUT_TEST_ID, 2);
+        assertEquals(2, resultList.size());
+        assertJsonEquals(new TestData(), resultList.get(0));
+    }
+
+    private void assertJsonEquals(TestData expected, JsonObject actual) {
+        assertEquals(Integer.valueOf(expected.getColIntMin()), actual.getInt("t_int_min"));
+        assertEquals(Integer.valueOf(expected.getColIntMax()), actual.getInt("t_int_max"));
+        assertEquals(Long.valueOf(expected.getColLongMin()), actual.getLong("t_long_min"));
+        assertEquals(Long.valueOf(expected.getColLongMax()), actual.getLong("t_long_max"));
+        assertEquals(expected.getColFloatMin(), actual.getNumber("t_float_min").floatValue());
+        assertEquals(expected.getColFloatMax(), actual.getNumber("t_float_max").floatValue());
+        assertEquals(expected.getColDoubleMin(), actual.getDouble("t_double_min"));
+        assertEquals(expected.getColDoubleMax(), actual.getDouble("t_double_max"));
+        assertEquals(expected.isColBoolean(), actual.getBoolean("t_boolean"));
+        assertEquals(expected.getColDateTime().toString(), actual.getString("t_datetime"));
+        Assertions.assertArrayEquals(expected.getColList().toArray(), actual.getArray("t_array").toList().toArray());
+    }
+
+    private List<Record> createRecords(TestData testData, String id) {
+        List<Record> records = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            records.add(testData.createRecord(recordBuilderFactory, generateDocId(id, i)));
+        }
+        return records;
+    }
 
     // @Test
     // @DisplayName("Check binary document output")
@@ -305,16 +306,16 @@ class CouchbaseOutputTest extends CouchbaseUtilTest {
     // });
     // }
 
-    // private CouchbaseOutputConfiguration getOutputConfiguration() {
-    // CouchbaseDataSet couchbaseDataSet = new CouchbaseDataSet();
-    // couchbaseDataSet.setBucket(BUCKET_NAME);
-    // couchbaseDataSet.setDatastore(couchbaseDataStore);
-    //
-    // CouchbaseOutputConfiguration configuration = new CouchbaseOutputConfiguration();
-    // configuration.setIdFieldName("t_string");
-    // configuration.setDataSet(couchbaseDataSet);
-    // return configuration;
-    // }
+    private CouchbaseOutputConfiguration getOutputConfiguration() {
+        CouchbaseDataSet couchbaseDataSet = new CouchbaseDataSet();
+        couchbaseDataSet.setBucket(BUCKET_NAME);
+        couchbaseDataSet.setDatastore(couchbaseDataStore);
+
+        CouchbaseOutputConfiguration configuration = new CouchbaseOutputConfiguration();
+        configuration.setIdFieldName("t_string");
+        configuration.setDataSet(couchbaseDataSet);
+        return configuration;
+    }
 
     // @Test
     // void toJsonDocumentWithBytesType() {

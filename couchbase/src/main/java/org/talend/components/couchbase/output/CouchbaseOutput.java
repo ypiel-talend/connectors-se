@@ -83,7 +83,8 @@ public class CouchbaseOutput implements Serializable {
     @PostConstruct
     public void init() {
         cluster = service.openConnection(configuration.getDataSet().getDatastore());
-        // bucket = service.openBucket(cluster, configuration.getDataSet().getBucket());
+        bucket = cluster.bucket(configuration.getDataSet().getBucket());
+        collection = bucket.defaultCollection();
         idFieldName = configuration.getIdFieldName();
     }
 
@@ -116,7 +117,7 @@ public class CouchbaseOutput implements Serializable {
                     collection.upsert(idFieldName, record,
                             UpsertOptions.upsertOptions().transcoder(RawStringTranscoder.INSTANCE));
                 } else {
-                    collection.upsert(idFieldName, buildJsonObjectWithoutId(record),
+                    collection.upsert(idFieldName, buildJsonObjectWithoutId(record).toBytes(),
                             UpsertOptions.upsertOptions().transcoder(RawJsonTranscoder.INSTANCE));
                 }
             }
