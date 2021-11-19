@@ -95,7 +95,7 @@
     <jackson.version>2.11.4</jackson.version>
     <jackson-codehaus.version>1.9.15-TALEND</jackson-codehaus.version>
 
-    <jsoup.version>1.14.2</jsoup.version>
+    <jsoup.version>1.14.3</jsoup.version>
 
     <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
     <daikon.version>0.31.0</daikon.version>
