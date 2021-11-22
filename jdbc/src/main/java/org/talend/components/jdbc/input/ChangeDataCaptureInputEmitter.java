@@ -21,6 +21,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
@@ -47,7 +49,7 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
 
     private final InputCaptureDataChangeConfig inputConfig;
 
-    private RecordBuilderFactory recordBuilderFactory;
+    private final RecordBuilderFactory recordBuilderFactory;
 
     private final JdbcService jdbcDriversService;
 
@@ -65,9 +67,11 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
 
     private static JdbcService.JdbcDatasource dataSource;
 
-    private ChangeDataCaptureDataset cdcDataset;
+    private final ChangeDataCaptureDataset cdcDataset;
 
     private transient Schema schema;
+
+    private transient JdbcService.ColumnInfo[] columnInfoList;
 
     private static int nbRecords = 0;
 
@@ -82,7 +86,7 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
         this.recordBuilderFactory = recordBuilderFactory;
         this.jdbcDriversService = jdbcDriversService;
         this.i18n = i18nMessage;
-        this.cdcDataset = ((ChangeDataCaptureDataset) config.getDataSet());
+        this.cdcDataset = config.getDataSet();
     }
 
     @PostConstruct
@@ -107,6 +111,13 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
             statementUpdate = connection.createStatement();
             int result = statementUpdate.executeUpdate(createStreamStatement);
             fetchData();
+
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
+            columnInfoList = IntStream.rangeClosed(1, metaData.getColumnCount())
+                    .mapToObj(index -> jdbcDriversService.addField(schemaBuilder, metaData, index))
+                    .toArray(JdbcService.ColumnInfo[]::new);
+            schema = schemaBuilder.build();
         } catch (final SQLException e) {
             throw toIllegalStateException(e);
         }
@@ -133,20 +144,11 @@ public class ChangeDataCaptureInputEmitter implements Serializable {
             if (!resultSet.next())
                 if (!commit)
                     return null;
-            final ResultSetMetaData metaData = resultSet.getMetaData();
-
-            if (schema == null) {
-                final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
-                IntStream
-                        .rangeClosed(1, metaData.getColumnCount())
-                        .forEach(index -> jdbcDriversService.addField(schemaBuilder, metaData, index));
-                schema = schemaBuilder.build();
-            }
 
             final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);
-            IntStream
-                    .rangeClosed(1, metaData.getColumnCount())
-                    .forEach(index -> jdbcDriversService.addColumn(recordBuilder, metaData, index, resultSet));
+            for (int index = 0; index < columnInfoList.length; index++) {
+                jdbcDriversService.addColumn(recordBuilder, columnInfoList[index], resultSet.getObject(index + 1));
+            }
 
             if (nbRecords == resultSetSize)
                 log.info("Last record of series emitted: " + getRowAsString());
