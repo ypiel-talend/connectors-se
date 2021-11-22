@@ -42,6 +42,16 @@
         <hadoop-azure.version>3.2.2.1</hadoop-azure.version>
     </properties>
 
+    <dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>com.google.protobuf</groupId>
+          <artifactId>protobuf-java</artifactId>
+          <version>3.4.0</version>
+        </dependency>
+      </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- AzureBlob library -->
         <dependency>
