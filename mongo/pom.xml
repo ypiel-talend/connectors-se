@@ -17,4 +17,8 @@
         <module>mongo-common</module>
         <module>mongodb</module>
     </modules>
+
+    <properties>
+        <mongodb.client.version>3.12.8</mongodb.client.version>
+    </properties>
 </project>

@@ -12,12 +12,6 @@
 
     <name>Connectors SE :: Mongo :: Mongo-Common</name>
 
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <mongodb.client.version>3.12.8</mongodb.client.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.mongodb</groupId>

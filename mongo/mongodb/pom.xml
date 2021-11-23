@@ -12,10 +12,6 @@
 
   <name>Connectors SE :: MongoDB</name>
 
-  <properties>
-    <mongodb.client.version>3.12.8</mongodb.client.version>
-  </properties>
-
   <dependencies>
     <!--
     <dependency>
@@ -24,7 +20,17 @@
       <version>${locales.version}</version>
     </dependency>
     -->
+<!--    <dependency>-->
+<!--      <groupId>org.mongodb</groupId>-->
+<!--      <artifactId>mongodb-driver-core</artifactId>-->
+<!--      <version>${mongodb.client.version}</version>-->
+<!--    </dependency>-->
 
+<!--    <dependency>-->
+<!--      <groupId>org.mongodb</groupId>-->
+<!--      <artifactId>mongodb-driver-sync</artifactId>-->
+<!--      <version>${mongodb.client.version}</version>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>

@@ -148,7 +148,7 @@ public class MongoDBService {
         // do special process for ssl cert as sometimes, we need to ingore cert as impossible to provide it
         /*
          * if (sslEnabled) {
-         * optionsBuilder.sslEnabled(sslEnabled).sslInvalidHostNameAllowed(sslInvalidHostNameAllowed);
+         * optionsBuilder.sslEnabled(sslEnabled).sslInvalidHostNameAllowed( );
          * if (ignoreSSLCertificate) {
          * SSLContext sslContext = SSLUtils.ignoreSSLCertificate();
          * optionsBuilder.sslContext(sslContext);
