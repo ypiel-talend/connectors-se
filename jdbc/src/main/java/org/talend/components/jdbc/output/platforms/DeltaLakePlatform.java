@@ -52,13 +52,16 @@ public class DeltaLakePlatform extends Platform {
     }
 
     @Override
-    protected String buildUrlFromPattern(final String protocol, final String host, final int port,
+    protected String buildUrlFromPattern(final String protocol, final String host, String port,
             final String database,
             String params) {
         if (!"".equals(params.trim())) {
             params = ";" + params;
         }
-        return String.format("%s://%s:%s/%s%s", protocol, host, port, database, params.replace('&', ';'));
+
+        port = this.buildPort(port);
+
+        return String.format("%s://%s%s/%s%s", protocol, host, port, database, params.replace('&', ';'));
     }
 
     @Override

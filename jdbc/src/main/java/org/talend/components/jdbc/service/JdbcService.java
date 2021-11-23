@@ -48,6 +48,8 @@ import org.talend.components.jdbc.datastore.AuthenticationType;
 import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.output.platforms.PlatformService;
+import org.talend.sdk.component.api.exception.ComponentException;
+import org.talend.sdk.component.api.exception.ComponentException.ErrorOrigin;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
@@ -429,6 +431,14 @@ public class JdbcService {
             }
         } catch (final SQLException e) {
             throw toIllegalStateException(e);
+        }
+    }
+
+    public static int parseJdbcPort(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            throw new ComponentException(ErrorOrigin.USER, "JDBC port number is invalid.", e);
         }
     }
 

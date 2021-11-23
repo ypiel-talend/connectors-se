@@ -115,7 +115,7 @@ public class JdbcConfiguration implements Serializable {
 
         @Option
         @Documentation("JDBC default port")
-        private int port;
+        private String port;
 
         @Option
         @Documentation("JDBC default database")

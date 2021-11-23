@@ -51,7 +51,7 @@ public class PlatformTests {
 
         Defaults defaults = new JdbcConfiguration.Defaults();
         defaults.setHost("talend.local");
-        defaults.setPort(1234);
+        defaults.setPort("1234");
         defaults.setDatabase("mydatbase");
         defaults.setParameters(Collections.emptyList());
         driver.setDefaults(defaults);
@@ -61,7 +61,7 @@ public class PlatformTests {
         connection = new JdbcConnection();
         connection.setDatabase("connection.database");
         connection.setHost("connection.talend.local");
-        connection.setPort(21);
+        connection.setPort("21");
 
         List<KeyVal> params = new ArrayList<>();
         params.add(new KeyVal("param1", "aaa aaaa"));

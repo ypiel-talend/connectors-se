@@ -63,20 +63,28 @@ public abstract class Platform implements Serializable {
 
     protected abstract String buildQuery(final Connection connection, final Table table) throws SQLException;
 
+    protected String buildPort(String portValue) {
+        portValue = portValue.trim();
+        return ("".equals(portValue)) ? portValue : ":" + portValue;
+    }
+
     /**
      * @param e if the exception if a table already exist ignore it. otherwise re throw e
      * @return true if the error is because the table already exist
      */
     protected abstract boolean isTableExistsCreationError(final Throwable e);
 
-    protected String buildUrlFromPattern(final String protocol, final String host, final int port,
+    protected String buildUrlFromPattern(final String protocol, final String host, String port,
             final String database,
             String params) {
 
         if (!"".equals(params.trim())) {
             params = "?" + params;
         }
-        return String.format("%s://%s:%s/%s%s", protocol, host, port, database, params);
+
+        port = this.buildPort(port);
+
+        return String.format("%s://%s%s/%s%s", protocol, host, port, database, params);
     }
 
     public String buildUrl(final JdbcConnection connection) {
@@ -104,8 +112,14 @@ public abstract class Platform implements Serializable {
                 .collect(Collectors.joining("&"));
         final String protocol =
                 connection.getDefineProtocol() ? connection.getProtocol() : this.getDriver().getProtocol();
-        final String builtURL = buildUrlFromPattern(protocol, connection.getHost(), connection.getPort(),
-                connection.getDatabase(), params);
+        final String port = Optional.ofNullable(connection.getPort()).orElse("").trim();
+        if (!"".equals(port)) {
+            // Check if a port is set, it is well a number, throw a ComponentException if not.
+            JdbcService.parseJdbcPort(port);
+        }
+        final String builtURL =
+                buildUrlFromPattern(protocol, connection.getHost(), port,
+                        connection.getDatabase(), params);
 
         return builtURL;
     }

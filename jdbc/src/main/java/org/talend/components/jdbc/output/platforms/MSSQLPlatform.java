@@ -37,13 +37,17 @@ public class MSSQLPlatform extends Platform {
 
     public static final String MSSQL_JTDS = "mssql_jtds";
 
-    protected String buildUrlFromPattern(final String protocol, final String host, final int port,
+    @Override
+    protected String buildUrlFromPattern(final String protocol, final String host, String port,
             final String database,
             String params) {
         if (!"".equals(params.trim())) {
             params = ";" + params;
         }
-        return String.format("%s://%s:%s;databaseName=%s%s", protocol, host, port, database, params.replace('&', ';'));
+
+        port = this.buildPort(port);
+
+        return String.format("%s://%s%s;databaseName=%s%s", protocol, host, port, database, params.replace('&', ';'));
     }
 
     public MSSQLPlatform(final I18nMessage i18n, final JdbcConfiguration.Driver driver) {

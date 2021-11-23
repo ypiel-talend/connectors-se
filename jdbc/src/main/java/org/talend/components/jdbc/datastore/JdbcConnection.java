@@ -31,6 +31,7 @@ import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.constraint.Min;
+import org.talend.sdk.component.api.configuration.constraint.Pattern;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
@@ -89,8 +90,8 @@ public class JdbcConnection implements Serializable {
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
     @Documentation("jdbc port")
-    @DefaultValue("80")
-    private int port = 80;
+    @Pattern("^[0-9][0-9]+")
+    private String port;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
@@ -209,7 +210,7 @@ public class JdbcConnection implements Serializable {
         this.setSetRawUrl(true);
         this.jdbcUrl = jdbcUrl;
         this.setHost("");
-        this.setPort(80);
+        this.setPort("");
         this.setDatabase("");
         this.setParameters(new ArrayList<>());
     }

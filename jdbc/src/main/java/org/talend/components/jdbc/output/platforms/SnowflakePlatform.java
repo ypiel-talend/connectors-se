@@ -42,7 +42,7 @@ public class SnowflakePlatform extends Platform {
     }
 
     @Override
-    protected String buildUrlFromPattern(final String protocol, final String host, final int port,
+    protected String buildUrlFromPattern(final String protocol, final String host, String port,
             final String database,
             String params) {
 
@@ -50,7 +50,9 @@ public class SnowflakePlatform extends Platform {
             params = "&" + params;
         }
 
-        return String.format("%s://%s:%s/?db=%s%s", protocol, host, port, database, params);
+        port = this.buildPort(port);
+
+        return String.format("%s://%s%s/?db=%s%s", protocol, host, port, database, params);
     }
 
     @Override
