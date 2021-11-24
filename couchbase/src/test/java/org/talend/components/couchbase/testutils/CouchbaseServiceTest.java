@@ -32,41 +32,41 @@ class CouchbaseServiceTest extends CouchbaseUtilTest {
     @Service
     private CouchbaseService couchbaseService;
 
-    // @Test
-    // @DisplayName("Test successful connection")
-    // void couchbaseSuccessfulConnectionTest() {
-    // assertEquals(HealthCheckStatus.Status.OK, couchbaseService.healthCheck(couchbaseDataStore).getStatus());
-    // }
+    @Test
+    @DisplayName("Test successful connection")
+    void couchbaseSuccessfulConnectionTest() {
+        assertEquals(HealthCheckStatus.Status.OK, couchbaseService.healthCheck(couchbaseDataStore).getStatus());
+    }
 
-    // @Test
-    // @DisplayName("Test unsuccessful connection")
-    // void couchbaseNotSuccessfulConnectionTest() {
-    // String wrongPassword = "wrongpass";
-    //
-    // CouchbaseDataStore couchbaseDataStoreWrongPass = new CouchbaseDataStore();
-    // couchbaseDataStoreWrongPass.setBootstrapNodes(couchbaseDataStore.getBootstrapNodes());
-    // couchbaseDataStoreWrongPass.setUsername(couchbaseDataStore.getUsername());
-    // couchbaseDataStoreWrongPass.setPassword(wrongPassword);
-    //
-    // assertEquals(HealthCheckStatus.Status.KO,
-    // couchbaseService.healthCheck(couchbaseDataStoreWrongPass).getStatus());
-    // }
-    //
-    // @Test
-    // @DisplayName("Two bootstrap nodes without spaces")
-    // void resolveAddressesTest() {
-    // String inputUrl = "192.168.0.1,192.168.0.2";
-    // String[] resultArrayWithUrls = couchbaseService.resolveAddresses(inputUrl).split(",");
-    // assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
-    // assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
-    // }
-    //
-    // @Test
-    // @DisplayName("Two bootstrap nodes with extra spaces")
-    // void resolveAddressesWithSpacesTest() {
-    // String inputUrl = " 192.168.0.1, 192.168.0.2";
-    // String[] resultArrayWithUrls = couchbaseService.resolveAddresses(inputUrl).split(",");
-    // assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
-    // assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
-    // }
+    @Test
+    @DisplayName("Test unsuccessful connection")
+    void couchbaseNotSuccessfulConnectionTest() {
+        String wrongPassword = "wrongpass";
+
+        CouchbaseDataStore couchbaseDataStoreWrongPass = new CouchbaseDataStore();
+        couchbaseDataStoreWrongPass.setBootstrapNodes(couchbaseDataStore.getBootstrapNodes());
+        couchbaseDataStoreWrongPass.setUsername(couchbaseDataStore.getUsername());
+        couchbaseDataStoreWrongPass.setPassword(wrongPassword);
+
+        assertEquals(HealthCheckStatus.Status.KO,
+                couchbaseService.healthCheck(couchbaseDataStoreWrongPass).getStatus());
+    }
+
+    @Test
+    @DisplayName("Two bootstrap nodes without spaces")
+    void resolveAddressesTest() {
+        String inputUrl = "192.168.0.1,192.168.0.2";
+        String[] resultArrayWithUrls = couchbaseService.resolveAddresses(inputUrl).split(",");
+        assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
+        assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
+    }
+
+    @Test
+    @DisplayName("Two bootstrap nodes with extra spaces")
+    void resolveAddressesWithSpacesTest() {
+        String inputUrl = " 192.168.0.1, 192.168.0.2";
+        String[] resultArrayWithUrls = couchbaseService.resolveAddresses(inputUrl).split(",");
+        assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
+        assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
+    }
 }

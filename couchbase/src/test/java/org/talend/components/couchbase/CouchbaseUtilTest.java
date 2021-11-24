@@ -12,9 +12,6 @@
  */
 package org.talend.components.couchbase;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -33,10 +30,6 @@ public abstract class CouchbaseUtilTest {
 
     private static final String CLUSTER_PASSWORD = "password";
 
-    // TODO: check if we still need these ports.
-    private static final List<Integer> ports =
-            Arrays.asList(8091, 8092, 8093, 8094, 8095, 11210);
-
     private static final CouchbaseContainer COUCHBASE_CONTAINER;
 
     protected final Cluster couchbaseCluster;
@@ -54,7 +47,6 @@ public abstract class CouchbaseUtilTest {
                 .withBucket(new BucketDefinition(BUCKET_NAME))
                 .withCredentials(CLUSTER_USERNAME, CLUSTER_PASSWORD)
                 .withAnalyticsService();
-        COUCHBASE_CONTAINER.setExposedPorts(ports);
         COUCHBASE_CONTAINER.start();
 
     }

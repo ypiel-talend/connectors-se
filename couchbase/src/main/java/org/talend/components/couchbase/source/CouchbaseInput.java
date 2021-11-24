@@ -108,7 +108,7 @@ public class CouchbaseInput implements Serializable {
             }
             queryResultsIterator = analyticsResult.rowsAsObject().iterator();
         } else {
-            // TODO: DSL API (Statement, AsPath classes etc. was deprecated, cannot use it anymore!)
+            // DSL API (Statement, AsPath classes etc. was deprecated, cannot use it anymore!)
             // In most cases, a simple string statement is the best replacement.
 
             QueryResult n1qlResult;
@@ -197,7 +197,6 @@ public class CouchbaseInput implements Serializable {
 
     @PreDestroy
     public void release() {
-        // service.closeBucket(bucket);
         service.closeConnection(configuration.getDataSet().getDatastore());
     }
 

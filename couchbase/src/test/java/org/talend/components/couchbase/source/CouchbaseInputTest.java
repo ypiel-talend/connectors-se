@@ -209,8 +209,6 @@ class CouchbaseInputTest extends CouchbaseUtilTest {
                 AnalyticsOptions.analyticsOptions()
                         .scanConsistency(AnalyticsScanConsistency.REQUEST_PLUS)
                         .priority(true));
-        // couchbaseCluster.analyticsIndexes()
-        // .connectLink(ConnectLinkAnalyticsOptions.connectLinkAnalyticsOptions().force(true));
         List<JsonObject> jsonObjects = createJsonObjects();
         for (int i = 0; i < insertCount; i++) {
             collection.insert(generateDocId(idPrefix, i), jsonObjects.get(i));

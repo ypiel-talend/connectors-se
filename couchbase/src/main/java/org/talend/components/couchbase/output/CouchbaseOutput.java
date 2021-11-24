@@ -12,6 +12,8 @@
  */
 package org.talend.components.couchbase.output;
 
+import static com.couchbase.client.java.kv.MutateInSpec.upsert;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -34,14 +36,12 @@ import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
-import com.couchbase.client.core.deps.io.netty.buffer.ByteBuf;
 import com.couchbase.client.core.deps.io.netty.buffer.Unpooled;
 import com.couchbase.client.core.deps.io.netty.handler.codec.base64.Base64;
 import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.Collection;
-import com.couchbase.client.java.codec.JsonTranscoder;
 import com.couchbase.client.java.codec.RawBinaryTranscoder;
 import com.couchbase.client.java.codec.RawJsonTranscoder;
 import com.couchbase.client.java.codec.RawStringTranscoder;
@@ -49,7 +49,6 @@ import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.UpsertOptions;
 import com.couchbase.client.java.query.QueryOptions;
-import com.couchbase.client.java.query.QueryResult;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -89,35 +88,32 @@ public class CouchbaseOutput implements Serializable {
     }
 
     @ElementListener
-    public void onNext(@Input final Record record) {
+    public void onNext(@Input final Record rec) {
         if (configuration.isUseN1QLQuery()) {
             Map<String, String> mappings = configuration
                     .getQueryParams()
                     .stream()
                     .collect(
                             Collectors.toMap(N1QLQueryParameter::getColumn, N1QLQueryParameter::getQueryParameterName));
-            JsonObject namedParams = buildJsonObject(record, mappings);
-            QueryResult queryResult;
+            JsonObject namedParams = buildJsonObject(rec, mappings);
             try {
-                queryResult =
-                        cluster.query(configuration.getQuery(), QueryOptions.queryOptions().parameters(namedParams));
+                cluster.query(configuration.getQuery(), QueryOptions.queryOptions().parameters(namedParams));
             } catch (CouchbaseException ex) {
                 log.error("N1QL failed: {}.", ex.getMessage());
                 throw new ComponentException(ex.getMessage());
             }
         } else {
             if (configuration.isPartialUpdate()) {
-                // do nothing for now
-                // updatePartiallyDocument(record);
+                updatePartiallyDocument(rec);
             } else {
                 if (configuration.getDataSet().getDocumentType() == DocumentType.BINARY) {
-                    collection.upsert(idFieldName, record,
+                    collection.upsert(rec.getString(idFieldName), rec.getBytes(CONTENT_FIELD_NAME),
                             UpsertOptions.upsertOptions().transcoder(RawBinaryTranscoder.INSTANCE));
                 } else if (configuration.getDataSet().getDocumentType() == DocumentType.STRING) {
-                    collection.upsert(idFieldName, record,
+                    collection.upsert(rec.getString(idFieldName), rec,
                             UpsertOptions.upsertOptions().transcoder(RawStringTranscoder.INSTANCE));
                 } else {
-                    collection.upsert(idFieldName, buildJsonObjectWithoutId(record).toBytes(),
+                    collection.upsert(rec.getString(idFieldName), buildJsonObjectWithoutId(rec).toBytes(),
                             UpsertOptions.upsertOptions().transcoder(RawJsonTranscoder.INSTANCE));
                 }
             }
@@ -126,72 +122,56 @@ public class CouchbaseOutput implements Serializable {
 
     @PreDestroy
     public void release() {
-        // TODO: Seems no need to close bucket now.
-        // service.closeBucket(bucket);
         service.closeConnection(configuration.getDataSet().getDatastore());
     }
 
-    // private RawBinaryTranscoder toBinaryDocument(String idFieldName, Record record) {
-    // ByteBuf toWrite = Unpooled.copiedBuffer(record.getBytes(CONTENT_FIELD_NAME));
-    // return RawBinaryTranscoder.create(record.getString(idFieldName), toWrite);
-    // }
+    private void updatePartiallyDocument(Record rec) {
+        rec.getSchema()
+                .getEntries()
+                .stream()
+                .filter(e -> !idFieldName.equals(e.getName()))
+                .forEach(
+                        e -> collection.mutateIn(rec.getString(idFieldName), Collections
+                                .singletonList(upsert(e.getName(), jsonValueFromRecordValue(e, rec)))));
+    }
 
-    // private RawStringTranscoder toStringDocument(String idFieldName, Record record) {
-    // String content = record.getString(CONTENT_FIELD_NAME);
-    // return RawStringTranscoder.create(record.getString(idFieldName), content);
-    // }
-
-    /*
-     * private void updatePartiallyDocument(Record record) {
-     * final MutateInBuilder[] mutateBuilder = { collection.mutateIn(record.getString(idFieldName)) };
-     * record
-     * .getSchema()
-     * .getEntries()
-     * .stream()
-     * .filter(e -> !idFieldName.equals(e.getName()))
-     * .forEach(e -> mutateBuilder[0] =
-     * mutateBuilder[0].upsert(e.getName(), jsonValueFromRecordValue(e, record)));
-     * mutateBuilder[0].execute();
-     * }
-     */
-
-    private Object jsonValueFromRecordValue(Schema.Entry entry, Record record) {
+    private Object jsonValueFromRecordValue(Schema.Entry entry, Record rec) {
         String entryName = entry.getName();
-        Object value = record.get(Object.class, entryName);
+        Object value = rec.get(Object.class, entryName);
         if (null == value) {
             return null;
         }
         switch (entry.getType()) {
         case INT:
-            return record.getInt(entryName);
+            return rec.getInt(entryName);
         case LONG:
-            return record.getLong(entryName);
+            return rec.getLong(entryName);
         case BYTES:
-            return Base64.encode(Unpooled.copiedBuffer(record.getBytes(entryName)));
+            return Base64.encode(Unpooled.copiedBuffer(rec.getBytes(entryName)));
         case FLOAT:
-            return Double.parseDouble(String.valueOf(record.getFloat(entryName)));
+            return Double.parseDouble(String.valueOf(rec.getFloat(entryName)));
         case DOUBLE:
-            return record.getDouble(entryName);
+            return rec.getDouble(entryName);
         case STRING:
-            return createJsonFromString(record.getString(entryName));
+            return createJsonFromString(rec.getString(entryName));
         case BOOLEAN:
-            return record.getBoolean(entryName);
+            return rec.getBoolean(entryName);
         case ARRAY:
-            return JsonArray.from((List<?>) record.getArray(List.class, entryName));
+            return JsonArray.from((List<?>) rec.getArray(List.class, entryName));
         case DATETIME:
-            return record.getDateTime(entryName).toString();
+            return rec.getDateTime(entryName).toString();
         case RECORD:
-            return record.getRecord(entryName);
+            return rec.getRecord(entryName);
         default:
             throw new ComponentException("Unknown Type " + entry.getType());
         }
     }
 
-    private JsonObject buildJsonObject(Record record, Map<String, String> mappings) {
+    private JsonObject buildJsonObject(Record rec, Map<String, String> mappings) {
         JsonObject jsonObject = JsonObject.create();
-        record.getSchema().getEntries().stream().forEach(entry -> {
+        rec.getSchema().getEntries().stream().forEach(entry -> {
             String property = mappings.getOrDefault(entry.getName(), entry.getName());
-            Object value = jsonValueFromRecordValue(entry, record);
+            Object value = jsonValueFromRecordValue(entry, rec);
             jsonObject.put(property, value);
         });
         return jsonObject;
@@ -200,18 +180,12 @@ public class CouchbaseOutput implements Serializable {
     /**
      * Calls {@link #buildJsonObject(Record, Map)} and then removes the KEY(idFieldName) from it
      *
-     * @param record
+     * @param rec
      * @return JsonObject
      */
-    private JsonObject buildJsonObjectWithoutId(Record record) {
-        return buildJsonObject(record, Collections.emptyMap()).removeKey(idFieldName);
+    private JsonObject buildJsonObjectWithoutId(Record rec) {
+        return buildJsonObject(rec, Collections.emptyMap()).removeKey(idFieldName);
     }
-
-    /*
-     * public JsonTranscoder toJsonDocument(String idFieldName, Record record) {
-     * return JsonTranscoder.create(record.getString(idFieldName), buildJsonObjectWithoutId(record));
-     * }
-     */
 
     private Object createJsonFromString(String str) {
         Object value = null;

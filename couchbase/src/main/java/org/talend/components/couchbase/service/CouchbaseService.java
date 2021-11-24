@@ -56,8 +56,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 import com.couchbase.client.core.diagnostics.PingResult;
-import com.couchbase.client.core.endpoint.CircuitBreakerConfig;
-import com.couchbase.client.core.env.IoConfig;
 import com.couchbase.client.core.env.TimeoutConfig;
 import com.couchbase.client.core.error.AuthenticationFailureException;
 import com.couchbase.client.java.Bucket;
@@ -177,10 +175,10 @@ public class CouchbaseService implements Serializable {
         configuration.setDataSet(dataSet);
         CouchbaseInput couchbaseInput = new CouchbaseInput(configuration, this, builderFactory, i18n);
         couchbaseInput.init();
-        Record record = couchbaseInput.next();
+        Record rec = couchbaseInput.next();
         couchbaseInput.release();
 
-        return record.getSchema();
+        return rec.getSchema();
     }
 
     @Suggestions(DETECT_SCHEMA)
@@ -215,19 +213,6 @@ public class CouchbaseService implements Serializable {
         }
         return collection;
     }
-
-    // TODO: seems no need to close bucket now; need to verify.
-    /*
-     * public void closeBucket(Bucket bucket) {
-     * if (bucket != null) {
-     * if (Boolean.TRUE.equals(bucket.close())) {
-     * LOG.debug(i18n.bucketWasClosed(bucket.name()));
-     * } else {
-     * LOG.debug(i18n.cannotCloseBucket(bucket.name()));
-     * }
-     * }
-     * }
-     */
 
     public void closeConnection(CouchbaseDataStore ds) {
         ClusterHolder holder = clustersPool.get(ds);
