@@ -14,7 +14,7 @@
 
   <properties>
     <testcontainers.version>1.16.2</testcontainers.version>
-    <couchbase.client.version>3.2.2</couchbase.client.version>
+    <couchbase.client.version>3.2.3</couchbase.client.version>
   </properties>
 
   <dependencies>
