@@ -15,6 +15,7 @@ package org.talend.components.couchbase.output;
 import static com.couchbase.client.java.kv.MutateInSpec.upsert;
 
 import java.io.Serializable;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,14 +37,11 @@ import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
-import com.couchbase.client.core.deps.io.netty.buffer.Unpooled;
-import com.couchbase.client.core.deps.io.netty.handler.codec.base64.Base64;
 import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.codec.RawBinaryTranscoder;
-import com.couchbase.client.java.codec.RawJsonTranscoder;
 import com.couchbase.client.java.codec.RawStringTranscoder;
 import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.json.JsonObject;
@@ -113,8 +111,7 @@ public class CouchbaseOutput implements Serializable {
                     collection.upsert(rec.getString(idFieldName), rec,
                             UpsertOptions.upsertOptions().transcoder(RawStringTranscoder.INSTANCE));
                 } else {
-                    collection.upsert(rec.getString(idFieldName), buildJsonObjectWithoutId(rec).toBytes(),
-                            UpsertOptions.upsertOptions().transcoder(RawJsonTranscoder.INSTANCE));
+                    collection.upsert(rec.getString(idFieldName), buildJsonObjectWithoutId(rec));
                 }
             }
         }
@@ -147,7 +144,7 @@ public class CouchbaseOutput implements Serializable {
         case LONG:
             return rec.getLong(entryName);
         case BYTES:
-            return Base64.encode(Unpooled.copiedBuffer(rec.getBytes(entryName)));
+            return Base64.getEncoder().encode(rec.getBytes(entryName));
         case FLOAT:
             return Double.parseDouble(String.valueOf(rec.getFloat(entryName)));
         case DOUBLE:

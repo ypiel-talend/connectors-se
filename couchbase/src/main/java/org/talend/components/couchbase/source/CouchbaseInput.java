@@ -88,9 +88,9 @@ public class CouchbaseInput implements Serializable {
 
     @PostConstruct
     public void init() {
-        this.cluster = service.openConnection(configuration.getDataSet().getDatastore());
-        this.bucket = cluster.bucket(configuration.getDataSet().getBucket());
-        this.collection = service.openDefaultCollection(cluster, configuration.getDataSet().getBucket());
+        cluster = service.openConnection(configuration.getDataSet().getDatastore());
+        bucket = cluster.bucket(configuration.getDataSet().getBucket());
+        collection = service.openDefaultCollection(cluster, configuration.getDataSet().getBucket());
         if (configuration.isCreatePrimaryIndex()) {
             cluster.queryIndexes()
                     .createPrimaryIndex(bucket.name(),
