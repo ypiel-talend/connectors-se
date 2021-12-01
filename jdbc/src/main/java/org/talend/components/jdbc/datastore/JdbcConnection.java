@@ -90,7 +90,7 @@ public class JdbcConnection implements Serializable {
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
     @Documentation("jdbc port")
-    @Pattern("^[0-9][0-9]+")
+    @Pattern("^[0-9]+$")
     private String port;
 
     @Option
