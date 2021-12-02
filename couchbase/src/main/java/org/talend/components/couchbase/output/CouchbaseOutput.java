@@ -108,7 +108,7 @@ public class CouchbaseOutput implements Serializable {
                     collection.upsert(rec.getString(idFieldName), rec.getBytes(CONTENT_FIELD_NAME),
                             UpsertOptions.upsertOptions().transcoder(RawBinaryTranscoder.INSTANCE));
                 } else if (configuration.getDataSet().getDocumentType() == DocumentType.STRING) {
-                    collection.upsert(rec.getString(idFieldName), rec,
+                    collection.upsert(rec.getString(idFieldName), rec.getString(CONTENT_FIELD_NAME),
                             UpsertOptions.upsertOptions().transcoder(RawStringTranscoder.INSTANCE));
                 } else {
                     collection.upsert(rec.getString(idFieldName), buildJsonObjectWithoutId(rec));
@@ -169,6 +169,10 @@ public class CouchbaseOutput implements Serializable {
         rec.getSchema().getEntries().stream().forEach(entry -> {
             String property = mappings.getOrDefault(entry.getName(), entry.getName());
             Object value = jsonValueFromRecordValue(entry, rec);
+            // need to save encoded byte array as a String
+            if (value.getClass() == byte[].class) {
+                value = new String((byte[]) value);
+            }
             jsonObject.put(property, value);
         });
         return jsonObject;

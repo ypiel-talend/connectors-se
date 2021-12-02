@@ -10,17 +10,23 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.couchbase.testutils;
+package org.talend.components.couchbase.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.talend.components.couchbase.CouchbaseUtilTest;
+import org.talend.components.couchbase.dataset.CouchbaseDataSet;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
 import org.talend.components.couchbase.service.CouchbaseService;
+import org.talend.components.couchbase.source.CouchbaseInputConfiguration;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
+
+import com.couchbase.client.core.error.AuthenticationFailureException;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,8 +45,8 @@ class CouchbaseServiceTest extends CouchbaseUtilTest {
     }
 
     @Test
-    @DisplayName("Test unsuccessful connection")
-    void couchbaseNotSuccessfulConnectionTest() {
+    @DisplayName("Test connection with wrong password")
+    void couchbaseWrongPasswordNotSuccessfulConnectionTest() {
         String wrongPassword = "wrongpass";
 
         CouchbaseDataStore couchbaseDataStoreWrongPass = new CouchbaseDataStore();
@@ -69,4 +75,5 @@ class CouchbaseServiceTest extends CouchbaseUtilTest {
         assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
         assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
     }
+    
 }

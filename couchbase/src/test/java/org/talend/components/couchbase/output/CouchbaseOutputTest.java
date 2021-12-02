@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.codec.RawBinaryTranscoder;
+import com.couchbase.client.java.codec.RawStringTranscoder;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.GetOptions;
 import com.couchbase.client.java.kv.GetResult;
@@ -167,7 +168,48 @@ class CouchbaseOutputTest extends CouchbaseUtilTest {
         }
     }
 
-    // TODO: Create "Check string document output" test.
+    @Test
+    @DisplayName("Check String document output")
+    void outputStringDocumentTest() {
+        log.info("Test start: outputStringDocumentTest");
+        String idPrefix = "outputStringDocumentTest";
+        String docContent = "StringDocumentContent";
+        int docCount = 2;
+
+        List<Record> records = new ArrayList<>();
+        final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
+        for (int i = 0; i < docCount; i++) {
+            Record record = recordBuilderFactory.newRecordBuilder()
+                    .withString(entryBuilder.withName("id").withType(Schema.Type.STRING).build(),
+                            generateDocId(idPrefix, i))
+                    .withString(entryBuilder.withName("content").withType(Schema.Type.STRING).build(),
+                            (docContent + "_" + i).toString())
+                    .build();
+            records.add(record);
+        }
+
+        componentsHandler.setInputData(records);
+        CouchbaseOutputConfiguration configuration = getOutputConfiguration();
+        configuration.getDataSet().setDocumentType(DocumentType.STRING);
+        configuration.setIdFieldName("id");
+        executeJob(configuration);
+
+        Collection collection = couchbaseCluster.bucket(BUCKET_NAME).defaultCollection();
+        List<GetResult> resultList = new ArrayList<>();
+        for (int i = 0; i < docCount; i++) {
+            GetResult result = collection.get(generateDocId(idPrefix, i),
+                    GetOptions.getOptions().transcoder(RawStringTranscoder.INSTANCE));
+            resultList.add(result);
+        }
+
+        assertEquals(2, resultList.size());
+        for (int i = 0; i < docCount; i++) {
+            GetResult getResult = resultList.get(i);
+            String content = getResult.contentAs(String.class);
+            assertEquals((docContent + "_" + i).toString(), content);
+        }
+
+    }
 
     @Test
     @DisplayName("Simple N1QL query with no parameters")
