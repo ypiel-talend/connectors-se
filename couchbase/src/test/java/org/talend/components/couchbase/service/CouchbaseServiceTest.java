@@ -16,19 +16,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.talend.components.couchbase.CouchbaseUtilTest;
-import org.talend.components.couchbase.dataset.CouchbaseDataSet;
+import org.talend.components.couchbase.configuration.ConnectionConfiguration;
+import org.talend.components.couchbase.configuration.ConnectionParameter;
 import org.talend.components.couchbase.datastore.CouchbaseDataStore;
-import org.talend.components.couchbase.service.CouchbaseService;
-import org.talend.components.couchbase.source.CouchbaseInputConfiguration;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
 
-import com.couchbase.client.core.error.AuthenticationFailureException;
+import com.couchbase.client.core.env.TimeoutConfig;
 import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 @WithComponents("org.talend.components.couchbase")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -59,6 +62,21 @@ class CouchbaseServiceTest extends CouchbaseUtilTest {
     }
 
     @Test
+    @DisplayName("Test connection to non-existing bucket")
+    void missingBucketNotSuccessfulConnectionTest() {
+        String wrongBucket = "missing-bucket";
+
+        try {
+            couchbaseService.openDefaultCollection(couchbaseCluster, wrongBucket);
+            assertTrue(false);
+        } catch (ComponentException e) {
+            assertEquals(
+                    "(com.couchbase.client.core.error.BucketNotFoundException) Bucket [" + wrongBucket + "] not found.",
+                    e.getMessage());
+        }
+    }
+
+    @Test
     @DisplayName("Two bootstrap nodes without spaces")
     void resolveAddressesTest() {
         String inputUrl = "192.168.0.1,192.168.0.2";
@@ -75,5 +93,48 @@ class CouchbaseServiceTest extends CouchbaseUtilTest {
         assertEquals("192.168.0.1", resultArrayWithUrls[0], "first expected node");
         assertEquals("192.168.0.2", resultArrayWithUrls[1], "second expected node");
     }
-    
+
+    @Test
+    @DisplayName("Test setting custom timeout values")
+    void customTimeoutValuesTest() {
+        List<ConnectionConfiguration> timeouts = new ArrayList<>();
+        timeouts.add(new ConnectionConfiguration(ConnectionParameter.CONNECTION_TIMEOUT, "30000"));
+        timeouts.add(new ConnectionConfiguration(ConnectionParameter.QUERY_TIMEOUT, "80000"));
+        timeouts.add(new ConnectionConfiguration(ConnectionParameter.ANALYTICS_TIMEOUT, "100000"));
+        CouchbaseDataStore timeoutDatastore = new CouchbaseDataStore();
+        timeoutDatastore.setBootstrapNodes(couchbaseDataStore.getBootstrapNodes());
+        timeoutDatastore.setUsername(couchbaseDataStore.getUsername());
+        timeoutDatastore.setPassword(couchbaseDataStore.getPassword());
+        timeoutDatastore.setUseConnectionParameters(true);
+        timeoutDatastore.setConnectionParametersList(timeouts);
+
+        Cluster timeoutCluster = couchbaseService.openConnection(timeoutDatastore);
+        timeoutCluster.waitUntilReady(Duration.ofSeconds(5));
+        TimeoutConfig timeoutConfig = timeoutCluster.environment().timeoutConfig();
+        assertEquals(30, timeoutConfig.connectTimeout().getSeconds());
+        assertEquals(80, timeoutConfig.queryTimeout().getSeconds());
+        assertEquals(100, timeoutConfig.analyticsTimeout().getSeconds());
+    }
+
+    @Test
+    @DisplayName("Test setting wrong timeout values")
+    void wrongTimeoutValuesTest() {
+        List<ConnectionConfiguration> timeouts = new ArrayList<>();
+        timeouts.add(new ConnectionConfiguration(ConnectionParameter.CONNECTION_TIMEOUT, "value"));
+        CouchbaseDataStore timeoutDatastore = new CouchbaseDataStore();
+        timeoutDatastore.setBootstrapNodes(couchbaseDataStore.getBootstrapNodes());
+        timeoutDatastore.setUsername(couchbaseDataStore.getUsername());
+        timeoutDatastore.setPassword(couchbaseDataStore.getPassword());
+        timeoutDatastore.setUseConnectionParameters(true);
+        timeoutDatastore.setConnectionParametersList(timeouts);
+
+        try {
+            Cluster timeoutCluster = couchbaseService.openConnection(timeoutDatastore);
+            timeoutCluster.waitUntilReady(Duration.ofSeconds(5));
+            assertTrue(false);
+        } catch (ComponentException e) {
+            assertEquals("Unexpected value: value. Only numerical values are accepted.", e.getMessage());
+        }
+    }
+
 }

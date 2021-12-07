@@ -94,6 +94,29 @@ class CouchbaseInputTest extends CouchbaseUtilTest {
         }
     }
 
+    @Test
+    @DisplayName("Test limit input data.")
+    void couchbaseLimitInputDataTest() {
+        log.info("Test start: couchbaseLimitInputDataTest");
+        String idPrefix = "couchbaseLimitInputDataTest";
+        insertTestDataToDB(idPrefix);
+        CouchbaseInputConfiguration limitInputConfiguration = getInputConfiguration();
+        limitInputConfiguration.setLimit("1");
+        limitInputConfiguration.setSelectAction(SelectAction.ALL);
+        executeJob(limitInputConfiguration);
+
+        final List<Record> res = componentsHandler.getCollectedData(Record.class);
+
+        assertNotNull(res);
+        List<Record> data = res.stream()
+                .filter(record -> record.getString("_meta_id_").startsWith(idPrefix))
+                .sorted(Comparator.comparing(r -> r.getString("_meta_id_")))
+                .collect(Collectors.toList());
+        assertEquals(1, data.size());
+
+        assertOneRecord("1", data.get(0));
+    }
+
     private void assertOneRecord(String id, Record record) {
         TestData testData = new TestData();
         assertEquals(testData.getColId() + id, record.getString("t_string"));

@@ -55,13 +55,17 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
+import com.couchbase.client.core.diagnostics.ClusterState;
 import com.couchbase.client.core.diagnostics.PingResult;
 import com.couchbase.client.core.env.TimeoutConfig;
+import com.couchbase.client.core.env.TimeoutConfig.Builder;
 import com.couchbase.client.core.error.AuthenticationFailureException;
+import com.couchbase.client.core.error.UnambiguousTimeoutException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.ClusterOptions;
 import com.couchbase.client.java.Collection;
+import com.couchbase.client.java.diagnostics.WaitUntilReadyOptions;
 import com.couchbase.client.java.env.ClusterEnvironment;
 import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.json.JsonObject;
@@ -99,42 +103,48 @@ public class CouchbaseService implements Serializable {
         String password = dataStore.getPassword();
         String urls = resolveAddresses(bootStrapNodes);
 
-        try {
-            ClusterHolder holder = clustersPool.computeIfAbsent(dataStore, ds -> {
-                ClusterEnvironment.Builder envBuilder = ClusterEnvironment.builder();
+        ClusterHolder holder = clustersPool.computeIfAbsent(dataStore, ds -> {
+            ClusterEnvironment.Builder envBuilder = ClusterEnvironment.builder();
 
-                if (dataStore.isUseConnectionParameters()) {
-                    dataStore.getConnectionParametersList()
-                            .forEach(conf -> setTimeout(envBuilder,
-                                    conf.getParameterName(), parseValue(conf.getParameterValue())));
-                }
-                ClusterEnvironment environment = envBuilder.build();
-                Cluster cluster = Cluster.connect(urls,
-                        ClusterOptions.clusterOptions(username, password).environment(environment));
-                cluster.waitUntilReady(Duration.ofSeconds(5));
-                return new ClusterHolder(environment, cluster);
-            });
-            holder.use();
-            Cluster cluster = holder.getCluster();
-            // connection is lazily initialized; need to send actual request to test it
-            cluster.buckets().getAllBuckets();
-            PingResult pingResult = cluster.ping();
-            LOG.debug(i18n.connectedToCluster(pingResult.id()));
-            return cluster;
-        } catch (AuthenticationFailureException e) {
-            LOG.error(i18n.connectionKO());
-            throw new ComponentException(e);
-        }
+            if (dataStore.isUseConnectionParameters()) {
+                Builder timeoutBuilder = TimeoutConfig.builder();
+                dataStore.getConnectionParametersList()
+                        .forEach(
+                                conf -> setTimeout(timeoutBuilder, conf.getParameterName(),
+                                        parseValue(conf.getParameterValue())));
+                envBuilder.timeoutConfig(timeoutBuilder);
+            }
+            ClusterEnvironment environment = envBuilder.build();
+            Cluster cluster = Cluster.connect(urls,
+                    ClusterOptions.clusterOptions(username, password).environment(environment));
+            try {
+                cluster.waitUntilReady(Duration.ofSeconds(3),
+                        WaitUntilReadyOptions.waitUntilReadyOptions().desiredState(ClusterState.ONLINE));
+            } catch (UnambiguousTimeoutException e) {
+                LOG.error(i18n.connectionKO());
+                throw new ComponentException(i18n.connectionKO());
+            }
+            return new ClusterHolder(environment, cluster);
+        });
+        holder.use();
+        Cluster cluster = holder.getCluster();
+        // connection is lazily initialized; need to send actual request to test it
+        cluster.buckets()
+                .getAllBuckets();
+        PingResult pingResult = cluster.ping();
+        LOG.debug(i18n.connectedToCluster(pingResult.id()));
+
+        return cluster;
 
     }
 
-    private void setTimeout(ClusterEnvironment.Builder envBuilder, ConnectionParameter parameterName, long value) {
+    private void setTimeout(Builder timeoutBuilder, ConnectionParameter parameterName, long value) {
         if (parameterName == ConnectionParameter.CONNECTION_TIMEOUT) {
-            envBuilder.timeoutConfig(TimeoutConfig.connectTimeout(Duration.ofMillis(value)));
+            timeoutBuilder.connectTimeout(Duration.ofMillis(value));
         } else if (parameterName == ConnectionParameter.QUERY_TIMEOUT) {
-            envBuilder.timeoutConfig(TimeoutConfig.queryTimeout(Duration.ofMillis(value)));
+            timeoutBuilder.queryTimeout(Duration.ofMillis(value));
         } else { // Analytics timeout
-            envBuilder.timeoutConfig(TimeoutConfig.analyticsTimeout(Duration.ofMillis(value)));
+            timeoutBuilder.analyticsTimeout(Duration.ofMillis(value));
         }
     }
 
@@ -205,6 +215,9 @@ public class CouchbaseService implements Serializable {
         Bucket bucket;
         Collection collection;
         try {
+            // fetching BucketSettings will send an actual request to cluster
+            // and raise an exception if bucket does not exists.
+            cluster.buckets().getBucket(bucketName);
             bucket = cluster.bucket(bucketName);
             collection = bucket.defaultCollection();
         } catch (Exception e) {
