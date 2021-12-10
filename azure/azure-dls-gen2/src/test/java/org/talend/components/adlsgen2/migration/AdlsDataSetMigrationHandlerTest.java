@@ -16,14 +16,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class AdlsDataSetMigrationHandlerTest {
 
+    private AdlsDataSetMigrationHandler migrator;
+
+    @BeforeEach
+    public void setUp() {
+        migrator = new AdlsDataSetMigrationHandler();
+    }
+
     @Test
     public void testMigrationAfterRefactoringVersion1() {
-        AdlsDataSetMigrationHandler migrator = new AdlsDataSetMigrationHandler();
-
         Map<String, String> oldConfigMap = new HashMap<>();
 
         oldConfigMap.put("csvConfiguration.fileEncoding", "UTF8");
@@ -62,5 +68,26 @@ class AdlsDataSetMigrationHandlerTest {
                 migratedConfigMap.get("csvConfiguration.csvFormatOptions.customEncoding"));
         Assertions.assertEquals(oldConfigMap.get("connection.endpointSuffix"),
                 migratedConfigMap.get("connection.endpointSuffix"));
+    }
+
+    @Test
+    void testMigrateFieldDelimiterTabulationFromV1() {
+        Map<String, String> oldConfigMap = new HashMap<>();
+        oldConfigMap.put("csvConfiguration.fieldDelimiter", "TABULATION");
+
+        Map<String, String> migratedConfigMap = migrator.migrate(1, oldConfigMap);
+
+        Assertions.assertEquals("TAB",
+                migratedConfigMap.get("csvConfiguration.csvFormatOptions.fieldDelimiter"));
+    }
+
+    @Test
+    void testMigrateFieldDelimiterTabulationFromV2() {
+        Map<String, String> oldConfigMap = new HashMap<>();
+        oldConfigMap.put("csvConfiguration.csvFormatOptions.fieldDelimiter", "TABULATION");
+
+        Map<String, String> migratedConfigMap = migrator.migrate(2, oldConfigMap);
+        Assertions.assertEquals("TAB",
+                migratedConfigMap.get("csvConfiguration.csvFormatOptions.fieldDelimiter"));
     }
 }
