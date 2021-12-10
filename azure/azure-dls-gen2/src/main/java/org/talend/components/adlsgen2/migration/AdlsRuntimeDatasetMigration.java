@@ -30,6 +30,10 @@ public class AdlsRuntimeDatasetMigration implements MigrationHandler {
         if (incomingVersion < 2) {
             AdlsDataSetMigrationHandler.migrateDataset(migratedConfiguration, "configuration.dataSet.");
         }
+        if (incomingVersion < 3) {
+            AdlsDataSetMigrationHandler.migrateCSVFieldDelimiterTabulation(migratedConfiguration,
+                    "configuration.dataSet.csvConfiguration.csvFormatOptions.fieldDelimiter");
+        }
         return migratedConfiguration;
     }
 
