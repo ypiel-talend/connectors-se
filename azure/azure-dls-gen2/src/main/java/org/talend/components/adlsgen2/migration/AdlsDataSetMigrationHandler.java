@@ -14,7 +14,7 @@ package org.talend.components.adlsgen2.migration;
 
 import java.util.HashMap;
 import java.util.Map;
-
+import org.talend.components.common.formats.csv.CSVFieldDelimiter;
 import org.talend.sdk.component.api.component.MigrationHandler;
 
 public class AdlsDataSetMigrationHandler implements MigrationHandler {
@@ -26,6 +26,10 @@ public class AdlsDataSetMigrationHandler implements MigrationHandler {
         Map<String, String> migratedConfiguration = new HashMap<>(incomingData);
         if (incomingVersion < 2) {
             migrateDataset(migratedConfiguration, "");
+        }
+        if (incomingVersion < 3) {
+            migrateCSVFieldDelimiterTabulation(migratedConfiguration,
+                    "csvConfiguration.csvFormatOptions.fieldDelimiter");
         }
         return migratedConfiguration;
     }
@@ -56,5 +60,12 @@ public class AdlsDataSetMigrationHandler implements MigrationHandler {
                 configPrefix + "csvConfiguration.csvFormatOptions.textEnclosureCharacter");
         putIfNotNull(migratedConfiguration, configPrefix + "csvConfiguration.escapeCharacter",
                 configPrefix + "csvConfiguration.csvFormatOptions.escapeCharacter");
+    }
+
+    static void migrateCSVFieldDelimiterTabulation(Map<String, String> migratedConfiguration,
+            String fieldDelimiterConfigPath) {
+        if ("TABULATION".equals(migratedConfiguration.get(fieldDelimiterConfigPath))) {
+            migratedConfiguration.put(fieldDelimiterConfigPath, CSVFieldDelimiter.TAB.toString());
+        }
     }
 }

@@ -40,7 +40,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Version(value = 2, migrationHandler = AdlsRuntimeDatasetMigration.class)
+@Version(value = 3, migrationHandler = AdlsRuntimeDatasetMigration.class)
 @Icon(value = Icon.IconType.CUSTOM, custom = "AdlsGen2-output")
 @Processor(name = "AdlsGen2Output")
 @Documentation("Azure Data Lake Storage Gen2 Output")
