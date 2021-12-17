@@ -370,7 +370,7 @@ public class JdbcService {
                 break;
             }
 
-            log.warn("[addField] {} {} {}.", metaData.getColumnName(columnIndex), javaType, sqlType);
+            log.warn("[addField] {} {} {}.", columnName, javaType, sqlType);
             return new ColumnInfo(columnName, sqlType, isNullable);
         } catch (final SQLException e) {
             throw toIllegalStateException(e);
