@@ -13,11 +13,13 @@
 package org.talend.components.mongodb.dataset;
 
 import lombok.Data;
+import org.talend.components.mongo.Mode;
 import org.talend.components.mongo.dataset.MongoCommonDataSet;
 import org.talend.components.mongodb.datastore.MongoDBDataStore;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -26,12 +28,45 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Data
 @Icon(value = Icon.IconType.CUSTOM, custom = "mongo_db-connector")
 @DataSet("MongoDBReadAndWriteDataSet")
-@GridLayout({ @GridLayout.Row({ "datastore" }) })
+@GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "collection" }), @GridLayout.Row({ "mode" }) })
 // @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "todo" }) })
 @Documentation("MongoDB DataSet for read and write both")
-public class MongoDBReadAndWriteDataSet extends MongoCommonDataSet implements BaseDataSet {
+public class MongoDBReadAndWriteDataSet implements MongoCommonDataSet {
 
     @Option
     @Documentation("Connection")
     private MongoDBDataStore datastore;
+
+    @Option
+    @Required
+    @Documentation("Collection")
+    private String collection;
+
+    @Option
+    @Required
+    @Documentation("Mode")
+    private Mode mode = Mode.JSON;
+
+    // TODO almost impossible to split dataset with source and sink, the common part is almost no meaning as dataset
+    /*
+     * @Option
+     *
+     * @ActiveIf(target = "mode", value = "MAPPING")
+     *
+     * @Documentation("Path Mapping")
+     * private List<PathMapping> pathMappings = Collections.emptyList();
+     */
+
+    /*
+     * // TODO readonly and only for user view data
+     *
+     * @Option
+     *
+     * @Code("json")
+     *
+     * @ActiveIf(target = "mode", value = "DOCUMENT")
+     *
+     * @Documentation("Sample for document json")
+     * private String sample;
+     */
 }

@@ -12,14 +12,14 @@
  */
 package org.talend.components.mongodb.sink;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
 import org.talend.components.mongo.BulkWriteType;
-import org.talend.components.mongo.DataAction;
 import org.talend.components.mongo.KeyMapping;
 import org.talend.components.mongo.WriteConcern;
+import org.talend.components.mongo.output.MongoCommonOutputConfiguration;
+import org.talend.components.mongodb.DataAction;
 import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -39,7 +39,7 @@ import lombok.Data;
         @GridLayout.Row({ "keyMappings" }), @GridLayout.Row({ "updateAllDocuments" }) }),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }) }) })
 @Documentation("MongoDB sink configuration")
-public class MongoDBSinkConfiguration implements Serializable {
+public class MongoDBSinkConfiguration implements MongoCommonOutputConfiguration {
 
     @Option
     @Documentation("Dataset")

@@ -12,56 +12,25 @@
  */
 package org.talend.components.mongo.datastore;
 
-import lombok.Data;
 import org.talend.components.mongo.Address;
 import org.talend.components.mongo.AddressType;
 import org.talend.components.mongo.Auth;
 import org.talend.components.mongo.ConnectionParameter;
-import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.constraint.Required;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 
-@Data
-@GridLayout(names = GridLayout.FormType.MAIN,
-        value = { @GridLayout.Row({ "addressType" }), @GridLayout.Row({ "address" }),
-                @GridLayout.Row({ "replicaSetAddress" }), @GridLayout.Row({ "database" }),
-                @GridLayout.Row({ "auth" }) })
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectionParameter" }) })
-@Documentation("MongoDB connection")
-public class MongoCommonDataStore implements Serializable {
+public interface MongoCommonDataStore extends Serializable {
 
-    @Option
-    @Required
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
-    private AddressType addressType = AddressType.STANDALONE;
+    String getDatabase();
 
-    @Option
-    @ActiveIf(target = "addressType", value = "STANDALONE")
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
-    private Address address;
+    AddressType getAddressType();
 
-    @Option
-    @ActiveIf(target = "addressType", value = "REPLICA_SET")
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
-    private List<Address> replicaSetAddress = Collections.emptyList();
+    Address getAddress();
 
-    @Option
-    @Required
-    @Documentation("Database")
-    private String database;
+    List<Address> getReplicaSetAddress();
 
-    @Option
-    @Documentation("auth page")
-    private Auth auth;
+    Auth getAuth();
 
-    // advanced page
-    @Option
-    @Documentation("Connection parameter")
-    private List<ConnectionParameter> connectionParameter = Collections.emptyList();
+    List<ConnectionParameter> getConnectionParameter();
 }

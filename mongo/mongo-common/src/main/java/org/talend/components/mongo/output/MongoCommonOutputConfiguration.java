@@ -10,21 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.mongodb.dataset;
+package org.talend.components.mongo.output;
 
-import org.talend.components.mongo.Mode;
-import org.talend.components.mongodb.datastore.MongoDBDataStore;
+import org.talend.components.mongo.KeyMapping;
+import org.talend.components.mongo.dataset.MongoCommonDataSet;
 
 import java.io.Serializable;
+import java.util.List;
 
-public interface BaseDataSet extends Serializable {
+public interface MongoCommonOutputConfiguration extends Serializable {
 
-    MongoDBDataStore getDatastore();
+    MongoCommonDataSet getDataset();
 
-    String getCollection();
-
-    Mode getMode();
-
-    // List<PathMapping> getPathMappings();
-
+    List<KeyMapping> getKeyMappings();
 }

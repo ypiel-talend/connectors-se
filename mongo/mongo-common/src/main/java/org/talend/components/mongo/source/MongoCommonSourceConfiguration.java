@@ -10,14 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.mongo;
+package org.talend.components.mongo.source;
 
-// hide update, upsert and delete as they don't support parallize
-public enum DataAction {
-    INSERT,
-    // UPDATE,
-    SET,
-    // UPSERT,
-    UPSERT_WITH_SET
-    // DELETE
+import org.talend.components.mongo.dataset.MongoCommonDataSet;
+
+import java.io.Serializable;
+
+public interface MongoCommonSourceConfiguration extends Serializable {
+
+    void setDataset(MongoCommonDataSet dataset);
+
+    MongoCommonDataSet getDataset();
+
+    Long getSampleLimit();
+
 }

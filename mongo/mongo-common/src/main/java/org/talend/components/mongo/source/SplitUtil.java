@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.mongodb.source;
+package org.talend.components.mongo.source;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -26,9 +26,9 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonMode;
 import org.bson.json.JsonWriterSettings;
-import org.talend.components.mongodb.dataset.BaseDataSet;
-import org.talend.components.mongodb.datastore.MongoDBDataStore;
-import org.talend.components.mongodb.service.MongoDBService;
+import org.talend.components.mongo.dataset.MongoCommonDataSet;
+import org.talend.components.mongo.datastore.MongoCommonDataStore;
+import org.talend.components.mongo.service.MongoCommonService;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,13 +37,13 @@ import java.util.List;
 @Slf4j
 public class SplitUtil {
 
-    public static List<String> getQueries4Split(final BaseSourceConfiguration configuration,
-            final MongoDBService service,
+    public static List<String> getQueries4Split(final MongoCommonSourceConfiguration configuration,
+            final MongoCommonService service,
             final int splitCount) {
         List<String> result = new ArrayList<>();
 
-        BaseDataSet dataset = configuration.getDataset();
-        MongoDBDataStore datastore = dataset.getDatastore();
+        MongoCommonDataSet dataset = configuration.getDataset();
+        MongoCommonDataStore datastore = dataset.getDatastore();
 
         MongoClient client = null;
         try {
@@ -62,10 +62,31 @@ public class SplitUtil {
         return result;
     }
 
-    public static long getEstimatedSizeBytes(final BaseSourceConfiguration configuration,
-            final MongoDBService service) {
-        BaseDataSet dataset = configuration.getDataset();
-        MongoDBDataStore datastore = dataset.getDatastore();
+    public static List<String> getQueries4Split(final MongoCommonSourceConfiguration configuration,
+            final int splitCount,
+            final MongoClient client) {
+        List<String> result = new ArrayList<>();
+
+        MongoCommonDataSet dataset = configuration.getDataset();
+        MongoCommonDataStore datastore = dataset.getDatastore();
+
+        try {
+            MongoDatabase database = client.getDatabase(datastore.getDatabase());
+            MongoCollection<Document> collection = database.getCollection(dataset.getCollection());
+
+            result = getQueries4Split(collection, splitCount);
+        } catch (Exception e) {
+            // ignore any exception for split, for example: main node can't reason mongodb
+            log.info(e.getMessage(), e);
+        }
+
+        return result;
+    }
+
+    public static long getEstimatedSizeBytes(final MongoCommonSourceConfiguration configuration,
+            final MongoCommonService service) {
+        MongoCommonDataSet dataset = configuration.getDataset();
+        MongoCommonDataStore datastore = dataset.getDatastore();
 
         MongoClient client = null;
         try {
@@ -81,6 +102,26 @@ public class SplitUtil {
             log.info(e.getMessage(), e);
         } finally {
             service.closeClient(client);
+        }
+
+        return 1l;
+    }
+
+    public static long getEstimatedSizeBytes(final MongoCommonSourceConfiguration configuration,
+            final MongoClient client) {
+        MongoCommonDataSet dataset = configuration.getDataset();
+        MongoCommonDataStore datastore = dataset.getDatastore();
+
+        try {
+            MongoDatabase database = client.getDatabase(datastore.getDatabase());
+            BasicDBObject stat = new BasicDBObject();
+            stat.append("collStats", dataset.getCollection());
+            Document stats = database.runCommand(stat);
+
+            return stats.get("size", Number.class).longValue();
+        } catch (Exception e) {
+            // ignore any exception for split, for example: main node can't reason mongodb
+            log.info(e.getMessage(), e);
         }
 
         return 1l;

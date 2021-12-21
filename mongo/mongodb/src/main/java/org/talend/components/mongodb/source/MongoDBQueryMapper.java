@@ -14,7 +14,8 @@ package org.talend.components.mongodb.source;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.mongodb.service.I18nMessage;
+import org.talend.components.mongo.service.I18nMessage;
+import org.talend.components.mongo.source.SplitUtil;
 import org.talend.components.mongodb.service.MongoDBService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;

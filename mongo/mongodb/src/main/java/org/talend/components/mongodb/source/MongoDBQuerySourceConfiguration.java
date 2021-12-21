@@ -12,6 +12,9 @@
  */
 package org.talend.components.mongodb.source;
 
+import org.talend.components.mongo.dataset.MongoCommonDataSet;
+import org.talend.components.mongo.source.MongoCommonSourceConfiguration;
+import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
 import org.talend.components.mongodb.dataset.MongoDBReadDataSet;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -26,7 +29,7 @@ import lombok.Data;
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataset" }) }),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }) }) })
 @Documentation("MongoDB Source Configuration with full query support")
-public class MongoDBQuerySourceConfiguration implements BaseSourceConfiguration {
+public class MongoDBQuerySourceConfiguration implements MongoCommonSourceConfiguration {
 
     @Option
     @Documentation("dataset")
@@ -34,4 +37,7 @@ public class MongoDBQuerySourceConfiguration implements BaseSourceConfiguration 
 
     private Long sampleLimit = -1L;
 
+    public void setDataset(MongoCommonDataSet dataset) {
+        this.dataset = (MongoDBReadDataSet) dataset;
+    }
 }

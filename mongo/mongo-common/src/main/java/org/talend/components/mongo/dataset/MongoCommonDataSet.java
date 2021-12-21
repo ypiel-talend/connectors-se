@@ -12,25 +12,19 @@
  */
 package org.talend.components.mongo.dataset;
 
-import lombok.Data;
 import org.talend.components.mongo.Mode;
-import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.constraint.Required;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.meta.Documentation;
+import org.talend.components.mongo.datastore.MongoCommonDataStore;
 
-@Data
-@GridLayout({ @GridLayout.Row({ "collection" }), @GridLayout.Row({ "mode" }) })
-@Documentation("Mongo common dataSet for mongodb and docdb")
-public class MongoCommonDataSet {
+import java.io.Serializable;
 
-    @Option
-    @Required
-    @Documentation("Collection")
-    private String collection;
+public interface MongoCommonDataSet extends Serializable {
 
-    @Option
-    @Required
-    @Documentation("Mode")
-    private Mode mode = Mode.JSON;
+    MongoCommonDataStore getDatastore();
+
+    String getCollection();
+
+    Mode getMode();
+
+    // List<PathMapping> getPathMappings();
+
 }

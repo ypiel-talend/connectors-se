@@ -14,7 +14,6 @@ package org.talend.components.mongodb;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
-import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -29,16 +28,17 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 import org.talend.components.common.stream.output.json.RecordToJson;
 import org.talend.components.mongo.*;
+import org.talend.components.mongo.dataset.MongoCommonDataSet;
 import org.talend.components.mongo.service.RecordToDocument;
+import org.talend.components.mongo.source.MongoCommonSourceConfiguration;
+import org.talend.components.mongo.source.SplitUtil;
 import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
 import org.talend.components.mongodb.dataset.MongoDBReadDataSet;
 import org.talend.components.mongodb.datastore.MongoDBDataStore;
 import org.talend.components.mongodb.service.MongoDBService;
 import org.talend.components.mongodb.sink.MongoDBSinkConfiguration;
-import org.talend.components.mongodb.source.BaseSourceConfiguration;
 import org.talend.components.mongodb.source.MongoDBCollectionSourceConfiguration;
 import org.talend.components.mongodb.source.MongoDBQuerySourceConfiguration;
-import org.talend.components.mongodb.source.SplitUtil;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
@@ -225,8 +225,8 @@ public class MongoDBTest {
         Assertions.assertEquals("123.123", record.get(Object.class, "number"));
     }
 
-    private List<Record> getRecords(MongoDBReadDataSet dataset) {
-        MongoDBQuerySourceConfiguration config = new MongoDBQuerySourceConfiguration();
+    private List<Record> getRecords(MongoCommonDataSet dataset) {
+        MongoCommonSourceConfiguration config = new MongoDBQuerySourceConfiguration();
         config.setDataset(dataset);
 
         executeSourceTestJob(config);
@@ -383,7 +383,7 @@ public class MongoDBTest {
         Assertions.assertNull(options.getApplicationName());
     }
 
-    private void executeSourceTestJob(BaseSourceConfiguration configuration) {
+    private void executeSourceTestJob(MongoCommonSourceConfiguration configuration) {
         String sourceConfig =
                 SimpleFactory.configurationByExample().forInstance(configuration).configured().toQueryString();
 
@@ -795,7 +795,7 @@ public class MongoDBTest {
                 .run();
     }
 
-    private void executeSourceAndSinkTestJob(BaseSourceConfiguration source_config,
+    private void executeSourceAndSinkTestJob(MongoCommonSourceConfiguration source_config,
             MongoDBSinkConfiguration sink_config) {
         String sourceConfig =
                 SimpleFactory.configurationByExample().forInstance(source_config).configured().toQueryString();

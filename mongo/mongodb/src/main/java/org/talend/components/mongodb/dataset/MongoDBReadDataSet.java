@@ -13,11 +13,13 @@
 package org.talend.components.mongodb.dataset;
 
 import lombok.Data;
+import org.talend.components.mongo.Mode;
 import org.talend.components.mongo.dataset.MongoCommonDataSet;
 import org.talend.components.mongodb.datastore.MongoDBDataStore;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -27,14 +29,25 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Data
 @Icon(value = Icon.IconType.CUSTOM, custom = "mongo_db-connector")
 @DataSet("MongoDBReadDataSet")
-@GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "query" }) })
+@GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "collection" }), @GridLayout.Row({ "mode" }),
+        @GridLayout.Row({ "query" }) })
 // @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "enableExternalSort" }) })
 @Documentation("MongoDB DataSet for read only")
-public class MongoDBReadDataSet extends MongoCommonDataSet implements BaseDataSet {
+public class MongoDBReadDataSet implements MongoCommonDataSet {
 
     @Option
     @Documentation("Connection")
     private MongoDBDataStore datastore;
+
+    @Option
+    @Required
+    @Documentation("Collection")
+    private String collection;
+
+    @Option
+    @Required
+    @Documentation("Mode")
+    private Mode mode = Mode.JSON;
 
     // TODO almost impossible to split dataset with source and sink, the common part is almost no meaning as dataset
     /*
@@ -61,58 +74,58 @@ public class MongoDBReadDataSet extends MongoCommonDataSet implements BaseDataSe
 
     /*
      * @Option
-     * 
+     *
      * @Code("json")
-     * 
+     *
      * @ActiveIf(target = "queryType", value = "FIND")
-     * 
+     *
      * @Documentation("http://mongodb.github.io/mongo-java-driver/4.0/driver-scala/builders/projections/")
      * private String projection = "{}";
-     * 
+     *
      * @Option
-     * 
+     *
      * @ActiveIf(target = "queryType", value = "AGGREGATION")
-     * 
+     *
      * @Documentation("Aggregation stages")
      * private List<AggregationStage> aggregationStages = Collections.emptyList();
-     * 
+     *
      * @Option
-     * 
+     *
      * @Documentation("Sort by")
      * private List<SortBy> sortBy = Collections.emptyList();
-     * 
+     *
      * @Option
-     * 
+     *
      * @Documentation("Maximum number of documents to be returned")
      * private int limit = -1;
-     * 
+     *
      * // TODO readonly and only for user view data
-     * 
+     *
      * @Option
-     * 
+     *
      * @Code("json")
-     * 
+     *
      * @ActiveIf(target = "mode", value = "DOCUMENT")
-     * 
+     *
      * @Documentation("Sample for document json")
      * private String sample;
-     * 
+     *
      * @Option
-     * 
+     *
      * @Documentation("Set read preference")
      * private boolean setReadPreference;
-     * 
+     *
      * @Option
-     * 
+     *
      * @ActiveIf(target = "setReadPreference", value = "true")
-     * 
+     *
      * @Documentation("Read preference")
      * private ReadPreference readPreference = ReadPreference.PRIMARY;
-     * 
+     *
      * @Option
-     * 
+     *
      * @ActiveIf(target = "queryType", value = "AGGREGATION")
-     * 
+     *
      * @Documentation("Enable external sort")
      * private boolean enableExternalSort;
      */
