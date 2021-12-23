@@ -38,7 +38,6 @@
     <module>mongodb</module>
     <module>couchbase</module>
     <module>azure</module>
-    <module>rest</module>
     <module>dynamics-crm</module>
     <module>marketo</module>
     <module>common</module>
