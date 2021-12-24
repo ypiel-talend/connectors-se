@@ -12,30 +12,21 @@
  */
 package org.talend.components.common.stream.format;
 
-import java.io.Serializable;
-
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public abstract class OptionalLine implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+@GridLayout(@GridLayout.Row({ "active", "size" }))
+public class HeaderLine extends OptionalLine {
 
-    private static final long serialVersionUID = -5243288997978197551L;
+    private static final long serialVersionUID = 1784866198877063893L;
 
     @Option
-    @Min(0)
-    @ActiveIf(target = "active", value = "true")
-    @Documentation("Number of lines.")
-    private int size = 1;
-
-    public abstract boolean isActive();
-
-    public int getSize() {
-        return isActive() ? size : 0;
-    }
+    @Documentation("Set header.")
+    private boolean active;
 }

@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.talend.components.common.stream.api.output.RecordWriter;
 import org.talend.components.common.stream.api.output.RecordWriterSupplier;
+import org.talend.components.common.stream.format.HeaderLine;
 import org.talend.components.common.stream.format.LineConfiguration;
-import org.talend.components.common.stream.format.OptionalLine;
 import org.talend.components.common.stream.format.csv.CSVConfiguration;
 import org.talend.components.common.stream.format.csv.FieldSeparator;
 import org.talend.sdk.component.api.record.Record;
@@ -42,7 +42,7 @@ class CSVRecordWriterTest {
         config.setFieldSeparator(new FieldSeparator());
         config.getFieldSeparator().setFieldSeparatorType(FieldSeparator.Type.SEMICOLON);
 
-        config.getLineConfiguration().setHeader(new OptionalLine());
+        config.getLineConfiguration().setHeader(new HeaderLine());
         config.getLineConfiguration().getHeader().setActive(true);
         config.getLineConfiguration().getHeader().setSize(4);
 

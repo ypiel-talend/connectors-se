@@ -62,7 +62,7 @@ public class LineConfiguration implements ContentFormat {
 
     @Option
     @Documentation("Header.")
-    private OptionalLine header;
+    private HeaderLine header;
 
     public int calcHeader() {
         return Optional.ofNullable(this.header).map(OptionalLine::getSize).orElse(0);
