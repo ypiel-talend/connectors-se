@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -31,6 +31,9 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 @Service
 public class MongoDBService extends MongoCommonService {
 
+    @Service
+    protected I18nMessage i18n;
+
     @HealthCheck("healthCheck")
     public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final MongoDBDataStore datastore) {
         return super.healthCheck(datastore);
@@ -39,7 +42,7 @@ public class MongoDBService extends MongoCommonService {
     public Schema retrieveSchema(@Option("dataset") final MongoDBReadDataSet dataset) {
         MongoDBQuerySourceConfiguration configuration = new MongoDBQuerySourceConfiguration();
         configuration.setDataset(dataset);
-        MongoDBReader reader = new MongoDBReader(configuration, this, super.builderFactory, super.i18n, null);
+        MongoDBReader reader = new MongoDBReader(configuration, this, super.builderFactory, i18n, null);
         reader.init();
         Record record = reader.next();
         reader.release();

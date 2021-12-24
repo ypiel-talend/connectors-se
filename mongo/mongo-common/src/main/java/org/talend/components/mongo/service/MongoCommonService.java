@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -48,9 +48,6 @@ import static org.talend.sdk.component.api.record.Schema.Type.*;
 public class MongoCommonService {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(MongoCommonService.class);
-
-    @Service
-    protected I18nMessage i18n;
 
     @Service
     protected RecordBuilderFactory builderFactory;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,8 +14,8 @@ package org.talend.components.mongodb.source;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.mongo.service.I18nMessage;
 import org.talend.components.mongo.source.SplitUtil;
+import org.talend.components.mongodb.service.I18nMessage;
 import org.talend.components.mongodb.service.MongoDBService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;

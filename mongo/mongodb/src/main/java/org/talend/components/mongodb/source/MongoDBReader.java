@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -25,10 +25,10 @@ import org.talend.components.common.stream.input.json.JsonToRecord;
 import org.talend.components.mongo.dataset.MongoCommonDataSet;
 import org.talend.components.mongo.datastore.MongoCommonDataStore;
 import org.talend.components.mongo.service.DocumentToRecord;
-import org.talend.components.mongo.service.I18nMessage;
 import org.talend.components.mongo.source.MongoCommonInput;
 import org.talend.components.mongo.source.MongoCommonSourceConfiguration;
 import org.talend.components.mongodb.dataset.MongoDBReadDataSet;
+import org.talend.components.mongodb.service.I18nMessage;
 import org.talend.components.mongodb.service.MongoDBService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
@@ -50,15 +50,9 @@ public class MongoDBReader extends MongoCommonInput {
 
     private final MongoCommonSourceConfiguration configuration;
 
-    private final RecordBuilderFactory builderFactory;
-
     private MongoDBService service;
 
     private transient MongoClient client;
-
-    private transient JsonToRecord jsonToRecord;
-
-    private transient DocumentToRecord documentToRecord;
 
     private transient String query4Split;
 
@@ -67,10 +61,9 @@ public class MongoDBReader extends MongoCommonInput {
             final RecordBuilderFactory builderFactory, final I18nMessage i18n, String query4Split) {
         super.configuration = this.configuration = configuration;
         super.service = this.service = service;
-        super.builderFactory = this.builderFactory = builderFactory;
+        this.builderFactory = builderFactory;
         this.i18n = i18n;
         this.query4Split = query4Split;
-
     }
 
     Iterator<Document> iterator = null;
@@ -79,9 +72,6 @@ public class MongoDBReader extends MongoCommonInput {
     public void init() {
         jsonToRecord = new JsonToRecord(this.builderFactory);
         documentToRecord = new DocumentToRecord(this.builderFactory);
-
-        super.jsonToRecord = new JsonToRecord(this.builderFactory);
-        super.documentToRecord = new DocumentToRecord(this.builderFactory);
 
         MongoCommonDataSet dataset = configuration.getDataset();
         MongoCommonDataStore datastore = dataset.getDatastore();

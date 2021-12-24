@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -23,10 +23,10 @@ import org.talend.components.common.stream.output.json.RecordToJson;
 import org.talend.components.mongo.BulkWriteType;
 import org.talend.components.mongo.Mode;
 import org.talend.components.mongo.output.MongoCommonOutput;
-import org.talend.components.mongo.service.I18nMessage;
 import org.talend.components.mongo.service.RecordToDocument;
 import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
 import org.talend.components.mongodb.datastore.MongoDBDataStore;
+import org.talend.components.mongodb.service.I18nMessage;
 import org.talend.components.mongodb.service.MongoDBService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -59,22 +59,18 @@ public class MongoDBProcessor extends MongoCommonOutput {
 
     private transient MongoCollection<Document> collection;
 
-    private transient RecordToJson recordToJson;
-
-    private transient RecordToDocument recordToDocument;
-
     public MongoDBProcessor(@Option("configuration") final MongoDBSinkConfiguration configuration,
             final MongoDBService service,
             final I18nMessage i18n) {
-        this.configuration = configuration;
+        super.configuration = this.configuration = configuration;
         this.service = service;
         this.i18n = i18n;
     }
 
     @PostConstruct
     public void init() {
-        this.recordToJson = new RecordToJson();
-        this.recordToDocument = new RecordToDocument();
+        recordToJson = new RecordToJson();
+        recordToDocument = new RecordToDocument();
 
         MongoDBReadAndWriteDataSet dataset = configuration.getDataset();
         MongoDBDataStore datastore = dataset.getDatastore();

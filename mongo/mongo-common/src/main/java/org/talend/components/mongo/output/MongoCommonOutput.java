@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,13 +13,12 @@
 package org.talend.components.mongo.output;
 
 import org.bson.Document;
+import org.talend.components.common.stream.output.json.RecordToJson;
 import org.talend.components.mongo.KeyMapping;
 import org.talend.components.mongo.Mode;
 import org.talend.components.mongo.service.RecordToDocument;
-import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.components.common.stream.output.json.RecordToJson;
 
 import javax.json.JsonObject;
 import java.io.Serializable;
@@ -27,11 +26,11 @@ import java.util.List;
 
 public class MongoCommonOutput implements Serializable {
 
-    private MongoCommonOutputConfiguration configuration;
+    protected MongoCommonOutputConfiguration configuration;
 
-    private transient RecordToJson recordToJson;
+    protected transient RecordToJson recordToJson;
 
-    private transient RecordToDocument recordToDocument;
+    protected transient RecordToDocument recordToDocument;
 
     protected Document getKeysQueryDocumentAndRemoveKeysFromSourceDocument(List<KeyMapping> keyMappings, Record record,
             Document document) {
@@ -128,13 +127,13 @@ public class MongoCommonOutput implements Serializable {
         return str == null || str.trim().isEmpty();
     }
 
-    protected Document convertRecord2Document(@Input Record record) {
+    protected Document convertRecord2Document(Record record) {
         JsonObject jsonObject = this.recordToJson.fromRecord(record);
         String jsonContent = jsonObject.toString();
         return Document.parse(jsonContent);
     }
 
-    protected Document convertRecord2DocumentDirectly(@Input Record record) {
+    protected Document convertRecord2DocumentDirectly(Record record) {
         return recordToDocument.fromRecord(record);
     }
 
