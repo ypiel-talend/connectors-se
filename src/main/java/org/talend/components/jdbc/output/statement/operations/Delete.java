@@ -52,6 +52,7 @@ public class Delete extends QueryManagerImpl {
         }
         this.query = "DELETE FROM " + getPlatform().identifier(configuration.getDataset().getTableName()) + " WHERE "
                 + keys.stream().map(platform::identifier).map(c -> c + " = ?").collect(joining(" AND "));
+        log.debug("DELETE SQL: " + query);
     }
 
     @Override

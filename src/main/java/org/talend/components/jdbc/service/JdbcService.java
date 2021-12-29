@@ -96,22 +96,28 @@ public class JdbcService {
 
     public static boolean checkTableExistence(final String tableName, final JdbcService.JdbcDatasource dataSource)
             throws SQLException {
+        final String driverId = dataSource.getDriverId();
         try (final Connection connection = dataSource.getConnection()) {
+            log.debug("getSchema(connection): " + getSchema(connection));
             try (final ResultSet resultSet = connection
                     .getMetaData()
                     .getTables(connection.getCatalog(), getSchema(connection),
-                            tableName, new String[] { "TABLE", "SYNONYM" })) {
+                            "Redshift".equalsIgnoreCase(driverId) ? null : tableName,
+                            new String[] { "TABLE", "SYNONYM" })) {
                 while (resultSet.next()) {
-                    if (ofNullable(ofNullable(resultSet.getString("TABLE_NAME")).orElseGet(() -> {
+                    final String table_name = resultSet.getString("TABLE_NAME");
+                    log.debug("table_name " + table_name);
+                    if (ofNullable(ofNullable(table_name).orElseGet(() -> {
                         try {
                             return resultSet.getString("SYNONYM_NAME");
                         } catch (final SQLException e) {
                             return null;
                         }
                     }))
-                            .filter(tn -> ("DeltaLake".equalsIgnoreCase(dataSource.getDriverId())
-                                    ? tableName.equalsIgnoreCase(tn)
-                                    : tableName.equals(tn)))
+                            .filter(tn -> ("DeltaLake".equalsIgnoreCase(driverId)
+                                    || "Redshift".equalsIgnoreCase(driverId)
+                                            ? tableName.equalsIgnoreCase(tn)
+                                            : tableName.equals(tn)))
                             .isPresent()) {
                         return true;
                     }
