@@ -33,6 +33,7 @@ public class SnowflakeInsert extends Insert {
 
     public SnowflakeInsert(Platform platform, OutputConfig configuration, I18nMessage i18n) {
         super(platform, configuration, i18n);
+        snowflakeCopy.setUseOriginColumnName(configuration.isUseOriginColumnName());
     }
 
     @Override

@@ -64,6 +64,8 @@ public class SnowflakeCopyService implements Serializable {
 
     private final List<Path> tmpFiles = new ArrayList<>();
 
+    private boolean isUseOriginColumnName;
+
     private Path tmpFolder;
 
     public List<Reject> putAndCopy(final Connection connection, final List<Record> records, final String fqStageName,
@@ -209,7 +211,7 @@ public class SnowflakeCopyService implements Serializable {
                 .filter(schemaEntries -> !schemaEntries.isEmpty())
                 .map(schemaEntries -> schemaEntries
                         .stream()
-                        .map(Schema.Entry::getName)
+                        .map(e -> isUseOriginColumnName ? e.getOriginalFieldName() : e.getName())
                         .collect(joining("\",\"", "(\"", "\")")))
                 .orElse("");
     }
@@ -232,6 +234,14 @@ public class SnowflakeCopyService implements Serializable {
                 .stream()
                 .map(chunk -> "'" + chunk.getChunk().getFileName() + ".gz'")
                 .collect(joining(",", "(", ")"));
+    }
+
+    public boolean isUseOriginColumnName() {
+        return isUseOriginColumnName;
+    }
+
+    public void setUseOriginColumnName(boolean useOriginColumnName) {
+        isUseOriginColumnName = useOriginColumnName;
     }
 
     @Data
@@ -367,7 +377,7 @@ public class SnowflakeCopyService implements Serializable {
         case RECORD:
         default:
             throw new IllegalArgumentException(
-                    "Unsupported \"" + entry.getType().name() + "\" type for field: " + entry.getName());
+                    "Unsupported \"" + entry.getType().name() + "\" type for field: " + entry.getOriginalFieldName());
         }
     }
 

@@ -67,9 +67,10 @@ public class SnowflakeUpsert extends UpsertDefault {
                                             .getQueryParams()
                                             .values()
                                             .stream()
-                                            .filter(p -> !getUpdate().getIgnoreColumns().contains(p.getName())
-                                                    && !getKeys().contains(p.getName()))
-                                            .map(e -> getPlatform().identifier(e.getName()))
+                                            .filter(p -> !getUpdate().getIgnoreColumns()
+                                                    .contains(p.getOriginalFieldName())
+                                                    && !getKeys().contains(p.getOriginalFieldName()))
+                                            .map(e -> getPlatform().identifier(e.getOriginalFieldName()))
                                             .map(name -> "target." + name + "= source." + name)
                                             .collect(joining(",", "", " "))
                                     + " when not matched then " + "insert"
@@ -77,7 +78,7 @@ public class SnowflakeUpsert extends UpsertDefault {
                                             .getQueryParams()
                                             .values()
                                             .stream()
-                                            .map(e -> getPlatform().identifier(e.getName()))
+                                            .map(e -> getPlatform().identifier(e.getOriginalFieldName()))
                                             .map(name -> "target." + name)
                                             .collect(Collectors.joining(",", "(", ")"))
                                     + " values"
@@ -85,7 +86,7 @@ public class SnowflakeUpsert extends UpsertDefault {
                                             .getQueryParams()
                                             .values()
                                             .stream()
-                                            .map(e -> getPlatform().identifier(e.getName()))
+                                            .map(e -> getPlatform().identifier(e.getOriginalFieldName()))
                                             .map(name -> "source." + name)
                                             .collect(Collectors.joining(",", "(", ")")));
                     connection.commit();
