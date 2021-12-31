@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
@@ -102,6 +103,9 @@ public abstract class AbstractInputEmitter implements Serializable {
                         .rangeClosed(1, metaData.getColumnCount())
                         .forEach(index -> jdbcDriversService.addField(schemaBuilder, metaData, index));
                 schema = schemaBuilder.build();
+                log.debug("Input schema: " + schema);
+                log.debug("SchemaRaw: "
+                        + schema.getEntries().stream().map(e -> e.getRawName()).collect(Collectors.joining(",")));
             }
 
             final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);

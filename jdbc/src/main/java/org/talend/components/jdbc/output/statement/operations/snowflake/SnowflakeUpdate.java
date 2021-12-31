@@ -35,6 +35,7 @@ public class SnowflakeUpdate extends Update {
 
     public SnowflakeUpdate(Platform platform, OutputConfig configuration, I18nMessage i18n) {
         super(platform, configuration, i18n);
+        snowflakeCopy.setUseOriginColumnName(configuration.isUseOriginColumnName());
     }
 
     @Override
@@ -62,9 +63,9 @@ public class SnowflakeUpdate extends Update {
                                     + getQueryParams()
                                             .values()
                                             .stream()
-                                            .filter(p -> !getIgnoreColumns().contains(p.getName())
-                                                    && !getKeys().contains(p.getName()))
-                                            .map(e -> getPlatform().identifier(e.getName()))
+                                            .filter(p -> !getIgnoreColumns().contains(p.getOriginalFieldName())
+                                                    && !getKeys().contains(p.getOriginalFieldName()))
+                                            .map(e -> getPlatform().identifier(e.getOriginalFieldName()))
                                             .map(name -> "target." + name + "= source." + name)
                                             .collect(joining(",", "", " ")));
                 }
