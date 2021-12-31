@@ -26,7 +26,6 @@ import org.apache.parquet.hadoop.ParquetFileWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.talend.components.adlsgen2.output.OutputConfiguration;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.common.Constants;
 import org.talend.components.common.converters.ParquetConverter;
@@ -42,8 +41,8 @@ public class ParquetBlobWriter extends BlobWriter {
     protected static final String EXT_PARQUET = ".parquet";
 
     public ParquetBlobWriter(OutputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
-            JsonBuilderFactory jsonFactory, AdlsGen2Service service, AdlsActiveDirectoryService tokenProviderService) {
-        super(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
+            JsonBuilderFactory jsonFactory, AdlsGen2Service service) {
+        super(configuration, recordBuilderFactory, jsonFactory, service);
         this.converter = ParquetConverter.of(recordBuilderFactory, configuration.getDataSet().getParquetConfiguration(),
                 Constants.ADLS_NAMESPACE);
         this.config = new Configuration();

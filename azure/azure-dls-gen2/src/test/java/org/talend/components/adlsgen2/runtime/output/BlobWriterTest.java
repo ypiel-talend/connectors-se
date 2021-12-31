@@ -26,8 +26,7 @@ public class BlobWriterTest extends AdlsGen2TestBase {
     @BeforeEach
     public void setup() throws Exception {
         super.setUp();
-        blobWriter = new ParquetBlobWriter(outputConfiguration, recordBuilderFactory, jsonBuilderFactory, service,
-                tokenProviderService);
+        blobWriter = new ParquetBlobWriter(outputConfiguration, recordBuilderFactory, jsonBuilderFactory, service);
     }
 
     @Test

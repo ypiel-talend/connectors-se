@@ -14,7 +14,7 @@ package org.talend.components.azure.migration;
 
 import java.util.Map;
 
-import org.talend.components.common.connection.adls.AzureAuthType;
+import org.talend.components.common.connection.azureblob.AzureAuthType;
 import org.talend.sdk.component.api.component.MigrationHandler;
 
 public class AzureStorageConnectionMigration implements MigrationHandler {

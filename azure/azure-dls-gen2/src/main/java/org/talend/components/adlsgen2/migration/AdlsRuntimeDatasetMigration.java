@@ -36,5 +36,4 @@ public class AdlsRuntimeDatasetMigration implements MigrationHandler {
         }
         return migratedConfiguration;
     }
-
 }

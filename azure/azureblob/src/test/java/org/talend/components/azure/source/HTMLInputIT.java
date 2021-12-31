@@ -225,7 +225,7 @@ class HTMLInputIT extends BaseIT {
                 .to("collector")
                 .build()
                 .run());
-        
+
         Assertions.assertTrue(expectedException.getMessage().contains(messageService.fileIsNotValidExcelHTML()));
     }
 }

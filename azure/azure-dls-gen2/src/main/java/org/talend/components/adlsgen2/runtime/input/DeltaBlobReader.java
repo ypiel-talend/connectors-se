@@ -14,13 +14,12 @@ package org.talend.components.adlsgen2.runtime.input;
 
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
-import org.talend.components.adlsgen2.common.format.FileFormatRuntimeException;
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
 import org.talend.components.adlsgen2.input.InputConfiguration;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.adlsgen2.service.BlobInformations;
 import org.talend.components.common.Constants;
+import org.talend.components.common.connection.adls.AuthMethod;
 import org.talend.components.common.converters.DeltaConverter;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -29,14 +28,13 @@ import io.delta.standalone.Snapshot;
 import io.delta.standalone.data.CloseableIterator;
 import io.delta.standalone.data.RowRecord;
 import lombok.extern.slf4j.Slf4j;
-import static org.talend.components.adlsgen2.datastore.AdlsGen2Connection.AuthMethod;
 
 @Slf4j
 public class DeltaBlobReader extends BlobReader {
 
     public DeltaBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
-            AdlsGen2Service connectionServices, AdlsActiveDirectoryService tokenProviderService) {
-        super(configuration, recordBuilderFactory, connectionServices, tokenProviderService);
+            AdlsGen2Service connectionServices) {
+        super(configuration, recordBuilderFactory, connectionServices);
     }
 
     @Override
@@ -64,7 +62,7 @@ public class DeltaBlobReader extends BlobReader {
         private void initConfig() {
             hadoopConfig = new Configuration();
 
-            AdlsGen2Connection datastore = datasetRuntimeInfo.getConnection();
+            AdlsGen2Connection datastore = configuration.getDataSet().getConnection();
             String accountName = datastore.getAccountName();
             AuthMethod authMethod = datastore.getAuthMethod();
 
@@ -116,11 +114,11 @@ public class DeltaBlobReader extends BlobReader {
                 // we need to list blob objects? i think no need
                 StringBuilder strBuilder = new StringBuilder();
                 strBuilder.append("abfss://")
-                        .append(datasetRuntimeInfo.getDataSet().getFilesystem())
+                        .append(configuration.getDataSet().getFilesystem())
                         .append('@')
-                        .append(datasetRuntimeInfo.getConnection().getAccountName())
+                        .append(configuration.getDataSet().getConnection().getAccountName())
                         .append('.')
-                        .append(datasetRuntimeInfo.getConnection().getEndpointSuffix());
+                        .append(configuration.getDataSet().getConnection().getEndpointSuffix());
                 if (!getCurrentBlob().getBlobPath().startsWith("/")) {
                     strBuilder.append("/");
                 }

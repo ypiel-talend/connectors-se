@@ -21,7 +21,6 @@ import javax.json.JsonBuilderFactory;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
 import org.talend.components.adlsgen2.runtime.input.BlobReader;
 import org.talend.components.adlsgen2.runtime.input.BlobReader.BlobFileReaderFactory;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -53,16 +52,12 @@ public class AdlsGen2Input implements Serializable {
 
     private BlobReader reader;
 
-    private AdlsActiveDirectoryService tokenProviderService;
-
     public AdlsGen2Input(@Option("configuration") final InputConfiguration configuration, final AdlsGen2Service service,
-            final RecordBuilderFactory recordBuilderFactory, JsonBuilderFactory jsonFactory,
-            final AdlsActiveDirectoryService tokenProviderService) {
+            final RecordBuilderFactory recordBuilderFactory, JsonBuilderFactory jsonFactory) {
         this.configuration = configuration;
         this.service = service;
         this.jsonFactory = jsonFactory;
         this.recordBuilderFactory = recordBuilderFactory;
-        this.tokenProviderService = tokenProviderService;
     }
 
     @PostConstruct
@@ -70,8 +65,7 @@ public class AdlsGen2Input implements Serializable {
         log.debug("[init]");
         try {
             reader = BlobFileReaderFactory
-                    .getReader(configuration, recordBuilderFactory, jsonFactory, service,
-                            tokenProviderService);
+                    .getReader(configuration, recordBuilderFactory, jsonFactory, service);
         } catch (Exception e) {
             log.error("[init] Error: {}.", e.getMessage());
             throw new AdlsGen2RuntimeException(e.getMessage(), e);

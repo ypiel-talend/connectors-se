@@ -12,107 +12,100 @@
  */
 package org.talend.components.adlsgen2.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-
+import java.util.List;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.talend.components.adlsgen2.AdlsGen2TestBase;
-import org.talend.components.adlsgen2.ClientGen2Fake;
-import org.talend.components.adlsgen2.FakeActiveDirectoryService;
-import org.talend.components.adlsgen2.FakeResponse;
-import org.talend.components.adlsgen2.datastore.AdlsGen2Connection.AuthMethod;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
+import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
+import org.talend.components.common.connection.adls.AuthMethod;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
-import org.talend.sdk.component.api.service.completion.SuggestionValues.Item;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-import org.talend.sdk.component.junit.BaseComponentsHandler;
-import org.talend.sdk.component.junit5.Injected;
-import org.talend.sdk.component.junit5.WithComponents;
-import org.talend.sdk.component.runtime.manager.ComponentManager;
+import static org.mockito.ArgumentMatchers.any;
 
-@WithComponents("org.talend.components.adlsgen2")
-class UIActionServiceTest extends AdlsGen2TestBase {
+class UIActionServiceTest {
 
-    @Injected
-    private BaseComponentsHandler componentsHandler;
+    @Mock
+    private AdlsGen2Service service;
 
-    private UIActionService uiActionService;
+    @Mock
+    private I18n i18n;
+
+    @InjectMocks
+    private UIActionService uiActionService = new UIActionService();
 
     @BeforeEach
     protected void setUp() throws Exception {
-        super.setUp();
-
-        final ComponentManager manager = componentsHandler.asManager();
-        final JsonObject filesystems = Json
-                .createObjectBuilder()
-                .add("filesystems", Json
-                        .createArrayBuilder()
-                        .add(Json.createObjectBuilder().add("etag", "0x8D89D1980D8BD4B").add("name", "ct1").build())
-                        .build())
-                .build();
-        ClientGen2Fake fake = new ClientGen2Fake(new FakeResponse<>(200, filesystems, null, null));
-        ClientGen2Fake.inject(manager, fake);
-
-        this.uiActionService = this.componentsHandler.findService(UIActionService.class);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
     void filesystemListSuggestions() {
-        connection.setAuthMethod(AuthMethod.SAS);
-        SuggestionValues fs = this.uiActionService.filesystemList(connection);
-        assertNotNull(fs);
-        for (Item i : fs.getItems()) {
-            assertNotNull(i);
-        }
+        List<String> expectedList = new ArrayList<>();
+        expectedList.add("fs1");
+        expectedList.add("fs2");
+        Mockito.when(service.filesystemList(any())).thenReturn(expectedList);
+
+        AdlsGen2Connection someConnection = new AdlsGen2Connection();
+        someConnection.setAuthMethod(AuthMethod.SharedKey);
+        someConnection.setAccountName("someAccount");
+        someConnection.setSharedKey("someKey");
+        SuggestionValues resultValues = uiActionService.filesystemList(someConnection);
+
+        List<String> resultList =
+                resultValues.getItems().stream().map(SuggestionValues.Item::getId).collect(Collectors.toList());
+
+        Assertions.assertEquals(expectedList.size(), resultList.size());
+        Assertions.assertArrayEquals(expectedList.toArray(new String[] {}), resultList.toArray(new String[] {}));
     }
 
     @Test
     void testHealthCheck() {
-        connection.setAuthMethod(AuthMethod.SAS);
-        final HealthCheckStatus status = this.uiActionService.validateConnection(connection);
-        assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
+        Mockito.when(service.filesystemList(any())).thenReturn(Collections.singletonList("SomeFS"));
+
+        AdlsGen2Connection someConnection = new AdlsGen2Connection();
+        someConnection.setAuthMethod(AuthMethod.SharedKey);
+        someConnection.setAccountName("someAccount");
+        someConnection.setSharedKey("someKey");
+        HealthCheckStatus resultStatus = uiActionService.validateConnection(someConnection);
+
+        Assertions.assertEquals(HealthCheckStatus.Status.OK, resultStatus.getStatus());
     }
 
     @Test
     void testHealthCheckOKDespitePermissionIssueForAD() {
-        // override test connection with AD one
-        connection.setAuthMethod(AuthMethod.ActiveDirectory);
+        AdlsGen2RuntimeException permissionIssueRuntimeException = new AdlsGen2RuntimeException(403, "SomeError");
+        Mockito.when(service.filesystemList(any())).thenThrow(permissionIssueRuntimeException);
 
-        connection.setTenantId("fakeTenant");
-        connection.setClientId("fakeClient");
-        connection.setClientSecret("somePass");
-
-        final ComponentManager manager = componentsHandler.asManager();
-        FakeActiveDirectoryService fakeActiveDirectoryService = new FakeActiveDirectoryService();
-        ClientGen2Fake fake = new ClientGen2Fake(new FakeResponse<>(403, null, Collections.emptyMap(), null)); // auth
-                                                                                                               // permission
-                                                                                                               // mismatch
-        ClientGen2Fake.inject(manager, fake);
-        ClientGen2Fake
-                .inject(manager, AdlsActiveDirectoryService.class, UIActionService.class, fakeActiveDirectoryService);
-
-        this.uiActionService = this.componentsHandler.findService(UIActionService.class);
-
-        final HealthCheckStatus status = this.uiActionService.validateConnection(connection);
-        assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
+        AdlsGen2Connection someConnection = new AdlsGen2Connection();
+        someConnection.setAuthMethod(AuthMethod.ActiveDirectory);
+        someConnection.setAccountName("someAccount");
+        someConnection.setTenantId("someTenantID");
+        someConnection.setClientId("someClientID");
+        someConnection.setClientSecret("someClientSecret");
+        final HealthCheckStatus status = this.uiActionService.validateConnection(someConnection);
+        Assertions.assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
+        Mockito.verify(i18n).healthCheckActiveDirectoryPermissions();
     }
 
     @Test
     void testHealthCheckKOForPermissionIssueForSAS() {
+        Mockito.when(service.filesystemList(any())).thenThrow(ComponentException.class);
 
-        final ComponentManager manager = componentsHandler.asManager();
-        ClientGen2Fake fake = new ClientGen2Fake(new FakeResponse<>(403, null, null, null)); // auth permission mismatch
-        ClientGen2Fake.inject(manager, fake);
-
-        this.uiActionService = this.componentsHandler.findService(UIActionService.class);
-
-        final HealthCheckStatus status = this.uiActionService.validateConnection(connection);
-        assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
+        AdlsGen2Connection someConnection = new AdlsGen2Connection();
+        someConnection.setAuthMethod(AuthMethod.SAS);
+        someConnection.setAccountName("someAccount");
+        someConnection.setSas("?sv=2022-12-31&ss=bfqt&srt=sco&spr=https&sig=TEST_SHARED_SIGNATURE");
+        final HealthCheckStatus status = this.uiActionService.validateConnection(someConnection);
+        Assertions.assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
     }
 
 }

@@ -22,7 +22,6 @@ import org.talend.components.adlsgen2.migration.AdlsRuntimeDatasetMigration;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
 import org.talend.components.adlsgen2.runtime.output.BlobWriter;
 import org.talend.components.adlsgen2.runtime.output.BlobWriterFactory;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -50,9 +49,6 @@ public class AdlsGen2Output implements Serializable {
     RecordBuilderFactory recordBuilderFactory;
 
     @Service
-    private final AdlsActiveDirectoryService tokenProviderService;
-
-    @Service
     JsonBuilderFactory jsonBuilderFactory;
 
     @Service
@@ -64,13 +60,11 @@ public class AdlsGen2Output implements Serializable {
 
     public AdlsGen2Output(@Option("configuration") final OutputConfiguration configuration,
             final AdlsGen2Service service,
-            final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory,
-            AdlsActiveDirectoryService tokenProviderService) {
+            final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
         this.jsonBuilderFactory = jsonBuilderFactory;
-        this.tokenProviderService = tokenProviderService;
     }
 
     @PostConstruct
@@ -78,8 +72,7 @@ public class AdlsGen2Output implements Serializable {
         log.debug("[init]");
         try {
             blobWriter = BlobWriterFactory
-                    .getWriter(configuration, recordBuilderFactory, jsonBuilderFactory, service,
-                            tokenProviderService);
+                    .getWriter(configuration, recordBuilderFactory, jsonBuilderFactory, service);
         } catch (Exception e) {
             log.error("[init] {}", e.getMessage());
             throw new AdlsGen2RuntimeException(e.getMessage(), e);

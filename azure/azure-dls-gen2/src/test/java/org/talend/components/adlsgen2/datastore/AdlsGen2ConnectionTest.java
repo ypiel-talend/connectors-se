@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.common.Constants;
-import org.talend.components.adlsgen2.datastore.AdlsGen2Connection.AuthMethod;
+import org.talend.components.common.connection.adls.AuthMethod;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

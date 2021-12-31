@@ -16,7 +16,7 @@ import java.io.*;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.talend.components.common.connection.adls.AzureAuthType;
+import org.talend.components.common.connection.azureblob.AzureAuthType;
 import org.talend.components.common.connection.azureblob.AzureConnectionActiveDir;
 import org.talend.components.common.connection.azureblob.AzureStorageConnectionAccount;
 import org.talend.components.common.connection.azureblob.Protocol;

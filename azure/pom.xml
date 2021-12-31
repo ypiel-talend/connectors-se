@@ -1,69 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.talend.components</groupId>
-        <artifactId>connectors-se</artifactId>
-        <version>1.29.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>org.talend.components</groupId>
+    <artifactId>connectors-se</artifactId>
+    <version>1.29.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>azure</artifactId>
-    <packaging>pom</packaging>
+  <artifactId>azure</artifactId>
+  <packaging>pom</packaging>
 
-    <name>Connectors SE :: Azure</name>
+  <name>Connectors SE :: Azure</name>
 
-    <modules>
-        <module>azurecommon</module>
-        <module>azureblob</module>
-        <module>azure-dls-gen2</module>
-    </modules>
+  <modules>
+    <module>azurecommon</module>
+    <module>azureblob</module>
+    <module>azure-dls-gen2</module>
+  </modules>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!--
-        Set it to true if you want the documentation to be rendered as HTML and PDF
+    <!--
+    Set it to true if you want the documentation to be rendered as HTML and PDF
 
-        You can also use it on the command line: -Dtalend.documentation.htmlAndPdf=true
-        -->
-        <talend.documentation.htmlAndPdf>false</talend.documentation.htmlAndPdf>
+    You can also use it on the command line: -Dtalend.documentation.htmlAndPdf=true
+    -->
+    <talend.documentation.htmlAndPdf>false
+    </talend.documentation.htmlAndPdf>
 
-        <!--
-        if you want to deploy into the studio you can use the related goal:
+    <hadoop-common.version>3.2.2</hadoop-common.version>
+    <hadoop-azure.version>3.2.2.1</hadoop-azure.version>
+    <mockito.version>2.23.0</mockito.version>
+  </properties>
 
-        mvn package talend-component:deploy-in-studio -Dtalend.component.studioHome=/path/to/studio
-
-        TIP: it is recommended to set this property into your settings.xml in an active by default profile.
-        -->
-        <talend.component.studioHome />
-
-        <hadoop-common.version>3.2.2</hadoop-common.version>
-        <hadoop-azure.version>3.2.2.1</hadoop-azure.version>
-    </properties>
-
-    <dependencyManagement>
-      <dependencies>
-        <dependency>
-          <groupId>com.google.protobuf</groupId>
-          <artifactId>protobuf-java</artifactId>
-          <version>3.4.0</version>
-        </dependency>
-      </dependencies>
-    </dependencyManagement>
+  <dependencyManagement>
     <dependencies>
-        <!-- AzureBlob library -->
-        <dependency>
-            <groupId>com.microsoft.azure</groupId>
-            <artifactId>azure-storage</artifactId>
-            <version>8.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-            <scope>compile</scope>
-        </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>3.4.0</version>
+      </dependency>
+      <!--latest versions use azure-core
+        which depends on the jacksonV 12, not compatible with pipeline designer -->
+      <dependency>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-identity</artifactId>
+        <version>1.2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-storage-file-datalake</artifactId>
+        <version>12.4.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.microsoft.azure</groupId>
+        <artifactId>azure-storage</artifactId>
+        <version>8.6.6</version>
+      </dependency>
     </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-storage</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
 </project>

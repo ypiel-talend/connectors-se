@@ -14,29 +14,25 @@ package org.talend.components.adlsgen2.runtime.input;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.talend.components.adlsgen2.input.InputConfiguration;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.adlsgen2.service.BlobInformations;
 import org.talend.components.common.stream.input.avro.AvroToRecord;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AvroBlobReader extends BlobReader {
 
     public AvroBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
-            AdlsGen2Service service,
-            AdlsActiveDirectoryService activeDirectoryService) {
-        super(configuration, recordBuilderFactory, service, activeDirectoryService);
+            AdlsGen2Service service) {
+        super(configuration, recordBuilderFactory, service);
     }
 
     @Override
@@ -71,7 +67,7 @@ public class AvroBlobReader extends BlobReader {
         protected void readBlob() {
             closePreviousInputStream();
             try {
-                input = service.getBlobInputstream(datasetRuntimeInfo, getCurrentBlob());
+                input = service.getBlobInputstream(configuration.getDataSet(), getCurrentBlob());
                 DatumReader<GenericRecord> reader = new GenericDatumReader<>();
                 avroItemIterator = new DataFileStream<>(input, reader);
             } catch (Exception e) {

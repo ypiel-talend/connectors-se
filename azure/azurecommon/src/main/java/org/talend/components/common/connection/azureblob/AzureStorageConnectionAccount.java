@@ -14,7 +14,6 @@ package org.talend.components.common.connection.azureblob;
 
 import java.io.Serializable;
 
-import org.talend.components.common.connection.adls.AzureAuthType;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;

@@ -40,16 +40,22 @@
   </properties>
 
   <dependencies>
+    <!-- ADLS SDK dependency section -->
     <dependency>
-      <groupId>org.talend.components</groupId>
-      <artifactId>stream-json</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-identity</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.talend.components</groupId>
-      <artifactId>stream-excel</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-file-datalake</artifactId>
     </dependency>
+
+    <!--AzureBlob SDK dependency section -->
+    <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-storage</artifactId>
+    </dependency>
+
     <!-- traductions -->
     <dependency>
       <groupId>org.talend.components</groupId>
@@ -70,6 +76,12 @@
     </dependency>
 
     <!-- Excel format -->
+    <dependency>
+      <groupId>org.talend.components</groupId>
+      <artifactId>stream-excel</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
@@ -255,10 +267,10 @@
       <version>3.5.3</version>
     </dependency>
 
-    <!-- Testing -->
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
+      <groupId>org.talend.components</groupId>
+      <artifactId>stream-json</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <!-- For Active directory authentication -->

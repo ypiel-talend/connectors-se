@@ -15,4 +15,5 @@ package org.talend.components.common.connection.adls;
 public enum AuthMethod {
     SharedKey,
     SAS,
+    ActiveDirectory
 }

@@ -20,8 +20,6 @@
 
         <talend.documentation.htmlAndPdf>false</talend.documentation.htmlAndPdf>
 
-        <mockito.version>2.23.0</mockito.version>
-
         <talend.component.studioHome />
     </properties>
 

@@ -14,11 +14,9 @@ package org.talend.components.adlsgen2.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
-import org.talend.components.adlsgen2.datastore.AdlsGen2Connection.AuthMethod;
-import org.talend.components.adlsgen2.runtime.AdlsDatastoreRuntimeInfo;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
+import org.talend.components.common.connection.adls.AuthMethod;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -26,7 +24,7 @@ import org.talend.sdk.component.api.service.completion.SuggestionValues.Item;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-
+import com.azure.storage.file.datalake.models.DataLakeStorageException;
 import lombok.extern.slf4j.Slf4j;
 import static org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus.Status.KO;
 import static org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus.Status.OK;
@@ -43,17 +41,12 @@ public class UIActionService {
     private AdlsGen2Service service;
 
     @Service
-    private AdlsActiveDirectoryService activeDirectoryService;
-
-    @Service
     private I18n i18n;
 
     @HealthCheck(ACTION_HEALTHCHECK)
     public HealthCheckStatus validateConnection(@Option final AdlsGen2Connection connection) {
-        AdlsDatastoreRuntimeInfo connectionRuntimeInfo =
-                new AdlsDatastoreRuntimeInfo(connection, activeDirectoryService);
         try {
-            service.filesystemList(connectionRuntimeInfo);
+            service.filesystemList(connection);
         } catch (Exception e) {
             String msg;
             if (connection.getAuthMethod() == AuthMethod.SAS) {
@@ -61,7 +54,7 @@ public class UIActionService {
             } else if (connection.getAuthMethod() == AuthMethod.SharedKey) {
                 msg = i18n.healthCheckSharedKey();
             } else {
-                if (e instanceof AdlsGen2RuntimeException && ((AdlsGen2RuntimeException) e).getErrorCode() == 403) {
+                if (e instanceof DataLakeStorageException && ((DataLakeStorageException) e).getStatusCode() == 403) {
                     // workaround to unlock using permission-limited active directory connections in studio
                     return new HealthCheckStatus(OK, i18n.healthCheckActiveDirectoryPermissions());
                 }
@@ -74,10 +67,8 @@ public class UIActionService {
 
     @Suggestions(ACTION_FILESYSTEMS)
     public SuggestionValues filesystemList(@Option final AdlsGen2Connection connection) {
-        AdlsDatastoreRuntimeInfo connectionRuntimeInfo =
-                new AdlsDatastoreRuntimeInfo(connection, activeDirectoryService);
         List<Item> items = new ArrayList<>();
-        for (String s : service.filesystemList(connectionRuntimeInfo)) {
+        for (String s : service.filesystemList(connection)) {
             items.add(new SuggestionValues.Item(s, s));
         }
         return new SuggestionValues(false, items);

@@ -61,7 +61,6 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
         @Override
         protected void readItem() {
-
             try (InputStream input = getCurrentItem().openInputStream()) {
                 Document document =
                         Jsoup.parse(input, getConfig().getExcelOptions()

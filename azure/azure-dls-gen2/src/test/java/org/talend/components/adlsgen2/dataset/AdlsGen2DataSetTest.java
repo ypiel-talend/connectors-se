@@ -20,7 +20,7 @@ import java.io.ObjectOutputStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
-import org.talend.components.adlsgen2.datastore.AdlsGen2Connection.AuthMethod;
+import org.talend.components.common.connection.adls.AuthMethod;
 import org.talend.components.common.formats.ParquetFormatOptions;
 import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.formats.csv.CSVFormatOptionsWithSchema;

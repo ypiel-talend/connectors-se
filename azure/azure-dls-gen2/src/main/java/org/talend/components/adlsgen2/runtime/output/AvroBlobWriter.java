@@ -22,7 +22,6 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.talend.components.adlsgen2.output.OutputConfiguration;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.common.Constants;
 import org.talend.components.common.stream.output.avro.RecordToAvro;
@@ -39,8 +38,8 @@ public class AvroBlobWriter extends BlobWriter {
     private RecordToAvro converter;
 
     public AvroBlobWriter(OutputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
-            JsonBuilderFactory jsonFactory, AdlsGen2Service service, AdlsActiveDirectoryService tokenProviderService) {
-        super(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
+            JsonBuilderFactory jsonFactory, AdlsGen2Service service) {
+        super(configuration, recordBuilderFactory, jsonFactory, service);
         converter = new RecordToAvro(Constants.ADLS_NAMESPACE);
     }
 
