@@ -95,8 +95,7 @@ class UIActionServiceTest {
         someConnection.setClientId("someClientID");
         someConnection.setClientSecret("someClientSecret");
         final HealthCheckStatus status = this.uiActionService.validateConnection(someConnection);
-        Assertions.assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
-        Mockito.verify(i18n).healthCheckActiveDirectoryPermissions();
+        Assertions.assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
     }
 
     @Test
