@@ -31,6 +31,8 @@ import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import static org.mockito.ArgumentMatchers.any;
 
+import com.azure.storage.file.datalake.models.DataLakeStorageException;
+
 class UIActionServiceTest {
 
     @Mock
@@ -82,7 +84,8 @@ class UIActionServiceTest {
 
     @Test
     void testHealthCheckOKDespitePermissionIssueForAD() {
-        AdlsGen2RuntimeException permissionIssueRuntimeException = new AdlsGen2RuntimeException(403, "SomeError");
+        DataLakeStorageException permissionIssueRuntimeException = Mockito.mock(DataLakeStorageException.class);
+        Mockito.when(permissionIssueRuntimeException.getStatusCode()).thenReturn(403);
         Mockito.when(service.filesystemList(any())).thenThrow(permissionIssueRuntimeException);
 
         AdlsGen2Connection someConnection = new AdlsGen2Connection();
