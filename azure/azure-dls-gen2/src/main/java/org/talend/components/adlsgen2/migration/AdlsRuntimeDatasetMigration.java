@@ -24,7 +24,8 @@ import org.talend.sdk.component.api.component.MigrationHandler;
 
 public class AdlsRuntimeDatasetMigration implements MigrationHandler {
 
-    @Override public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
+    @Override
+    public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
         Map<String, String> migratedConfiguration = new HashMap<>(incomingData);
         if (incomingVersion < 2) {
             AdlsDataSetMigrationHandler.migrateDataset(migratedConfiguration, "configuration.dataSet.");

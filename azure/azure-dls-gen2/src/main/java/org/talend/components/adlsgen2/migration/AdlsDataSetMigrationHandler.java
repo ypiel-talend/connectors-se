@@ -52,13 +52,13 @@ public class AdlsDataSetMigrationHandler implements MigrationHandler {
                 configPrefix + "csvConfiguration.csvFormatOptions.encoding");
         putIfNotNull(migratedConfiguration, configPrefix + "csvConfiguration.customFileEncoding",
                 configPrefix + "csvConfiguration.csvFormatOptions.customEncoding");
-        putIfNotNull(migratedConfiguration,configPrefix + "csvConfiguration.fieldDelimiter",
+        putIfNotNull(migratedConfiguration, configPrefix + "csvConfiguration.fieldDelimiter",
                 configPrefix + "csvConfiguration.csvFormatOptions.fieldDelimiter");
-        putIfNotNull(migratedConfiguration,configPrefix + "csvConfiguration.customFieldDelimiter",
+        putIfNotNull(migratedConfiguration, configPrefix + "csvConfiguration.customFieldDelimiter",
                 configPrefix + "csvConfiguration.csvFormatOptions.customFieldDelimiter");
-        putIfNotNull(migratedConfiguration,configPrefix + "csvConfiguration.textEnclosureCharacter",
+        putIfNotNull(migratedConfiguration, configPrefix + "csvConfiguration.textEnclosureCharacter",
                 configPrefix + "csvConfiguration.csvFormatOptions.textEnclosureCharacter");
-        putIfNotNull(migratedConfiguration,configPrefix + "csvConfiguration.escapeCharacter",
+        putIfNotNull(migratedConfiguration, configPrefix + "csvConfiguration.escapeCharacter",
                 configPrefix + "csvConfiguration.csvFormatOptions.escapeCharacter");
     }
 
