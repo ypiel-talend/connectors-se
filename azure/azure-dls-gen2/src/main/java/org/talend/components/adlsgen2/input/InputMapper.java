@@ -15,6 +15,7 @@ package org.talend.components.adlsgen2.input;
 import java.io.Serializable;
 import java.util.List;
 import javax.json.JsonBuilderFactory;
+import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
 import org.talend.components.adlsgen2.migration.AdlsRuntimeDatasetMigration;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.sdk.component.api.component.Icon;
@@ -27,6 +28,7 @@ import org.talend.sdk.component.api.input.PartitionSize;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.connection.Connection;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import static java.util.Collections.singletonList;
 
@@ -46,6 +48,8 @@ public class InputMapper implements Serializable {
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
+    @Connection
+    private AdlsGen2Connection injectedConnection;
     public InputMapper(@Option("configuration") final InputConfiguration configuration, final AdlsGen2Service service,
             final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory) {
         this.configuration = configuration;
@@ -66,6 +70,9 @@ public class InputMapper implements Serializable {
 
     @Emitter
     public AdlsGen2Input createWorker() {
+        if (injectedConnection != null) {
+            configuration.getDataSet().setConnection(injectedConnection);
+        }
         return new AdlsGen2Input(configuration, service, recordBuilderFactory, jsonBuilderFactory);
     }
 }

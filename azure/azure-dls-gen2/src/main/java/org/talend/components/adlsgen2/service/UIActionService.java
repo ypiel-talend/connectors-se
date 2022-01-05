@@ -18,10 +18,13 @@ import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
 import org.talend.components.common.connection.adls.AuthMethod;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.exception.ComponentException;
+import org.talend.sdk.component.api.exception.ComponentException.ErrorOrigin;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.SuggestionValues.Item;
 import org.talend.sdk.component.api.service.completion.Suggestions;
+import org.talend.sdk.component.api.service.connection.CreateConnection;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import com.azure.storage.file.datalake.models.DataLakeStorageException;
@@ -42,6 +45,20 @@ public class UIActionService {
 
     @Service
     private I18n i18n;
+    /**
+     * This is not really a dedicated service for UI but need to check connection.
+     *
+     * @param connection The datastore configuration.
+     * @return The datastore if the check connection is successful.
+     */
+    @CreateConnection(value = "AzureAdlsGen2")
+    public AdlsGen2Connection createConn(@Option("configuration") final AdlsGen2Connection connection) {
+        final HealthCheckStatus healthCheckStatus = this.validateConnection(connection);
+        if (healthCheckStatus.getStatus() != OK) {
+            throw new ComponentException(ErrorOrigin.USER, healthCheckStatus.getComment());
+        }
+        return connection;
+    }
 
     @HealthCheck(ACTION_HEALTHCHECK)
     public HealthCheckStatus validateConnection(@Option final AdlsGen2Connection connection) {
