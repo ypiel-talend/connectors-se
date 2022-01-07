@@ -42,7 +42,7 @@ public abstract class AbstractInputEmitter implements Serializable {
 
     private final InputConfig inputConfig;
 
-    private RecordBuilderFactory recordBuilderFactory;
+    private final RecordBuilderFactory recordBuilderFactory;
 
     private final JdbcService jdbcDriversService;
 
@@ -57,6 +57,8 @@ public abstract class AbstractInputEmitter implements Serializable {
     private JdbcService.JdbcDatasource dataSource;
 
     private transient Schema schema;
+
+    private transient JdbcService.ColumnInfo[] columnInfoList;
 
     AbstractInputEmitter(final InputConfig inputConfig, final JdbcService jdbcDriversService,
             final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
@@ -84,6 +86,17 @@ public abstract class AbstractInputEmitter implements Serializable {
             statement = connection.createStatement();
             statement.setFetchSize(inputConfig.getDataSet().getFetchSize());
             resultSet = statement.executeQuery(query);
+
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
+            columnInfoList = IntStream.rangeClosed(1, metaData.getColumnCount())
+                    .mapToObj(index -> jdbcDriversService.addField(schemaBuilder, metaData, index))
+                    .toArray(JdbcService.ColumnInfo[]::new);
+            schema = schemaBuilder.build();
+
+            log.debug("Input schema: {}", schema);
+            log.debug("SchemaRaw: {}",
+                    schema.getEntries().stream().map(Schema.Entry::getRawName).collect(Collectors.joining(",")));
         } catch (final SQLException e) {
             throw toIllegalStateException(e);
         }
@@ -95,23 +108,10 @@ public abstract class AbstractInputEmitter implements Serializable {
             if (!resultSet.next()) {
                 return null;
             }
-
-            final ResultSetMetaData metaData = resultSet.getMetaData();
-            if (schema == null) {
-                final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
-                IntStream
-                        .rangeClosed(1, metaData.getColumnCount())
-                        .forEach(index -> jdbcDriversService.addField(schemaBuilder, metaData, index));
-                schema = schemaBuilder.build();
-                log.debug("Input schema: " + schema);
-                log.debug("SchemaRaw: "
-                        + schema.getEntries().stream().map(e -> e.getRawName()).collect(Collectors.joining(",")));
-            }
-
             final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);
-            IntStream
-                    .rangeClosed(1, metaData.getColumnCount())
-                    .forEach(index -> jdbcDriversService.addColumn(recordBuilder, metaData, index, resultSet));
+            for (int index = 0; index < columnInfoList.length; index++) {
+                jdbcDriversService.addColumn(recordBuilder, columnInfoList[index], resultSet.getObject(index + 1));
+            }
             return recordBuilder.build();
         } catch (final SQLException e) {
             throw toIllegalStateException(e);

@@ -12,7 +12,6 @@
  */
 package org.talend.components.jdbc.service;
 
-import static java.sql.ResultSetMetaData.columnNoNulls;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static org.talend.components.jdbc.ErrorFactory.toIllegalStateException;
@@ -34,7 +33,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,7 +62,7 @@ public class JdbcService {
 
     private static final String SNOWFLAKE_DATABASE_NAME = "Snowflake";
 
-    private static Pattern READ_ONLY_QUERY_PATTERN = Pattern
+    private static final Pattern READ_ONLY_QUERY_PATTERN = Pattern
             .compile(
                     "^SELECT\\s+((?!((\\bINTO\\b)|(\\bFOR\\s+UPDATE\\b)|(\\bLOCK\\s+IN\\s+SHARE\\s+MODE\\b))).)+$",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
@@ -151,7 +149,7 @@ public class JdbcService {
 
         private final Resolver.ClassLoaderDescriptor classLoaderDescriptor;
 
-        private HikariDataSource dataSource;
+        private final HikariDataSource dataSource;
 
         @Getter
         private final String driverId;
@@ -221,7 +219,6 @@ public class JdbcService {
 
                 driver
                         .getFixedParameters()
-                        .stream()
                         .forEach(kv -> dataSource.addDataSourceProperty(kv.getKey(), kv.getValue()));
 
             } finally {
@@ -308,14 +305,36 @@ public class JdbcService {
         return schema;
     }
 
-    public void addField(final Schema.Builder builder, final ResultSetMetaData metaData, final int columnIndex) {
+    /**
+     * To avoid accessing {@link ResultSetMetaData} object for each cell of a table in
+     * {@link JdbcService#addColumn(Record.Builder, ColumnInfo, Object)}, the required information for each column
+     * is kept in this class.
+     * <p>
+     * Accessing {@link ResultSetMetaData} object requires Class Loader switching, which is a source of high performance
+     * overhead.
+     *
+     * @see JdbcDatasource.ContextualDelegate#invoke(Object, Method, Object[])
+     */
+    @Getter
+    @AllArgsConstructor
+    public static class ColumnInfo {
+
+        private final String columnName;
+
+        private final int sqlType;
+
+        private final boolean isNullable;
+    }
+
+    public ColumnInfo addField(final Schema.Builder builder, final ResultSetMetaData metaData, final int columnIndex) {
         try {
             final String javaType = metaData.getColumnClassName(columnIndex);
             final int sqlType = metaData.getColumnType(columnIndex);
-            final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
-            entryBuilder
-                    .withName(metaData.getColumnName(columnIndex))
-                    .withNullable(metaData.isNullable(columnIndex) != columnNoNulls);
+            final String columnName = metaData.getColumnName(columnIndex);
+            final boolean isNullable = metaData.isNullable(columnIndex) != ResultSetMetaData.columnNoNulls;
+            final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder()
+                    .withName(columnName)
+                    .withNullable(isNullable);
             switch (sqlType) {
             case java.sql.Types.SMALLINT:
             case java.sql.Types.TINYINT:
@@ -343,7 +362,7 @@ public class JdbcService {
                 break;
             case java.sql.Types.BINARY:
             case java.sql.Types.VARBINARY:
-            case Types.LONGVARBINARY:
+            case java.sql.Types.LONGVARBINARY:
                 builder.withEntry(entryBuilder.withType(BYTES).build());
                 break;
             case java.sql.Types.BIGINT:
@@ -357,84 +376,76 @@ public class JdbcService {
                 break;
             }
 
-            log.warn("[addField] {} {} {}.", metaData.getColumnName(columnIndex), javaType, sqlType);
-
+            log.warn("[addField] {} {} {}.", columnName, javaType, sqlType);
+            return new ColumnInfo(columnName, sqlType, isNullable);
         } catch (final SQLException e) {
             throw toIllegalStateException(e);
         }
     }
 
-    public void addColumn(final Record.Builder builder, final ResultSetMetaData metaData, final int columnIndex,
-            final ResultSet resultSet) {
-        try {
-            final int sqlType = metaData.getColumnType(columnIndex);
-            final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
-            final Object value = resultSet.getObject(columnIndex);
-            entryBuilder
-                    .withName(metaData.getColumnName(columnIndex))
-                    .withNullable(metaData.isNullable(columnIndex) != columnNoNulls);
-            switch (sqlType) {
-            case java.sql.Types.SMALLINT:
-            case java.sql.Types.TINYINT:
-            case java.sql.Types.INTEGER:
-                if (value != null) {
-                    if (value instanceof Integer) {
-                        builder.withInt(entryBuilder.withType(INT).build(), (Integer) value);
-                    } else if (value instanceof Short) {
-                        builder.withInt(entryBuilder.withType(INT).build(), ((Short) value).intValue());
-                    } else {
-                        builder.withLong(entryBuilder.withType(LONG).build(), Long.valueOf(value.toString()));
-                    }
+    public void addColumn(final Record.Builder builder, final ColumnInfo columnInfo, final Object value) {
+        final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder()
+                .withName(columnInfo.getColumnName())
+                .withNullable(columnInfo.isNullable());
+        switch (columnInfo.getSqlType()) {
+        case java.sql.Types.SMALLINT:
+        case java.sql.Types.TINYINT:
+        case java.sql.Types.INTEGER:
+            if (value != null) {
+                if (value instanceof Integer) {
+                    builder.withInt(entryBuilder.withType(INT).build(), (Integer) value);
+                } else if (value instanceof Short) {
+                    builder.withInt(entryBuilder.withType(INT).build(), ((Short) value).intValue());
+                } else {
+                    builder.withLong(entryBuilder.withType(LONG).build(), Long.parseLong(value.toString()));
                 }
-                break;
-            case java.sql.Types.FLOAT:
-            case java.sql.Types.REAL:
-                if (value != null) {
-                    builder.withFloat(entryBuilder.withType(FLOAT).build(), (Float) value);
-                }
-                break;
-            case java.sql.Types.DOUBLE:
-                if (value != null) {
-                    builder.withDouble(entryBuilder.withType(DOUBLE).build(), (Double) value);
-                }
-                break;
-            case java.sql.Types.BOOLEAN:
-                if (value != null) {
-                    builder.withBoolean(entryBuilder.withType(BOOLEAN).build(), (Boolean) value);
-                }
-                break;
-            case java.sql.Types.DATE:
-                builder
-                        .withDateTime(entryBuilder.withType(DATETIME).build(),
-                                value == null ? null : new Date(((java.sql.Date) value).getTime()));
-                break;
-            case java.sql.Types.TIME:
-                builder
-                        .withDateTime(entryBuilder.withType(DATETIME).build(),
-                                value == null ? null : new Date(((java.sql.Time) value).getTime()));
-                break;
-            case java.sql.Types.TIMESTAMP:
-                builder
-                        .withDateTime(entryBuilder.withType(DATETIME).build(),
-                                value == null ? null : new Date(((java.sql.Timestamp) value).getTime()));
-                break;
-            case java.sql.Types.BINARY:
-            case java.sql.Types.VARBINARY:
-            case Types.LONGVARBINARY:
-                builder.withBytes(entryBuilder.withType(BYTES).build(), value == null ? null : (byte[]) value);
-                break;
-            case java.sql.Types.BIGINT:
-            case java.sql.Types.DECIMAL:
-            case java.sql.Types.NUMERIC:
-            case java.sql.Types.VARCHAR:
-            case java.sql.Types.LONGVARCHAR:
-            case java.sql.Types.CHAR:
-            default:
-                builder.withString(entryBuilder.withType(STRING).build(), value == null ? null : String.valueOf(value));
-                break;
             }
-        } catch (final SQLException e) {
-            throw toIllegalStateException(e);
+            break;
+        case java.sql.Types.FLOAT:
+        case java.sql.Types.REAL:
+            if (value != null) {
+                builder.withFloat(entryBuilder.withType(FLOAT).build(), (Float) value);
+            }
+            break;
+        case java.sql.Types.DOUBLE:
+            if (value != null) {
+                builder.withDouble(entryBuilder.withType(DOUBLE).build(), (Double) value);
+            }
+            break;
+        case java.sql.Types.BOOLEAN:
+            if (value != null) {
+                builder.withBoolean(entryBuilder.withType(BOOLEAN).build(), (Boolean) value);
+            }
+            break;
+        case java.sql.Types.DATE:
+            builder
+                    .withDateTime(entryBuilder.withType(DATETIME).build(),
+                            value == null ? null : new Date(((java.sql.Date) value).getTime()));
+            break;
+        case java.sql.Types.TIME:
+            builder
+                    .withDateTime(entryBuilder.withType(DATETIME).build(),
+                            value == null ? null : new Date(((java.sql.Time) value).getTime()));
+            break;
+        case java.sql.Types.TIMESTAMP:
+            builder
+                    .withDateTime(entryBuilder.withType(DATETIME).build(),
+                            value == null ? null : new Date(((java.sql.Timestamp) value).getTime()));
+            break;
+        case java.sql.Types.BINARY:
+        case java.sql.Types.VARBINARY:
+        case java.sql.Types.LONGVARBINARY:
+            builder.withBytes(entryBuilder.withType(BYTES).build(), value == null ? null : (byte[]) value);
+            break;
+        case java.sql.Types.BIGINT:
+        case java.sql.Types.DECIMAL:
+        case java.sql.Types.NUMERIC:
+        case java.sql.Types.VARCHAR:
+        case java.sql.Types.LONGVARCHAR:
+        case java.sql.Types.CHAR:
+        default:
+            builder.withString(entryBuilder.withType(STRING).build(), value == null ? null : String.valueOf(value));
+            break;
         }
     }
 
