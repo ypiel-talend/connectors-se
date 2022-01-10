@@ -17,6 +17,7 @@ import org.talend.components.common.stream.api.output.RecordWriterSupplier;
 import org.talend.components.common.stream.api.output.TargetFinder;
 import org.talend.components.common.stream.format.ContentFormat;
 import org.talend.components.common.stream.format.excel.ExcelConfiguration;
+import org.talend.components.common.stream.format.excel.ExcelConfiguration.ExcelFormat;
 
 public class ExcelWriterSupplier implements RecordWriterSupplier {
 
@@ -27,6 +28,9 @@ public class ExcelWriterSupplier implements RecordWriterSupplier {
         }
 
         final ExcelConfiguration excelConfig = (ExcelConfiguration) config;
+        if (excelConfig.getExcelFormat() == ExcelFormat.HTML) {
+            throw new IllegalArgumentException("HTML Excel format is not supported for writing.");
+        }
 
         return new ExcelWriter(excelConfig, target);
     }
