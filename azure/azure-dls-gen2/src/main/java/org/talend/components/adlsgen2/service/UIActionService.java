@@ -45,6 +45,7 @@ public class UIActionService {
 
     @Service
     private I18n i18n;
+
     /**
      * This is not really a dedicated service for UI but need to check connection.
      *

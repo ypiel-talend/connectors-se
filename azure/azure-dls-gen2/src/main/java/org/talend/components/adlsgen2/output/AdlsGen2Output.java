@@ -62,6 +62,7 @@ public class AdlsGen2Output implements Serializable {
 
     @Connection
     private AdlsGen2Connection injectedConnection;
+
     public AdlsGen2Output(@Option("configuration") final OutputConfiguration configuration,
             final AdlsGen2Service service,
             final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory) {

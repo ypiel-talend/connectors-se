@@ -50,6 +50,7 @@ public class InputMapper implements Serializable {
 
     @Connection
     private AdlsGen2Connection injectedConnection;
+
     public InputMapper(@Option("configuration") final InputConfiguration configuration, final AdlsGen2Service service,
             final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory) {
         this.configuration = configuration;
