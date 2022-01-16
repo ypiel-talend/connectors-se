@@ -155,6 +155,7 @@ public class SnowflakeCopyService implements Serializable {
         final String query = String
                 .format(COPY_INTO_QUERY, fqTableName, getColumnNamesList(chunks), fqStageName,
                         joinFileNamesString(chunks));
+        log.debug("Copy query: " + query);
         try (final Statement statement = connection.createStatement();
                 final ResultSet result = statement.executeQuery(query)) {
             final List<CopyError> errors = new ArrayList<>();
