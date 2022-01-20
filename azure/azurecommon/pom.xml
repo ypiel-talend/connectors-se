@@ -245,6 +245,16 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- log4j1 to log4j2 api migration and log4j2 api&implement, at common, this should be provided scope, should runtime platform provide it -->
+    <!-- but here, not confident for the cloud platform, so add it here -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-1.2-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-azure-tlnd</artifactId>

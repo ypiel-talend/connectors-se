@@ -76,6 +76,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--as hadoop&spark/beam both hard depend on log4j1, so need this bridge-->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-1.2-api</artifactId>
+        </dependency>
+        <!--use log4j2 implement for this test module-->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
