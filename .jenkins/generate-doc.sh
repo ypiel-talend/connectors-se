@@ -1,19 +1,59 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
-OUTPUT_DIR=target/talend-component-kit_documentation/
-INDEX_OUTPUT=$OUTPUT_DIR/index.html
+set -xe
 
-rm -Rf $OUTPUT_DIR
-mkdir -p $OUTPUT_DIR
+# Generates the HTML documentation for the components
+# $@: the extra parameters to be used in the maven command
+main() {
+  local extraBuildParams=("$@")
 
-modules=$(grep '^[ \t]*<module>' pom.xml | sed 's/.*>\(.*\)<.*/\1/' | sort -u | grep -v common)
-mvn ${EXTRA_BUILD_PARAMS} -Pdocumentation-html dependency:unpack@doc-html-theme
-mvn ${EXTRA_BUILD_PARAMS} -Pdocumentation-html -T1C asciidoctor:process-asciidoc@html \
-    $(echo $modules | sed 's/[^ ]* */-pl &/g')
+  local outputFolder=target/talend-component-kit_documentation/
 
-echo "<html><head><title>Documentations</title></head><body>" > $INDEX_OUTPUT
-echo "<h1>Reports</h1>" >> $INDEX_OUTPUT
-echo "<ul>" >> $INDEX_OUTPUT
-echo "$(echo $modules | sed 's/[^ ]*/<li><a href="&\/documentation.html">&<\/a><\/li>/g')" >> $INDEX_OUTPUT
-echo "</ul>" >> $INDEX_OUTPUT
-echo "</body></html>" >> $INDEX_OUTPUT
+  rm --recursive --force "${outputFolder}" || true
+  mkdir --parents "${outputFolder}"
+
+  local modules
+  modules="$(
+    readModulesFromPom \
+      | grep 'content=' \
+      | awk -F '=' '{print $2}' \
+      | sort --unique \
+      | grep --invert-match --extended-regexp 'common'
+  )"
+
+  mvn dependency:unpack@doc-html-theme asciidoctor:process-asciidoc@html \
+    --batch-mode \
+    --threads '1C' \
+    --define "git.branch=${BRANCH_NAME:-master}" \
+    --activate-profiles 'documentation-html' \
+    --projects "$(tr '\n' ',' <<< "${modules}")" \
+    "${extraBuildParams[@]}"
+
+  local moduleBulletPoints
+  moduleBulletPoints="$(
+    while read -r module; do
+      printf '      <li><a href="%s/documentation.html">%s</a></li>\n' "${module}" "${module}"
+    done <<< "${modules}"
+  )"
+
+  printf '%s\n' \
+    '<html>' \
+    '  <head><title>Documentations</title></head>'           \
+    '  <body>'                                               \
+    '    <h1>Reports</h1>'                                   \
+    '    <ul>'                                               \
+    "${moduleBulletPoints}"                                  \
+    '    </ul>'                                              \
+    '  </body>'                                              \
+    '</html>'                                                \
+    > "${outputFolder}/index.html"
+}
+
+readModulesFromPom() {
+  xmllint --shell pom.xml << __EOF
+    setns ns=http://maven.apache.org/POM/4.0.0
+    xpath /ns:project//ns:module/text()
+__EOF
+}
+
+main "$@"
