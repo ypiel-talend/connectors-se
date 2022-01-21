@@ -1209,6 +1209,9 @@
 
   <profiles>
     <profile>
+        <id>STANDARD</id>
+    </profile>
+    <profile>
       <id>documentation-html</id>
       <build>
         <plugins>
