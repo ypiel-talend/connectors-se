@@ -11,10 +11,13 @@ main() {
   local extraBuildParams=("$@")
 
   # Real task
+  # ITs profile is added for jdbc
   mvn clean install \
       --batch-mode \
       --threads '1C' \
-      --activate-profiles "${jenkinsAction}" \
+      --activate-profiles "${jenkinsAction},ITs" \
+      --errors \
+      ${talendOssRepositoryArg}
       "${extraBuildParams[@]}"
 }
 
