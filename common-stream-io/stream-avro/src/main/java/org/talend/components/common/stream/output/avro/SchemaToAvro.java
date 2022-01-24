@@ -13,7 +13,6 @@
 package org.talend.components.common.stream.output.avro;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,10 +23,6 @@ import org.talend.sdk.component.api.record.Schema;
 public class SchemaToAvro {
 
     private static final String ERROR_UNDEFINED_TYPE = "Undefined type %s.";
-
-    private static final String AVRO_PROP_JAVA_CLASS = "java-class";
-
-    private static final String AVRO_PROP_TALEND_FIELD_PATTERN = "talend.field.pattern";
 
     private static final String RECORD_NAME = "talend_";
 
@@ -108,8 +103,6 @@ public class SchemaToAvro {
     private static org.apache.avro.Schema buildDateTimeSchema() {
         org.apache.avro.Schema dateSchema = org.apache.avro.Schema.create(org.apache.avro.Schema.Type.LONG);
         LogicalTypes.timestampMillis().addToSchema(dateSchema);
-        dateSchema.addProp(AVRO_PROP_TALEND_FIELD_PATTERN, ""); // for studio
-        dateSchema.addProp(AVRO_PROP_JAVA_CLASS, Date.class.getCanonicalName()); // for studio
         return dateSchema;
     }
 
