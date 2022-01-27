@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 # git config hack when pushing to bypass :
 # "fatal: could not read Username for 'https://github.com': No such device or address" error.
 # This appeared after 2fa auth activation on github.
@@ -18,14 +20,25 @@ if [[ $pre_release_version != *'-SNAPSHOT' ]]; then
 fi
 
 # prepare release
-mvn -B -s .jenkins/settings.xml release:clean release:prepare ${EXTRA_BUILD_PARAMS} -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/
+mvn release:clean release:prepare \
+  --batch-mode \
+  --settings .jenkins/settings.xml \
+  --define "talend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/" \
+  ${EXTRA_BUILD_PARAMS}
 if [[ ! $? -eq 0 ]]; then
   echo mvn error during build
   exit 123
 fi
 
 # perform release
-mvn -B -s .jenkins/settings.xml release:perform ${EXTRA_BUILD_PARAMS} -Darguments='-Dmaven.javadoc.skip=true' -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/
+mvn release:perform\
+  --batch-mode \
+  --settings .jenkins/settings.xml \
+  --define 'skipTests=true' \
+  --define 'maven.javadoc.skip=true' \
+  --define 'arguments=-DskipTests=true -Dmaven.javadoc.skip=true' \
+  --define "talend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/" \
+  ${EXTRA_BUILD_PARAMS}
 if [[ ! $? -eq 0 ]]; then
   echo mvn error during build
   exit 123
