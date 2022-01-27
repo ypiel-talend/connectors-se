@@ -23,8 +23,6 @@ fi
 mvn release:clean release:prepare \
   --batch-mode \
   --settings .jenkins/settings.xml \
-  --define 'skipTests=true' \
-  --define 'arguments=-DskipTests=true -Dmaven.test.skip=true' \
   --define "talend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/" \
   ${EXTRA_BUILD_PARAMS}
 if [[ ! $? -eq 0 ]]; then
@@ -38,7 +36,7 @@ mvn release:perform\
   --settings .jenkins/settings.xml \
   --define 'skipTests=true' \
   --define 'maven.javadoc.skip=true' \
-  --define 'arguments=-DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true' \
+  --define 'arguments=-DskipTests=true -Dmaven.javadoc.skip=true' \
   --define "talend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/" \
   ${EXTRA_BUILD_PARAMS}
 if [[ ! $? -eq 0 ]]; then
