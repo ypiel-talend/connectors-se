@@ -12,6 +12,7 @@
  */
 package org.talend.components.common.stream.format;
 
+import java.nio.charset.Charset;
 import java.util.Optional;
 
 import org.talend.sdk.component.api.configuration.Option;
@@ -66,6 +67,10 @@ public class LineConfiguration implements ContentFormat {
 
     public int calcHeader() {
         return Optional.ofNullable(this.header).map(OptionalLine::getSize).orElse(0);
+    }
+
+    public Charset getEncodingCharset() {
+        return Charset.forName(encoding.getEncoding());
     }
 
 }

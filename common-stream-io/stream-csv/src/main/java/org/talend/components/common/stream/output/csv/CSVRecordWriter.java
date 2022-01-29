@@ -55,7 +55,8 @@ public class CSVRecordWriter implements RecordWriter {
         }
 
         final OutputStream outputStream = this.target.find();
-        final PrintStream ps = new PrintStream(outputStream);
+        final PrintStream ps =
+                new PrintStream(outputStream, false, config.getLineConfiguration().getEncoding().getEncoding());
         this.printer = csvFormat.print(ps);
     }
 
