@@ -6,18 +6,18 @@ set -xe
 # Also generates the Talend components uispec
 # $1: the Jenkinsfile's params.Action
 # $@: the extra parameters to be used in the maven commands
-main() {
-  local jenkinsAction="${1?Missing Jenkins action}"; shift
-  local extraBuildParams=("$@")
+main() (
+  jenkinsAction="${1?Missing Jenkins action}"; shift
+  extraBuildParams=("$@")
 
   # Real task
   # ITs profile is added for jdbc
-  mvn clean verify \
+  mvn verify \
+      --errors \
       --batch-mode \
       --threads '1C' \
       --activate-profiles "${jenkinsAction},ITs" \
-      --errors \
       "${extraBuildParams[@]}"
-}
+)
 
 main "$@"

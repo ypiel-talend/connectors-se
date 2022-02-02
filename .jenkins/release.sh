@@ -3,99 +3,61 @@
 set -xe
 
 # Releases the components
-# $1: the version being released (semver, extracted from pom)
+# $1: the Jenkinsfile's params.Action
+# $2: the version being released (semver, extracted from pom)
 # $@: the extra parameters to be used in the maven commands
-main() {
-  local releaseVersion="${1?Missing release version}"; shift
-  local extraBuildParams=("$@")
+main() (
+  jenkinsAction="${1?Missing Jenkins action}"
+  releaseVersion="${2?Missing release version}"
+  shift; shift
+  extraBuildParams=("$@")
 
-  # Prepare release
-  mvn release:clean release:prepare \
+  setMavenVersion "${releaseVersion}"
+  setMavenProperty 'common.version' "${releaseVersion}"
+
+  mvn deploy \
+    --errors \
     --batch-mode \
+    --threads '1C' \
     --define 'maven.javadoc.skip=true' \
-    --define "arguments=-Dmaven.javadoc.skip=true" \
+    --activate-profiles "${jenkinsAction}" \
     "${extraBuildParams[@]}"
 
-  # perform release
-  mvn release:perform \
-    --batch-mode \
-    --define 'maven.javadoc.skip=true' \
-    --define "arguments=-Dmaven.javadoc.skip=true" \
-    "${extraBuildParams[@]}"
-
-  postReleaseVersion="$(
-    mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate \
-      --quiet \
-      --define 'forceStdout' \
-      --define 'expression=project.version'
-  )"
-
-  # Reset the current branch to the commit just before the release:
-  git reset --hard 'HEAD~2'
-
-  # Squash merge to next-iter state:
-  git merge --squash 'HEAD@{1}'
-
-  # Commit:
   git add --update
-  git commit --message "[jenkins-release] prepare for next development iteration ${postReleaseVersion}"
+  git commit --message "[jenkins-release] Release ${releaseVersion}"
 
-  # push release bump to origin
-  if [[ "${BRANCH_NAME}" == 'master' ]]; then
-      # master is out of date, creating a maintenance branch
-      # TODO: 👇 shellcheck doesn't like that
-      masterVersion=${releaseVersion%.*}
-      git checkout -b         "maintenance/${masterVersion}"
-      git push --force origin "maintenance/${masterVersion}"
+  majorVersion="$(cut --delimiter '.' --fields 1 <<< "${releaseVersion}")"
+  minorVersion="$(cut --delimiter '.' --fields 2 <<< "${releaseVersion}")"
+  patchVersion="$(cut --delimiter '.' --fields 3 <<< "${releaseVersion}")"
+  postReleaseVersion="${majorVersion}.${minorVersion}.$((patchVersion + 1))-SNAPSHOT"
 
-      # bump master
-      major="$(awk -F '.' '{print $1}' <<< "${masterVersion}")"
-      minor="$(awk -F '.' '{print $2}' <<< "${masterVersion}")"
-      newMinor="$(( minor + 1))"
-      nextMasterVersion="${major}.${newMinor}.0-SNAPSHOT"
+  tag="release/${releaseVersion}"
+  git tag "${tag}"
 
-      # apply bump
-      mvn versions:set \
-        --batch-mode \
-        --define "newVersion=${nextMasterVersion}" \
-        "${extraBuildParams[@]}"
+  setMavenVersion "${postReleaseVersion}"
+  setMavenProperty 'common.version' "${postReleaseVersion}"
 
-      setMavenProperty 'common.version' "${nextMasterVersion}"
-      setMavenProperty 'locales.version' "[${major}.${newMinor},)"
-      setMavenProperty 'connectors-test-bom.version' "${nextMasterVersion}"
+  git add --update
+  git commit --message "[jenkins-release] Prepare for next development iteration ${postReleaseVersion}"
 
-      git add --update
-      git commit --message "[jenkins-release] prepare for next development iteration ${nextMasterVersion}"
+  git push origin "${tag}"
+  git push origin "$(git rev-parse --abbrev-ref HEAD)"
+)
 
-      # master is a protected branch, should create a PR
-      git checkout -b                "jenkins/master-next-iteration-${nextMasterVersion}"
-      git push --set-upstream origin "jenkins/master-next-iteration-${nextMasterVersion}"
-  else
-      # pushed to related origin maintenance branch
-      git push --force origin "HEAD:${BRANCH_NAME}"
-  fi
+setMavenVersion() (
+  version="$1"
+  mvn 'versions:set' \
+    --batch-mode \
+    --define "newVersion=${version}"
+)
 
-  #
-  # tag / I think no need
-  #
-  #git checkout     "release/${releaseVersion}"
-  #git tag --delete "release/${releaseVersion}"
-  #setMavenProperty 'connectors-se.version' "${releaseVersion}"
-  
-  #git add --update
-  #git commit --message "[jenkins-release] setting connectors-se.version to ${releaseVersion}"
-  
-  #git tag         "release/${releaseVersion}"
-  #git push origin "release/${releaseVersion}"
-  #printf 'Tagged release\n'
-}
-
-setMavenProperty() {
-  local propertyName="$1"
-  local propertyValue="$2"
-  mvn versions:set-property \
+setMavenProperty() (
+  propertyName="$1"
+  propertyValue="$2"
+  mvn 'versions:set-property' \
+    --batch-mode \
     --define "property=${propertyName}" \
     --define "newVersion=${propertyValue}"
-}
+)
 
 main "$@"
