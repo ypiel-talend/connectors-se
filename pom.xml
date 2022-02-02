@@ -155,6 +155,7 @@
     <validation.placeholder>false</validation.placeholder>
     <validation.documentation>true</validation.documentation>
     <validation.wording>false</validation.wording>
+    <talend-component.icon.skip>true</talend-component.icon.skip>
     <!-- TODO: replace with a 'validation.svg' -->
     <validation.metadata>true</validation.metadata>
   </properties>
@@ -1193,13 +1194,16 @@
 
   <profiles>
     <profile>
-        <id>STANDARD</id>
+      <id>STANDARD</id>
     </profile>
     <profile>
-      <id>documentation-html</id>
+      <id>DEPLOY</id>
+    </profile>
+    <profile>
+      <id>documentation</id>
       <build>
         <plugins>
-          <plugin>
+          <!--plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
             <version>3.1.1</version>
@@ -1227,7 +1231,7 @@
                 </configuration>
               </execution>
             </executions>
-          </plugin>
+          </plugin -->
           <plugin>
             <groupId>org.asciidoctor</groupId>
             <artifactId>asciidoctor-maven-plugin</artifactId>
