@@ -12,12 +12,11 @@ main() {
 
   # Real task
   # ITs profile is added for jdbc
-  mvn clean install \
+  mvn clean verify \
       --batch-mode \
       --threads '1C' \
       --activate-profiles "${jenkinsAction},ITs" \
       --errors \
-      ${talendOssRepositoryArg}
       "${extraBuildParams[@]}"
 }
 
