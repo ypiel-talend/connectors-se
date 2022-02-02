@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>0.6.6-SNAPSHOT</version>
+        <version>0.6.6</version>
     </parent>
 
     <artifactId>dynamics-crm</artifactId>

@@ -18,7 +18,7 @@
 
   <groupId>org.talend.components</groupId>
   <artifactId>connectors-se</artifactId>
-  <version>0.6.6-SNAPSHOT</version>
+  <version>0.6.6</version>
   <packaging>pom</packaging>
 
   <name>Connectors SE</name>
@@ -55,7 +55,7 @@
     <connection>scm:git:https://github.com/talend/connectors-se.git</connection>
     <developerConnection>scm:git:https://github.com/talend/connectors-se.git</developerConnection>
     <url>https://github.com/talend/connectors-se</url>
-    <tag>HEAD</tag>
+    <tag>release/0.6.6</tag>
   </scm>
   <distributionManagement>
     <snapshotRepository>
@@ -73,8 +73,8 @@
   </distributionManagement>
 
   <properties>
-    <connectors-test-bom.version>0.6.6-SNAPSHOT</connectors-test-bom.version>
-    <common.version>0.6.6-SNAPSHOT</common.version>
+    <connectors-test-bom.version>0.6.6</connectors-test-bom.version>
+    <common.version>0.6.6</common.version>
 
     <timestamp.year>${maven.build.timestamp}</timestamp.year>
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
