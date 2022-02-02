@@ -106,10 +106,10 @@ spec:
         choice(name: 'Action',
                 choices: ['STANDARD', 'RELEASE', 'DEPLOY'],
                 description: '''
-			        Kind of run:
+                    Kind of run:
                     STANDARD : (default) classical CI
                     RELEASE : Build release, deploy to the Nexus for master/maintenance branches
-			        DEPLOY : Build release, deploy it to the Nexus for any branch
+                    DEPLOY : Build release, deploy it to the Nexus for any branch
                 ''')
         string(
                 name: 'EXTRA_BUILD_PARAMS',
