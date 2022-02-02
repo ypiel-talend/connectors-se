@@ -57,7 +57,7 @@ spec:
             tty: true
             volumeMounts: [
                 {name: docker, mountPath: /var/run/docker.sock},
-                {name: efs-jenkins-connectors-se-m2, mountPath: /root/.m2/repository}
+                {name: efs-jenkins-connectors-se-m2, mountPath: /root/.m2/repository},
                 {name: dockercache, mountPath: /root/.dockercache}
             ]
             resources: {requests: {memory: 3G, cpu: '2'}, limits: {memory: 8G, cpu: '2'}}
