@@ -12,10 +12,6 @@ final def artifactoryCredentials = usernamePassword(
         credentialsId: 'artifactory-datapwn-credentials',
         passwordVariable: 'ARTIFACTORY_PASSWORD',
         usernameVariable: 'ARTIFACTORY_LOGIN')
-final def sonarCredentials = usernamePassword(
-        credentialsId: 'sonar-credentials',
-        passwordVariable: 'SONAR_PASSWORD',
-        usernameVariable: 'SONAR_LOGIN')
 
 final String PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
 
@@ -35,11 +31,8 @@ final String devNexusRepository = isOnMasterOrMaintenanceBranch
 
 final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
 
-/*final String deploymentSuffix = (env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")) ? "${PRODUCTION_DEPLOYMENT_REPOSITORY}" : ("dev_branch_snapshots/branch_${escapedBranch}")
-final String m2 = "/tmp/jenkins/tdi/m2/${deploymentSuffix}"
-final String talendOssRepositoryArg = (env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")) ? "" : ("-Dtalend_oss_snapshots=https://nexus-smart-branch.datapwn.com/nexus/content/repositories/${deploymentSuffix}")
-*/
-
+final String tsbiImage = 'jdk8-svc-springboot-builder'
+final String tsbiVersion = '2.9.0-2.3-20210907155713'
 
 pipeline {
     agent {
@@ -50,9 +43,8 @@ apiVersion: v1
 kind: Pod
 spec:
     containers:
-        -
-            name: main
-            image: '${env.TSBI_IMAGE}'
+            - name: '${tsbiImage}'
+            image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/${tsbiImage}:${tsbiVersion}'
             command: [cat]
             tty: true
             volumeMounts: [
@@ -62,16 +54,13 @@ spec:
             ]
             resources: {requests: {memory: 3G, cpu: '2'}, limits: {memory: 8G, cpu: '2'}}
     volumes:
-        -
-            name: docker
-            hostPath: {path: /var/run/docker.sock}
-        -
-            name: efs-jenkins-connectors-se-m2
-            persistentVolumeClaim: 
+        - name: docker
+          hostPath: {path: /var/run/docker.sock}
+        - name: efs-jenkins-connectors-se-m2
+          persistentVolumeClaim: 
                 claimName: efs-jenkins-connectors-se-m2
-        -
-            name: dockercache
-            hostPath: {path: /tmp/jenkins/tdi/docker}
+        - name: dockercache
+          hostPath: {path: /tmp/jenkins/tdi/docker}
     imagePullSecrets:
         - name: talend-registry
 """.stripIndent()
@@ -81,20 +70,30 @@ spec:
     environment {
         MAVEN_SETTINGS = "${WORKSPACE}/.jenkins/settings.xml"
         DECRYPTER_ARG = "-Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/"
-        MAVEN_OPTS = "-Dtalend-image.layersCacheDirectory=/root/.dockercache -Dmaven.artifact.threads=128 -Dorg.slf4j.simpleLogger.showThreadName=true -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss ${DECRYPTER_ARG}"
-        TALEND_REGISTRY = "registry.datapwn.com"
+        MAVEN_OPTS = [
+                "-Dmaven.artifact.threads=128",
+                "-Dorg.slf4j.simpleLogger.showDateTime=true",
+                "-Dorg.slf4j.simpleLogger.showThreadName=true",
+                "-Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss",
+                "-Dtalend-image.layersCacheDirectory=/root/.dockercache"
+        ].join(' ')
         VERACODE_APP_NAME = 'Talend Component Kit'
         VERACODE_SANDBOX = 'connectors-se'
 
         APP_ID = '579232'
-        ARTIFACTORY_REGISTRY = "artifactory.datapwn.com"
+        TALEND_REGISTRY = "artifactory.datapwn.com"
 
         TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = "artifactory.datapwn.com/docker-io-remote/"
     }
 
     options {
-        buildDiscarder(logRotator(artifactNumToKeepStr: '5', numToKeepStr: (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('maintenance/')) ? '10' : '2'))
-        timeout(time: 120, unit: 'MINUTES')
+        buildDiscarder(
+                logRotator(
+                        artifactNumToKeepStr: '5',
+                        numToKeepStr: (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('maintenance/')) ? '10' : '2'
+                )
+        )
+        timeout(time: 60, unit: 'MINUTES')
         skipStagesAfterUnstable()
     }
 
@@ -109,7 +108,7 @@ spec:
                     Kind of run:
                     STANDARD : (default) classical CI
                     RELEASE : Build release, deploy to the Nexus for master/maintenance branches
-                    DEPLOY : Build release, deploy it to the Nexus for any branch
+                    DEPLOY : Build snapshot, deploy it to the Nexus for any branch
                 ''')
         string(
                 name: 'EXTRA_BUILD_PARAMS',
@@ -126,30 +125,41 @@ spec:
     }
 
     stages {
+        stage('Validate parameters') {
+            steps {
+                script {
+                    final def pom = readMavenPom file: 'pom.xml'
+                    final String pomVersion = pom.version
+
+                    if (params.Action == 'RELEASE' && !pomVersion.endsWith('-SNAPSHOT')) {
+                        error('Cannot release from a non SNAPSHOT, exiting.')
+                    }
+
+                    if (params.Action == 'RELEASE' && !((String) env.BRANCH_NAME).startsWith('maintenance/')) {
+                        error('Can only release from a maintenance branch, exiting.')
+                    }
+
+                    echo 'Processing parameters'
+                    final List<String> buildParamsAsArray = ['--settings', env.MAVEN_SETTINGS, env.DECRYPTER_ARG]
+                    if (!isOnMasterOrMaintenanceBranch) {
+                        // Properties documented in the pom.
+                        buildParamsAsArray.addAll([
+                                '--define', "nexus_snapshots_repository=${params.DEV_NEXUS_REPOSITORY}",
+                                '--define', 'nexus_snapshots_pull_base_url=https://nexus-smart-branch.datapwn.com/nexus/content/repositories'
+                        ])
+                    }
+                    buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
+                    extraBuildParams = buildParamsAsArray.join(' ')
+
+                    releaseVersion = pomVersion.split('-')[ 0 ]
+                }
+            }
+        }
 
         stage('Prepare build') {
             steps {
-                container('main') {
+                container(tsbiImage) {
                     script {
-                        final def pom = readMavenPom file: 'pom.xml'
-
-                        if (params.Action == 'RELEASE' && !pom.version.endsWith('-SNAPSHOT')) {
-                            error('Cannot release from a non SNAPSHOT, exiting.')
-                        }
-
-                        echo 'Processing parameters'
-                        final List<String> buildParamsAsArray = ['--settings', env.MAVEN_SETTINGS, env.DECRYPTER_ARG]
-                        if (!isOnMasterOrMaintenanceBranch) {
-                            // Properties documented in the pom.
-                            buildParamsAsArray.addAll([
-                                    '--define', "nexus_snapshots_repository=${params.DEV_NEXUS_REPOSITORY}",
-                                    '--define', 'nexus_snapshots_pull_base_url=https://nexus-smart-branch.datapwn.com/nexus/content/repositories'
-                            ])
-                        }
-                        buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
-                        extraBuildParams = buildParamsAsArray.join(' ')
-                        releaseVersion = pom.version.split('-')[0]
-
                         echo 'Git login'
                         withCredentials([gitCredentials]) {
                             sh """
@@ -166,21 +176,21 @@ spec:
                             /* will be replaced by the bash process. */
                             sh """
                                 bash .jenkins/docker-login.sh \
-                                    '${ARTIFACTORY_REGISTRY}' \
+                                    '${env.TALEND_REGISTRY}' \
                                     "\${ARTIFACTORY_LOGIN}" \
                                     "\${ARTIFACTORY_PASSWORD}"
                             """
                         }
-                        echo "Pre-requisites script"
-                        sh "bash .jenkins/prerequisites.sh"
                     }
                 }
             }
         }
 
         stage('Post login') {
+            // FIXME: this step is an aberration and a gaping security hole.
+            //        As soon as the build is stable enough not to rely on this crutch, let's get rid of it.
             steps {
-                container('main') {
+                container(tsbiImage) {
                     withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
                         script {
                             if (params.POST_LOGIN_SCRIPT?.trim()) {
@@ -200,11 +210,13 @@ spec:
                 expression { params.Action == 'STANDARD' }
             }
             steps {
-                container('main') {
+                container(tsbiImage) {
                     script {
                         withCredentials([nexusCredentials]) {
                             sh """
-                                bash .jenkins/build.sh '${params.Action}' ${extraBuildParams}
+                                bash .jenkins/build.sh \
+                                    '${params.Action}' \
+                                    ${extraBuildParams}
                             """
                         }
                     }
@@ -213,7 +225,7 @@ spec:
 
             post {
                 always {
-                    junit testResults: '*/target/surefire-reports/*.xml', allowEmptyResults: true
+                    junit testResults: '*/target/surefire-reports/*.xml', allowEmptyResults: false
                 }
             }
         }
@@ -230,10 +242,13 @@ spec:
                 withCredentials([gitCredentials,
                                  nexusCredentials,
                                  artifactoryCredentials]) {
-                    container('main') {
+                    container(tsbiImage) {
                         script {
                             sh """
-                                bash .jenkins/release.sh "${releaseVersion}" ${extraBuildParams}
+                                bash .jenkins/release.sh \
+                                    '${params.Action}' \
+                                    '${releaseVersion}' \
+                                    ${extraBuildParams}
                             """
                         }
                     }
@@ -241,7 +256,7 @@ spec:
             }
         }
 
-        stage('Push maven artifacts') {
+        stage('Deploy') {
             when {
                 anyOf {
                     expression { params.Action == 'DEPLOY' }
@@ -249,10 +264,12 @@ spec:
             }
             steps {
                 withCredentials([nexusCredentials]) {
-                    container('main') {
+                    container(tsbiImage) {
                         script {
                             sh """
-                                bash .jenkins/deploy.sh '${params.Action}' ${extraBuildParams}
+                                bash .jenkins/deploy.sh \
+                                    '${params.Action}' \
+                                    ${extraBuildParams}
                             """
                         }
                     }
