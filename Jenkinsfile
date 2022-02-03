@@ -39,30 +39,30 @@ pipeline {
         kubernetes {
             label podLabel
             yaml """
-apiVersion: v1
-kind: Pod
-spec:
-    containers:
-            - name: '${tsbiImage}'
-            image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/${tsbiImage}:${tsbiVersion}'
-            command: [cat]
-            tty: true
-            volumeMounts: [
-                {name: docker, mountPath: /var/run/docker.sock},
-                {name: efs-jenkins-connectors-se-m2, mountPath: /root/.m2/repository},
-                {name: dockercache, mountPath: /root/.dockercache}
-            ]
-            resources: {requests: {memory: 3G, cpu: '2'}, limits: {memory: 8G, cpu: '2'}}
-    volumes:
-        - name: docker
-          hostPath: {path: /var/run/docker.sock}
-        - name: efs-jenkins-connectors-se-m2
-          persistentVolumeClaim: 
-                claimName: efs-jenkins-connectors-se-m2
-        - name: dockercache
-          hostPath: {path: /tmp/jenkins/tdi/docker}
-    imagePullSecrets:
-        - name: talend-registry
+    apiVersion: v1
+    kind: Pod
+    spec:
+        containers:
+                - name: '${tsbiImage}'
+                  image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/${tsbiImage}:${tsbiVersion}'
+                  command: [ cat ]
+                  tty: true
+                  volumeMounts: [
+                    { name: docker, mountPath: /var/run/docker.sock },
+                    { name: efs-jenkins-connectors-se-m2, mountPath: /root/.m2/repository },
+                    { name: dockercache, mountPath: /root/.dockercache }
+                  ]
+                  resources: { requests: { memory: 3G, cpu: '2' }, limits: { memory: 8G, cpu: '2' } }
+        volumes:
+            - name: docker
+              hostPath: { path: /var/run/docker.sock }
+            - name: efs-jenkins-connectors-se-m2
+              persistentVolumeClaim: 
+                    claimName: efs-jenkins-connectors-se-m2
+            - name: dockercache
+              hostPath: { path: /tmp/jenkins/tdi/docker }
+        imagePullSecrets:
+            - name: talend-registry
 """.stripIndent()
         }
     }
@@ -151,7 +151,7 @@ spec:
                     buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
                     extraBuildParams = buildParamsAsArray.join(' ')
 
-                    releaseVersion = pomVersion.split('-')[ 0 ]
+                    releaseVersion = pomVersion.split('-')[0]
                 }
             }
         }
