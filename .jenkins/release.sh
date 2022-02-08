@@ -19,7 +19,6 @@ main() (
     --errors \
     --batch-mode \
     --threads '1C' \
-    --define 'maven.javadoc.skip=true' \
     --activate-profiles "${jenkinsAction}" \
     "${extraBuildParams[@]}"
 

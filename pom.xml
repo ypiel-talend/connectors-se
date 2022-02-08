@@ -1211,6 +1211,9 @@
   <profiles>
     <profile>
       <id>STANDARD</id>
+      <properties>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+      </properties>
     </profile>
     <profile>
       <id>DEPLOY</id>
