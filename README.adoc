@@ -2,3 +2,12 @@
 
 Open source Talend Component Kit (TCK) connectors implementation.
 
+== How to build
+=== Locally
+This is a maven project, so you simply have to execute:
+....
+mvn clean install
+....
+
+
+
