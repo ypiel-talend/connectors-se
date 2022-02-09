@@ -29,7 +29,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
-@Version(value = 2, migrationHandler = CouchbaseDataStoreMigrationHandler.class)
+@Version(value = 3, migrationHandler = CouchbaseDataStoreMigrationHandler.class)
 @Data
 @DataStore("CouchbaseDataStore")
 @Checkable("healthCheck")

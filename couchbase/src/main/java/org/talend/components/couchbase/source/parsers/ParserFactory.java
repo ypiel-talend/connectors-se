@@ -22,12 +22,13 @@ public class ParserFactory {
     }
 
     public static DocumentParser createDocumentParser(DocumentType documentType, RecordBuilderFactory builderFactory) {
-        switch (documentType) {
-        case BINARY:
+        if (documentType == DocumentType.BINARY) {
             return new BinaryParser(builderFactory);
-        case STRING:
+        } else if (documentType == DocumentType.STRING) {
             return new StringParser(builderFactory);
+        } else {
+            // only BINARY or STRING document types are expected for ParserFactory
+            throw new ComponentException("[Parser factory] Unexpected document type: " + documentType);
         }
-        throw new ComponentException("Parser factory. Unknown document type: " + documentType);
     }
 }

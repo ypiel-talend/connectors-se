@@ -23,10 +23,6 @@ public interface I18nMessage {
 
     String connectionKO();
 
-    String bucketWasClosed(String bucketName);
-
-    String cannotCloseBucket(String bucketName);
-
     String clusterWasClosed();
 
     String cannotCloseCluster();
