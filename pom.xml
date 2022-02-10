@@ -143,8 +143,8 @@
     <nimbus-jose-jwt.version>8.11</nimbus-jose-jwt.version>
     <zookeeper.version>3.4.14</zookeeper.version>
     <guava.version>30.0-jre</guava.version>
-
     <hadoop.version>3.2.2</hadoop.version>
+    <axis2.version>1.8.0</axis2.version>
 
     <!-- code quality enforcer default values.
          run build w/ -Pcode-quality to have a full validation -->
@@ -533,6 +533,16 @@
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-client</artifactId>
         <version>${hadoop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.axis2</groupId>
+        <artifactId>axis2-xmlbeans</artifactId>
+        <version>${axis2.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.axis2</groupId>
+        <artifactId>axis2-transport-http</artifactId>
+        <version>${axis2.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
