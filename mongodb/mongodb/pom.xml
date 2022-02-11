@@ -50,7 +50,7 @@
     </dependency>
     <dependency>
         <groupId>org.talend.components</groupId>
-        <artifactId>mongo-common</artifactId>
+        <artifactId>mongodb-common</artifactId>
         <version>${project.version}</version>
         <scope>compile</scope>
     </dependency>
