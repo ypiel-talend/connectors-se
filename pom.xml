@@ -544,6 +544,18 @@
         <artifactId>axis2-transport-http</artifactId>
         <version>${axis2.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-identity</artifactId>
+        <version>1.2.2</version>
+        <!--consider to disable KeePassJava2 directly as that only works for idea plugin-->
+        <exclusions>
+          <exclusion>
+            <groupId>org.simpleframework</groupId>
+            <artifactId>simple-xml</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
