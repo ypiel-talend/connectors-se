@@ -17,20 +17,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Iterator;
 
-import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.parquet.avro.AvroParquetReader;
-import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.util.HadoopInputFile;
 import org.talend.components.adlsgen2.common.format.FileFormatRuntimeException;
 import org.talend.components.adlsgen2.input.InputConfiguration;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.adlsgen2.service.BlobInformations;
-import org.talend.components.common.Constants;
-import org.talend.components.common.converters.ParquetConverter;
+import org.talend.components.common.stream.input.parquet.ParquetRecordReader;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
@@ -45,24 +41,20 @@ public class ParquetBlobReader extends BlobReader {
     }
 
     @Override
-    protected RecordIterator initRecordIterator(Iterable<BlobInformations> blobItems) {
+    protected Iterator<Record> initRecordIterator(Iterable<BlobInformations> blobItems) {
         return new ParquetRecordIterator(blobItems, recordBuilderFactory);
     }
 
-    private class ParquetRecordIterator extends RecordIterator<GenericRecord> {
-
-        private ParquetConverter converter;
+    private class ParquetRecordIterator extends RecordIterator<Record> {
 
         private Configuration hadoopConfig;
 
-        private String accountName;
+        private Iterator<Record> reader;
 
-        private ParquetReader<GenericRecord> reader;
+        private Record currentRecord;
 
-        private GenericRecord currentRecord;
-
-        private ParquetRecordIterator(Iterable<BlobInformations> blobItemsList,
-                RecordBuilderFactory recordBuilderFactory) {
+        private ParquetRecordIterator(final Iterable<BlobInformations> blobItemsList,
+                final RecordBuilderFactory recordBuilderFactory) {
             super(blobItemsList, recordBuilderFactory);
             initConfig();
             peekFirstBlob();
@@ -74,28 +66,22 @@ public class ParquetBlobReader extends BlobReader {
         }
 
         @Override
-        protected Record convertToRecord(GenericRecord next) {
-            if (converter == null) {
-                converter = ParquetConverter.of(getRecordBuilderFactory(),
-                        configuration.getDataSet().getParquetConfiguration(),
-                        Constants.ADLS_NAMESPACE);
-            }
-
-            return converter.toRecord(next);
+        protected Record convertToRecord(Record next) {
+            return next;
         }
 
         @Override
         protected void readBlob() {
-            closePreviousInputStream();
             try {
-                File tmp = File.createTempFile("talend-adls-gen2-tmp", ".parquet");
+                final File tmp = File.createTempFile("talend-adls-gen2-tmp", ".parquet");
                 tmp.deleteOnExit();
-                InputStream input = service.getBlobInputstream(configuration.getDataSet(), getCurrentBlob());
-                Files.copy(input, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                IOUtils.closeQuietly(input);
-                HadoopInputFile hdpIn = HadoopInputFile.fromPath(new Path(tmp.getPath()), hadoopConfig);
-                reader = AvroParquetReader.<GenericRecord> builder(hdpIn).build();
-                currentRecord = reader.read();
+                try (InputStream input = service.getBlobInputstream(configuration.getDataSet(), getCurrentBlob())) {
+                    Files.copy(input, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+                final HadoopInputFile hdpIn = HadoopInputFile.fromPath(new Path(tmp.getPath()), hadoopConfig);
+
+                this.reader = new ParquetRecordReader(this.getRecordBuilderFactory()).read(hdpIn);
+                this.currentRecord = reader.next();
             } catch (IOException e) {
                 log.error("[ParquetIterator] {}", e.getMessage());
                 throw new FileFormatRuntimeException(e.getMessage());
@@ -108,12 +94,12 @@ public class ParquetBlobReader extends BlobReader {
         }
 
         @Override
-        protected GenericRecord peekNextBlobRecord() {
-            GenericRecord currentRecord = this.currentRecord;
-            try {
-                this.currentRecord = reader.read();
-            } catch (IOException e) {
-                log.error("Can't read record from file " + getCurrentBlob().getBlobPath(), e);
+        protected Record peekNextBlobRecord() {
+            Record currentRecord = this.currentRecord;
+            if (reader.hasNext()) {
+                this.currentRecord = reader.next();
+            } else {
+                this.currentRecord = null;
             }
 
             return currentRecord;
@@ -121,18 +107,8 @@ public class ParquetBlobReader extends BlobReader {
 
         @Override
         protected void complete() {
-            closePreviousInputStream();
         }
 
-        private void closePreviousInputStream() {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    log.error("Can't close stream: {}.", e.getMessage());
-                }
-            }
-        }
     }
 
 }

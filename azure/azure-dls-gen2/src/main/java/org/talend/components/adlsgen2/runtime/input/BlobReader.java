@@ -28,7 +28,7 @@ public abstract class BlobReader {
 
     protected RecordBuilderFactory recordBuilderFactory;
 
-    private RecordIterator iterator;
+    private Iterator<Record> iterator;
 
     protected InputConfiguration configuration;
 
@@ -43,7 +43,7 @@ public abstract class BlobReader {
         iterator = initRecordIterator(blobItems);
     }
 
-    protected abstract RecordIterator initRecordIterator(Iterable<BlobInformations> blobItems);
+    protected abstract Iterator<Record> initRecordIterator(Iterable<BlobInformations> blobItems);
 
     public Record readRecord() {
         return iterator.next();

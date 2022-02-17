@@ -12,39 +12,32 @@
  */
 package org.talend.components.adlsgen2.runtime.output;
 
+import javax.json.JsonBuilderFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import javax.json.JsonBuilderFactory;
-
-import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetFileWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.talend.components.adlsgen2.output.OutputConfiguration;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
-import org.talend.components.common.Constants;
-import org.talend.components.common.converters.ParquetConverter;
+import org.talend.components.common.stream.output.parquet.TCKParquetWriterBuilder;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class ParquetBlobWriter extends BlobWriter {
 
-    private ParquetConverter converter;
-
-    private Configuration config;
+    private final Configuration config;
 
     protected static final String EXT_PARQUET = ".parquet";
 
     public ParquetBlobWriter(OutputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
             JsonBuilderFactory jsonFactory, AdlsGen2Service service) {
         super(configuration, recordBuilderFactory, jsonFactory, service);
-        this.converter = ParquetConverter.of(recordBuilderFactory, configuration.getDataSet().getParquetConfiguration(),
-                Constants.ADLS_NAMESPACE);
+
         this.config = new Configuration();
         config.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
     }
@@ -63,16 +56,17 @@ public class ParquetBlobWriter extends BlobWriter {
         try {
             tempFilePath = File.createTempFile("tempFile", EXT_PARQUET);
             Path tempFile = new Path(tempFilePath.getPath());
-            ParquetWriter<GenericRecord> writer = AvroParquetWriter
-                    .<GenericRecord> builder(tempFile)
+
+            final TCKParquetWriterBuilder builder = new TCKParquetWriterBuilder(tempFile);
+            builder.withSchema(this.getSchema())
                     .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
-                    .withSchema(converter.inferAvroSchema(getSchema()))
-                    .withConf(config)
-                    .build();
-            for (Record r : getBatch()) {
-                writer.write(converter.fromRecord(r));
+                    .withConf(this.config);
+            try (final ParquetWriter<Record> writer = builder.build()) {
+                for (Record r : getBatch()) {
+                    writer.write(r);
+                }
             }
-            writer.close();
+
             uploadContent(Files.readAllBytes(tempFilePath.toPath()));
         } catch (IOException e) {
             throw new AdlsGen2RuntimeException(e.getMessage(), e);
