@@ -25,6 +25,7 @@ import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.common.stream.output.json.RecordToJson;
 import org.talend.sdk.component.api.record.Record;
 
+import com.microsoft.azure.storage.OperationContext;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
 
@@ -60,7 +61,8 @@ public class JsonBlobFileWriter extends BlobFileWriter {
     protected void generateFile(String directoryName) throws URISyntaxException, StorageException {
         String fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".json";
         CloudBlob blob = getContainer().getBlockBlobReference(fileName);
-        while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+        final OperationContext operationContext = AzureComponentServices.getTalendOperationContext();
+        while (blob.exists(null, null, operationContext)) {
             fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".json";
             blob = getContainer().getBlockBlobReference(fileName);
         }

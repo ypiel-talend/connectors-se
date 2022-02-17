@@ -49,8 +49,7 @@ public abstract class BlobFileReader {
     private final AzureBlobComponentServices connectionServices;
 
     public BlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-            AzureBlobComponentServices connectionServices, MessageService messageService)
-            throws URISyntaxException, StorageException {
+            AzureBlobComponentServices connectionServices, MessageService messageService) {
         this.recordBuilderFactory = recordBuilderFactory;
         this.config = config;
         this.messageService = messageService;
@@ -133,6 +132,7 @@ public abstract class BlobFileReader {
                 break;
             case JSON:
                 reader = new JsonBlobFileReader(config, recordBuilderFactory, connectionServices, messageService);
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
             }
@@ -141,7 +141,7 @@ public abstract class BlobFileReader {
         }
     }
 
-    protected static abstract class ItemRecordIterator<T> implements Iterator<Record> {
+    protected abstract static class ItemRecordIterator<T> implements Iterator<Record> {
 
         private Iterator<ListBlobItem> blobItems;
 
@@ -190,7 +190,6 @@ public abstract class BlobFileReader {
 
             complete();
             return null;
-
         }
 
         protected abstract T takeNextRecord();

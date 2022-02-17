@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,18 +51,7 @@ public class JsonIterator implements Iterator<Record>, Serializable {
         this.reader = reader;
         JsonStructure structure = reader.read();
         if (structure == null) {
-            iterator = new Iterator<JsonValue>() {
-
-                @Override
-                public boolean hasNext() {
-                    return false;
-                }
-
-                @Override
-                public JsonValue next() {
-                    return null;
-                }
-            };
+            iterator = Collections.emptyIterator();
         } else {
             if (structure.getValueType() == ValueType.ARRAY) {
                 iterator = structure.asJsonArray().stream().iterator();

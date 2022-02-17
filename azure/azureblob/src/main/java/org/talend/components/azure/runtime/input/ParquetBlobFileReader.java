@@ -12,11 +12,9 @@
  */
 package org.talend.components.azure.runtime.input;
 
-import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
@@ -40,8 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ParquetBlobFileReader extends BlobFileReader {
 
     public ParquetBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-            AzureBlobComponentServices connectionServices, MessageService messageService)
-            throws URISyntaxException, StorageException {
+            AzureBlobComponentServices connectionServices, MessageService messageService) {
         super(config, recordBuilderFactory, connectionServices, messageService);
     }
 

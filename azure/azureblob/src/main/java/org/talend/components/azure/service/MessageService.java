@@ -12,10 +12,12 @@
  */
 package org.talend.components.azure.service;
 
+import java.io.Serializable;
+
 import org.talend.sdk.component.api.internationalization.Internationalized;
 
 @Internationalized
-public interface MessageService {
+public interface MessageService extends Serializable {
 
     String illegalContainerName();
 

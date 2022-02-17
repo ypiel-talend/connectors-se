@@ -12,15 +12,14 @@
  */
 package org.talend.components.azure.runtime.input;
 
+import com.microsoft.azure.storage.blob.ListBlobItem;
+
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.Iterator;
+
 import org.jsoup.Jsoup;
-import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.parser.ParseError;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -30,8 +29,6 @@ import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class ExcelHTMLBlobFileReader extends BlobFileReader {
 
@@ -40,8 +37,7 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
     private Schema columns;
 
     public ExcelHTMLBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-            AzureBlobComponentServices connectionServices, MessageService messageService)
-            throws URISyntaxException, StorageException {
+            AzureBlobComponentServices connectionServices, MessageService messageService) {
         super(config, recordBuilderFactory, connectionServices, messageService);
     }
 

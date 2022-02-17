@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JsonBlobReader extends BlobReader {
 
-    private JsonBuilderFactory jsonFactoryBuilder;
+    private final JsonBuilderFactory jsonFactoryBuilder;
 
     JsonBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
             JsonBuilderFactory jsonFactoryBuilder, AdlsGen2Service service) {

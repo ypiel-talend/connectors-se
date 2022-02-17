@@ -95,14 +95,14 @@ public class ParquetBlobReader extends BlobReader {
 
         @Override
         protected Record peekNextBlobRecord() {
-            Record currentRecord = this.currentRecord;
+            final Record nextRecord = this.currentRecord;
             if (reader.hasNext()) {
                 this.currentRecord = reader.next();
             } else {
                 this.currentRecord = null;
             }
 
-            return currentRecord;
+            return nextRecord;
         }
 
         @Override

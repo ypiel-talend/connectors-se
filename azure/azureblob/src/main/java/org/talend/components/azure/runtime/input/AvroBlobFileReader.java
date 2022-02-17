@@ -12,9 +12,10 @@
  */
 package org.talend.components.azure.runtime.input;
 
+import com.microsoft.azure.storage.blob.ListBlobItem;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
@@ -28,9 +29,6 @@ import org.talend.components.common.stream.input.avro.AvroToRecord;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.ListBlobItem;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -39,8 +37,7 @@ public class AvroBlobFileReader extends BlobFileReader {
     private AvroFormatOptions config;
 
     public AvroBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-            AzureBlobComponentServices connectionServices, MessageService messageService)
-            throws URISyntaxException, StorageException {
+            AzureBlobComponentServices connectionServices, MessageService messageService) {
         super(config, recordBuilderFactory, connectionServices, messageService);
     }
 

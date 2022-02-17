@@ -106,7 +106,7 @@ public class AzureComponentServices {
         return blobClient;
     }
 
-    public static OperationContext getTalendOperationContext() {
+    public static synchronized OperationContext getTalendOperationContext() {
         if (talendOperationContext == null) {
             talendOperationContext = new OperationContext();
             HashMap<String, String> talendUserHeaders = new HashMap<>();

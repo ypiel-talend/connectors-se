@@ -22,10 +22,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.talend.components.adlsgen2.common.format.FileFormat;
 import org.talend.components.adlsgen2.dataset.AdlsGen2DataSet;
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
+import org.talend.sdk.component.api.service.BaseService;
 import org.talend.sdk.component.api.service.Service;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
@@ -40,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class AdlsGen2Service {
+public class AdlsGen2Service extends BaseService {
 
     @SuppressWarnings("unchecked")
     public List<String> filesystemList(final AdlsGen2Connection connection) {
@@ -51,19 +53,19 @@ public class AdlsGen2Service {
                 .collect(Collectors.toList());
     }
 
-    public String extractFolderPath(String blobPath) {
-        Path path = Paths.get(blobPath);
+    public String extractFolderPath(final String blobPath) {
+        final Path path = Paths.get(blobPath);
         log.debug("[extractFolderPath] blobPath: {}. Path: {}. {}", blobPath, path.toString(), path.getNameCount());
         if (path.getNameCount() == 1) {
             return "/";
         }
-        return Paths.get(blobPath).getParent().toString();
+        return Optional.ofNullable(path.getParent()).map(Path::toString).orElse("/");
     }
 
     public String extractFileName(String blobPath) {
-        Path path = Paths.get(blobPath);
+        final Path path = Paths.get(blobPath);
         log.debug("[extractFileName] blobPath: {}. Path: {}. {}", blobPath, path.toString(), path.getNameCount());
-        return Paths.get(blobPath).getFileName().toString();
+        return Optional.ofNullable(Paths.get(blobPath).getFileName()).map(Path::toString).orElse("");
     }
 
     public List<BlobInformations> getBlobs(final AdlsGen2DataSet dataSet) {
@@ -121,7 +123,7 @@ public class AdlsGen2Service {
             try {
                 log.debug(
                         "Starting the separate thread to read the pipe finished: " + Thread.currentThread().getName());
-                blobFileClient.read(pipedOutputStream);
+                this.readDatalakeFile(blobFileClient, pipedOutputStream);
                 pipedOutputStream.flush();
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
@@ -138,6 +140,10 @@ public class AdlsGen2Service {
         writer.start(); // populating a pipe in the separate thread, will be read with blobFileReader
 
         return pipedInputStream;
+    }
+
+    protected void readDatalakeFile(final DataLakeFileClient blobFileClient, final OutputStream out) {
+        blobFileClient.read(out);
     }
 
     @SuppressWarnings("unchecked")

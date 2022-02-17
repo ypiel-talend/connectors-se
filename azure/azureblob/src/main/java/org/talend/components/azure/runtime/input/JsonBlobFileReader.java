@@ -12,20 +12,18 @@
  */
 package org.talend.components.azure.runtime.input;
 
+import javax.json.Json;
+import javax.json.JsonReader;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.json.Json;
-import javax.json.JsonReader;
-import javax.json.JsonStructure;
-import javax.json.JsonValue;
 
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobComponentServices;
@@ -34,7 +32,6 @@ import org.talend.components.common.stream.input.json.JsonToRecord;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JsonBlobFileReader extends BlobFileReader {
 
     public JsonBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-            AzureBlobComponentServices connectionServices, MessageService messageService)
-            throws URISyntaxException, StorageException {
+            AzureBlobComponentServices connectionServices, MessageService messageService) {
         super(config, recordBuilderFactory, connectionServices, messageService);
     }
 

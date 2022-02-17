@@ -47,18 +47,20 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("Azure Data Lake Storage Gen2 Output")
 public class AdlsGen2Output implements Serializable {
 
-    @Service
-    RecordBuilderFactory recordBuilderFactory;
+    private static final long serialVersionUID = 1772927056419482159L;
 
     @Service
-    JsonBuilderFactory jsonBuilderFactory;
+    private final RecordBuilderFactory recordBuilderFactory;
+
+    @Service
+    private final JsonBuilderFactory jsonBuilderFactory;
 
     @Service
     private final AdlsGen2Service service;
 
-    private OutputConfiguration configuration;
+    private final OutputConfiguration configuration;
 
-    private BlobWriter blobWriter;
+    private transient BlobWriter blobWriter;
 
     @Connection
     private AdlsGen2Connection injectedConnection;

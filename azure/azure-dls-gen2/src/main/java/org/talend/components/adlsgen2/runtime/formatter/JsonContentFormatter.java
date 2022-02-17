@@ -12,34 +12,24 @@
  */
 package org.talend.components.adlsgen2.runtime.formatter;
 
-import java.util.List;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonBuilderFactory;
-import org.talend.components.adlsgen2.output.OutputConfiguration;
+import java.util.List;
+
 import org.talend.components.common.stream.output.json.RecordToJson;
-import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JsonContentFormatter extends AbstractContentFormatter {
 
-    private final RecordBuilderFactory recordBuilderFactory;
-
-    private final OutputConfiguration configuration;
-
     private final RecordToJson converter;
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
-    private boolean hasAlreadyItems;
-
-    public JsonContentFormatter(@Option("configuration") final OutputConfiguration configuration,
-            final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory) {
-        this.recordBuilderFactory = recordBuilderFactory;
+    public JsonContentFormatter(final JsonBuilderFactory jsonBuilderFactory) {
         this.jsonBuilderFactory = jsonBuilderFactory;
-        this.configuration = configuration;
         converter = new RecordToJson();
     }
 

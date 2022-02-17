@@ -29,6 +29,8 @@ import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+
+import com.microsoft.azure.storage.OperationContext;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudAppendBlob;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +57,8 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".csv";
         CloudAppendBlob currentItem = getContainer().getAppendBlobReference(itemName);
 
-        while (currentItem.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+        final OperationContext operationContext = AzureComponentServices.getTalendOperationContext();
+        while (currentItem.exists(null, null, operationContext)) {
             itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
             currentItem = getContainer().getAppendBlobReference(itemName);
         }

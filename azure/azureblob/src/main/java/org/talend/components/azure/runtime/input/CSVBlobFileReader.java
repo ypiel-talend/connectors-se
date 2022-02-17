@@ -12,33 +12,31 @@
  */
 package org.talend.components.azure.runtime.input;
 
+import com.microsoft.azure.storage.blob.ListBlobItem;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.talend.components.common.formats.Encoding;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.common.converters.CSVConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
+import org.talend.components.common.converters.CSVConverter;
+import org.talend.components.common.formats.Encoding;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CSVBlobFileReader extends BlobFileReader {
 
     CSVBlobFileReader(AzureBlobDataset config, RecordBuilderFactory recordBuilderFactory,
-            AzureBlobComponentServices connectionServices, MessageService messageService)
-            throws URISyntaxException, StorageException {
+            AzureBlobComponentServices connectionServices, MessageService messageService) {
         super(config, recordBuilderFactory, connectionServices, messageService);
     }
 

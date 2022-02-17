@@ -14,7 +14,6 @@
   <description>Azure Data Lake Storage Gen2</description>
 
   <properties>
-    <parquet.version>1.10.1</parquet.version>
     <hamcrest.version>1.3</hamcrest.version>
     <delta.version>0.2.0.1-talend</delta.version>
   </properties>
@@ -40,17 +39,7 @@
       <artifactId>azurecommon</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.parquet</groupId>
-      <artifactId>parquet-hadoop</artifactId>
-      <version>${parquet.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapreduce-client-core</artifactId>

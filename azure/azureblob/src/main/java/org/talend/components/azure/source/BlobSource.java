@@ -29,6 +29,8 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 @Documentation("Azure Blob Storage reader")
 public class BlobSource implements Serializable {
 
+    private static final long serialVersionUID = -8827462729275736928L;
+
     private final BlobInputProperties configuration;
 
     private final AzureBlobComponentServices service;
@@ -37,7 +39,7 @@ public class BlobSource implements Serializable {
 
     private final MessageService messageService;
 
-    private BlobFileReader reader;
+    private transient BlobFileReader reader;
 
     public BlobSource(@Option("configuration") final BlobInputProperties configuration,
             final AzureBlobComponentServices service,

@@ -31,6 +31,7 @@ import org.talend.components.azure.runtime.output.BlobFileWriter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
 
+import com.microsoft.azure.storage.OperationContext;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
 
@@ -75,7 +76,8 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
         String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension;
 
         CloudBlob excelFile = getContainer().getBlockBlobReference(itemName);
-        while (excelFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+        final OperationContext operationContext = AzureComponentServices.getTalendOperationContext();
+        while (excelFile.exists(null, null, operationContext)) {
             itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension;
             excelFile = getContainer().getBlockBlobReference(itemName);
 

@@ -20,6 +20,7 @@ import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.exception.ComponentException;
+import org.talend.sdk.component.api.service.BaseService;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
@@ -31,7 +32,7 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import lombok.Getter;
 
 @Service
-public class AzureBlobComponentServices {
+public class AzureBlobComponentServices extends BaseService {
 
     /**
      * The name of HealthCheck service

@@ -29,7 +29,7 @@ public class JsonBlobWriter extends BlobWriter {
     public JsonBlobWriter(OutputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
             JsonBuilderFactory jsonFactory, AdlsGen2Service service) {
         super(configuration, recordBuilderFactory, jsonFactory, service);
-        formatter = new JsonContentFormatter(configuration, recordBuilderFactory, jsonFactory);
+        formatter = new JsonContentFormatter(jsonFactory);
     }
 
     @Override

@@ -12,6 +12,7 @@
  */
 package org.talend.components.azure.runtime.output;
 
+import com.microsoft.azure.storage.OperationContext;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
@@ -58,7 +59,8 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
         String fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + ".parquet";
 
         CloudBlob blob = getContainer().getBlockBlobReference(fileName);
-        while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
+        final OperationContext operationContext = AzureComponentServices.getTalendOperationContext();
+        while (blob.exists(null, null, operationContext)) {
             fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + ".parquet";
             blob = getContainer().getBlockBlobReference(fileName);
         }

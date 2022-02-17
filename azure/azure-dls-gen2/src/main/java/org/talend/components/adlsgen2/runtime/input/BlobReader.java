@@ -26,11 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class BlobReader {
 
-    protected RecordBuilderFactory recordBuilderFactory;
+    protected final RecordBuilderFactory recordBuilderFactory;
 
     private Iterator<Record> iterator;
 
-    protected InputConfiguration configuration;
+    protected final InputConfiguration configuration;
 
     protected final AdlsGen2Service service;
 
@@ -39,7 +39,10 @@ public abstract class BlobReader {
         this.recordBuilderFactory = recordBuilderFactory;
         this.configuration = configuration;
         this.service = service;
-        Iterable<BlobInformations> blobItems = service.getBlobs(configuration.getDataSet());
+    }
+
+    protected void initialize() {
+        final Iterable<BlobInformations> blobItems = service.getBlobs(configuration.getDataSet());
         iterator = initRecordIterator(blobItems);
     }
 
@@ -51,24 +54,30 @@ public abstract class BlobReader {
 
     public static class BlobFileReaderFactory {
 
-        private static JsonBuilderFactory jsonFactory;
-
         public static BlobReader getReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
                 JsonBuilderFactory jsonFactory, AdlsGen2Service service) {
+            final BlobReader reader;
             switch (configuration.getDataSet().getFormat()) {
             case CSV:
-                return new CsvBlobReader(configuration, recordBuilderFactory, service);
+                reader = new CsvBlobReader(configuration, recordBuilderFactory, service);
+                break;
             case AVRO:
-                return new AvroBlobReader(configuration, recordBuilderFactory, service);
+                reader = new AvroBlobReader(configuration, recordBuilderFactory, service);
+                break;
             case PARQUET:
-                return new ParquetBlobReader(configuration, recordBuilderFactory, service);
+                reader = new ParquetBlobReader(configuration, recordBuilderFactory, service);
+                break;
             case JSON:
-                return new JsonBlobReader(configuration, recordBuilderFactory, jsonFactory, service);
+                reader = new JsonBlobReader(configuration, recordBuilderFactory, jsonFactory, service);
+                break;
             case DELTA:
-                return new DeltaBlobReader(configuration, recordBuilderFactory, service);
+                reader = new DeltaBlobReader(configuration, recordBuilderFactory, service);
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported file format"); // shouldn't be here
             }
+            reader.initialize();
+            return reader;
         }
     }
 
