@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -24,7 +24,8 @@ class IndexValueTest {
     @Test
     void wrap() {
         final List<IndexValue<String>> collect = IndexValue.streamOf(Arrays.asList("1", "2", "3"))
-                .map(IndexValue.wrap((String x) -> "_" + x)).collect(Collectors.toList());
+                .map(IndexValue.wrap((String x) -> "_" + x))
+                .collect(Collectors.toList());
         final IndexValue<String> indexValue1 = collect.get(0);
         Assertions.assertEquals(0, indexValue1.getIndex());
         Assertions.assertEquals("_1", indexValue1.getValue());

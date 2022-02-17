@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -61,15 +61,18 @@ public class TCKArrayConverter extends GroupConverter {
                 } else {
                     final Name name = Name.fromParquetName(type.getName());
                     final Schema elementSchema = tckType.getElementSchema();
-                    final Schema.Entry.Builder fieldBuilder = factory.newEntryBuilder().withName(name.getName())
-                            .withNullable(true).withType(elementSchema.getType());
+                    final Schema.Entry.Builder fieldBuilder = factory.newEntryBuilder()
+                            .withName(name.getName())
+                            .withNullable(true)
+                            .withType(elementSchema.getType());
                     if (elementSchema.getElementSchema() != null) {
                         fieldBuilder.withElementSchema(elementSchema.getElementSchema());
                     }
                     if (elementSchema.getType() == Schema.Type.RECORD) {
                         fieldBuilder.withElementSchema(elementSchema);
                     }
-                    final Schema schema = factory.newSchemaBuilder(Schema.Type.RECORD).withEntry(fieldBuilder.build()).build();
+                    final Schema schema =
+                            factory.newSchemaBuilder(Schema.Type.RECORD).withEntry(fieldBuilder.build()).build();
                     final Record.Builder subRecordBuilder[] = new Record.Builder[1];
                     subRecordBuilder[0] = factory.newRecordBuilder(schema);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -34,7 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TCKConverter {
 
-    public static Converter buildConverter(final org.apache.parquet.schema.Type parquetType, final RecordBuilderFactory factory,
+    public static Converter buildConverter(final org.apache.parquet.schema.Type parquetType,
+            final RecordBuilderFactory factory,
             final Schema tckType, final Supplier<Record.Builder> builderGetter) {
 
         final Name name = Name.fromParquetName(parquetType.getName());
@@ -42,8 +43,9 @@ public class TCKConverter {
 
         final Type innerArrayType = TCKConverter.innerArrayType(parquetType);
         if (innerArrayType != null && (!innerArrayType.isPrimitive())) {
-            final Consumer<Collection<Object>> collectionSetter = (Collection<Object> elements) -> TCKConverter.setArray(elements,
-                    builderGetter, field);
+            final Consumer<Collection<Object>> collectionSetter =
+                    (Collection<Object> elements) -> TCKConverter.setArray(elements,
+                            builderGetter, field);
             final TCKArrayConverter arrayConverter = new TCKArrayConverter(collectionSetter, factory, innerArrayType,
                     field.getElementSchema());
             return new TCKEndActionConverter(arrayConverter); // for list
@@ -68,8 +70,9 @@ public class TCKConverter {
 
         // TCK Record.
         if (parquetType.isRepetition(Repetition.REPEATED)) {
-            final Consumer<Collection<Object>> collectionSetter = (Collection<Object> elements) -> TCKConverter.setArray(elements,
-                    builderGetter, field);
+            final Consumer<Collection<Object>> collectionSetter =
+                    (Collection<Object> elements) -> TCKConverter.setArray(elements,
+                            builderGetter, field);
             final TCKArrayConverter arrayConverter = new TCKArrayConverter(collectionSetter, factory, parquetType,
                     field.getElementSchema());
             return new TCKEndActionConverter(arrayConverter); // for list
@@ -92,7 +95,8 @@ public class TCKConverter {
         builderGetter.get().withArray(field, elements);
     }
 
-    private static void setObject(final Object value, final Supplier<Record.Builder> builderGetter, final Schema.Entry field) {
+    private static void setObject(final Object value, final Supplier<Record.Builder> builderGetter,
+            final Schema.Entry field) {
         final Object realValue = TCKConverter.realValue(field.getType(), value);
         if (field.getType() == Schema.Type.BYTES && realValue instanceof String) {
             builderGetter.get().with(field, ((String) realValue).getBytes(StandardCharsets.UTF_8));
@@ -101,7 +105,8 @@ public class TCKConverter {
         }
     }
 
-    private static void setRecord(final Record rec, final Supplier<Record.Builder> builderGetter, final Schema.Entry field) {
+    private static void setRecord(final Record rec, final Supplier<Record.Builder> builderGetter,
+            final Schema.Entry field) {
         if (rec != null) {
             builderGetter.get().withRecord(field, rec);
         }

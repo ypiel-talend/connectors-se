@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -33,7 +33,8 @@ class SchemaWriterTest {
         final SchemaWriter schemaWriter = new SchemaWriter();
 
         final Schema schema1 = this.newSchema(Type.RECORD)
-                .withEntry(this.newEntry("field1", Type.STRING).withNullable(false).build()).build();
+                .withEntry(this.newEntry("field1", Type.STRING).withNullable(false).build())
+                .build();
         final MessageType messageType1 = schemaWriter.convert(schema1);
 
         Assertions.assertNotNull(messageType1);
@@ -41,17 +42,24 @@ class SchemaWriterTest {
         Assertions.assertTrue(field1.isPrimitive());
         Assertions.assertEquals(Repetition.REQUIRED, field1.getRepetition());
         Assertions.assertEquals(PrimitiveTypeName.BINARY, field1.asPrimitiveType().getPrimitiveTypeName());
-        Assertions.assertEquals(LogicalTypeAnnotation.stringType(), field1.asPrimitiveType().getLogicalTypeAnnotation());
+        Assertions.assertEquals(LogicalTypeAnnotation.stringType(),
+                field1.asPrimitiveType().getLogicalTypeAnnotation());
 
         final Schema.Entry multiArrayInt = this.newEntry("multiArrayInt", Type.ARRAY)
-                .withElementSchema(this.newSchema(Type.ARRAY).withElementSchema(this.newPrimitiveSchema(Type.INT)).build())
+                .withElementSchema(
+                        this.newSchema(Type.ARRAY).withElementSchema(this.newPrimitiveSchema(Type.INT)).build())
                 .build();
         final Schema.Entry arrayOfRecord = this.newEntry("arrayOfRecord", Type.ARRAY)
-                .withElementSchema(this.newSchema(Type.RECORD).withEntry(this.newEntry("time", Type.DATETIME).build())
-                        .withEntry(this.newEntry("theLong", Type.LONG).build()).build())
+                .withElementSchema(this.newSchema(Type.RECORD)
+                        .withEntry(this.newEntry("time", Type.DATETIME).build())
+                        .withEntry(this.newEntry("theLong", Type.LONG).build())
+                        .build())
                 .build();
-        final Schema complexSchema = this.newSchema(Type.RECORD).withEntry(multiArrayInt).withEntry(arrayOfRecord)
-                .withEntry(newEntry("bytesField", Type.BYTES).build()).build();
+        final Schema complexSchema = this.newSchema(Type.RECORD)
+                .withEntry(multiArrayInt)
+                .withEntry(arrayOfRecord)
+                .withEntry(newEntry("bytesField", Type.BYTES).build())
+                .build();
         final MessageType complexMsg = schemaWriter.convert(complexSchema);
         Assertions.assertNotNull(complexMsg);
 
