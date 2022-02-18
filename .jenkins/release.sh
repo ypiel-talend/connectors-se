@@ -41,6 +41,15 @@ main() (
 
   git push origin "${tag}"
   git push origin "$(git rev-parse --abbrev-ref HEAD)"
+
+  # Deploy the next SNAPSHOT version
+  mvn deploy \
+    --errors \
+    --batch-mode \
+    --threads '1C' \
+    --define 'maven.javadoc.skip=true' \
+    --activate-profiles 'DEPLOY_SNAPSHOT_AFTER_RELEASEe' \
+    "${extraBuildParams[@]}"
 )
 
 setMavenVersion() (

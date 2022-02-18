@@ -1,5 +1,4 @@
-final String slackChannel = 'components-ci'
-
+//----------------- Credentials
 final def nexusCredentials = usernamePassword(
         credentialsId: 'nexus-artifact-zl-credentials',
         usernameVariable: 'NEXUS_USER',
@@ -12,22 +11,30 @@ final def artifactoryCredentials = usernamePassword(
         credentialsId: 'artifactory-datapwn-credentials',
         passwordVariable: 'ARTIFACTORY_PASSWORD',
         usernameVariable: 'ARTIFACTORY_LOGIN')
+def sonarCredentials = usernamePassword(
+        credentialsId: 'sonar-credentials',
+        passwordVariable: 'SONAR_PASSWORD',
+        usernameVariable: 'SONAR_LOGIN')
 
+
+//----------------- Global variables
+final String slackChannel = 'components-ci'
 final String PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
 
+//-----------------
 final String branchName = BRANCH_NAME.startsWith("PR-")
         ? env.CHANGE_BRANCH
         : env.BRANCH_NAME
-
-String releaseVersion = ''
-String extraBuildParams = ''
-
 final String escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
 
 final String devNexusRepository = isOnMasterOrMaintenanceBranch
         ? "${PRODUCTION_DEPLOYMENT_REPOSITORY}"
         : "dev_branch_snapshots/branch_${escapedBranch}"
+
+
+String releaseVersion = ''
+String extraBuildParams = ''
 
 final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
 
@@ -102,7 +109,8 @@ pipeline {
     }
 
     parameters {
-        choice(name: 'Action',
+        choice(
+                name: 'Action',
                 choices: ['STANDARD', 'RELEASE', 'DEPLOY'],
                 description: '''
                     Kind of run:
@@ -110,6 +118,10 @@ pipeline {
                     RELEASE : Build release, deploy to the Nexus for master/maintenance branches
                     DEPLOY : Build snapshot, deploy it to the Nexus for any branch
                 ''')
+        booleanParam(
+                name: 'SONAR_ANALYSIS',
+                defaultValue: false,
+                description: 'Execute Sonar analysis.')
         string(
                 name: 'EXTRA_BUILD_PARAMS',
                 defaultValue: "",
@@ -121,7 +133,7 @@ pipeline {
         string(
                 name: 'DEV_NEXUS_REPOSITORY',
                 defaultValue: devNexusRepository,
-                description: 'The Nexus repositories where maven snapshots are deployed')
+                description: 'The Nexus repositories where maven snapshots are deployed.')
     }
 
     stages {
@@ -216,6 +228,8 @@ pipeline {
                             sh """
                                 bash .jenkins/build.sh \
                                     '${params.Action}' \
+                                    '${isOnMasterOrMaintenanceBranch}' \
+                                    '${params.SONAR_ANALYSIS}' \
                                     ${extraBuildParams}
                             """
                         }
@@ -258,9 +272,7 @@ pipeline {
 
         stage('Deploy') {
             when {
-                anyOf {
-                    expression { params.Action == 'DEPLOY' }
-                }
+                expression { params.Action == 'DEPLOY' }
             }
             steps {
                 withCredentials([nexusCredentials]) {
