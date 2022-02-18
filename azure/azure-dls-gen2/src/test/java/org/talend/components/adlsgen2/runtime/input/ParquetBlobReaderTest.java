@@ -92,6 +92,7 @@ class ParquetBlobReaderTest {
         for (int i = 0; i < 12; i++) {
             final Record record = reader.readRecord();
             Assertions.assertNotNull(record);
+            Assertions.assertNotNull(record.get(Integer.class, "intValue"));
         }
         final Record record = reader.readRecord();
         Assertions.assertNull(record);

@@ -13,7 +13,6 @@
 package org.talend.components.adlsgen2.runtime.output;
 
 import javax.json.JsonBuilderFactory;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,16 +20,23 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.parquet.hadoop.util.HadoopInputFile;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.talend.components.adlsgen2.dataset.AdlsGen2DataSet;
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
 import org.talend.components.adlsgen2.output.OutputConfiguration;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.common.connection.adls.AuthMethod;
+import org.talend.components.common.stream.input.parquet.ParquetRecordReader;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
@@ -46,6 +52,8 @@ class ParquetBlobWriterTest {
     @Service
     private JsonBuilderFactory json;
 
+    private File lastFile = null;
+
     private AdlsGen2Service service = new AdlsGen2Service() {
 
         @Override
@@ -55,7 +63,7 @@ class ParquetBlobWriterTest {
 
         @Override
         public boolean pathCreate(final AdlsGen2DataSet dataSet) {
-            final File f = this.getFile(dataSet);
+            final File f = ParquetBlobWriterTest.this.getFile(dataSet);
             if (f.exists()) {
                 f.delete();
             }
@@ -68,7 +76,7 @@ class ParquetBlobWriterTest {
 
         @Override
         public void pathUpdate(final AdlsGen2DataSet dataSet, byte[] content, long position) {
-            final File file = this.getFile(dataSet);
+            final File file = ParquetBlobWriterTest.this.getFile(dataSet);
             try (FileOutputStream out = new FileOutputStream(file)) {
                 out.getChannel().position(position).write(ByteBuffer.wrap(content));
             }
@@ -80,16 +88,17 @@ class ParquetBlobWriterTest {
         @Override
         public void flushBlob(AdlsGen2DataSet dataSet, long position) {
         }
-
-        private File getFile(final AdlsGen2DataSet dataSet) {
-            final String blobPath = dataSet.getBlobPath();
-            final String rootPath = Thread.currentThread().getContextClassLoader().getResource("./out").getPath();
-            return new File(rootPath, blobPath);
-        }
     };
 
+    private File getFile(final AdlsGen2DataSet dataSet) {
+        final String blobPath = dataSet.getBlobPath();
+        final String rootPath = Thread.currentThread().getContextClassLoader().getResource("./out").getPath();
+        this.lastFile = new File(rootPath, blobPath);
+        return this.lastFile;
+    }
+
     @Test
-    void writeRecordTest() {
+    void writeRecordTest() throws IOException {
         final OutputConfiguration config = new OutputConfiguration();
         final AdlsGen2DataSet ds = new AdlsGen2DataSet();
         config.setDataSet(ds);
@@ -115,6 +124,25 @@ class ParquetBlobWriterTest {
         final Record record3 = this.buildRecord(factory, schema, 3);
         writer.writeRecord(record3);
         writer.flush();
+        final Record record4 = this.buildRecord(factory, schema, 4);
+        writer.writeRecord(record4);
+        writer.flush();
+
+        final Configuration hadoopConfig = new Configuration();
+        hadoopConfig.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+        final HadoopInputFile hdpIn = HadoopInputFile.fromPath(new Path(this.lastFile.getAbsolutePath()), hadoopConfig);
+        final Iterator<Record> reader = new ParquetRecordReader(this.factory).read(hdpIn);
+        final Record record1Bis = reader.next();
+        Assertions.assertNotNull(record1Bis);
+        Assertions.assertEquals("value_4", record1Bis.getString("field1"));
+        final Collection<Record> array = record1Bis.getArray(Record.class, "field2");
+        Assertions.assertEquals(5, array.size());
+        int index = 1;
+        for (final Record rec : array) {
+            Assertions.assertEquals("inner" + index, rec.getString("inner"));
+            index++;
+        }
+        Assertions.assertFalse(reader.hasNext());
     }
 
     private Record buildRecord(final RecordBuilderFactory factory,
