@@ -145,7 +145,6 @@ class JsonFormatTest {
         }
     }
 
-    @Disabled("Will be fixed with component runtime 1.40")
     @EnvironmentalTest
     void testEmptyRecord() {
         config.setJsonFile("withEmptyRecord.json");
