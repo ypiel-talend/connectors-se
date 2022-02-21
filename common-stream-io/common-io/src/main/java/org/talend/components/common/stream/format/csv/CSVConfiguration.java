@@ -21,8 +21,15 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@GridLayout({ @GridLayout.Row("lineConfiguration"), @GridLayout.Row({ "fieldSeparator" }) })
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "escape", "quotedValue" }) })
+@GridLayout({ //
+        @GridLayout.Row({ "lineConfiguration" }), //
+        @GridLayout.Row({ "fieldSeparator" })
+})
+@GridLayout(names = GridLayout.FormType.ADVANCED,
+        value = { //
+                @GridLayout.Row({ "escape", "quotedValue" }),
+                @GridLayout.Row({ "commentMarker" })
+        })
 public class CSVConfiguration implements ContentFormat {
 
     private static final long serialVersionUID = -6803208558417743486L;
@@ -40,6 +47,10 @@ public class CSVConfiguration implements ContentFormat {
     private Character escape = '\\';
 
     @Option
+    @Documentation("Comment marker.")
+    private CommentMarker commentMarker = new CommentMarker();
+
+    @Option
     @Documentation("Text enclosure character.")
     private Character quotedValue = '"';
 
@@ -48,5 +59,13 @@ public class CSVConfiguration implements ContentFormat {
             return ';';
         }
         return this.fieldSeparator.findFieldSeparator();
+    }
+
+    public Character findCommentMarker() {
+        if (commentMarker == null) {
+            return ' '; // the default value that was used
+        }
+
+        return commentMarker.findCommentMarker();
     }
 }

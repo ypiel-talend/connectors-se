@@ -25,6 +25,7 @@ import org.talend.components.common.stream.format.Encoding.Type;
 import org.talend.components.common.stream.format.HeaderLine;
 import org.talend.components.common.stream.format.LineConfiguration;
 import org.talend.components.common.stream.format.csv.CSVConfiguration;
+import org.talend.components.common.stream.format.csv.CommentMarker;
 import org.talend.components.common.stream.format.csv.FieldSeparator;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -48,7 +49,48 @@ class CSVRecordWriterTest {
 
         writer.flush();
         writer.end();
-        Assertions.assertEquals("  \n  \n  \nhello;xx\nmike;45\nbob;11\n\"ice;peak\";13\n", out.toString());
+        Assertions.assertEquals(
+                "  \n  \n  \nhello;xx\nmike;45\nbob;11\n\"ice;peak\";13\nice peak;68\n",
+                out.toString());
+    }
+
+    @Test
+    public void spaceFieldSeparatorWithCommentMarker() throws IOException {
+        final RecordWriterSupplier recordWriterSupplier = new CSVWriterSupplier();
+
+        final CSVConfiguration config = createCsvConfiguration();
+        config.getFieldSeparator().setFieldSeparatorType(FieldSeparator.Type.SPACE);
+        config.getCommentMarker().setCommentMarkerType(CommentMarker.Type.HASH);
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final RecordWriter writer = recordWriterSupplier.getWriter(() -> out, config);
+
+        writer.init(config);
+
+        final List<Record> records = buildRecords();
+        writer.add(records);
+
+        writer.flush();
+        writer.end();
+        Assertions.assertEquals("# \n# \n# \nhello xx\nmike 45\nbob 11\nice;peak 13\n\"ice peak\" 68\n",
+                out.toString());
+    }
+
+    @Test
+    public void spaceFieldSeparatorWithSpaceMarker() throws IOException {
+        final RecordWriterSupplier recordWriterSupplier = new CSVWriterSupplier();
+
+        final CSVConfiguration config = createCsvConfiguration();
+        config.getFieldSeparator().setFieldSeparatorType(FieldSeparator.Type.SPACE);
+        config.getCommentMarker().setCommentMarkerType(CommentMarker.Type.SPACE);
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final RecordWriter writer = recordWriterSupplier.getWriter(() -> out, config);
+
+        writer.init(config);
+
+        final List<Record> records = buildRecords();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> writer.add(records));
     }
 
     @Test
@@ -100,7 +142,9 @@ class CSVRecordWriterTest {
 
         final Record record3 = factory.newRecordBuilder().withString("hello", "ice;peak").withInt("xx", 13).build();
 
-        return Arrays.asList(record1, record2, record3);
+        final Record record4 = factory.newRecordBuilder().withString("hello", "ice peak").withInt("xx", 68).build();
+
+        return Arrays.asList(record1, record2, record3, record4);
     }
 
 }

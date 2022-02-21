@@ -45,7 +45,7 @@ public class CSVRecordWriter implements RecordWriter {
 
         int nbeHeaderLine = this.config.getLineConfiguration().calcHeader();
         if (nbeHeaderLine > 0) {
-            csvFormat = csvFormat.withCommentMarker(' ');
+            csvFormat = csvFormat.withCommentMarker(config.findCommentMarker());
             if (nbeHeaderLine > 2) {
                 final String headers = String.join("", Collections.nCopies(nbeHeaderLine - 2, "\n"));
                 csvFormat = csvFormat.withHeaderComments(headers);
