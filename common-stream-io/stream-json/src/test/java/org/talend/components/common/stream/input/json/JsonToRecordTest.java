@@ -12,7 +12,6 @@
  */
 package org.talend.components.common.stream.input.json;
 
-import java.io.IOException;
 import java.io.StringReader;
 
 import java.util.Collection;
@@ -31,7 +30,6 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-// import org.talend.sdk.component.runtime.beam.spi.AvroRecordBuilderFactoryProvider;
 import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 
 class JsonToRecordTest {
