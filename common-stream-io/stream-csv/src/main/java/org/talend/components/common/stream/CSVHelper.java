@@ -19,11 +19,10 @@ public class CSVHelper {
 
     public static CSVFormat getCsvFormat(CSVConfiguration config) {
         return CSVFormat.newFormat(config.findFieldSeparator())
-                .builder() //
-                .setQuote(config.getQuotedValue()) //
-                .setEscape(config.getEscape()) //
-                .setCommentMarker(config.findCommentMarker())
-                .setRecordSeparator(config.getLineConfiguration().getLineSeparator()) //
+                .builder()
+                .setQuote(config.getQuotedValue())
+                .setEscape(config.getEscape())
+                .setRecordSeparator(config.getLineConfiguration().getLineSeparator())
                 .build();
     }
 

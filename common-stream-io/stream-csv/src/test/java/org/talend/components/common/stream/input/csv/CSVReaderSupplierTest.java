@@ -18,15 +18,11 @@ import java.net.URL;
 import java.util.Iterator;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.talend.components.common.stream.api.input.RecordReader;
 import org.talend.components.common.stream.format.LineConfiguration;
 import org.talend.components.common.stream.format.LineConfiguration.LineSeparatorType;
 import org.talend.components.common.stream.format.csv.CSVConfiguration;
-import org.talend.components.common.stream.format.csv.CommentMarker;
 import org.talend.components.common.stream.format.csv.FieldSeparator;
 import org.talend.components.common.stream.format.csv.FieldSeparator.Type;
 import org.talend.sdk.component.api.record.Record;
@@ -48,24 +44,6 @@ class CSVReaderSupplierTest {
         configuration.getLineConfiguration().setLineSeparator("|");
 
         runCSVReader(configuration, "./CSV_PipeLineSep.csv", 7);
-    }
-
-    @Disabled("This test should start to pass when support of csv comments will be added")
-    @ParameterizedTest
-    @ValueSource(strings = { "CSV_WithCommentsInBegin.csv", "CSV_WithCommentsInEnd.csv" })
-    void testCSVPipelineWithCommented(String resourceName) throws IOException {
-        final CSVConfiguration configuration = new CSVConfiguration();
-        configuration.setQuotedValue('"');
-        configuration.setEscape('\\');
-        configuration.setFieldSeparator(new FieldSeparator());
-        configuration.getFieldSeparator().setFieldSeparatorType(Type.COMMA);
-        configuration.getCommentMarker().setCommentMarkerType(CommentMarker.Type.HASH);
-
-        configuration.setLineConfiguration(new LineConfiguration());
-        configuration.getLineConfiguration().setLineSeparatorType(LineSeparatorType.OTHER);
-        configuration.getLineConfiguration().setLineSeparator("|");
-
-        runCSVReader(configuration, resourceName, 7);
     }
 
     private void runCSVReader(

@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVFormat.Builder;
@@ -47,10 +48,8 @@ public class CSVRecordWriter implements RecordWriter {
         int nbeHeaderLine = this.config.getLineConfiguration().calcHeader();
         if (nbeHeaderLine > 0) {
             final Builder builder = csvFormat.builder();
-            if (csvFormat.getCommentMarker() == null) {
-                // it was default behavior before 1.31.0
-                builder.setCommentMarker(' ');
-            }
+            // it was default behavior before 1.31.0
+            builder.setCommentMarker(Optional.ofNullable(config.findCommentMarker()).orElse(' '));
             if (nbeHeaderLine > 2) {
                 final String headers = String.join("", Collections.nCopies(nbeHeaderLine - 2, "\n"));
                 builder.setHeaderComments(headers);

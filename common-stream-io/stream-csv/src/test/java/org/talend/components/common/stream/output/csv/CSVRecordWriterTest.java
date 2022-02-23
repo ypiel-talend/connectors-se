@@ -78,8 +78,7 @@ class CSVRecordWriterTest {
                 Arguments.of(null, null, null,
                         "  \n  \n  \nhello;xx\nmike;45\nbob;11\n\"ice;peak\";13\nice peak;68\n"),
                 Arguments.of(null, CommentMarker.Type.OTHER, '$',
-                        "$ \n$ \n$ \nhello;xx\nmike;45\nbob;11\n\"ice;peak\";13\nice peak;68\n")
-                );
+                        "$ \n$ \n$ \nhello;xx\nmike;45\nbob;11\n\"ice;peak\";13\nice peak;68\n"));
     }
 
     @Test
