@@ -16,9 +16,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.talend.components.common.stream.api.output.RecordWriter;
 import org.talend.components.common.stream.api.output.RecordWriterSupplier;
 import org.talend.components.common.stream.format.Encoding.Type;
@@ -33,11 +37,26 @@ import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 
 class CSVRecordWriterTest {
 
-    @Test
-    public void writeCSV() throws IOException {
+    @MethodSource("writeCSVSource")
+    @ParameterizedTest
+    void writeCSV(
+            FieldSeparator.Type fieldSeparatorType,
+            CommentMarker.Type commentMarkerType,
+            Character commentMarker,
+            String expected)
+            throws IOException {
         final RecordWriterSupplier recordWriterSupplier = new CSVWriterSupplier();
 
         final CSVConfiguration config = createCsvConfiguration();
+        if (fieldSeparatorType != null) {
+            config.getFieldSeparator().setFieldSeparatorType(fieldSeparatorType);
+        }
+        if (commentMarkerType != null) {
+            config.getCommentMarker().setCommentMarkerType(commentMarkerType);
+        }
+        if (commentMarker != null) {
+            config.getCommentMarker().setCommentMarker(commentMarker);
+        }
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final RecordWriter writer = recordWriterSupplier.getWriter(() -> out, config);
@@ -49,31 +68,18 @@ class CSVRecordWriterTest {
 
         writer.flush();
         writer.end();
-        Assertions.assertEquals(
-                "  \n  \n  \nhello;xx\nmike;45\nbob;11\n\"ice;peak\";13\nice peak;68\n",
-                out.toString());
+        Assertions.assertEquals(expected, out.toString());
     }
 
-    @Test
-    public void spaceFieldSeparatorWithCommentMarker() throws IOException {
-        final RecordWriterSupplier recordWriterSupplier = new CSVWriterSupplier();
-
-        final CSVConfiguration config = createCsvConfiguration();
-        config.getFieldSeparator().setFieldSeparatorType(FieldSeparator.Type.SPACE);
-        config.getCommentMarker().setCommentMarkerType(CommentMarker.Type.HASH);
-
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final RecordWriter writer = recordWriterSupplier.getWriter(() -> out, config);
-
-        writer.init(config);
-
-        final List<Record> records = buildRecords();
-        writer.add(records);
-
-        writer.flush();
-        writer.end();
-        Assertions.assertEquals("# \n# \n# \nhello xx\nmike 45\nbob 11\nice;peak 13\n\"ice peak\" 68\n",
-                out.toString());
+    private static Stream<Arguments> writeCSVSource() {
+        return Stream.of(
+                Arguments.of(FieldSeparator.Type.SPACE, CommentMarker.Type.HASH, null,
+                        "# \n# \n# \nhello xx\nmike 45\nbob 11\nice;peak 13\n\"ice peak\" 68\n"),
+                Arguments.of(null, null, null,
+                        "  \n  \n  \nhello;xx\nmike;45\nbob;11\n\"ice;peak\";13\nice peak;68\n"),
+                Arguments.of(null, CommentMarker.Type.OTHER, '$',
+                        "$ \n$ \n$ \nhello;xx\nmike;45\nbob;11\n\"ice;peak\";13\nice peak;68\n")
+                );
     }
 
     @Test

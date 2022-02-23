@@ -18,11 +18,13 @@ import org.talend.components.common.stream.format.csv.CSVConfiguration;
 public class CSVHelper {
 
     public static CSVFormat getCsvFormat(CSVConfiguration config) {
-        return CSVFormat
-                .newFormat(config.findFieldSeparator()) //
-                .withQuote(config.getQuotedValue()) //
-                .withEscape(config.getEscape()) //
-                .withRecordSeparator(config.getLineConfiguration().getLineSeparator()); //
+        return CSVFormat.newFormat(config.findFieldSeparator())
+                .builder() //
+                .setQuote(config.getQuotedValue()) //
+                .setEscape(config.getEscape()) //
+                .setCommentMarker(config.findCommentMarker())
+                .setRecordSeparator(config.getLineConfiguration().getLineSeparator()) //
+                .build();
     }
 
 }

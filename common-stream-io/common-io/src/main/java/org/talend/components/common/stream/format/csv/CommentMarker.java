@@ -36,18 +36,22 @@ public class CommentMarker implements Serializable {
     @RequiredArgsConstructor
     public enum Type {
 
+        /**
+         * null for CSV config is disabled
+         */
+        NONE(null),
         SEMICOLON(';'),
         COMMA(','),
         SPACE(' '),
         HASH('#'),
         OTHER((char) 0);
 
-        private final char marker;
+        private final Character marker;
     }
 
     @Option
     @Documentation("Comment marker type.")
-    private Type commentMarkerType = Type.SPACE;
+    private Type commentMarkerType = Type.NONE;
 
     @Option
     @ActiveIf(target = "commentMarkerType", value = "OTHER")

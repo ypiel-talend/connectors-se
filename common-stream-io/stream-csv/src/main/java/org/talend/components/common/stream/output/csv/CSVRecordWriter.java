@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVFormat.Builder;
 import org.apache.commons.csv.CSVPrinter;
 import org.talend.components.common.stream.CSVHelper;
 import org.talend.components.common.stream.api.output.RecordWriter;
@@ -45,13 +46,17 @@ public class CSVRecordWriter implements RecordWriter {
 
         int nbeHeaderLine = this.config.getLineConfiguration().calcHeader();
         if (nbeHeaderLine > 0) {
-            csvFormat = csvFormat.withCommentMarker(config.findCommentMarker());
+            final Builder builder = csvFormat.builder();
+            if (csvFormat.getCommentMarker() == null) {
+                // it was default behavior before 1.31.0
+                builder.setCommentMarker(' ');
+            }
             if (nbeHeaderLine > 2) {
                 final String headers = String.join("", Collections.nCopies(nbeHeaderLine - 2, "\n"));
-                csvFormat = csvFormat.withHeaderComments(headers);
+                builder.setHeaderComments(headers);
             }
             final List<String> headers = RecordSerializerLineHelper.schemaFrom(record.getSchema());
-            csvFormat = csvFormat.withHeader(headers.toArray(new String[] {}));
+            csvFormat = builder.setHeader(headers.toArray(new String[0])).build();
         }
 
         final OutputStream outputStream = this.target.find();

@@ -26,7 +26,7 @@
   <name>Connectors SE :: Common Stream IO :: stream-csv</name>
 
   <properties>
-    <commons-csv.version>1.7.1</commons-csv.version>
+    <commons-csv.version>1.9.0</commons-csv.version>
   </properties>
 
   <dependencies>
