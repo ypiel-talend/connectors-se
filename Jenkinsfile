@@ -262,6 +262,7 @@ pipeline {
                                 bash .jenkins/release.sh \
                                     '${params.Action}' \
                                     '${releaseVersion}' \
+                                    '${env.BRANCH_NAME}' \
                                     ${extraBuildParams}
                             """
                         }

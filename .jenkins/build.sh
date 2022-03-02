@@ -12,6 +12,7 @@ main() (
   jenkinsAction="${1?Missing Jenkins action}"; shift
   isOnMasterOrMaintenanceBranch="${1?Missing is on master or a maintenance branch}"; shift
   sonar="${1?Missing sonar option}"; shift
+  branch="${1?Missing branch name}"; shift
   extraBuildParams=("$@")
 
     mavenPhase='verify'
@@ -36,7 +37,7 @@ main() (
         --define 'sonar.host.url=https://sonar-eks.datapwn.com' \
         --define "sonar.login='${SONAR_LOGIN}'" \
         --define "sonar.password='${SONAR_PASSWORD}'" \
-        --define "sonar.branch.name=${env.BRANCH_NAME}" \
+        --define "sonar.branch.name=${branch}" \
         --define "sonar.coverage.jacoco.xmlReportPaths='${LIST_FILE}'" \
         --activate-profiles SONAR \
         "${extraBuildParams[@]}"
