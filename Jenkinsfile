@@ -203,7 +203,7 @@ pipeline {
             //        As soon as the build is stable enough not to rely on this crutch, let's get rid of it.
             steps {
                 container(tsbiImage) {
-                    withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
+                    withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials, sonarCredentials]) {
                         script {
                             if (params.POST_LOGIN_SCRIPT?.trim()) {
                                 try {
