@@ -9,6 +9,9 @@ set -xe
 # $3: Execute sonar anlaysis or not, from jenkinsfile's params.SONAR_ANALYSIS
 # $@: the extra parameters to be used in the maven commands
 main() (
+echo "xxxxx sonar.login=${#SONAR_LOGIN}" && echo "yyyy sonar.password=${#SONAR_PASSWORD}" && echo "zzz Nexus => ${#NEXUS_USER}"
+
+
   jenkinsAction="${1?Missing Jenkins action}"; shift
   isOnMasterOrMaintenanceBranch="${1?Missing is on master or a maintenance branch}"; shift
   sonar="${1?Missing sonar option}"; shift
@@ -28,10 +31,6 @@ main() (
       --threads '1C' \
       --activate-profiles "${jenkinsAction},ITs" \
       "${extraBuildParams[@]}"
-
-
-    echo "xxxxx sonar.login=${#SONAR_LOGIN}" && echo "sonar.password=${#SONAR_PASSWORD}" && echo "Nexus => ${#NEXUS_USER}"
-
 
   if [[ "${sonar}" == 'true' ]]; then
     declare -a LIST_FILE_ARRAY=( $(find $(pwd) -type f -name 'jacoco.xml') )
