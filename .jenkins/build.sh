@@ -9,6 +9,10 @@ set -xe
 # $3: Execute sonar anlaysis or not, from jenkinsfile's params.SONAR_ANALYSIS
 # $@: the extra parameters to be used in the maven commands
 main() (
+    echo "Param 1 : $1"
+    echo "Param 2 : $2"
+    echo "Param 3 : $3"
+
   jenkinsAction="${1?Missing Jenkins action}"; shift
   isOnMasterOrMaintenanceBranch="${2?Missing is on master or a maintenance branch}"; shift
   sonar="${3?Missing sonar option}"; shift
