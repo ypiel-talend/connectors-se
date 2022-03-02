@@ -230,6 +230,7 @@ pipeline {
                                     '${params.Action}' \
                                     '${isOnMasterOrMaintenanceBranch}' \
                                     '${params.SONAR_ANALYSIS}' \
+                                    '${env.BRANCH_NAME}' \
                                     ${extraBuildParams}
                             """
                         }
@@ -262,7 +263,6 @@ pipeline {
                                 bash .jenkins/release.sh \
                                     '${params.Action}' \
                                     '${releaseVersion}' \
-                                    '${env.BRANCH_NAME}' \
                                     ${extraBuildParams}
                             """
                         }
