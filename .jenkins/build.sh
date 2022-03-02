@@ -29,13 +29,16 @@ main() (
       "${extraBuildParams[@]}"
 
   if [[ "${sonar}" == 'true' ]]; then
+    declare -a LIST_FILE_ARRAY=( $(find $(pwd) -type f -name 'jacoco.xml') )
+    LIST_FILE=$(IFS=, ; echo "${LIST_FILE_ARRAY[*]}")
     # Why sonar plugin is not pom.xml: https://blog.sonarsource.com/we-had-a-dream-mvn-sonarsonar
-    mvn -Dsonar.host.url=https://sonar-eks.datapwn.com -Dsonar.login='$SONAR_LOGIN' \
-        -Dsonar.password='$SONAR_PASSWORD' \
-        -Dsonar.branch.name=${env.BRANCH_NAME} \
-        -Dsonar.coverage.jacoco.xmlReportPaths='${LIST_FILE}' \
-        sonar:sonar \
-        -PSONAR \
+    mvn sonar:sonar \
+        --define 'sonar.host.url=https://sonar-eks.datapwn.com' \
+        --define "sonar.login='${SONAR_LOGIN}'" \
+        --define "sonar.password='${SONAR_PASSWORD}'" \
+        --define "sonar.branch.name=${env.BRANCH_NAME}" \
+        --define "sonar.coverage.jacoco.xmlReportPaths='${LIST_FILE}'" \
+        --activate-profiles SONAR \
         "${extraBuildParams[@]}"
         #-s .jenkins/settings.xml \
         #-Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/ \

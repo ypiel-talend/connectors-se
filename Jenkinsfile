@@ -224,7 +224,7 @@ pipeline {
             steps {
                 container(tsbiImage) {
                     script {
-                        withCredentials([nexusCredentials]) {
+                        withCredentials([nexusCredentials, sonarCredentials]) {
                             sh """
                                 bash .jenkins/build.sh \
                                     '${params.Action}' \
