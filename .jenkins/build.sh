@@ -29,6 +29,10 @@ main() (
       --activate-profiles "${jenkinsAction},ITs" \
       "${extraBuildParams[@]}"
 
+
+    echo "xxxxx sonar.login=${#SONAR_LOGIN}" && echo "sonar.password=${#SONAR_PASSWORD}" && echo "Nexus => ${#NEXUS_USER}"
+
+
   if [[ "${sonar}" == 'true' ]]; then
     declare -a LIST_FILE_ARRAY=( $(find $(pwd) -type f -name 'jacoco.xml') )
     LIST_FILE=$(IFS=, ; echo "${LIST_FILE_ARRAY[*]}")
