@@ -9,7 +9,7 @@ set -xe
 # $3: Execute sonar anlaysis or not, from jenkinsfile's params.SONAR_ANALYSIS
 # $@: the extra parameters to be used in the maven commands
 main() (
-   # TODO: To remove, Check Sonar talend.maven.decrypter.m2.location needs /  on project connectors-se: Not authorized. Please check the properties sonar.login and sonar.password.
+   # TODO: on project connectors-se: Not authorized. Please check the properties sonar.login and sonar.password.
    echo "xxxxx sonar.login=${#SONAR_LOGIN}" && echo "yyyy sonar.password=${#SONAR_PASSWORD}" && echo "zzz Nexus => ${#NEXUS_USER}"
 
 
@@ -39,14 +39,12 @@ main() (
     # Why sonar plugin is not pom.xml: https://blog.sonarsource.com/we-had-a-dream-mvn-sonarsonar
     mvn sonar:sonar \
         --define 'sonar.host.url=https://sonar-eks.datapwn.com' \
-        --define "sonar.login='${SONAR_LOGIN}'" \
-        --define "sonar.password='${SONAR_PASSWORD}'" \
+        --define "sonar.login=${SONAR_LOGIN}" \
+        --define "sonar.password=${SONAR_PASSWORD}" \
         --define "sonar.branch.name=${branch}" \
         --define "sonar.coverage.jacoco.xmlReportPaths='${LIST_FILE}'" \
         --activate-profiles SONAR \
         "${extraBuildParams[@]}"
-        #-s .jenkins/settings.xml \
-        #-Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/ \
   fi
 )
 
