@@ -7,9 +7,8 @@ set -xe
 # $2: the version being released (semver, extracted from pom)
 # $@: the extra parameters to be used in the maven commands
 main() (
-  jenkinsAction="${1?Missing Jenkins action}"
-  releaseVersion="${2?Missing release version}"
-  shift; shift
+  jenkinsAction="${1?Missing Jenkins action}"; shift
+  releaseVersion="${1?Missing release version}"; shift
   extraBuildParams=("$@")
 
   setMavenVersion "${releaseVersion}"

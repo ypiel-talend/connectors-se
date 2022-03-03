@@ -9,7 +9,8 @@ set -xe
 # $3: Execute sonar anlaysis or not, from jenkinsfile's params.SONAR_ANALYSIS
 # $@: the extra parameters to be used in the maven commands
 main() (
-echo "xxxxx sonar.login=${#SONAR_LOGIN}" && echo "yyyy sonar.password=${#SONAR_PASSWORD}" && echo "zzz Nexus => ${#NEXUS_USER}"
+   # TODO: To remove, Check Sonar talend.maven.decrypter.m2.location needs /  on project connectors-se: Not authorized. Please check the properties sonar.login and sonar.password.
+   echo "xxxxx sonar.login=${#SONAR_LOGIN}" && echo "yyyy sonar.password=${#SONAR_PASSWORD}" && echo "zzz Nexus => ${#NEXUS_USER}"
 
 
   jenkinsAction="${1?Missing Jenkins action}"; shift

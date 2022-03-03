@@ -121,7 +121,7 @@ pipeline {
         booleanParam(
                 name: 'SONAR_ANALYSIS',
                 defaultValue: false,
-                description: 'Execute Sonar analysis.')
+                description: 'Execute Sonar analysis (only for STANDARD action).')
         string(
                 name: 'EXTRA_BUILD_PARAMS',
                 defaultValue: "",
