@@ -73,7 +73,7 @@
     </distributionManagement>
 
     <properties>
-        <connectors-test-bom.version>0.7.1-SNAPSHOT</connectors-test-bom.version>
+        <connectors-test-bom.version>0.7.2-SNAPSHOT</connectors-test-bom.version>
         <common.version>0.7.2-SNAPSHOT</common.version>
 
         <timestamp.year>${maven.build.timestamp}</timestamp.year>
