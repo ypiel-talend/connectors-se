@@ -46,8 +46,7 @@ main() (
     --errors \
     --batch-mode \
     --threads '1C' \
-    --define 'maven.javadoc.skip=true' \
-    --activate-profiles 'DEPLOY_SNAPSHOT_AFTER_RELEASEe' \
+    --activate-profiles 'DEPLOY_SNAPSHOT_AFTER_RELEASE' \
     "${extraBuildParams[@]}"
 )
 
