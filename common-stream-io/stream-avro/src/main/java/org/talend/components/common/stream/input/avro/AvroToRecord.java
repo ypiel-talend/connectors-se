@@ -94,7 +94,7 @@ public class AvroToRecord {
     private Collection<?> buildArrayField(final org.apache.avro.Schema schema, final Collection<?> value,
             final Schema elementSchema) {
         final org.apache.avro.Schema arraySchema = AvroHelper.getUnionSchema(schema);
-        final org.apache.avro.Schema arrayInnerType = arraySchema.getElementType();
+        final org.apache.avro.Schema arrayInnerType = AvroHelper.getUnionSchema(arraySchema.getElementType());
 
         final Collection<?> objectArray;
         switch (arrayInnerType.getType()) {
