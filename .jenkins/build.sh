@@ -9,17 +9,13 @@ set -xe
 # $3: Execute sonar anlaysis or not, from jenkinsfile's params.SONAR_ANALYSIS
 # $@: the extra parameters to be used in the maven commands
 main() (
-   # TODO: on project connectors-se: Not authorized. Please check the properties sonar.login and sonar.password.
-   echo "xxxxx sonar.login=${#SONAR_LOGIN}" && echo "yyyy sonar.password=${#SONAR_PASSWORD}" && echo "zzz Nexus => ${#NEXUS_USER}"
-
-
   jenkinsAction="${1?Missing Jenkins action}"; shift
   isOnMasterOrMaintenanceBranch="${1?Missing is on master or a maintenance branch}"; shift
   sonar="${1?Missing sonar option}"; shift
   branch="${1?Missing branch name}"; shift
   extraBuildParams=("$@")
 
-    mavenPhase='verify'
+  mavenPhase='verify'
   if [[ "${isOnMasterOrMaintenanceBranch}" == 'true' ]]; then
     mavenPhase='deploy'
   fi
@@ -36,7 +32,7 @@ main() (
   if [[ "${sonar}" == 'true' ]]; then
     declare -a LIST_FILE_ARRAY=( $(find $(pwd) -type f -name 'jacoco.xml') )
     LIST_FILE=$(IFS=, ; echo "${LIST_FILE_ARRAY[*]}")
-    # Why sonar plugin is not pom.xml: https://blog.sonarsource.com/we-had-a-dream-mvn-sonarsonar
+    # Why sonar plugin is not declared in pom.xml: https://blog.sonarsource.com/we-had-a-dream-mvn-sonarsonar
     mvn sonar:sonar \
         --define 'sonar.host.url=https://sonar-eks.datapwn.com' \
         --define "sonar.login=${SONAR_LOGIN}" \
