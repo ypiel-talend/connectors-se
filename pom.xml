@@ -1231,6 +1231,7 @@
             <id>DEPLOY_SNAPSHOT_AFTER_RELEASE</id>
             <properties>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.test.skip>true</maven.test.skip>
             </properties>
         </profile>
         <profile>
