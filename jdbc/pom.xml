@@ -240,7 +240,13 @@
                 </repository>
                 <repository>
                     <id>redshift</id>
-                    <url>http://s3.amazonaws.com/redshift-maven-repository/release</url>
+                    <!--
+                        Previous repository was:
+                        <url>http://s3.amazonaws.com/redshift-maven-repository/release</url>
+                        but it was failing:
+                        Failed to execute goal on project jdbc: Could not resolve dependencies for project org.talend.components:jdbc:jar:0.7.1-SNAPSHOT: Failed to collect dependencies at com.amazon.redshift:redshift-jdbc42:jar:1.2.37.1061
+                    -->
+                    <url>https://mvnrepository.com/artifact/</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
