@@ -235,10 +235,6 @@
           <artifactId>re2j</artifactId>
           <groupId>com.google.re2j</groupId>
         </exclusion>
-        <exclusion>
-          <groupId>com.google.protobuf</groupId>
-          <artifactId>protobuf-java</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>

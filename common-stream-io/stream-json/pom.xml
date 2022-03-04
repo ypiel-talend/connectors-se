@@ -25,15 +25,6 @@
 
   <name>Connectors SE :: Common Stream IO :: stream-json</name>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.google.protobuf</groupId>
-        <artifactId>protobuf-java</artifactId>
-        <version>3.4.0</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <dependencies>
     <!-- file line formats -->
     <dependency>

@@ -37,11 +37,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>com.google.protobuf</groupId>
-        <artifactId>protobuf-java</artifactId>
-        <version>3.4.0</version>
-      </dependency>
       <!--latest versions use azure-core
         which depends on the jacksonV 12, not compatible with pipeline designer -->
       <dependency>
