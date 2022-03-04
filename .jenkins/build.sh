@@ -7,6 +7,7 @@ set -xe
 # $1: the Jenkinsfile's params.Action
 # $2: Execute maven verify or deploy whether the branch is maintenance or master.
 # $3: Execute sonar anlaysis or not, from jenkinsfile's params.SONAR_ANALYSIS
+# $4: Sonar analyzed branch
 # $@: the extra parameters to be used in the maven commands
 main() (
   jenkinsAction="${1?Missing Jenkins action}"; shift
