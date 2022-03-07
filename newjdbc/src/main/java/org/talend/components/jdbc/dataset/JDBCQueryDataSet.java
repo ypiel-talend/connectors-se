@@ -35,9 +35,10 @@ import java.io.Serializable;
 @DataSet("JDBCQueryDataSet")
 @Documentation("A query dataset")
 public class JDBCQueryDataSet implements Serializable {
-    //TODO consider the questions below:
+    // TODO consider the questions below:
     // dataset is not so generic for standard alone component,
-    // dataset is even not so generic for output component which works as sink in pipeline designer sometimes, so we need two datasets sometimes
+    // dataset is even not so generic for output component which works as sink in pipeline designer sometimes, so we
+    // need two datasets sometimes
     // dataset show in ui as :
     // 1. cloud data catalog / dataprep, pipeline designer ref
     // 2. studio component ui like tjdbcinput/tjdbcoutput
@@ -50,16 +51,17 @@ public class JDBCQueryDataSet implements Serializable {
     @Documentation("The connection information to execute")
     private JDBCDataStore dataStore;
 
-    //TODO for jdbcinpput, it works for help generate sql only by a button: Guess Query, not works for job runtime
-    //TODO for tjdbcrow and something, it works for runtime, so right place?
+    // TODO for jdbcinpput, it works for help generate sql only by a button: Guess Query, not works for job runtime
+    // TODO for tjdbcrow and something, it works for runtime, so right place?
     @Option
     @Documentation("The table name")
     private String tableName;
 
-    //TODO how to generate Query Store field, Guess Query button here and hook it to the query field for runtime to generate the query
-    //TODO how to pass right connection info to SQL Editor field by button in Query field?
-    //TODO how to process different action between studio and cloud
-    //TODO how to process different action betwen tjdbcinput and tjdbcrow
+    // TODO how to generate Query Store field, Guess Query button here and hook it to the query field for runtime to
+    // generate the query
+    // TODO how to pass right connection info to SQL Editor field by button in Query field?
+    // TODO how to process different action between studio and cloud
+    // TODO how to process different action betwen tjdbcinput and tjdbcrow
     @Option
     @Code("sql")
     @Documentation("sql query")

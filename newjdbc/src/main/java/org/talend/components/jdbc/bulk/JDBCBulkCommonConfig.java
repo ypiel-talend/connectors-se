@@ -22,10 +22,10 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({
-        //TODO layout more here
+        // TODO layout more here
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        //TODO layout more here
+        // TODO layout more here
 })
 @Documentation("jdbc bulk common")
 public class JDBCBulkCommonConfig implements Serializable {
@@ -34,7 +34,7 @@ public class JDBCBulkCommonConfig implements Serializable {
     @Documentation("")
     private String bulkFile;
 
-    //advanced setting
+    // advanced setting
 
     @Option
     @Documentation("")
@@ -44,8 +44,8 @@ public class JDBCBulkCommonConfig implements Serializable {
     @Documentation("")
     private String fieldSeparator;
 
-    //TODO set text enclosure field
+    // TODO set text enclosure field
 
-    //TODO set null value field
+    // TODO set null value field
 
 }

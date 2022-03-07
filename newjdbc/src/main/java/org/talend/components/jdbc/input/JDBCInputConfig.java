@@ -28,7 +28,7 @@ import java.util.List;
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet")
-        //TODO layout more here
+        // TODO layout more here
 })
 @Documentation("jdbc input")
 public class JDBCInputConfig implements Serializable {
@@ -37,17 +37,17 @@ public class JDBCInputConfig implements Serializable {
     @Documentation("SQL query dataset")
     private JDBCQueryDataSet dataSet;
 
-    //TODO studio will add schema field and guess schema button auto
-    //TODO but how to make guess schema works for tjdbcinput, which should guess from query, not table
+    // TODO studio will add schema field and guess schema button auto
+    // TODO but how to make guess schema works for tjdbcinput, which should guess from query, not table
 
-    //advanced setting
+    // advanced setting
 
     @Option
     @Documentation("use cursor")
     private boolean useCursor;
 
     @Option
-    @ActiveIf(target = "useCursor", value = {"true"})
+    @ActiveIf(target = "useCursor", value = { "true" })
     @Documentation("cursor size")
     private int cursorSize = 1000;
 
@@ -67,7 +67,7 @@ public class JDBCInputConfig implements Serializable {
     @Documentation("select DB mapping")
     private String mapping;
 
-    //TODO a field : allow special char in dynamic table name? what's that?
+    // TODO a field : allow special char in dynamic table name? what's that?
 
     @Option
     @Documentation("")

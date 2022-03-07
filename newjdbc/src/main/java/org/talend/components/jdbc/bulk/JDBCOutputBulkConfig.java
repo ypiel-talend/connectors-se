@@ -21,10 +21,10 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({
-        //TODO layout more here
+        // TODO layout more here
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        //TODO layout more here
+        // TODO layout more here
 })
 @Documentation("jdbc output bulk file")
 public class JDBCOutputBulkConfig implements Serializable {
@@ -33,7 +33,7 @@ public class JDBCOutputBulkConfig implements Serializable {
     @Documentation("")
     private JDBCBulkCommonConfig bulkCommonConfig;
 
-    //advanced setting
+    // advanced setting
 
     @Option
     @Documentation("")

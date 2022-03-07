@@ -24,7 +24,7 @@ import java.util.List;
 @Data
 @GridLayout({
         @GridLayout.Row("dataStore")
-        //TODO layout more here
+        // TODO layout more here
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataStore")
@@ -32,13 +32,13 @@ import java.util.List;
 @Documentation("jdbc sp")
 public class JDBCSPConfig implements Serializable {
 
-    //TODO check if ok here to use datastore instead of dataset
+    // TODO check if ok here to use datastore instead of dataset
     @Option
     @Documentation("")
     private JDBCDataStore dataStore;
 
-    //TODO studio will add schema field auto
-    //TODO but how to add guess schema auto for tjdbcrow, which should guess from where?
+    // TODO studio will add schema field auto
+    // TODO but how to add guess schema auto for tjdbcrow, which should guess from where?
 
     @Option
     @Documentation("")
@@ -48,6 +48,6 @@ public class JDBCSPConfig implements Serializable {
     @Documentation("")
     private boolean isFunction;
 
-    //TODO set sp parameters table
+    // TODO set sp parameters table
 
 }

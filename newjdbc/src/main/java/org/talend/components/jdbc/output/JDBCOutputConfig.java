@@ -26,7 +26,7 @@ import java.io.Serializable;
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet")
-        //TODO layout more here
+        // TODO layout more here
 })
 @Documentation("jdbc output")
 public class JDBCOutputConfig implements Serializable {
@@ -35,8 +35,8 @@ public class JDBCOutputConfig implements Serializable {
     @Documentation("table dataset")
     private JDBCTableDataSet dataSet;
 
-    //TODO studio will add schema field auto
-    //TODO but how to add guess schema auto for tjdbcoutput, which should guess from table
+    // TODO studio will add schema field auto
+    // TODO but how to add guess schema auto for tjdbcoutput, which should guess from table
 
     @Option
     @Documentation("")
@@ -54,13 +54,13 @@ public class JDBCOutputConfig implements Serializable {
     @Documentation("")
     private int commitEvery = 10000;
 
-    //TODO additional columns table, how to link schema columns as select?
+    // TODO additional columns table, how to link schema columns as select?
 
-    //TODO field options table, how to link schema columns as select and auto fill table row by row by schema columns?
+    // TODO field options table, how to link schema columns as select and auto fill table row by row by schema columns?
 
-    //TODO debugQueryMode
+    // TODO debugQueryMode
 
-    //TODO use batch and batch size
+    // TODO use batch and batch size
 
-    //TODO use query timeout and query timeout
+    // TODO use query timeout and query timeout
 }

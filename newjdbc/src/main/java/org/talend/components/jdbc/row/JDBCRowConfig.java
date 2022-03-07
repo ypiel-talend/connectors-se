@@ -28,7 +28,7 @@ import java.util.List;
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet")
-        //TODO layout more here
+        // TODO layout more here
 })
 @Documentation("jdbc row")
 public class JDBCRowConfig implements Serializable {
@@ -37,31 +37,31 @@ public class JDBCRowConfig implements Serializable {
     @Documentation("table dataset")
     private JDBCQueryDataSet dataSet;
 
-    //TODO studio will add schema field auto
-    //TODO but how to add guess schema auto for tjdbcrow, which should guess from table
+    // TODO studio will add schema field auto
+    // TODO but how to add guess schema auto for tjdbcrow, which should guess from table
 
     @Option
     @Documentation("")
     private boolean dieOnError;
 
-    //TODO field : propagate query's recordset
+    // TODO field : propagate query's recordset
 
-    //TODO column choose field : how to map schema to this field, avoiding to call runtime?
+    // TODO column choose field : how to map schema to this field, avoiding to call runtime?
 
     @Option
     @Documentation("")
     private boolean usePreparedStatement;
 
-    //TODO how to inject the var to main part?
+    // TODO how to inject the var to main part?
     @Option
     @Documentation("")
     private List<Object> preparedStatementParameters;
 
-    //TODO detect error on multiple statements field
+    // TODO detect error on multiple statements field
 
     @Option
     @Documentation("")
     private int commitEvery = 10000;
 
-    //TODO use query timeout and query timeout
+    // TODO use query timeout and query timeout
 }

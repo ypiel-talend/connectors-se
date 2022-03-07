@@ -26,7 +26,7 @@ import java.io.Serializable;
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet")
-        //TODO layout more here
+        // TODO layout more here
 })
 @Documentation("jdbc bulk exec")
 public class JDBCOutputBulkExecConfig implements Serializable {
@@ -35,8 +35,8 @@ public class JDBCOutputBulkExecConfig implements Serializable {
     @Documentation("table dataset")
     private JDBCTableDataSet dataSet;
 
-    //TODO studio will add schema field auto
-    //TODO but how to add guess schema auto for tjdbcrow, which should guess from table
+    // TODO studio will add schema field auto
+    // TODO but how to add guess schema auto for tjdbcrow, which should guess from table
 
     @Option
     @Documentation("")

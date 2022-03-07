@@ -10,30 +10,22 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.input;
+package org.talend.components.jdbc.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
-import org.talend.sdk.component.api.meta.Documentation;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
+import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
-import java.io.Serializable;
+@Slf4j
+@Service
+public class JDBCService {
 
-@Data
-@OptionsOrder({ "column", "trim" })
-@NoArgsConstructor
-@AllArgsConstructor
-@Documentation("")
-public class ColumnTrim implements Serializable {
-
-    @Option
-    @Documentation("")
-    private String column;
-
-    @Option
-    @Documentation("")
-    private boolean trim;
+    @HealthCheck("CheckConnection")
+    public HealthCheckStatus validateBasicDataStore(@Option final JDBCDataStore datastore) {
+        return new HealthCheckStatus(HealthCheckStatus.Status.OK, "success message, TODO, i18n");
+    }
 
 }

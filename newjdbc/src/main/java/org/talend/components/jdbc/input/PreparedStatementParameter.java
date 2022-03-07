@@ -21,9 +21,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 
-
 @Data
-@OptionsOrder({"index", "type", "value"})
+@OptionsOrder({ "index", "type", "value" })
 @NoArgsConstructor
 @AllArgsConstructor
 @Documentation("")
@@ -33,13 +32,13 @@ public class PreparedStatementParameter implements Serializable {
     @Documentation("")
     private String index;
 
-    //TODO to enum type
+    // TODO to enum type
     @Option
     @Documentation("")
     private String type;
 
-    //TODO it works? how to pass to main part, in loop logic for flow line
-    //TODO to string type?
+    // TODO it works? how to pass to main part, in loop logic for flow line
+    // TODO to string type?
     @Option
     @Documentation("")
     private Object value;
