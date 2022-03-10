@@ -12,16 +12,15 @@
  */
 package org.talend.components.common.stream.input.json;
 
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParserFactory;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.talend.components.common.collections.IteratorMap;
 import org.talend.components.common.stream.api.input.RecordReader;

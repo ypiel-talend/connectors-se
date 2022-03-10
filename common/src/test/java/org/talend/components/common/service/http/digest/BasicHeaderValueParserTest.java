@@ -12,10 +12,8 @@
  */
 package org.talend.components.common.service.http.digest;
 
-import org.junit.jupiter.api.Test;
-import org.talend.components.common.service.http.common.BasicHeader;
-import org.talend.components.common.service.http.common.BasicHeaderValueParser;
-import org.talend.components.common.service.http.common.BasicNameValuePair;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.talend.components.common.service.http.common.BasicHeader;
+import org.talend.components.common.service.http.common.BasicHeaderValueParser;
+import org.talend.components.common.service.http.common.BasicNameValuePair;
 
 class BasicHeaderValueParserTest {
 

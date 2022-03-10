@@ -12,14 +12,13 @@
  */
 package org.talend.components.common.stream.output.json;
 
-import java.time.ZonedDateTime;
-import java.util.Collection;
-
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import java.time.ZonedDateTime;
+import java.util.Collection;
 
 import org.talend.components.common.stream.api.output.RecordConverter;
 import org.talend.sdk.component.api.record.Record;

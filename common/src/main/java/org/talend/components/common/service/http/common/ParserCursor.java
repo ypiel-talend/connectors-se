@@ -12,7 +12,6 @@
  */
 package org.talend.components.common.service.http.common;
 
-import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 

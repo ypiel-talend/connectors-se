@@ -1,7 +1,5 @@
 package org.talend.components.common.service.http.digest;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Assertions;

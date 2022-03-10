@@ -12,6 +12,11 @@
  */
 package org.talend.components.common.stream.api;
 
+import javax.annotation.PostConstruct;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonReaderFactory;
+import javax.json.JsonValue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -21,17 +26,12 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.annotation.PostConstruct;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonReaderFactory;
-import javax.json.JsonValue;
-
-import lombok.extern.slf4j.Slf4j;
 import org.talend.components.common.stream.api.input.RecordReaderSupplier;
 import org.talend.components.common.stream.api.output.RecordWriterSupplier;
 import org.talend.components.common.stream.format.ContentFormat;
 import org.talend.sdk.component.api.service.Service;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service to group record reader and writer suppliers (one reader/writer for each configuration).

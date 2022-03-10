@@ -12,8 +12,6 @@
  */
 package org.talend.components.common.service.http;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

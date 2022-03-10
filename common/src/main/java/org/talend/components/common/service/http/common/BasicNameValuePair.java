@@ -12,9 +12,9 @@
  */
 package org.talend.components.common.service.http.common;
 
-import lombok.EqualsAndHashCode;
-
 import java.io.Serializable;
+
+import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(of = { "name", "value" })
 public class BasicNameValuePair implements Cloneable, Serializable {

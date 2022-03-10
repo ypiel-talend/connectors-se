@@ -12,11 +12,10 @@
  */
 package org.talend.components.common.stream.output.json;
 
-import java.io.IOException;
-
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.stream.JsonGenerator;
+import java.io.IOException;
 
 import org.talend.components.common.stream.api.output.RecordConverter;
 import org.talend.components.common.stream.api.output.RecordWriter;

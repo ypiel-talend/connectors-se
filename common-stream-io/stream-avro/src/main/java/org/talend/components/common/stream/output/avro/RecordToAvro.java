@@ -13,7 +13,6 @@
 package org.talend.components.common.stream.output.avro;
 
 import java.nio.ByteBuffer;
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,13 +22,11 @@ import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericData.Array;
 import org.apache.avro.generic.GenericRecord;
 import org.talend.components.common.stream.AvroHelper;
 import org.talend.components.common.stream.api.output.RecordConverter;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.record.Schema.Entry;
 
 public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.avro.Schema> {
 

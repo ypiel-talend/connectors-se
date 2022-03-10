@@ -12,13 +12,6 @@
  */
 package org.talend.components.common.service.http.digest;
 
-import org.talend.components.common.service.http.common.BasicHeader;
-import org.talend.components.common.service.http.common.BasicHeaderValueFormatter;
-import org.talend.components.common.service.http.common.BasicHeaderValueParser;
-import org.talend.components.common.service.http.common.BasicNameValuePair;
-import org.talend.components.common.service.http.common.ByteArrayBuilder;
-import org.talend.components.common.service.http.common.CharArrayBuffer;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +31,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import org.talend.components.common.service.http.common.BasicHeader;
+import org.talend.components.common.service.http.common.BasicHeaderValueFormatter;
+import org.talend.components.common.service.http.common.BasicHeaderValueParser;
+import org.talend.components.common.service.http.common.BasicNameValuePair;
+import org.talend.components.common.service.http.common.ByteArrayBuilder;
+import org.talend.components.common.service.http.common.CharArrayBuffer;
 
 /**
  * Digest authentication scheme as defined in RFC 2617.

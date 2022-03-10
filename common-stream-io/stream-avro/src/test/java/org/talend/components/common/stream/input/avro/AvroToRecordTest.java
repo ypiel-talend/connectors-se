@@ -32,9 +32,7 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.DatumReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.talend.components.common.stream.output.avro.RecordToAvro;
@@ -53,17 +51,29 @@ class AvroToRecordTest {
 
     private org.apache.avro.Schema getArrayInnerTypeAvroSchema() {
         final org.apache.avro.Schema schema = SchemaBuilder.array()
-                .items().unionOf()
-                .record("inner").fields()
-                    .name("f1").type().stringType().noDefault()
-                .endRecord().and().nullBuilder()
-                .endNull().endUnion();
+                .items()
+                .unionOf()
+                .record("inner")
+                .fields()
+                .name("f1")
+                .type()
+                .stringType()
+                .noDefault()
+                .endRecord()
+                .and()
+                .nullBuilder()
+                .endNull()
+                .endUnion();
         return schema;
     }
 
     private org.apache.avro.Schema getArrayRecord() {
-        return SchemaBuilder.record("inner").fields()
-                .name("f1").type().stringType().noDefault()
+        return SchemaBuilder.record("inner")
+                .fields()
+                .name("f1")
+                .type()
+                .stringType()
+                .noDefault()
                 .endRecord();
     }
 
@@ -73,20 +83,50 @@ class AvroToRecordTest {
                 .builder()
                 .record("sample")
                 .fields() //
-                    .name("string").type().stringType().noDefault() //
-                    .name("int").type().intType().noDefault() //
-                    .name("long").type().longType().noDefault() //
-                    .name("double").type().doubleType().noDefault() //
-                    .name("boolean").type().booleanType().noDefault() //
-                    .name("array").type().array().items().intType().noDefault() // Array of int
-                    .name("object").type().record("obj") // sub obj
-                    .fields()
-                        .name("f1").type().intType().noDefault() //
-                        .name("f2").type().stringType().noDefault() //
-                    .endRecord()
+                .name("string")
+                .type()
+                .stringType()
+                .noDefault() //
+                .name("int")
+                .type()
+                .intType()
+                .noDefault() //
+                .name("long")
+                .type()
+                .longType()
+                .noDefault() //
+                .name("double")
+                .type()
+                .doubleType()
+                .noDefault() //
+                .name("boolean")
+                .type()
+                .booleanType()
+                .noDefault() //
+                .name("array")
+                .type()
+                .array()
+                .items()
+                .intType()
+                .noDefault() // Array of int
+                .name("object")
+                .type()
+                .record("obj") // sub obj
+                .fields()
+                .name("f1")
+                .type()
+                .intType()
+                .noDefault() //
+                .name("f2")
+                .type()
+                .stringType()
+                .noDefault() //
+                .endRecord()
 
                 .noDefault()
-                .name("arrayOfRecord").type(this.getArrayInnerTypeAvroSchema()).noDefault()
+                .name("arrayOfRecord")
+                .type(this.getArrayInnerTypeAvroSchema())
+                .noDefault()
                 .endRecord();
 
         avro = new GenericData.Record(schema);
@@ -106,8 +146,7 @@ class AvroToRecordTest {
         avro.put("arrayOfRecord", Arrays.asList(
                 new GenericRecordBuilder(getArrayRecord())
                         .set("f1", "value1")
-                        .build()
-        ));
+                        .build()));
     }
 
     @ParameterizedTest
@@ -123,7 +162,8 @@ class AvroToRecordTest {
                 .map(Entry::getName)
                 .collect(toList())
                 .containsAll(
-                        Stream.of("string", "int", "long", "double", "boolean", "array", "object", "arrayOfRecord").collect(toList())));
+                        Stream.of("string", "int", "long", "double", "boolean", "array", "object", "arrayOfRecord")
+                                .collect(toList())));
     }
 
     @ParameterizedTest
@@ -236,8 +276,7 @@ class AvroToRecordTest {
         final RecordBuilderFactory factory2 = provider.apply("test");
         if (property == null) {
             System.clearProperty("talend.component.beam.record.factory.impl");
-        }
-        else {
+        } else {
             System.setProperty("talend.component.beam.record.factory.impl", property);
         }
         return Stream.of(factory1, factory2);
