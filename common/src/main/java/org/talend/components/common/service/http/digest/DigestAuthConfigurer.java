@@ -20,10 +20,10 @@ import java.util.Optional;
 @Slf4j
 public class DigestAuthConfigurer implements Configurer {
 
-    private final static String AUTHORIZATION_HEADER = System
+    private static final String AUTHORIZATION_HEADER = System
             .getProperty("org.talend.components.common.service.http.digest.authorization_header", "Authorization");
 
-    public final static String DIGEST_CONTEXT_CONF = "digestContext";
+    public static final String DIGEST_CONTEXT_CONF = "digestContext";
 
     @Override
     public void configure(Connection connection, ConfigurerConfiguration configuration) {

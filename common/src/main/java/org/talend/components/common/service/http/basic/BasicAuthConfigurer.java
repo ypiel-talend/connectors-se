@@ -22,7 +22,7 @@ import java.util.Base64;
 @Slf4j
 public class BasicAuthConfigurer implements Configurer {
 
-    public final static String BASIC_CONTEXT_CONF = "basicContext";
+    public static final String BASIC_CONTEXT_CONF = "basicContext";
 
     @Override
     public void configure(Connection connection, ConfigurerConfiguration configuration) {

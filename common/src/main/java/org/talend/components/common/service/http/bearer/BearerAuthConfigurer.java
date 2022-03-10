@@ -18,7 +18,7 @@ import org.talend.sdk.component.api.service.http.Configurer;
 @Slf4j
 public class BearerAuthConfigurer implements Configurer {
 
-    public final static String BEARER_TOKEN_CONF = "bearerToken";
+    public static final String BEARER_TOKEN_CONF = "bearerToken";
 
     @Override
     public void configure(Connection connection, ConfigurerConfiguration configuration) {

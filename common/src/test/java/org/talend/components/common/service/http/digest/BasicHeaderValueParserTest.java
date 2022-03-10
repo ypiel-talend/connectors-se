@@ -122,7 +122,7 @@ class BasicHeaderValueParserTest {
 
         assertEquals(expected.size(), nameValuePairs.length);
         expected.entrySet().stream().forEach(k -> {
-            assertTrue(existsOnce(nameValuePairs, k.getKey()));
+            assertTrue(existsOnce(nameValuePairs, k.getKey()), "not exist once " + k.getKey());
             assertEquals(k.getValue(), getByName(nameValuePairs, k.getKey()).getValue());
         });
     }

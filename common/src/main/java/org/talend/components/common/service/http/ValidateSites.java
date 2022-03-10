@@ -25,15 +25,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 @Slf4j
 public class ValidateSites {
 
-    private final static List<String> ADDITIONAL_LOCAL_HOSTS = Arrays.asList(
+    private static final List<String> ADDITIONAL_LOCAL_HOSTS = Arrays.asList(
             // local multicast from 224.0.0.0 to 224.0.0.255
             "224.0.0.");
 
-    private final static class Constants {
+    private static final class Constants {
 
         private Constants() {
         }
@@ -104,7 +105,7 @@ public class ValidateSites {
             }
         }
         accesses.trimToSize();
-        if (accesses.size() == 0) {
+        if (accesses.isEmpty()) {
             return (final URL url, final InetAddress inetAddress) -> true;
         }
         return new GlobalAccessChecker(accesses);
@@ -182,12 +183,12 @@ public class ValidateSites {
         }
     }
 
-    public static String buildErrorMessage(final Function<String, String> msgBuilder,
+    public static String buildErrorMessage(final UnaryOperator<String> msgBuilder,
             final String endPoint) {
         return buildErrorMessage(msgBuilder, endPoint, ValidateSites.systemEnvironment);
     }
 
-    public static String buildErrorMessage(final Function<String, String> msgBuilder,
+    public static String buildErrorMessage(final UnaryOperator<String> msgBuilder,
             final String endPoint,
             final Environment env) {
         final StringBuilder builder = new StringBuilder(msgBuilder.apply(endPoint));

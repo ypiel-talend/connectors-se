@@ -44,7 +44,7 @@ import java.util.StringTokenizer;
  * Both MD5 (default) and MD5-sess are supported.
  * Currently only qop=auth or no qop is supported. qop=auth-int
  * is unsupported. If auth and auth-int are provided, auth is
- * used.
+ * used. (qop : Quality of Protection)
  * <p>
  * Since the digest username is included as clear text in the generated
  * Authentication header, the charset of the username must be compatible
@@ -219,10 +219,8 @@ public class DigestScheme {
         final String hasha1 = formatHex(digester.digest(a1));
         buffer.reset();
 
-        if (qop == QOP_AUTH) {
-            // Method ":" digest-uri-value
-            a2 = buffer.append(method).append(":").append(uri).toByteArray();
-        } else if (qop == QOP_AUTH_INT) {
+        buffer.append(method).append(":").append(uri);
+        if (qop == QOP_AUTH_INT) {
             final HttpEntityDigester entityDigester = new HttpEntityDigester(digester);
             try {
                 if (context.hasPayload()) {
@@ -232,41 +230,28 @@ public class DigestScheme {
             } catch (final IOException ex) {
                 throw new AuthenticationException("I/O error reading entity content", ex);
             }
-            a2 = buffer
-                    .append(method)
-                    .append(":")
-                    .append(uri)
-                    .append(":")
+            a2 = buffer.append(":")
                     .append(formatHex(entityDigester.getDigest()))
                     .toByteArray();
-        } else {
-            a2 = buffer.append(method).append(":").append(uri).toByteArray();
         }
+        a2 = buffer.toByteArray();
 
         final String hasha2 = formatHex(digester.digest(a2));
         buffer.reset();
 
         // 3.2.2.1
-
-        final byte[] digestInput;
-        if (qop == QOP_MISSING) {
-            buffer.append(hasha1).append(":").append(nonce).append(":").append(hasha2);
-            digestInput = buffer.toByteArray();
-        } else {
-            buffer
-                    .append(hasha1)
-                    .append(":")
-                    .append(nonce)
-                    .append(":")
-                    .append(nc)
+        buffer.append(hasha1).append(":").append(nonce).append(":");
+        if (qop != QOP_MISSING) {
+            buffer.append(nc)
                     .append(":")
                     .append(cnonce)
                     .append(":")
                     .append(qop == QOP_AUTH_INT ? "auth-int" : "auth")
                     .append(":")
                     .append(hasha2);
-            digestInput = buffer.toByteArray();
         }
+        buffer.append(hasha2);
+        final byte[] digestInput = buffer.toByteArray();
         buffer.reset();
 
         final String digest = formatHex(digester.digest(digestInput));

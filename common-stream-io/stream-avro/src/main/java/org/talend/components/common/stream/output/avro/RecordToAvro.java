@@ -41,8 +41,10 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
 
     private Schema cachedSchema;
 
-    public RecordToAvro(String currentRecordNamespace) {
-        assert currentRecordNamespace != null : "currentRecordNamespace can't be null";
+    public RecordToAvro(final String currentRecordNamespace) {
+        if (currentRecordNamespace == null) {
+            throw new IllegalArgumentException("currentRecordNamespace can't be null");
+        }
         this.currentRecordNamespace = currentRecordNamespace;
     }
 
@@ -120,7 +122,7 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
         case FLOAT:
             OptionalDouble optionalFloat = fromRecord.getOptionalFloat(name);
             if (optionalFloat.isPresent()) {
-                toRecord.put(name, Double.valueOf(optionalFloat.getAsDouble()).floatValue());
+                toRecord.put(name, (float) optionalFloat.getAsDouble());
             } else {
                 toRecord.put(name, null);
             }
@@ -205,38 +207,4 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
         return schemaToAvro.fromRecordSchema(null, schema);
     }
 
-    private Entry getEntry(String name, Schema schema) {
-        for (Entry e : schema.getEntries()) {
-            if (name.equals(e.getName())) {
-                return e;
-            }
-        }
-        return null;
-    }
-
-    private Class<?> getJavaClassForType(final Schema.Type type) {
-        switch (type) {
-        case RECORD:
-            return Record.class;
-        case ARRAY:
-            return Array.class;
-        case STRING:
-            return String.class;
-        case BYTES:
-            return Byte[].class;
-        case INT:
-            return Integer.class;
-        case LONG:
-            return Long.class;
-        case FLOAT:
-            return Float.class;
-        case DOUBLE:
-            return Double.class;
-        case BOOLEAN:
-            return Boolean.class;
-        case DATETIME:
-            return ZonedDateTime.class;
-        }
-        return Object.class;
-    }
 }
