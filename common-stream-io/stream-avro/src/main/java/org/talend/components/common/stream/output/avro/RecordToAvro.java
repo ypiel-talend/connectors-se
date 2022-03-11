@@ -12,6 +12,7 @@
  */
 package org.talend.components.common.stream.output.avro;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -22,11 +23,13 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Array;
 import org.apache.avro.generic.GenericRecord;
 import org.talend.components.common.stream.AvroHelper;
 import org.talend.components.common.stream.api.output.RecordConverter;
+import org.talend.components.common.stream.Constants;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
@@ -72,6 +75,7 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
             final GenericRecord toRecord) {
         final String name = field.name();
         final org.apache.avro.Schema.Type fieldType = AvroHelper.getFieldType(field);
+        String logicalType = AvroHelper.getLogicalType(field);
         switch (fieldType) {
         case RECORD:
             final Record record = fromRecord.getRecord(name);
@@ -93,12 +97,27 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
             toRecord.put(name, fromRecord.getOptionalString(name).orElse(null));
             break;
         case BYTES:
-            final Optional<byte[]> optionalBytesValue = fromRecord.getOptionalBytes(name);
-            if (optionalBytesValue.isPresent()) {
-                ByteBuffer byteBuffer = ByteBuffer.wrap(fromRecord.getBytes(name));
-                toRecord.put(name, byteBuffer);
+            if (Constants.AVRO_LOGICAL_TYPE_DECIMAL.equals(logicalType)) {
+                final Optional<String> optionalStringValue = fromRecord.getOptionalString(name);
+                if (optionalStringValue.isPresent()) {
+                    BigDecimal bigDecimal = new BigDecimal(optionalStringValue.get())
+                            .setScale(
+                                    ((LogicalTypes.Decimal) AvroHelper.getUnionSchema(field.schema()).getLogicalType())
+                                            .getScale(),
+                                    BigDecimal.ROUND_HALF_UP);
+                    ByteBuffer byteBuffer = ByteBuffer.wrap(bigDecimal.unscaledValue().toByteArray());
+                    toRecord.put(name, byteBuffer);
+                } else {
+                    toRecord.put(name, null);
+                }
             } else {
-                toRecord.put(name, null);
+                final Optional<byte[]> optionalBytesValue = fromRecord.getOptionalBytes(name);
+                if (optionalBytesValue.isPresent()) {
+                    ByteBuffer byteBuffer = ByteBuffer.wrap(fromRecord.getBytes(name));
+                    toRecord.put(name, byteBuffer);
+                } else {
+                    toRecord.put(name, null);
+                }
             }
             break;
         case INT:

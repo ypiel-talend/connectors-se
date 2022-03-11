@@ -13,6 +13,7 @@
 package org.talend.components.common.stream.input.avro;
 
 import org.talend.components.common.stream.AvroHelper;
+import org.talend.components.common.stream.Constants;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 

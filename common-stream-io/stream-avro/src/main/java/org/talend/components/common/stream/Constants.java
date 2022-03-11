@@ -10,17 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.common.stream.input.avro;
+package org.talend.components.common.stream;
 
 public class Constants {
 
     public static final String AVRO_LOGICAL_TYPE = "logicalType";
 
-    static final String AVRO_LOGICAL_TYPE_DATE = "date";
+    public static final String AVRO_LOGICAL_TYPE_DATE = "date";
 
-    static final String AVRO_LOGICAL_TYPE_TIME_MILLIS = "time-millis";
+    public static final String AVRO_LOGICAL_TYPE_TIME_MILLIS = "time-millis";
 
-    static final String AVRO_LOGICAL_TYPE_TIMESTAMP_MILLIS = "timestamp-millis";
+    public static final String AVRO_LOGICAL_TYPE_TIMESTAMP_MILLIS = "timestamp-millis";
 
-    static final String ERROR_UNDEFINED_TYPE = "Undefined type %s.";
+    public static final String AVRO_LOGICAL_TYPE_DECIMAL = "decimal";
+
+    public static final String ERROR_UNDEFINED_TYPE = "Undefined type %s.";
+
+    public static final String STUDIO_LENGTH = "talend.studio.length";
+
+    public static final String STUDIO_PRECISION = "talend.studio.precision";
+
+    public static final String STUDIO_TYPE = "talend.studio.type";
 }

@@ -14,7 +14,11 @@ package org.talend.components.common.stream.output.avro;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.talend.components.common.stream.Constants.*;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -46,6 +50,8 @@ class RecordToAvroTest {
     protected Record versatileRecord;
 
     protected Record complexRecord;
+
+    private Record decimalRecord;
 
     private RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
 
@@ -170,6 +176,17 @@ class RecordToAvroTest {
                 record.get("datetime"));
         assertEquals(20.5f, record.get("float"));
         assertEquals(20.5, record.get("double"));
+    }
+
+    @Test
+    void testFromDecimalRecord() {
+        final RecordToAvro converter = new RecordToAvro("test");
+        final GenericRecord record = converter.fromRecord(decimalRecord);
+        assertNotNull(record);
+        assertEquals("DecimalR", record.get("name"));
+        ByteBuffer byteBuffer = (ByteBuffer) record.get("BIG_DECIMALS");
+        BigDecimal bd = new BigDecimal(new BigInteger(byteBuffer.array()), 5);
+        assertEquals(new BigDecimal("12345.67890"), bd);
     }
 
     @Test
@@ -350,6 +367,17 @@ class RecordToAvroTest {
                 .withRecord(er, versatileRecord) //
                 .withDateTime("now", now) //
                 .withArray(ea, Arrays.asList("ary1", "ary2", "ary3"))
+                .build();
+        decimalRecord = factory
+                .newRecordBuilder() //
+                .withString("name", "DecimalR") //
+                .withString(factory.newEntryBuilder()
+                        .withName("BIG_DECIMALS")
+                        .withType(Type.STRING)
+                        .withProp(STUDIO_TYPE, "id_BigDecimal")
+                        .withProp(STUDIO_LENGTH, "10")
+                        .withProp(STUDIO_PRECISION, "5")
+                        .build(), "12345.67890")
                 .build();
     }
 

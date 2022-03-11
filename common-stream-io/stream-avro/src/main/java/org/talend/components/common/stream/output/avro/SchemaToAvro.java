@@ -20,11 +20,15 @@ import org.apache.avro.LogicalTypes;
 import org.apache.avro.SchemaBuilder;
 import org.talend.sdk.component.api.record.Schema;
 
+import static org.talend.components.common.stream.Constants.*;
+
 public class SchemaToAvro {
 
     private static final String ERROR_UNDEFINED_TYPE = "Undefined type %s.";
 
     private static final String RECORD_NAME = "talend_";
+
+    private static final String BIGDECIMAL = "id_BigDecimal";
 
     private final String currentRecordNamespace;
 
@@ -43,7 +47,25 @@ public class SchemaToAvro {
         for (Schema.Entry e : schema.getEntries()) {
             final String name = e.getName();
 
-            org.apache.avro.Schema builder = this.extractSchema(name, e.getType(), e.getElementSchema());
+            org.apache.avro.Schema builder = null;
+            String studioType = e.getProp(STUDIO_TYPE);
+            if (studioType != null && !studioType.isEmpty() && studioType.equals(BIGDECIMAL)) {
+                builder = org.apache.avro.Schema.create(org.apache.avro.Schema.Type.BYTES);
+                String precisionStr = e.getProp(STUDIO_PRECISION);
+                int precision = 0;
+                if (precisionStr != null && !precisionStr.isEmpty()) {
+                    precision = Integer.parseInt(precisionStr);
+                }
+                String lengthStr = e.getProp(STUDIO_LENGTH);
+                if (lengthStr != null && !lengthStr.isEmpty()) {
+                    int length = Integer.parseInt(lengthStr);
+                    LogicalTypes.decimal(length, precision).addToSchema(builder);
+                } else {
+                    LogicalTypes.decimal(precision).addToSchema(builder);
+                }
+            } else {
+                builder = this.extractSchema(name, e.getType(), e.getElementSchema());
+            }
 
             org.apache.avro.Schema unionWithNull;
             if (!e.isNullable()) {

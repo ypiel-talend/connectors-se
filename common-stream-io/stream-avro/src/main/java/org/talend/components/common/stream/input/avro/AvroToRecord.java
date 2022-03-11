@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.talend.components.common.stream.AvroHelper;
+import org.talend.components.common.stream.Constants;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
