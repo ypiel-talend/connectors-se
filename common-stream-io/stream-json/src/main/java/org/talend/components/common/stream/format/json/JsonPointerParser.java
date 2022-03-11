@@ -12,11 +12,12 @@
  */
 package org.talend.components.common.stream.format.json;
 
+import java.util.Collections;
+import java.util.Iterator;
+
 import javax.json.JsonValue;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
-import java.util.Collections;
-import java.util.Iterator;
 
 /**
  * Parse a json object with json pointer syntax.

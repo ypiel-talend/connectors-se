@@ -16,6 +16,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * FIXME : Seems to  be never used, to delete ?
+ */
 public class UrlEncoder {
 
     private static final String QUERY_RESERVED_CHARACTERS = "?/,";
