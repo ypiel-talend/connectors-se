@@ -14,6 +14,8 @@ package org.talend.components.common.stream.input.avro;
 
 import static java.util.stream.Collectors.toList;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.generic.GenericRecord;
 import org.talend.components.common.stream.AvroHelper;
 import org.talend.components.common.stream.Constants;
@@ -175,7 +178,14 @@ public class AvroToRecord {
             break;
         case BYTES:
             byte[] bytes = ((java.nio.ByteBuffer) value).array();
-            recordBuilder.withBytes(entry, bytes);
+            if (Constants.AVRO_LOGICAL_TYPE_DECIMAL.equals(logicalType)) {
+                BigDecimal decimal = new BigDecimal(new BigInteger(bytes),
+                        ((LogicalTypes.Decimal) AvroHelper.getUnionSchema(field.schema()).getLogicalType())
+                                .getScale());
+                recordBuilder.withString(entry, decimal.toPlainString());
+            } else {
+                recordBuilder.withBytes(entry, bytes);
+            }
             break;
         case INT:
             int ivalue = (Integer) value;

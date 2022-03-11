@@ -30,5 +30,7 @@ public class Constants {
 
     public static final String STUDIO_PRECISION = "talend.studio.precision";
 
+    public static final String BIGDECIMAL = "id_BigDecimal";
+
     public static final String STUDIO_TYPE = "talend.studio.type";
 }

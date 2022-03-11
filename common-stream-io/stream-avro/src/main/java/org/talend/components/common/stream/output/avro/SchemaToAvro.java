@@ -28,8 +28,6 @@ public class SchemaToAvro {
 
     private static final String RECORD_NAME = "talend_";
 
-    private static final String BIGDECIMAL = "id_BigDecimal";
-
     private final String currentRecordNamespace;
 
     public SchemaToAvro(String currentRecordNamespace) {
@@ -49,19 +47,19 @@ public class SchemaToAvro {
 
             org.apache.avro.Schema builder = null;
             String studioType = e.getProp(STUDIO_TYPE);
-            if (studioType != null && !studioType.isEmpty() && studioType.equals(BIGDECIMAL)) {
+            if (studioType != null && BIGDECIMAL.equals(studioType)) {
                 builder = org.apache.avro.Schema.create(org.apache.avro.Schema.Type.BYTES);
-                String precisionStr = e.getProp(STUDIO_PRECISION);
-                int precision = 0;
-                if (precisionStr != null && !precisionStr.isEmpty()) {
-                    precision = Integer.parseInt(precisionStr);
-                }
                 String lengthStr = e.getProp(STUDIO_LENGTH);
+                int length = 0;
                 if (lengthStr != null && !lengthStr.isEmpty()) {
-                    int length = Integer.parseInt(lengthStr);
-                    LogicalTypes.decimal(length, precision).addToSchema(builder);
+                    length = Integer.parseInt(lengthStr);
+                }
+                String precisionStr = e.getProp(STUDIO_PRECISION);
+                if (precisionStr != null && !precisionStr.isEmpty()) {
+                    int scale = Integer.parseInt(precisionStr);
+                    LogicalTypes.decimal(length, scale).addToSchema(builder);
                 } else {
-                    LogicalTypes.decimal(precision).addToSchema(builder);
+                    LogicalTypes.decimal(length).addToSchema(builder);
                 }
             } else {
                 builder = this.extractSchema(name, e.getType(), e.getElementSchema());

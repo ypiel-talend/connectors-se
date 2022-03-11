@@ -19,10 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericData;
@@ -77,6 +80,8 @@ class AvroToRecordTest {
                     .name("int").type().intType().noDefault() //
                     .name("long").type().longType().noDefault() //
                     .name("double").type().doubleType().noDefault() //
+                    .name("decimal").type(LogicalTypes.decimal(5, 2)
+                    	.addToSchema(org.apache.avro.Schema.create(org.apache.avro.Schema.Type.BYTES))).noDefault() //
                     .name("boolean").type().booleanType().noDefault() //
                     .name("array").type().array().items().intType().noDefault() // Array of int
                     .name("object").type().record("obj") // sub obj
@@ -94,6 +99,7 @@ class AvroToRecordTest {
         avro.put("int", 710);
         avro.put("long", 710L);
         avro.put("double", 71.0);
+        avro.put("decimal", ByteBuffer.wrap(new BigDecimal("123.45").unscaledValue().toByteArray()));
         avro.put("boolean", true);
         avro.put("array", Arrays.asList(1, 2, 3));
 
@@ -106,8 +112,7 @@ class AvroToRecordTest {
         avro.put("arrayOfRecord", Arrays.asList(
                 new GenericRecordBuilder(getArrayRecord())
                         .set("f1", "value1")
-                        .build()
-        ));
+                        .build()));
     }
 
     @ParameterizedTest
@@ -116,14 +121,15 @@ class AvroToRecordTest {
         AvroToRecord toRecord = new AvroToRecord(factory);
         Schema s = toRecord.inferSchema(avro);
         assertNotNull(s);
-        assertEquals(8, s.getEntries().size());
+        assertEquals(9, s.getEntries().size());
         assertTrue(s.getType().equals(Schema.Type.RECORD));
         assertTrue(s.getEntries()
                 .stream()
                 .map(Entry::getName)
                 .collect(toList())
                 .containsAll(
-                        Stream.of("string", "int", "long", "double", "boolean", "array", "object", "arrayOfRecord").collect(toList())));
+                        Stream.of("string", "int", "long", "double", "decimal", "boolean", "array", "object",
+                                "arrayOfRecord").collect(toList())));
     }
 
     @ParameterizedTest
@@ -136,6 +142,7 @@ class AvroToRecordTest {
         assertEquals(710, record.getInt("int"));
         assertEquals(710L, record.getLong("long"));
         assertEquals(71.0, record.getDouble("double"));
+        assertEquals("123.45", record.getString("decimal"));
         assertEquals(true, record.getBoolean("boolean"));
 
         final Collection<Integer> integers = record.getArray(Integer.class, "array");
@@ -236,8 +243,7 @@ class AvroToRecordTest {
         final RecordBuilderFactory factory2 = provider.apply("test");
         if (property == null) {
             System.clearProperty("talend.component.beam.record.factory.impl");
-        }
-        else {
+        } else {
             System.setProperty("talend.component.beam.record.factory.impl", property);
         }
         return Stream.of(factory1, factory2);
