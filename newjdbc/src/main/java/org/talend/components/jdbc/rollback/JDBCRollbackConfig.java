@@ -13,8 +13,6 @@
 package org.talend.components.jdbc.rollback;
 
 import lombok.Data;
-import org.talend.components.jdbc.dataset.JDBCTableDataSet;
-import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -27,6 +25,10 @@ import java.io.Serializable;
 })
 @Documentation("jdbc rollback")
 public class JDBCRollbackConfig implements Serializable {
+
+    // TODO as jdbcconnection and jdbcclose is auto generated in studio, how we process the jdbccommit/rollback
+    // components for
+    // the part of connection ref field
 
     @Option
     @Documentation("")

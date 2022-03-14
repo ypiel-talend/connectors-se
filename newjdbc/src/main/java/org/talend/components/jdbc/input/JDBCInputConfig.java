@@ -13,6 +13,7 @@
 package org.talend.components.jdbc.input;
 
 import lombok.Data;
+import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -27,8 +28,16 @@ import java.util.List;
         @GridLayout.Row("dataSet")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataSet")
-        // TODO layout more here
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row({ "useCursor", "cursorSize" }),
+        @GridLayout.Row("usePreparedStatement"),
+        @GridLayout.Row("preparedStatementParameters"),
+        @GridLayout.Row("trimAllStringOrCharColumns"),
+        @GridLayout.Row("columnTrims"),
+        @GridLayout.Row("enableMapping"),
+        @GridLayout.Row("mapping"),
+        @GridLayout.Row("useQueryTimeout"),
+        @GridLayout.Row("queryTimeout")
 })
 @Documentation("jdbc input")
 public class JDBCInputConfig implements Serializable {
@@ -75,7 +84,7 @@ public class JDBCInputConfig implements Serializable {
 
     @Option
     @Documentation("")
-    private List<Object> preparedStatementParameters;
+    private List<PreparedStatementParameter> preparedStatementParameters;
 
     @Option
     @Documentation("")

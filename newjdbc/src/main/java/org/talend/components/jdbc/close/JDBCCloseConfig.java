@@ -19,6 +19,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 
+// TODO remove it as studio auto generate it in fact
 @Data
 @Documentation("jdbc close")
 public class JDBCCloseConfig implements Serializable {

@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.input;
+package org.talend.components.jdbc.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,25 +22,15 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@OptionsOrder({ "index", "type", "value" })
+@OptionsOrder({ "driver" })
 @NoArgsConstructor
 @AllArgsConstructor
 @Documentation("")
-public class PreparedStatementParameter implements Serializable {
+public class Driver implements Serializable {
 
+    // TODO use which widget? how to pass data? how to load class at runtime?
     @Option
     @Documentation("")
-    private String index;
-
-    // TODO to enum type
-    @Option
-    @Documentation("")
-    private String type;
-
-    // TODO it works? how to pass to main part, in loop logic for flow line
-    // TODO to string type?
-    @Option
-    @Documentation("")
-    private Object value;
+    private String driver;
 
 }

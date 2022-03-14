@@ -10,46 +10,38 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.sp;
+package org.talend.components.jdbc.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.talend.components.jdbc.datastore.JDBCDataStore;
+import lombok.NoArgsConstructor;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
-@GridLayout({
-        @GridLayout.Row("dataStore"),
-        @GridLayout.Row("spName"),
-        @GridLayout.Row("isFunction")
-        // TODO layout more here
-})
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataStore")
-})
-@Documentation("jdbc sp")
-public class JDBCSPConfig implements Serializable {
+@OptionsOrder({ "index", "type", "value" })
+@NoArgsConstructor
+@AllArgsConstructor
+@Documentation("")
+public class PreparedStatementParameter implements Serializable {
 
-    // TODO check if ok here to use datastore instead of dataset
+    // TODO support index and column name both
     @Option
     @Documentation("")
-    private JDBCDataStore dataStore;
+    private String index;
 
-    // TODO studio will add schema field auto
-    // TODO but how to add guess schema auto for tjdbcrow, which should guess from where?
-
+    // TODO to enum type
     @Option
     @Documentation("")
-    private String spName;
+    private String type;
 
+    // TODO it works? how to pass to main part, in loop logic for flow line
+    // TODO to string type?
     @Option
     @Documentation("")
-    private boolean isFunction;
-
-    // TODO set sp parameters table
+    private Object value;
 
 }

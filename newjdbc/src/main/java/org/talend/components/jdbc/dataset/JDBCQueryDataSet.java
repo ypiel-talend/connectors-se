@@ -30,7 +30,8 @@ import java.io.Serializable;
         @GridLayout.Row("sqlQuery")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataStore")
+        @GridLayout.Row("dataStore")// TODO we should remove this as the settings in datastore advanced setting no
+                                    // meaning for input component?
 })
 @DataSet("JDBCQueryDataSet")
 @Documentation("A query dataset")

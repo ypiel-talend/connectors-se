@@ -13,6 +13,7 @@
 package org.talend.components.jdbc.row;
 
 import lombok.Data;
+import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.sdk.component.api.configuration.Option;
@@ -24,11 +25,14 @@ import java.util.List;
 
 @Data
 @GridLayout({
-        @GridLayout.Row("dataSet")
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row("dieOnError")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataSet")
-        // TODO layout more here
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row("usePreparedStatement"),
+        @GridLayout.Row("preparedStatementParameters"),
+        @GridLayout.Row("commitEvery")
 })
 @Documentation("jdbc row")
 public class JDBCRowConfig implements Serializable {
@@ -55,7 +59,7 @@ public class JDBCRowConfig implements Serializable {
     // TODO how to inject the var to main part?
     @Option
     @Documentation("")
-    private List<Object> preparedStatementParameters;
+    private List<PreparedStatementParameter> preparedStatementParameters;
 
     // TODO detect error on multiple statements field
 

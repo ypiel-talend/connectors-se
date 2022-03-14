@@ -26,6 +26,10 @@ import java.io.Serializable;
 @Documentation("jdbc commit")
 public class JDBCCommitConfig implements Serializable {
 
+    // TODO as jdbcconnection and jdbcclose is auto generated in studio, how we process the jdbccommit/rollback
+    // components for
+    // the part of connection ref field
+
     @Option
     @Documentation("")
     private boolean close;

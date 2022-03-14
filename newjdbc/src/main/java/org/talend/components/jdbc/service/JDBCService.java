@@ -19,9 +19,11 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
+import java.io.Serializable;
+
 @Slf4j
 @Service
-public class JDBCService {
+public class JDBCService implements Serializable {
 
     @HealthCheck("CheckConnection")
     public HealthCheckStatus validateBasicDataStore(@Option final JDBCDataStore datastore) {

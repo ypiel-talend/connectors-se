@@ -22,11 +22,15 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({
-        @GridLayout.Row("dataSet")
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row("dataAction"),
+        @GridLayout.Row("clearData"),
+        @GridLayout.Row("dieOnError")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataSet")
-        // TODO layout more here
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row("commitEvery")
+
 })
 @Documentation("jdbc output")
 public class JDBCOutputConfig implements Serializable {

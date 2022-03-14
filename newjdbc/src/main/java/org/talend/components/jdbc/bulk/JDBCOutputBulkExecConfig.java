@@ -22,10 +22,13 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({
-        @GridLayout.Row("dataSet")
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row("bulkCommonConfig"),
+        @GridLayout.Row("append")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataSet")
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row("bulkCommonConfig")
         // TODO layout more here
 })
 @Documentation("jdbc bulk exec")

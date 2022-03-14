@@ -14,10 +14,12 @@ package org.talend.components.jdbc.datastore;
 
 import lombok.Data;
 import lombok.ToString;
+import org.talend.components.jdbc.common.Driver;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
@@ -47,6 +49,7 @@ import java.util.List;
 public class JDBCDataStore implements Serializable {
 
     @Option
+    @Required
     @Documentation("jdbc url")
     private String jdbcUrl;
 
@@ -54,20 +57,24 @@ public class JDBCDataStore implements Serializable {
     // TODO how to use the right runtime to load jar or register jar path and pass it to studio or cloud by api
     // TODO need to support in cloud too? or how to hide it in cloud
     // TODO new Driver bean class?
+    // TODO maybe change it to List<Bean> object
     @Option
     @Documentation("jdbc driver table")
-    private List<String> jdbcDriver;
+    private List<Driver> jdbcDriver;
 
-    // TODO need a button "Select class name" for studio metadata
+    // TODO need a button "Select class name" for studio metadata and better to add button for component too
     @Option
+    @Required
     @Documentation("driver class")
     private String jdbcClass;
 
     @Option
+    @Required
     @Documentation("database user")
     private String userId;
 
     @Option
+    @Required
     @Credential
     @Documentation("database password")
     private String password;
@@ -79,6 +86,7 @@ public class JDBCDataStore implements Serializable {
     @Documentation("use or register a shared DB connection")
     private boolean useSharedDBConnection;
 
+    // TODO how to pass or get the shared connection in tck runtime?
     @Option
     @ActiveIf(target = "useSharedDBConnection", value = { "true" })
     @Documentation("shared DB connection name for register or fetch")
@@ -88,6 +96,8 @@ public class JDBCDataStore implements Serializable {
     @Documentation("use data source")
     private boolean useDataSource;
 
+    // TODO how to pass or get the shared connection in tck runtime?
+    // TODO how to hide it in cloud as sure no meaning for cloud
     @Option
     @ActiveIf(target = "useDataSource", value = { "true" })
     @Documentation("data source alias for fetch")
@@ -101,6 +111,8 @@ public class JDBCDataStore implements Serializable {
 
     // advanced setting
 
+    // TODO how to hide it for studio metadata
+    // TODO how to hide it for components like tjdbcinput/tjdbcrow
     @Option
     @Documentation("decide if call auto commit method")
     private boolean useAutoCommit;

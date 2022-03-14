@@ -24,10 +24,12 @@ import java.util.List;
 
 @Data
 @GridLayout({
-        @GridLayout.Row("dataSet")
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row("bulkCommonConfig")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataSet")
+        @GridLayout.Row("dataSet"),
+        @GridLayout.Row("bulkCommonConfig")
         // TODO layout more here
 })
 @Documentation("jdbc bulk exec")
