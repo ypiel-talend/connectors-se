@@ -12,7 +12,8 @@
  */
 package org.talend.components.common.stream.input.avro;
 
-import org.apache.avro.LogicalType;
+import static org.talend.components.common.stream.Constants.BIGDECIMAL;
+
 import org.apache.avro.LogicalTypes;
 import org.talend.components.common.stream.AvroHelper;
 import org.talend.components.common.stream.Constants;
@@ -20,8 +21,6 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import lombok.RequiredArgsConstructor;
-
-import static org.talend.components.common.stream.Constants.BIGDECIMAL;
 
 @RequiredArgsConstructor
 public class AvroToSchema {

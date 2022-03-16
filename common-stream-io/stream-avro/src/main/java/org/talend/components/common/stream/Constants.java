@@ -14,6 +14,10 @@ package org.talend.components.common.stream;
 
 public class Constants {
 
+    private Constants() {
+        throw new IllegalStateException("This is a utility class and cannot be instantiated");
+    }
+
     public static final String AVRO_LOGICAL_TYPE = "logicalType";
 
     public static final String AVRO_LOGICAL_TYPE_DATE = "date";
