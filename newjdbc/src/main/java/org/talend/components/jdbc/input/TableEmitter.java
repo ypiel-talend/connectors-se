@@ -29,7 +29,7 @@ import java.io.Serializable;
 @Slf4j
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
-@Emitter(name = "TableEmitter")
+@Emitter(name = "TableInput") // TODO how to make it only works for cloud? no need this for studio
 @Documentation("JDBC table input")
 public class TableEmitter implements Serializable {
 

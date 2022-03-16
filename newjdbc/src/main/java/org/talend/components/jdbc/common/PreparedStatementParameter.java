@@ -22,7 +22,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@OptionsOrder({ "index", "type", "value" })
+@OptionsOrder({ "index", "type", "dataValue" })
 @NoArgsConstructor
 @AllArgsConstructor
 @Documentation("")
@@ -42,6 +42,7 @@ public class PreparedStatementParameter implements Serializable {
     // TODO to string type?
     @Option
     @Documentation("")
-    private Object value;
+    private String dataValue;
+    // TODO can't use Object type here, if that, ui will not show this column
 
 }

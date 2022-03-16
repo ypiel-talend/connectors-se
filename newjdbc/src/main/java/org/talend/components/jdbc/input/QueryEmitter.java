@@ -29,7 +29,7 @@ import java.io.Serializable;
 @Slf4j
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
-@Emitter(name = "QueryEmitter")
+@Emitter(name = "Input")
 @Documentation("JDBC query input")
 public class QueryEmitter implements Serializable {
 

@@ -30,7 +30,7 @@ import java.io.Serializable;
 @Slf4j
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
-@DriverRunner(name = "JDBCBulkExec")
+@DriverRunner(name = "BulkExec")
 @Documentation("JDBC Bulk Exec component.")
 public class JDBCBulkExecRuntime implements Serializable {
 

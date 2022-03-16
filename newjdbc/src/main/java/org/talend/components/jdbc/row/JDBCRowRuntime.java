@@ -29,7 +29,7 @@ import java.io.Serializable;
 @Slf4j
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
-@DriverRunner(name = "JDBCRow")
+@DriverRunner(name = "Row")
 @Documentation("JDBC Row component.")
 public class JDBCRowRuntime implements Serializable {
 

@@ -26,6 +26,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Documentation("")
+// TODO seems no need this, remove it and use List<String> enough, but strange the ui is not editable if use this bean
+// class
 public class Driver implements Serializable {
 
     // TODO use which widget? how to pass data? how to load class at runtime?

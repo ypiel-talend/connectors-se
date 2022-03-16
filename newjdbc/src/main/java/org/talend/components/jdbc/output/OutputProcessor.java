@@ -28,7 +28,7 @@ import java.sql.SQLException;
 @Slf4j
 @Getter
 @Version(1)
-@Processor(name = "OutputProcessor")
+@Processor(name = "Output") // TODO remove "New"
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
 @Documentation("JDBC Output component")
 public class OutputProcessor implements Serializable {

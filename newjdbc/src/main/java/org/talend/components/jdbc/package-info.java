@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-@Components(family = "JDBC", categories = "Databases")
+@Components(family = "JDBCNew", categories = "Databases") // TODO remove "New"
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-family")
 package org.talend.components.jdbc;
 

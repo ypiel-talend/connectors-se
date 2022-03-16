@@ -60,7 +60,7 @@ public class JDBCDataStore implements Serializable {
     // TODO maybe change it to List<Bean> object
     @Option
     @Documentation("jdbc driver table")
-    private List<Driver> jdbcDriver;
+    private List<String> jdbcDriver;// TODO can't use Driver bean class as not editable if that in ui
 
     // TODO need a button "Select class name" for studio metadata and better to add button for component too
     @Option

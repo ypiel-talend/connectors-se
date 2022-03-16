@@ -30,7 +30,7 @@ import java.io.Serializable;
 @Slf4j
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
-@DriverRunner(name = "JDBCSP")
+@DriverRunner(name = "SP")
 @Documentation("JDBC SP component.")
 public class JDBCSPRuntime implements Serializable {
 

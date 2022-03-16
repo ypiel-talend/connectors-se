@@ -28,7 +28,7 @@ import java.sql.SQLException;
 @Slf4j
 @Getter
 @Version(1)
-@Processor(name = "OutputBulkExecProcessor")
+@Processor(name = "OutputBulkExec")
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
 @Documentation("JDBC Output Bulk Exec component")
 // TODO this class is a compose component in studio, but now we no need the compose way, we reuse model/runtime here, is

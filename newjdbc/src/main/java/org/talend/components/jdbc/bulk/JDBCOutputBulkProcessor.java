@@ -29,7 +29,7 @@ import java.sql.SQLException;
 @Slf4j
 @Getter
 @Version(1)
-// @Processor(name = "OutputBulkProcessor") //TODO fix this : The component
+// @Processor(name = "OutputBulk") //TODO fix this : The component
 // org.talend.components.jdbc.bulk.JDBCOutputBulkProcessor is missing a dataset in its configuration (see @DataSet)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
 @Documentation("JDBC Output Bulk component")
