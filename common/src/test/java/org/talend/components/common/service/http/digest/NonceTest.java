@@ -10,27 +10,29 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.common.service.http;
+package org.talend.components.common.service.http.digest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class RedirectContextTest {
+class NonceTest {
 
     @Test
-    void getHistory() {
-        final RedirectContext c1 = new RedirectContext("http://base", 3, true, "GET", true);
-        Assertions.assertEquals(0, c1.getHistory().size());
+    void renew() {
+        final Nonce nonce = new Nonce();
+        for (int i = 0; i < 300; i++) {
+            final String nc = nonce.renew("123" + i);
+            Assertions.assertEquals("00000001", nc);
+            Assertions.assertNotNull(nonce.getCnonce());
+            Assertions.assertEquals(16, nonce.getCnonce().length());
+            final String cnonce = nonce.getCnonce();
 
-        final RedirectContext c2 = new RedirectContext(null, c1);
-        Assertions.assertEquals(1, c2.getHistory().size());
-        Assertions.assertSame(c2, c2.getHistory().get(0));
-
-        final RedirectContext c3 = new RedirectContext(null, c2);
-        Assertions.assertEquals(2, c3.getHistory().size());
-        Assertions.assertSame(c3, c3.getHistory().get(0));
-        Assertions.assertSame(c2, c3.getHistory().get(1));
+            final String nc2 = nonce.renew("123" + i);
+            Assertions.assertEquals("00000002", nc2);
+            Assertions.assertEquals(16, nonce.getCnonce().length());
+            Assertions.assertEquals(cnonce, nonce.getCnonce());
+        }
     }
 }

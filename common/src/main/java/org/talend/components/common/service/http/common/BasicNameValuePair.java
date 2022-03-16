@@ -66,8 +66,7 @@ public class BasicNameValuePair implements Cloneable, Serializable {
     public BasicNameValuePair clone() {
         try {
             return (BasicNameValuePair) super.clone();
-        }
-        catch (CloneNotSupportedException ex) {
+        } catch (CloneNotSupportedException ex) {
             throw new RuntimeException("clone unsupported", ex);
         }
     }

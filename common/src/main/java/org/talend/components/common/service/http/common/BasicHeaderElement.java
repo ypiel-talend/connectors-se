@@ -98,8 +98,7 @@ public class BasicHeaderElement implements Cloneable {
         // no need to make a copy of it
         try {
             return (BasicHeaderElement) super.clone();
-        }
-        catch (CloneNotSupportedException ex) {
+        } catch (CloneNotSupportedException ex) {
             throw new RuntimeException("clone unsupported", ex);
         }
     }

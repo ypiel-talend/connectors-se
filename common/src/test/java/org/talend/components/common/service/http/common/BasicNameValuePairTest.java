@@ -12,27 +12,28 @@
  */
 package org.talend.components.common.service.http.common;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Formatter;
+import java.util.Locale;
+import java.util.Random;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class ByteArrayBufferTest {
+class BasicNameValuePairTest {
 
     @Test
-    void append() {
-        final ByteArrayBuffer buffer = new ByteArrayBuffer(10);
-        Assertions.assertEquals(0, buffer.length());
-        Assertions.assertEquals(10, buffer.buffer().length);
+    void testClone() {
+        final BasicNameValuePair pair = new BasicNameValuePair("name", "value");
+        final BasicNameValuePair pair2 = new BasicNameValuePair("name", "value2");
 
-        buffer.append("Hello".getBytes(StandardCharsets.UTF_8), 0, 5);
+        final BasicNameValuePair clone = pair.clone();
+        Assertions.assertEquals(pair, clone);
+        Assertions.assertNotEquals(pair, pair2);
 
-        Assertions.assertArrayEquals("Hello\0\0\0\0\0".getBytes(StandardCharsets.UTF_8), buffer.buffer());
-        buffer.append("World".getBytes(StandardCharsets.UTF_8), 0, 5);
-        Assertions.assertArrayEquals("HelloWorld".getBytes(StandardCharsets.UTF_8), buffer.buffer());
+        Assertions.assertEquals("name=value", pair.toString());
 
-        buffer.append(65);
-
-        Assertions.assertEquals('A', buffer.buffer()[10]);
+        final BasicNameValuePair nullValue = new BasicNameValuePair("name", null);
+        Assertions.assertEquals("name", nullValue.toString());
     }
+
 }
