@@ -18,7 +18,6 @@ import java.io.Serializable;
  * A resizable byte array.
  *
  * @since 4.0
- * FIXME : Seems to  be never used, to delete ?
  */
 public final class ByteArrayBuffer implements Serializable {
 
