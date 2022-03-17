@@ -14,10 +14,9 @@ package org.talend.components.jdbc.datastore;
 
 import lombok.Data;
 import lombok.ToString;
-import org.talend.components.jdbc.common.Driver;
-import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
@@ -36,8 +35,10 @@ import java.util.List;
         @GridLayout.Row("jdbcClass"),
         @GridLayout.Row("userId"),
         @GridLayout.Row("password"),
-        @GridLayout.Row({ "useSharedDBConnection", "sharedDBConnectionName" }),
-        @GridLayout.Row({ "useDataSource", "dataSourceAlias" }),
+        @GridLayout.Row("useSharedDBConnection"),
+        @GridLayout.Row("sharedDBConnectionName"),
+        @GridLayout.Row("useDataSource"),
+        @GridLayout.Row("dataSourceAlias"),
         @GridLayout.Row("dbMapping")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
@@ -49,7 +50,6 @@ import java.util.List;
 public class JDBCDataStore implements Serializable {
 
     @Option
-    @Required
     @Documentation("jdbc url")
     private String jdbcUrl;
 
@@ -62,19 +62,17 @@ public class JDBCDataStore implements Serializable {
     @Documentation("jdbc driver table")
     private List<String> jdbcDriver;// TODO can't use Driver bean class as not editable if that in ui
 
-    // TODO need a button "Select class name" for studio metadata and better to add button for component too
     @Option
     @Required
+    @Suggestable(value = "GUESS_DRIVER_CLASS", parameters = { "jdbcDriver" })
     @Documentation("driver class")
     private String jdbcClass;
 
     @Option
-    @Required
     @Documentation("database user")
     private String userId;
 
     @Option
-    @Required
     @Credential
     @Documentation("database password")
     private String password;

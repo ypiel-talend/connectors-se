@@ -20,6 +20,7 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.*;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.connection.Connection;
 
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
@@ -33,6 +34,8 @@ import java.sql.SQLException;
 @Documentation("JDBC Output component")
 public class OutputProcessor implements Serializable {
 
+    private static final long serialVersionUID = 1;
+
     private final JDBCOutputConfig configuration;
 
     private final JDBCService jdbcService;
@@ -40,6 +43,9 @@ public class OutputProcessor implements Serializable {
     // private final I18nMessage i18n;
 
     // private transient boolean init;
+
+    @Connection
+    private transient java.sql.Connection connection;
 
     public OutputProcessor(final JDBCOutputConfig outputConfig, final JDBCService jdbcService/*
                                                                                               * , final I18nMessage

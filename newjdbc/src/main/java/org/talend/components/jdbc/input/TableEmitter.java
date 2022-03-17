@@ -20,6 +20,7 @@ import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.connection.Connection;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PostConstruct;
@@ -33,12 +34,17 @@ import java.io.Serializable;
 @Documentation("JDBC table input")
 public class TableEmitter implements Serializable {
 
+    private static final long serialVersionUID = 1;
+
     // TODO how to make it both works well for cloud and studio?
     private final JDBCInputConfig inputConfig;
 
     private final RecordBuilderFactory recordBuilderFactory;
 
     private final JDBCService jdbcService;
+
+    @Connection
+    private transient java.sql.Connection connection;
 
     // private final I18nMessage i18n;
 

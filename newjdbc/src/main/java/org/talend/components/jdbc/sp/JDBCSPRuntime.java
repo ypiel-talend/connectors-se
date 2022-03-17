@@ -43,7 +43,7 @@ public class JDBCSPRuntime implements Serializable {
     private boolean reuseConnection;
 
     @Connection
-    private transient Connection connection;
+    private transient java.sql.Connection connection;
 
     public JDBCSPRuntime(@Option("configuration") final JDBCSPConfig configuration,
             final JDBCService service) {

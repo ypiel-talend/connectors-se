@@ -42,7 +42,7 @@ public class JDBCRowRuntime implements Serializable {
     private boolean reuseConnection;
 
     @Connection
-    private transient Connection connection;
+    private transient java.sql.Connection connection;
 
     public JDBCRowRuntime(@Option("configuration") final JDBCRowConfig configuration,
             final JDBCService service) {
