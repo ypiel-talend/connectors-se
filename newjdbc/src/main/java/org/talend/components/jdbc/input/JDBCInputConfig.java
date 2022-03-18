@@ -13,6 +13,7 @@
 package org.talend.components.jdbc.input;
 
 import lombok.Data;
+import org.talend.components.jdbc.common.DBTypes;
 import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.sdk.component.api.configuration.Option;
@@ -72,9 +73,12 @@ public class JDBCInputConfig implements Serializable {
     @Documentation("enable mapping")
     private boolean enableMapping;
 
+    // TODO use enum or a new widget mapping? "widget.type.mappingType":"MAPPING_TYPE"
+    // TODO duplicated with the one in datastore for metadata though
     @Option
     @Documentation("select DB mapping")
-    private String mapping;
+    // private String mapping;
+    private DBTypes mapping;
 
     // TODO a field : allow special char in dynamic table name? what's that?
 
