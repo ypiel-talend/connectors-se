@@ -10,41 +10,31 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.bulk;
+package org.talend.components.jdbc.sp;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.talend.components.jdbc.dataset.JDBCTableDataSet;
+import lombok.NoArgsConstructor;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 
 @Data
-@GridLayout({
-        @GridLayout.Row("dataSet"),
-        @GridLayout.Row("bulkCommonConfig"),
-        @GridLayout.Row("append")
-})
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataSet"),
-        @GridLayout.Row("bulkCommonConfig")
-})
-@Documentation("jdbc bulk exec")
-public class JDBCOutputBulkExecConfig implements Serializable {
+@OptionsOrder({ "columnName", "parameterType" })
+@NoArgsConstructor
+@AllArgsConstructor
+@Documentation("")
+public class SPParameter implements Serializable {
 
+    // TODO how to map schema field?s
     @Option
-    @Documentation("table dataset")
-    private JDBCTableDataSet dataSet;
-
-    // TODO studio will add schema field auto
-    // TODO but how to add guess schema auto for tjdbcrow, which should guess from table
+    @Documentation("")
+    private String columnName;
 
     @Option
     @Documentation("")
-    private JDBCBulkCommonConfig bulkCommonConfig;
+    private ParameterType parameterType;
 
-    @Option
-    @Documentation("")
-    private boolean append;
 }

@@ -30,7 +30,6 @@ import java.util.List;
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet"),
         @GridLayout.Row("bulkCommonConfig")
-        // TODO layout more here
 })
 @Documentation("jdbc bulk exec")
 public class JDBCBulkExecConfig implements Serializable {

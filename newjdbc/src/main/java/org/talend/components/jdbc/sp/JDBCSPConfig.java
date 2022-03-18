@@ -15,6 +15,7 @@ package org.talend.components.jdbc.sp;
 import lombok.Data;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -25,8 +26,9 @@ import java.util.List;
 @GridLayout({
         @GridLayout.Row("dataStore"),
         @GridLayout.Row("spName"),
-        @GridLayout.Row("isFunction")
-        // TODO layout more here
+        @GridLayout.Row("isFunction"),
+        @GridLayout.Row("resultColumn"),
+        @GridLayout.Row("spParameters")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataStore")
@@ -50,6 +52,14 @@ public class JDBCSPConfig implements Serializable {
     @Documentation("")
     private boolean isFunction;
 
-    // TODO set sp parameters table
+    // TODO how to map to a closed list for schema fields
+    @Option
+    @ActiveIf(target = "isFunction", value = { "true" })
+    @Documentation("")
+    private String resultColumn;
+
+    @Option
+    @Documentation("")
+    private List<SPParameter> spParameters;
 
 }

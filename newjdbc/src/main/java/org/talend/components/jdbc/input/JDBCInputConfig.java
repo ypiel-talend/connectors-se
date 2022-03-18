@@ -13,7 +13,7 @@
 package org.talend.components.jdbc.input;
 
 import lombok.Data;
-import org.talend.components.jdbc.common.DBTypes;
+import org.talend.components.jdbc.common.DBType;
 import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.sdk.component.api.configuration.Option;
@@ -30,13 +30,15 @@ import java.util.List;
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet"),
-        @GridLayout.Row({ "useCursor", "cursorSize" }),
-        @GridLayout.Row("usePreparedStatement"),
-        @GridLayout.Row("preparedStatementParameters"),
+        @GridLayout.Row("useCursor"),
+        @GridLayout.Row("cursorSize"),
         @GridLayout.Row("trimAllStringOrCharColumns"),
         @GridLayout.Row("columnTrims"),
         @GridLayout.Row("enableMapping"),
         @GridLayout.Row("mapping"),
+        @GridLayout.Row("allowSpecialChar"),
+        @GridLayout.Row("usePreparedStatement"),
+        @GridLayout.Row("preparedStatementParameters"),
         @GridLayout.Row("useQueryTimeout"),
         @GridLayout.Row("queryTimeout")
 })
@@ -66,6 +68,7 @@ public class JDBCInputConfig implements Serializable {
     private boolean trimAllStringOrCharColumns;
 
     @Option
+    @ActiveIf(target = "trimAllStringOrCharColumns", value = { "false" })
     @Documentation("")
     private List<ColumnTrim> columnTrims;
 
@@ -76,17 +79,22 @@ public class JDBCInputConfig implements Serializable {
     // TODO use enum or a new widget mapping? "widget.type.mappingType":"MAPPING_TYPE"
     // TODO duplicated with the one in datastore for metadata though
     @Option
+    @ActiveIf(target = "enableMapping", value = { "true" })
     @Documentation("select DB mapping")
     // private String mapping;
-    private DBTypes mapping;
+    private DBType mapping = DBType.MYSQL;
 
-    // TODO a field : allow special char in dynamic table name? what's that?
+    // TODO what's this for runtime?
+    @Option
+    @Documentation("")
+    private boolean allowSpecialChar;
 
     @Option
     @Documentation("")
     private boolean usePreparedStatement;
 
     @Option
+    @ActiveIf(target = "usePreparedStatement", value = { "true" })
     @Documentation("")
     private List<PreparedStatementParameter> preparedStatementParameters;
 
@@ -95,7 +103,8 @@ public class JDBCInputConfig implements Serializable {
     private boolean useQueryTimeout;
 
     @Option
+    @ActiveIf(target = "useQueryTimeout", value = { "true" })
     @Documentation("")
-    private int queryTimeout;
+    private int queryTimeout = 30;
 
 }

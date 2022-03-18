@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
+import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -37,7 +38,7 @@ public class TableEmitter implements Serializable {
     private static final long serialVersionUID = 1;
 
     // TODO how to make it both works well for cloud and studio?
-    private final JDBCInputConfig inputConfig;
+    private final JDBCInputConfig configuration;
 
     private final RecordBuilderFactory recordBuilderFactory;
 
@@ -48,9 +49,9 @@ public class TableEmitter implements Serializable {
 
     // private final I18nMessage i18n;
 
-    public TableEmitter(final JDBCInputConfig inputConfig, final JDBCService jdbcService,
+    public TableEmitter(@Option("configuration") final JDBCInputConfig configuration, final JDBCService jdbcService,
             final RecordBuilderFactory recordBuilderFactory/* .final I18nMessage i18nMessage */) {
-        this.inputConfig = inputConfig;
+        this.configuration = configuration;
         this.recordBuilderFactory = recordBuilderFactory;
         this.jdbcService = jdbcService;
         // this.i18n = i18nMessage;

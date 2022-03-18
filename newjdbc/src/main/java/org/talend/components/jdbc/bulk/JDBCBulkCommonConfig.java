@@ -15,6 +15,7 @@ package org.talend.components.jdbc.bulk;
 import lombok.Data;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -22,10 +23,15 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({
-        // TODO layout more here
+        @GridLayout.Row("bulkFile")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        // TODO layout more here
+        @GridLayout.Row("rowSeparator"),
+        @GridLayout.Row("fieldSeparator"),
+        @GridLayout.Row("setTextEnclosure"),
+        @GridLayout.Row("textEnclosure"),
+        @GridLayout.Row("setNullValue"),
+        @GridLayout.Row("nullValue"),
 })
 @Documentation("jdbc bulk common")
 public class JDBCBulkCommonConfig implements Serializable {
@@ -36,16 +42,31 @@ public class JDBCBulkCommonConfig implements Serializable {
 
     // advanced setting
 
+    // TODO check if right
     @Option
     @Documentation("")
-    private String rowSeparator;
+    private String rowSeparator = "\\n";
 
     @Option
     @Documentation("")
-    private String fieldSeparator;
+    private String fieldSeparator = ";";
 
-    // TODO set text enclosure field
+    @Option
+    @Documentation("")
+    private boolean setTextEnclosure;
 
-    // TODO set null value field
+    @Option
+    @ActiveIf(target = "setTextEnclosure", value = "true")
+    @Documentation("")
+    private String textEnclosure = "\"";
+
+    @Option
+    @Documentation("")
+    private boolean setNullValue;
+
+    @Option
+    @ActiveIf(target = "setNullValue", value = "true")
+    @Documentation("")
+    private String nullValue;
 
 }

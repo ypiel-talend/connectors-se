@@ -25,6 +25,7 @@ import org.talend.sdk.component.api.service.dependency.Resolver;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -48,7 +49,7 @@ public class JDBCService implements Serializable {
     private transient Resolver resolver;
 
     @Suggestions("GUESS_DRIVER_CLASS")
-    public SuggestionValues loadRecordTypes(@Option final List<String> driverJars) {
+    public SuggestionValues loadRecordTypes(@Option final List<String> driverJars) throws Exception {
         final List<SuggestionValues.Item> items = new ArrayList<>();
 
         // items.add(new SuggestionValues.Item("com.mysql.cj.jdbc.Driver", "com.mysql.cj.jdbc.Driver"));
@@ -60,7 +61,7 @@ public class JDBCService implements Serializable {
         return new SuggestionValues(true, items);
     }
 
-    private List<String> getDriverClasses(List<String> driverJars) {
+    private List<String> getDriverClasses(List<String> driverJars) throws IOException {
         // TODO check it if right
         List<String> driverClasses = new ArrayList<>();
 
@@ -102,12 +103,14 @@ public class JDBCService implements Serializable {
                     }
                 }
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             // TODO process
+            throw ex;
         }
 
         if (driverClasses.isEmpty()) {
             // TODO process
+            throw new RuntimeException("");
         }
 
         return driverClasses;

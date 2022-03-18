@@ -17,6 +17,7 @@ import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -30,9 +31,14 @@ import java.util.List;
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet"),
+        @GridLayout.Row("propagateRecordSet"),
+        @GridLayout.Row("recordSetColumn"),
         @GridLayout.Row("usePreparedStatement"),
         @GridLayout.Row("preparedStatementParameters"),
-        @GridLayout.Row("commitEvery")
+        @GridLayout.Row("detectErrorWhenMultiStatements"),
+        @GridLayout.Row("commitEvery"),
+        @GridLayout.Row("useQueryTimeout"),
+        @GridLayout.Row("queryTimeout")
 })
 @Documentation("jdbc row")
 public class JDBCRowConfig implements Serializable {
@@ -48,9 +54,15 @@ public class JDBCRowConfig implements Serializable {
     @Documentation("")
     private boolean dieOnError;
 
-    // TODO field : propagate query's recordset
+    @Option
+    @Documentation("")
+    private boolean propagateRecordSet;
 
     // TODO column choose field : how to map schema to this field, avoiding to call runtime?
+    @Option
+    @ActiveIf(target = "propagateRecordSet", value = { "true" })
+    @Documentation("")
+    private String recordSetColumn;
 
     @Option
     @Documentation("")
@@ -58,14 +70,24 @@ public class JDBCRowConfig implements Serializable {
 
     // TODO how to inject the var to main part?
     @Option
+    @ActiveIf(target = "usePreparedStatement", value = { "true" })
     @Documentation("")
     private List<PreparedStatementParameter> preparedStatementParameters;
 
-    // TODO detect error on multiple statements field
+    @Option
+    @Documentation("")
+    private boolean detectErrorWhenMultiStatements;
 
     @Option
     @Documentation("")
     private int commitEvery = 10000;
 
-    // TODO use query timeout and query timeout
+    @Option
+    @Documentation("")
+    private boolean useQueryTimeout;
+
+    @Option
+    @ActiveIf(target = "useQueryTimeout", value = { "true" })
+    @Documentation("")
+    private int queryTimeout = 30;
 }

@@ -10,31 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.common;
+package org.talend.components.jdbc.output;
 
-public enum DBTypes {
-    AS400,
-    ACCESS,
-    DB2,
-    FIREBIRD,
-    HSQLDB,
-    INFORMIX,
-    INGRES,
-    VECTORWISE,
-    INTERBASE,
-    JAVADB,
-    MAXDB,
-    MSSQL,
-    MYSQL,
-    NETEZZA,
-    ORACLE,
-    POSTGRESQL,
-    POSTGREPLUS,
-    SQLITE,
-    SYBASE,
-    SAPHANA,
-    TERADATA,
-    VERTICA,
-    H2,
-    ODBC
+public enum Position {
+
+    BEFORE,
+    AFTER,
+    REPLACE
+
 }

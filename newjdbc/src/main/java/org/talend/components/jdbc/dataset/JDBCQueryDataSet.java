@@ -66,6 +66,6 @@ public class JDBCQueryDataSet implements Serializable {
     @Option
     @Code("sql")
     @Documentation("sql query")
-    private String sqlQuery;
+    private String sqlQuery = "select id, name from employee";
 
 }

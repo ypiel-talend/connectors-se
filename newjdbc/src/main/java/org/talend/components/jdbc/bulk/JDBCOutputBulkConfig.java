@@ -23,11 +23,9 @@ import java.io.Serializable;
 @GridLayout({
         @GridLayout.Row("bulkCommonConfig"),
         @GridLayout.Row("append")
-        // TODO layout more here
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("bulkCommonConfig")
-        // TODO layout more here
 })
 @Documentation("jdbc output bulk file")
 public class JDBCOutputBulkConfig implements Serializable {

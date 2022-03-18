@@ -42,7 +42,8 @@ import java.util.List;
         @GridLayout.Row("dbMapping")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row({ "useAutoCommit", "autoCommit" })
+        @GridLayout.Row("useAutoCommit"),
+        @GridLayout.Row("autoCommit")
 })
 @DataStore("JDBCDataStore")
 @Checkable("CheckConnection")
@@ -51,7 +52,7 @@ public class JDBCDataStore implements Serializable {
 
     @Option
     @Documentation("jdbc url")
-    private String jdbcUrl;
+    private String jdbcUrl = "jdbc:";
 
     // TODO how to map to studio right ui widget
     // TODO how to use the right runtime to load jar or register jar path and pass it to studio or cloud by api

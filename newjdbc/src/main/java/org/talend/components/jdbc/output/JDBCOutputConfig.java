@@ -15,10 +15,12 @@ package org.talend.components.jdbc.output;
 import lombok.Data;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @GridLayout({
@@ -29,7 +31,15 @@ import java.io.Serializable;
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet"),
-        @GridLayout.Row("commitEvery")
+        @GridLayout.Row("commitEvery"),
+        @GridLayout.Row("additionalColumns"),
+        @GridLayout.Row("useFieldOptions"),
+        @GridLayout.Row("fieldOptions"),
+        @GridLayout.Row("debugQuery"),
+        @GridLayout.Row("useBatch"),
+        @GridLayout.Row("batchSize"),
+        @GridLayout.Row("useQueryTimeout"),
+        @GridLayout.Row("queryTimeout")
 
 })
 @Documentation("jdbc output")
@@ -44,7 +54,7 @@ public class JDBCOutputConfig implements Serializable {
 
     @Option
     @Documentation("")
-    private String dataAction;
+    private DataAction dataAction = DataAction.INSERT;
 
     @Option
     @Documentation("")
@@ -59,12 +69,41 @@ public class JDBCOutputConfig implements Serializable {
     private int commitEvery = 10000;
 
     // TODO additional columns table, how to link schema columns as select?
+    @Option
+    @Documentation("")
+    private List<AdditionalColumn> additionalColumns;
+
+    @Option
+    @Documentation("")
+    private boolean useFieldOptions;
 
     // TODO field options table, how to link schema columns as select and auto fill table row by row by schema columns?
+    @Option
+    @ActiveIf(target = "useFieldOptions", value = { "true" })
+    @Documentation("")
+    private List<FieldOption> fieldOptions;
 
-    // TODO debugQueryMode
+    @Option
+    @Documentation("")
+    private boolean debugQuery;
 
-    // TODO use batch and batch size
+    @Option
+    @Documentation("")
+    private boolean useBatch;
 
-    // TODO use query timeout and query timeout
+    // TODO be care this, seems have tck inside implement for this, conflict
+    @Option
+    @ActiveIf(target = "useBatch", value = { "true" })
+    @Documentation("")
+    private int batchSize = 10000;
+
+    @Option
+    @Documentation("")
+    private boolean useQueryTimeout;
+
+    @Option
+    @ActiveIf(target = "useQueryTimeout", value = { "true" })
+    @Documentation("")
+    private int queryTimeout = 30;
+
 }
