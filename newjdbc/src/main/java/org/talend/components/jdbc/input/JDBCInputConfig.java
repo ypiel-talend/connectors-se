@@ -87,7 +87,7 @@ public class JDBCInputConfig implements Serializable {
     // TODO what's this for runtime?
     @Option
     @Documentation("")
-    private boolean allowSpecialChar;
+    private boolean allowSpecialChar = true;
 
     @Option
     @Documentation("")

@@ -29,12 +29,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.sql.*;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -132,12 +128,17 @@ public class JDBCService implements Serializable {
     }
 
     @HealthCheck("CheckConnection")
-    public HealthCheckStatus validateBasicDataStore(@Option final JDBCDataStore datastore) {
+    public HealthCheckStatus validateBasicDataStore(@Option final JDBCDataStore dataStore) {
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, "success message, TODO, i18n");
     }
 
     @CreateConnection
-    public Connection createConnection(@Option final JDBCDataStore datastore) {
+    public Connection createConnection(@Option final JDBCDataStore dataStore) {
+        return connect(dataStore);
+    }
+
+    @CreateConnection
+    public Connection connect(@Option final JDBCDataStore dataStore) {
         // TODO create jdbc connection
         return null;
     }
@@ -164,4 +165,80 @@ public class JDBCService implements Serializable {
         };
     }
 
+    @Suggestions("FETCH_TABLES")
+    public SuggestionValues fetchTables(@Option final JDBCDataStore dataStore) throws SQLException {
+        final List<SuggestionValues.Item> items = new ArrayList<>();
+
+        // items.add(new SuggestionValues.Item("com.mysql.cj.jdbc.Driver", "com.mysql.cj.jdbc.Driver"));
+
+        getSchemaNames(dataStore).stream().forEach(tableName -> {
+            items.add(new SuggestionValues.Item(tableName, tableName));
+        });
+
+        return new SuggestionValues(true, items);
+    }
+
+    public List<String> getSchemaNames(final JDBCDataStore dataStore) throws SQLException {
+        List<String> result = new ArrayList<>();
+        try (Connection conn = connect(dataStore)) {
+            DatabaseMetaData dbMetaData = conn.getMetaData();
+
+            Set<String> tableTypes = getAvailableTableTypes(dbMetaData);
+
+            String database_schema = getDatabaseSchema(dataStore);
+
+            try (ResultSet resultset =
+                    dbMetaData.getTables(null, database_schema, null, tableTypes.toArray(new String[0]))) {
+                while (resultset.next()) {
+                    String tableName = resultset.getString("TABLE_NAME");
+                    if (tableName == null) {
+                        tableName = resultset.getString("SYNONYM_NAME");
+                    }
+                    result.add(tableName);
+                }
+            }
+        } catch (SQLException e) {
+            // TODO process it
+            throw e;
+        }
+        return result;
+    }
+
+    /**
+     * get database schema for database special
+     * 
+     * @return
+     */
+    private String getDatabaseSchema(final JDBCDataStore dataStore) {
+        // TODO fetch it from dataStore
+        String jdbc_url = "";
+        String username = "";
+        if (jdbc_url != null && username != null && jdbc_url.contains("oracle")) {
+            return username.toUpperCase();
+        }
+        return null;
+    }
+
+    private Set<String> getAvailableTableTypes(DatabaseMetaData dbMetaData) throws SQLException {
+        Set<String> availableTableTypes = new HashSet<String>();
+        List<String> neededTableTypes = Arrays.asList("TABLE", "VIEW", "SYNONYM");
+
+        try (ResultSet rsTableTypes = dbMetaData.getTableTypes()) {
+            while (rsTableTypes.next()) {
+                String currentTableType = rsTableTypes.getString("TABLE_TYPE");
+                if (currentTableType == null) {
+                    currentTableType = "";
+                }
+                currentTableType = currentTableType.trim();
+                if ("BASE TABLE".equalsIgnoreCase(currentTableType)) {
+                    currentTableType = "TABLE";
+                }
+                if (neededTableTypes.contains(currentTableType)) {
+                    availableTableTypes.add(currentTableType);
+                }
+            }
+        }
+
+        return availableTableTypes;
+    }
 }

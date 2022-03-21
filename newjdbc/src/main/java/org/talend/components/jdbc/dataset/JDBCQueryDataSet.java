@@ -16,6 +16,7 @@ import lombok.Data;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
@@ -55,6 +56,7 @@ public class JDBCQueryDataSet implements Serializable {
     // TODO for jdbcinpput, it works for help generate sql only by a button: Guess Query, not works for job runtime
     // TODO for tjdbcrow and something, it works for runtime, so right place?
     @Option
+    @Suggestable(value = "FETCH_TABLES", parameters = { "dataStore" })
     @Documentation("The table name")
     private String tableName;
 

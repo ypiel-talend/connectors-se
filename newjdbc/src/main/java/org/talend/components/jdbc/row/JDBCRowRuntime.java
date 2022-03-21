@@ -31,6 +31,7 @@ import java.io.Serializable;
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
 @DriverRunner(name = "Row")
 @Documentation("JDBC Row component.")
+// TODO processor is more suitable? or we need to support input/ouptut link to this standalone component in studio
 public class JDBCRowRuntime implements Serializable {
 
     private static final long serialVersionUID = 1;
