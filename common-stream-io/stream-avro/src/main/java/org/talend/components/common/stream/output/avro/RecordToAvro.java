@@ -34,6 +34,8 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
 
+import static org.apache.avro.Schema.Type.FIXED;
+
 public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.avro.Schema> {
 
     private static final String ERROR_UNDEFINED_TYPE = "Undefined type %s.";
@@ -97,16 +99,33 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
             toRecord.put(name, fromRecord.getOptionalString(name).orElse(null));
             break;
         case BYTES:
+        case FIXED:
             if (Constants.AVRO_LOGICAL_TYPE_DECIMAL.equals(logicalType)) {
                 final Optional<String> optionalStringValue = fromRecord.getOptionalString(name);
                 if (optionalStringValue.isPresent()) {
+                    org.apache.avro.Schema fieldSchema = AvroHelper.getUnionSchema(field.schema());
                     BigDecimal bigDecimal = new BigDecimal(optionalStringValue.get())
                             .setScale(
-                                    ((LogicalTypes.Decimal) AvroHelper.getUnionSchema(field.schema()).getLogicalType())
+                                    ((LogicalTypes.Decimal) fieldSchema.getLogicalType())
                                             .getScale(),
                                     BigDecimal.ROUND_HALF_UP);
-                    ByteBuffer byteBuffer = ByteBuffer.wrap(bigDecimal.unscaledValue().toByteArray());
-                    toRecord.put(name, byteBuffer);
+                    if (org.apache.avro.Schema.Type.BYTES.equals(fieldType)) {
+                        ByteBuffer byteBuffer = ByteBuffer.wrap(bigDecimal.unscaledValue().toByteArray());
+                        toRecord.put(name, byteBuffer);
+                    } else {
+                        byte fillByte = (byte) (bigDecimal.signum() < 0 ? 0xFF : 0x00);
+                        byte[] unscaled = bigDecimal.unscaledValue().toByteArray();
+                        byte[] bytes = new byte[fieldSchema.getFixedSize()];
+                        int offset = bytes.length - unscaled.length;
+                        for (int i = 0; i < bytes.length; i += 1) {
+                            if (i < offset) {
+                                bytes[i] = fillByte;
+                            } else {
+                                bytes[i] = unscaled[i - offset];
+                            }
+                        }
+                        toRecord.put(name, new GenericData.Fixed(fieldSchema, bytes));
+                    }
                 } else {
                     toRecord.put(name, null);
                 }

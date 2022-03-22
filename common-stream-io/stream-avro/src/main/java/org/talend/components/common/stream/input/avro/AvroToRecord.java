@@ -13,6 +13,7 @@
 package org.talend.components.common.stream.input.avro;
 
 import static java.util.stream.Collectors.toList;
+import static org.apache.avro.Schema.Type.FIXED;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -26,6 +27,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.avro.LogicalTypes;
+import org.apache.avro.generic.GenericFixed;
 import org.apache.avro.generic.GenericRecord;
 import org.talend.components.common.stream.AvroHelper;
 import org.talend.components.common.stream.Constants;
@@ -139,6 +141,18 @@ public class AvroToRecord {
         case LONG:
             objectArray = ((Collection<Long>) value).stream().collect(toList());
             break;
+        case FIXED:
+            objectArray = value.stream().map(obj -> {
+                if (Constants.AVRO_LOGICAL_TYPE_DECIMAL.equals(arrayInnerType.getLogicalType().getName())) {
+                    BigDecimal decimal = new BigDecimal(new BigInteger(((GenericFixed) obj).bytes()),
+                            ((LogicalTypes.Decimal) AvroHelper.getUnionSchema(arrayInnerType).getLogicalType())
+                                    .getScale());
+                    return decimal.toPlainString();
+                } else {
+                    return ((java.nio.ByteBuffer) obj).array();
+                }
+            }).collect(Collectors.toList());
+            break;
         default:
             throw new IllegalStateException(
                     String.format(Constants.ERROR_UNDEFINED_TYPE, arrayInnerType.getType().name()));
@@ -177,7 +191,13 @@ public class AvroToRecord {
             recordBuilder.withString(entry, value.toString());
             break;
         case BYTES:
-            byte[] bytes = ((java.nio.ByteBuffer) value).array();
+        case FIXED:
+            byte[] bytes = null;
+            if (FIXED.equals(fieldType)) {
+                bytes = ((GenericFixed) value).bytes();
+            } else {
+                bytes = ((java.nio.ByteBuffer) value).array();
+            }
             if (Constants.AVRO_LOGICAL_TYPE_DECIMAL.equals(logicalType)) {
                 BigDecimal decimal = new BigDecimal(new BigInteger(bytes),
                         ((LogicalTypes.Decimal) AvroHelper.getUnionSchema(field.schema()).getLogicalType())

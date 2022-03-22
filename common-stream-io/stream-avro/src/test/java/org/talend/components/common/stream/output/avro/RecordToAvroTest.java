@@ -184,8 +184,8 @@ class RecordToAvroTest {
         final GenericRecord record = converter.fromRecord(decimalRecord);
         assertNotNull(record);
         assertEquals("DecimalR", record.get("name"));
-        ByteBuffer byteBuffer = (ByteBuffer) record.get("BIG_DECIMALS");
-        BigDecimal bd = new BigDecimal(new BigInteger(byteBuffer.array()), 5);
+        GenericData.Fixed value = (GenericData.Fixed) record.get("BIG_DECIMALS");
+        BigDecimal bd = new BigDecimal(new BigInteger(value.bytes()), 5);
         assertEquals(new BigDecimal("12345.67890"), bd);
     }
 

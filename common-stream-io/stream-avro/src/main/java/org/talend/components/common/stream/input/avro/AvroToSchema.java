@@ -75,6 +75,7 @@ public class AvroToSchema {
             builder.withType(translateToRecordType(type));
             break;
         case BYTES:
+        case FIXED:
             if (Constants.AVRO_LOGICAL_TYPE_DECIMAL.equals(logicalType)) {
                 LogicalTypes.Decimal decimalType =
                         ((LogicalTypes.Decimal) AvroHelper.getUnionSchema(field.schema()).getLogicalType());
@@ -126,6 +127,7 @@ public class AvroToSchema {
         case STRING:
             return Schema.Type.STRING;
         case BYTES:
+        case FIXED:
             return Schema.Type.BYTES;
         case INT:
             return Schema.Type.INT;

@@ -48,7 +48,7 @@ public class SchemaToAvro {
             org.apache.avro.Schema builder = null;
             String studioType = e.getProp(STUDIO_TYPE);
             if (studioType != null && BIGDECIMAL.equals(studioType)) {
-                builder = org.apache.avro.Schema.create(org.apache.avro.Schema.Type.BYTES);
+                builder = org.apache.avro.Schema.createFixed(name, null, null, 16);
                 String lengthStr = e.getProp(STUDIO_LENGTH);
                 int length = 0;
                 if (lengthStr != null && !lengthStr.isEmpty()) {
