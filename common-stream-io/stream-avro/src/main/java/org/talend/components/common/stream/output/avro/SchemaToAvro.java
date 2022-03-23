@@ -89,10 +89,7 @@ public class SchemaToAvro {
     }
 
     private boolean isDecimalType(Map<String, String> props) {
-        if (props != null && props.get(STUDIO_TYPE) != null && BIGDECIMAL.equals(props.get(STUDIO_TYPE))) {
-            return true;
-        }
-        return false;
+        return props != null && props.get(STUDIO_TYPE) != null && BIGDECIMAL.equals(props.get(STUDIO_TYPE));
     }
 
     private org.apache.avro.Schema extractSchema(
