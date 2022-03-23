@@ -190,7 +190,6 @@ class AvroToRecordTest {
         final Collection<BigDecimal> records = record.getArray(BigDecimal.class, "decimalArray");
         assertEquals(2, records.size());
         assertEquals(Arrays.asList(new BigDecimal("1234.467"), new BigDecimal("12345.678")), records);
-        System.out.println(schema);
     }
 
     @ParameterizedTest
