@@ -14,6 +14,7 @@ package org.talend.components.common.stream.output.avro;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.avro.LogicalTypes;
@@ -46,21 +47,13 @@ public class SchemaToAvro {
             final String name = e.getName();
 
             org.apache.avro.Schema builder = null;
-            String studioType = e.getProp(STUDIO_TYPE);
-            if (studioType != null && BIGDECIMAL.equals(studioType)) {
-                builder = org.apache.avro.Schema.createFixed(name, null, null, 16);
-                String lengthStr = e.getProp(STUDIO_LENGTH);
-                int length = 0;
-                if (lengthStr != null && !lengthStr.isEmpty()) {
-                    length = Integer.parseInt(lengthStr);
-                }
-                String precisionStr = e.getProp(STUDIO_PRECISION);
-                if (precisionStr != null && !precisionStr.isEmpty()) {
-                    int scale = Integer.parseInt(precisionStr);
-                    LogicalTypes.decimal(length, scale).addToSchema(builder);
-                } else {
-                    LogicalTypes.decimal(length).addToSchema(builder);
-                }
+            if (isDecimalType(e.getProps())) {
+                builder = createDecimalSchema(name, e.getProp(STUDIO_LENGTH), e.getProp(STUDIO_PRECISION));
+            } else if (Schema.Type.ARRAY.equals(e.getType())
+                    && isDecimalType(e.getElementSchema().getProps())) {
+                Schema elementSchema = e.getElementSchema();
+                builder = org.apache.avro.Schema.createArray(createDecimalSchema(null,
+                        elementSchema.getProp(STUDIO_LENGTH), elementSchema.getProp(STUDIO_PRECISION)));
             } else {
                 builder = this.extractSchema(name, e.getType(), e.getElementSchema());
             }
@@ -78,6 +71,28 @@ public class SchemaToAvro {
         final String realName = schemaName == null ? this.buildSchemaId(schema) : schemaName;
         return org.apache.avro.Schema
                 .createRecord(realName, "", currentRecordNamespace, false, fields);
+    }
+
+    private org.apache.avro.Schema createDecimalSchema(String name, String lengthStr, String precisionStr) {
+        org.apache.avro.Schema builder = org.apache.avro.Schema.createFixed(name, null, null, 16);
+        int length = 0;
+        if (lengthStr != null && !lengthStr.isEmpty()) {
+            length = Integer.parseInt(lengthStr);
+        }
+        if (precisionStr != null && !precisionStr.isEmpty()) {
+            int scale = Integer.parseInt(precisionStr);
+            LogicalTypes.decimal(length, scale).addToSchema(builder);
+        } else {
+            LogicalTypes.decimal(length).addToSchema(builder);
+        }
+        return builder;
+    }
+
+    private boolean isDecimalType(Map<String, String> props) {
+        if (props != null && props.get(STUDIO_TYPE) != null && BIGDECIMAL.equals(props.get(STUDIO_TYPE))) {
+            return true;
+        }
+        return false;
     }
 
     private org.apache.avro.Schema extractSchema(

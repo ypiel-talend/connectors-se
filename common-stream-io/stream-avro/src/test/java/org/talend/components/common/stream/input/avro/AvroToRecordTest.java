@@ -61,12 +61,8 @@ class AvroToRecordTest {
     }
 
     private org.apache.avro.Schema getArrayRecord() {
-        return SchemaBuilder.record("inner")
-                .fields()
-                .name("f1")
-                .type()
-                .stringType()
-                .noDefault()
+        return SchemaBuilder.record("inner").fields()
+                .name("f1").type().stringType().noDefault()
                 .endRecord();
     }
 
@@ -167,14 +163,9 @@ class AvroToRecordTest {
                         .addToSchema(org.apache.avro.Schema.createFixed("decimal", null, null, 16)))
                 .noDefault() //
                 .name("decimalArray")
-                .type(org.apache.avro.SchemaBuilder.array()
-                        .items(SchemaBuilder.unionOf()
-                                .nullType()
-                                .and()
-                                .type(LogicalTypes.decimal(10, 3)
-                                        .addToSchema(
-                                                org.apache.avro.Schema.createFixed("decimalElement", null, null, 16)))
-                                .endUnion()))
+                .type(org.apache.avro.Schema.createArray(LogicalTypes.decimal(10, 3)
+                        .addToSchema(
+                                org.apache.avro.Schema.createFixed(null, null, null, 16))))
                 .noDefault()
                 .endRecord();
 
@@ -196,10 +187,10 @@ class AvroToRecordTest {
         Record record = toRecord.toRecord(decimalRecord);
         assertNotNull(record);
         assertEquals("123.45", record.getString("decimal"));
-        final Collection<String> records = record.getArray(String.class, "decimalArray");
+        final Collection<BigDecimal> records = record.getArray(BigDecimal.class, "decimalArray");
         assertEquals(2, records.size());
-        assertTrue(records.containsAll(Arrays.asList("1234.467","12345.678")));
-
+        assertEquals(Arrays.asList(new BigDecimal("1234.467"), new BigDecimal("12345.678")), records);
+        System.out.println(schema);
     }
 
     @ParameterizedTest
@@ -277,7 +268,7 @@ class AvroToRecordTest {
         Assertions.assertTrue(this.equalsSchema(avroRecord.getSchema(), tckRecord.getSchema()));
         Assertions.assertEquals(tckRecord.getSchema(), tckRecord2.getSchema());
     }
-    
+
     private byte[] decimalToBytes(BigDecimal decimal) {
         byte fillByte = (byte) (decimal.signum() < 0 ? 0xFF : 0x00);
         byte[] unscaled = decimal.unscaledValue().toByteArray();

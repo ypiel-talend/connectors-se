@@ -184,9 +184,12 @@ class RecordToAvroTest {
         final GenericRecord record = converter.fromRecord(decimalRecord);
         assertNotNull(record);
         assertEquals("DecimalR", record.get("name"));
-        GenericData.Fixed value = (GenericData.Fixed) record.get("BIG_DECIMALS");
+        GenericData.Fixed value = (GenericData.Fixed) record.get("big_decimal");
         BigDecimal bd = new BigDecimal(new BigInteger(value.bytes()), 5);
         assertEquals(new BigDecimal("12345.67890"), bd);
+
+        assertEquals(Arrays.asList(new BigDecimal("12.34567"), new BigDecimal("21.76543")),
+                decimalRecord.getArray(BigDecimal.class, "decimal_array"));
     }
 
     @Test
@@ -368,16 +371,28 @@ class RecordToAvroTest {
                 .withDateTime("now", now) //
                 .withArray(ea, Arrays.asList("ary1", "ary2", "ary3"))
                 .build();
+        Entry decimalArray = factory
+                .newEntryBuilder()
+                .withName("decimal_array")
+                .withType(Type.ARRAY)
+                .withElementSchema(factory.newSchemaBuilder(Type.ARRAY)
+                        .withType(Type.STRING)
+                        .withProp(STUDIO_TYPE, "id_BigDecimal")
+                        .withProp(STUDIO_LENGTH, "10")
+                        .withProp(STUDIO_PRECISION, "5")
+                        .build())
+                .build();
         decimalRecord = factory
                 .newRecordBuilder() //
                 .withString("name", "DecimalR") //
                 .withString(factory.newEntryBuilder()
-                        .withName("BIG_DECIMALS")
+                        .withName("big_decimal")
                         .withType(Type.STRING)
                         .withProp(STUDIO_TYPE, "id_BigDecimal")
                         .withProp(STUDIO_LENGTH, "10")
                         .withProp(STUDIO_PRECISION, "5")
                         .build(), "12345.67890")
+                .withArray(decimalArray, Arrays.asList(new BigDecimal("12.34567"), new BigDecimal("21.76543")))
                 .build();
     }
 

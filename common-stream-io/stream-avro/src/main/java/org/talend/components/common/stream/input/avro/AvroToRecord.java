@@ -144,10 +144,9 @@ public class AvroToRecord {
         case FIXED:
             objectArray = value.stream().map(obj -> {
                 if (Constants.AVRO_LOGICAL_TYPE_DECIMAL.equals(arrayInnerType.getLogicalType().getName())) {
-                    BigDecimal decimal = new BigDecimal(new BigInteger(((GenericFixed) obj).bytes()),
+                    return new BigDecimal(new BigInteger(((GenericFixed) obj).bytes()),
                             ((LogicalTypes.Decimal) AvroHelper.getUnionSchema(arrayInnerType).getLogicalType())
                                     .getScale());
-                    return decimal.toPlainString();
                 } else {
                     return ((java.nio.ByteBuffer) obj).array();
                 }

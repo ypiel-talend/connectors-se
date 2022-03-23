@@ -34,8 +34,6 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
 
-import static org.apache.avro.Schema.Type.FIXED;
-
 public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.avro.Schema> {
 
     private static final String ERROR_UNDEFINED_TYPE = "Undefined type %s.";
