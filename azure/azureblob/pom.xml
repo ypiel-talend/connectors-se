@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>azure</artifactId>
-        <version>1.29.0-SNAPSHOT</version>
+        <version>1.32.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>azureblob</artifactId>
@@ -19,8 +19,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <talend.documentation.htmlAndPdf>false</talend.documentation.htmlAndPdf>
-
-        <mockito.version>2.23.0</mockito.version>
 
         <talend.component.studioHome />
     </properties>

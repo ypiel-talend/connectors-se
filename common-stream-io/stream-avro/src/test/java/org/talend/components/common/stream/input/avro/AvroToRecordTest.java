@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -28,11 +28,14 @@ import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.DatumReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.talend.components.common.stream.output.avro.RecordToAvro;
 import org.talend.sdk.component.api.record.Record;
@@ -46,58 +49,44 @@ import lombok.RequiredArgsConstructor;
 
 class AvroToRecordTest {
 
-    private RecordBuilderFactory recordBuilderFactory;
-
     private GenericRecord avro;
+
+    private org.apache.avro.Schema getArrayInnerTypeAvroSchema() {
+        final org.apache.avro.Schema schema = SchemaBuilder.array()
+                .items().unionOf()
+                .record("inner").fields()
+                    .name("f1").type().stringType().noDefault()
+                .endRecord().and().nullBuilder()
+                .endNull().endUnion();
+        return schema;
+    }
+
+    private org.apache.avro.Schema getArrayRecord() {
+        return SchemaBuilder.record("inner").fields()
+                .name("f1").type().stringType().noDefault()
+                .endRecord();
+    }
 
     @BeforeEach
     protected void setUp() throws Exception {
-        recordBuilderFactory = new RecordBuilderFactoryImpl("test");
-
         final org.apache.avro.Schema schema = SchemaBuilder
                 .builder()
                 .record("sample")
                 .fields() //
-                .name("string")
-                .type()
-                .stringType()
-                .noDefault() //
-                .name("int")
-                .type()
-                .intType()
-                .noDefault() //
-                .name("long")
-                .type()
-                .longType()
-                .noDefault() //
-                .name("double")
-                .type()
-                .doubleType()
-                .noDefault() //
-                .name("boolean")
-                .type()
-                .booleanType()
-                .noDefault() //
-                .name("array")
-                .type()
-                .array()
-                .items()
-                .intType()
-                .noDefault() // Array of int
-                .name("object")
-                .type()
-                .record("obj") // sub obj
-                .fields()
-                .name("f1")
-                .type()
-                .intType()
-                .noDefault() //
-                .name("f2")
-                .type()
-                .stringType()
+                    .name("string").type().stringType().noDefault() //
+                    .name("int").type().intType().noDefault() //
+                    .name("long").type().longType().noDefault() //
+                    .name("double").type().doubleType().noDefault() //
+                    .name("boolean").type().booleanType().noDefault() //
+                    .name("array").type().array().items().intType().noDefault() // Array of int
+                    .name("object").type().record("obj") // sub obj
+                    .fields()
+                        .name("f1").type().intType().noDefault() //
+                        .name("f2").type().stringType().noDefault() //
+                    .endRecord()
+
                 .noDefault()
-                .endRecord()
-                .noDefault()
+                .name("arrayOfRecord").type(this.getArrayInnerTypeAvroSchema()).noDefault()
                 .endRecord();
 
         avro = new GenericData.Record(schema);
@@ -113,26 +102,34 @@ class AvroToRecordTest {
         avroObject.put("f1", 12);
         avroObject.put("f2", "Hello");
         avro.put("object", avroObject);
+
+        avro.put("arrayOfRecord", Arrays.asList(
+                new GenericRecordBuilder(getArrayRecord())
+                        .set("f1", "value1")
+                        .build()
+        ));
     }
 
-    @Test
-    void inferSchema() {
-        AvroToRecord toRecord = new AvroToRecord(recordBuilderFactory);
+    @ParameterizedTest
+    @MethodSource("provideFactory")
+    void inferSchema(final RecordBuilderFactory factory) {
+        AvroToRecord toRecord = new AvroToRecord(factory);
         Schema s = toRecord.inferSchema(avro);
         assertNotNull(s);
-        assertEquals(7, s.getEntries().size());
+        assertEquals(8, s.getEntries().size());
         assertTrue(s.getType().equals(Schema.Type.RECORD));
         assertTrue(s.getEntries()
                 .stream()
                 .map(Entry::getName)
                 .collect(toList())
                 .containsAll(
-                        Stream.of("string", "int", "long", "double", "boolean", "array", "object").collect(toList())));
+                        Stream.of("string", "int", "long", "double", "boolean", "array", "object", "arrayOfRecord").collect(toList())));
     }
 
-    @Test
-    void toRecord() {
-        AvroToRecord toRecord = new AvroToRecord(recordBuilderFactory);
+    @ParameterizedTest
+    @MethodSource("provideFactory")
+    void toRecord(final RecordBuilderFactory factory) {
+        final AvroToRecord toRecord = new AvroToRecord(factory);
         Record record = toRecord.toRecord(avro);
         assertNotNull(record);
         assertEquals("a string sample", record.getString("string"));
@@ -150,16 +147,20 @@ class AvroToRecordTest {
         final Record record1 = record.getRecord("object");
         assertEquals(12, record1.getInt("f1"));
         assertEquals("Hello", record1.getString("f2"));
+
+        final Collection<Record> records = record.getArray(Record.class, "arrayOfRecord");
+        assertEquals(1, records.size());
     }
 
-    @Test
-    void propFile() throws IOException {
+    @ParameterizedTest
+    @MethodSource("provideFactory")
+    void propFile(final RecordBuilderFactory factory) throws IOException {
         try (final InputStream input =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("properties.avro")) {
             final DatumReader<GenericRecord> userDatumReader = new GenericDatumReader<>();
             final DataFileStream<GenericRecord> fstream = new DataFileStream<>(input, userDatumReader);
 
-            final AvroToRecord toRecord = new AvroToRecord(this.recordBuilderFactory);
+            final AvroToRecord toRecord = new AvroToRecord(factory);
 
             final GenericRecord record = fstream.next();
             final Record tckRecord = toRecord.toRecord(record);
@@ -176,12 +177,13 @@ class AvroToRecordTest {
         }
     }
 
-    @Test
-    void propFileAvroRec() throws IOException {
+    @ParameterizedTest
+    @MethodSource("provideFactory")
+    void propFileAvroRec(final RecordBuilderFactory factory) throws IOException {
 
         final AvroRecordBuilderFactoryProvider provider = new AvroRecordBuilderFactoryProvider();
         System.setProperty("talend.component.beam.record.factory.impl", "avro");
-        final RecordBuilderFactory factory = provider.apply("test");
+
         try (final InputStream input =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("properties.avro")) {
             final DatumReader<GenericRecord> userDatumReader = new GenericDatumReader<>();
@@ -210,19 +212,35 @@ class AvroToRecordTest {
     @ParameterizedTest
     @ValueSource(strings = { "customers_orders.avro", "properties.avro" })
     void compareAvro(final String avroFile) throws IOException {
+        final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
         final GenericRecord avroRecord = this.getRecord(avroFile);
 
-        final AvroToRecord toRecord = new AvroToRecord(this.recordBuilderFactory);
+        final AvroToRecord toRecord = new AvroToRecord(factory);
         final Record tckRecord = toRecord.toRecord(avroRecord);
 
         final RecordToAvro toAvro = new RecordToAvro("test");
         final GenericRecord avroRecord2 = toAvro.fromRecord(tckRecord);
 
-        final AvroToRecord toRecord2 = new AvroToRecord(this.recordBuilderFactory);
+        final AvroToRecord toRecord2 = new AvroToRecord(factory);
         final Record tckRecord2 = toRecord2.toRecord(avroRecord2);
         Assertions.assertNotNull(tckRecord2);
         Assertions.assertTrue(this.equalsSchema(avroRecord.getSchema(), tckRecord.getSchema()));
         Assertions.assertEquals(tckRecord.getSchema(), tckRecord2.getSchema());
+    }
+
+    private static Stream<RecordBuilderFactory> provideFactory() {
+        final RecordBuilderFactory factory1 = new RecordBuilderFactoryImpl("test");
+
+        AvroRecordBuilderFactoryProvider provider = new AvroRecordBuilderFactoryProvider();
+        final String property = System.setProperty("talend.component.beam.record.factory.impl", "avro");
+        final RecordBuilderFactory factory2 = provider.apply("test");
+        if (property == null) {
+            System.clearProperty("talend.component.beam.record.factory.impl");
+        }
+        else {
+            System.setProperty("talend.component.beam.record.factory.impl", property);
+        }
+        return Stream.of(factory1, factory2);
     }
 
     private GenericRecord getRecord(final String filePath) throws IOException {

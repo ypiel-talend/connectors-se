@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -94,7 +94,7 @@ public class AvroToRecord {
     private Collection<?> buildArrayField(final org.apache.avro.Schema schema, final Collection<?> value,
             final Schema elementSchema) {
         final org.apache.avro.Schema arraySchema = AvroHelper.getUnionSchema(schema);
-        final org.apache.avro.Schema arrayInnerType = arraySchema.getElementType();
+        final org.apache.avro.Schema arrayInnerType = AvroHelper.getUnionSchema(arraySchema.getElementType());
 
         final Collection<?> objectArray;
         switch (arrayInnerType.getType()) {

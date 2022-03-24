@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -21,7 +21,7 @@ import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.util.HadoopInputFile;
 import org.apache.parquet.io.InputFile;
-import org.talend.components.common.connection.adls.AzureAuthType;
+import org.talend.components.common.connection.azureblob.AzureAuthType;
 import org.talend.components.common.connection.azureblob.Protocol;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.common.converters.ParquetConverter;

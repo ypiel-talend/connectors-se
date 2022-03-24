@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -27,7 +27,6 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import org.talend.components.adlsgen2.input.InputConfiguration;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.adlsgen2.service.BlobInformations;
 import org.talend.components.common.stream.input.json.JsonToRecord;
@@ -41,9 +40,8 @@ public class JsonBlobReader extends BlobReader {
     private JsonBuilderFactory jsonFactoryBuilder;
 
     JsonBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
-            JsonBuilderFactory jsonFactoryBuilder, AdlsGen2Service service,
-            AdlsActiveDirectoryService tokenProviderService) {
-        super(configuration, recordBuilderFactory, service, tokenProviderService);
+            JsonBuilderFactory jsonFactoryBuilder, AdlsGen2Service service) {
+        super(configuration, recordBuilderFactory, service);
         this.jsonFactoryBuilder = jsonFactoryBuilder;
     }
 
@@ -81,7 +79,7 @@ public class JsonBlobReader extends BlobReader {
             initMetadataIfNeeded();
             closePreviousInputStream();
             try {
-                currentItemInputStream = service.getBlobInputstream(datasetRuntimeInfo, getCurrentBlob());
+                currentItemInputStream = service.getBlobInputstream(configuration.getDataSet(), getCurrentBlob());
                 reader = Json.createReader((new InputStreamReader(currentItemInputStream, StandardCharsets.UTF_8)));
                 JsonStructure structure = reader.read();
                 if (structure == null) {

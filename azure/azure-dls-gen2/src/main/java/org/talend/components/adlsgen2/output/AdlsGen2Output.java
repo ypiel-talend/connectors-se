@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -18,11 +18,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.json.JsonBuilderFactory;
 
+import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
 import org.talend.components.adlsgen2.migration.AdlsRuntimeDatasetMigration;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
 import org.talend.components.adlsgen2.runtime.output.BlobWriter;
 import org.talend.components.adlsgen2.runtime.output.BlobWriterFactory;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -35,6 +35,7 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.connection.Connection;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import lombok.extern.slf4j.Slf4j;
@@ -50,9 +51,6 @@ public class AdlsGen2Output implements Serializable {
     RecordBuilderFactory recordBuilderFactory;
 
     @Service
-    private final AdlsActiveDirectoryService tokenProviderService;
-
-    @Service
     JsonBuilderFactory jsonBuilderFactory;
 
     @Service
@@ -62,24 +60,27 @@ public class AdlsGen2Output implements Serializable {
 
     private BlobWriter blobWriter;
 
+    @Connection
+    private AdlsGen2Connection injectedConnection;
+
     public AdlsGen2Output(@Option("configuration") final OutputConfiguration configuration,
             final AdlsGen2Service service,
-            final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory,
-            AdlsActiveDirectoryService tokenProviderService) {
+            final RecordBuilderFactory recordBuilderFactory, final JsonBuilderFactory jsonBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
         this.jsonBuilderFactory = jsonBuilderFactory;
-        this.tokenProviderService = tokenProviderService;
     }
 
     @PostConstruct
     public void init() {
         log.debug("[init]");
+        if (injectedConnection != null) {
+            configuration.getDataSet().setConnection(injectedConnection);
+        }
         try {
             blobWriter = BlobWriterFactory
-                    .getWriter(configuration, recordBuilderFactory, jsonBuilderFactory, service,
-                            tokenProviderService);
+                    .getWriter(configuration, recordBuilderFactory, jsonBuilderFactory, service);
         } catch (Exception e) {
             log.error("[init] {}", e.getMessage());
             throw new AdlsGen2RuntimeException(e.getMessage(), e);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -17,21 +17,17 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-
 import javax.json.JsonBuilderFactory;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.talend.components.adlsgen2.common.format.FileFormat;
-import org.talend.components.common.converters.CSVConverterForADLS;
 import org.talend.components.adlsgen2.dataset.AdlsGen2DataSet;
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
-import org.talend.components.adlsgen2.datastore.AdlsGen2Connection.AuthMethod;
-import org.talend.components.adlsgen2.datastore.SharedKeyUtils;
 import org.talend.components.adlsgen2.input.InputConfiguration;
 import org.talend.components.adlsgen2.output.OutputConfiguration;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.adlsgen2.service.I18n;
+import org.talend.components.common.connection.adls.AuthMethod;
+import org.talend.components.common.converters.CSVConverterForADLS;
 import org.talend.components.common.formats.csv.CSVFieldDelimiter;
 import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.formats.csv.CSVFormatOptionsWithSchema;
@@ -49,7 +45,7 @@ import org.talend.sdk.component.junit5.WithComponents;
 public class AdlsGen2TestBase implements Serializable {
 
     @Injected
-    protected BaseComponentsHandler components;
+    protected BaseComponentsHandler componentsHandler;
 
     @Service
     protected RecordBuilderFactory recordBuilderFactory;
@@ -59,11 +55,6 @@ public class AdlsGen2TestBase implements Serializable {
 
     @Service
     protected AdlsGen2Service service;
-
-    @Service
-    protected AdlsActiveDirectoryService tokenProviderService;
-
-    protected SharedKeyUtils utils;
 
     protected AdlsGen2Connection connection;
 
@@ -156,9 +147,9 @@ public class AdlsGen2TestBase implements Serializable {
                 .withArray(ea, Arrays.asList("ary1", "ary2", "ary3"))
                 .build();
         // inject needed services
-        components.injectServices(CSVConverterForADLS.class);
-        I18n i18 = components.findService(I18n.class);
-        recordBuilderFactory = components.findService(RecordBuilderFactory.class);
+        componentsHandler.injectServices(CSVConverterForADLS.class);
+        I18n i18 = componentsHandler.findService(I18n.class);
+        recordBuilderFactory = componentsHandler.findService(RecordBuilderFactory.class);
     }
 
     protected Record createData() {

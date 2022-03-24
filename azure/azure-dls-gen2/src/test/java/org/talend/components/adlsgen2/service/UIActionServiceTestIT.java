@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,19 +14,19 @@ package org.talend.components.adlsgen2.service;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.talend.components.adlsgen2.AdlsGen2IntegrationTestBase;
 import org.talend.components.adlsgen2.AdlsGen2TestBase;
-import org.talend.components.adlsgen2.datastore.AdlsGen2Connection.AuthMethod;
+import org.talend.components.common.connection.adls.AuthMethod;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.SuggestionValues.Item;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @WithComponents("org.talend.components.adlsgen2")
-class UIActionServiceTestIT extends AdlsGen2TestBase {
+class UIActionServiceTestIT extends AdlsGen2IntegrationTestBase {
 
     @Service
     UIActionService ui;
@@ -47,6 +47,10 @@ class UIActionServiceTestIT extends AdlsGen2TestBase {
     void testHealthCheck(String authmethod) {
         connection.setAuthMethod(AuthMethod.valueOf(authmethod));
         assertEquals(HealthCheckStatus.Status.OK, ui.validateConnection(connection).getStatus());
+    }
+
+    void testHealthCheckAD() {
+        connection.setAuthMethod(AuthMethod.ActiveDirectory);
     }
 
 }

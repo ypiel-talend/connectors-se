@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -15,6 +15,7 @@ package org.talend.components.adlsgen2.datastore;
 import java.io.Serializable;
 
 import org.talend.components.common.Constants;
+import org.talend.components.common.connection.adls.AuthMethod;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -96,11 +97,4 @@ public class AdlsGen2Connection implements Serializable {
     public String apiUrl() {
         return String.format(Constants.DFS_URL_PATTERN, getAccountName(), getEndpointSuffix());
     }
-
-    public enum AuthMethod {
-        SharedKey,
-        SAS,
-        ActiveDirectory
-    }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,27 +16,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Iterator;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.talend.components.common.converters.CSVConverterForADLS;
 import org.talend.components.adlsgen2.input.InputConfiguration;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.components.adlsgen2.service.BlobInformations;
+import org.talend.components.common.converters.CSVConverterForADLS;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CsvBlobReader extends BlobReader {
 
-    CsvBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory, AdlsGen2Service service,
-            AdlsActiveDirectoryService tokenProviderService) {
-        super(configuration, recordBuilderFactory, service, tokenProviderService);
+    CsvBlobReader(InputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
+            AdlsGen2Service service) {
+        super(configuration, recordBuilderFactory, service);
     }
 
     @Override
@@ -84,7 +81,7 @@ public class CsvBlobReader extends BlobReader {
             initMetadataIfNeeded();
             closePreviousInputStream();
             try {
-                currentItemInputStream = service.getBlobInputstream(datasetRuntimeInfo, getCurrentBlob());
+                currentItemInputStream = service.getBlobInputstream(configuration.getDataSet(), getCurrentBlob());
                 InputStreamReader inr = new InputStreamReader(currentItemInputStream, encodingValue);
                 parser = new CSVParser(inr, format);
                 converter.setRuntimeHeaders(parser.getHeaderMap());

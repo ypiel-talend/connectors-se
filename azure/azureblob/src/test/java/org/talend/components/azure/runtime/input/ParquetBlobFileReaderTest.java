@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -23,26 +23,26 @@ import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.components.azure.source.BlobInputProperties;
 import org.talend.components.azure.source.BlobSource;
-import org.talend.components.common.connection.adls.AzureAuthType;
+import org.talend.components.common.connection.azureblob.AzureAuthType;
 import org.talend.components.common.connection.azureblob.AzureStorageConnectionAccount;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.exception.ComponentException;
-import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.junit5.WithComponents;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 
-@WithComponents("org.talend.components.azure")
 class ParquetBlobFileReaderTest {
-
-    @Service
-    private MessageService messageService;
 
     @Test
     void testADAuthNotSupportedForParquet() throws Exception {
+        MessageService messageService = Mockito.mock(MessageService.class);
+        Mockito.when(messageService.authTypeNotSupportedForParquet()).thenReturn("Some error message");
+        Mockito.when(messageService.cantStartReadBlobItems(anyString()))
+                .thenReturn("Parent error message for " + "Some error message");
+
         AzureCloudConnection connection = new AzureCloudConnection();
         AzureStorageConnectionAccount accountConnection = new AzureStorageConnectionAccount();
         accountConnection.setAuthType(AzureAuthType.ACTIVE_DIRECTORY_CLIENT_CREDENTIAL);

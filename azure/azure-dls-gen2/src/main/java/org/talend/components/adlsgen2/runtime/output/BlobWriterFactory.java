@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -15,25 +15,23 @@ package org.talend.components.adlsgen2.runtime.output;
 import javax.json.JsonBuilderFactory;
 
 import org.talend.components.adlsgen2.output.OutputConfiguration;
-import org.talend.components.adlsgen2.service.AdlsActiveDirectoryService;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class BlobWriterFactory {
 
     public static BlobWriter getWriter(OutputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,
-            JsonBuilderFactory jsonFactory, AdlsGen2Service service, AdlsActiveDirectoryService tokenProviderService)
+            JsonBuilderFactory jsonFactory, AdlsGen2Service service)
             throws Exception {
         switch (configuration.getDataSet().getFormat()) {
         case CSV:
-            return new CsvBlobWriter(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
+            return new CsvBlobWriter(configuration, recordBuilderFactory, jsonFactory, service);
         case AVRO:
-            return new AvroBlobWriter(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
+            return new AvroBlobWriter(configuration, recordBuilderFactory, jsonFactory, service);
         case JSON:
-            return new JsonBlobWriter(configuration, recordBuilderFactory, jsonFactory, service, tokenProviderService);
+            return new JsonBlobWriter(configuration, recordBuilderFactory, jsonFactory, service);
         case PARQUET:
-            return new ParquetBlobWriter(configuration, recordBuilderFactory, jsonFactory, service,
-                    tokenProviderService);
+            return new ParquetBlobWriter(configuration, recordBuilderFactory, jsonFactory, service);
         default:
             throw new IllegalArgumentException("Unsupported file format");
         }

@@ -18,33 +18,24 @@
   <parent>
     <groupId>org.talend.components</groupId>
     <artifactId>common-stream-io</artifactId>
-    <version>1.29.0-SNAPSHOT</version>
+    <version>1.32.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>stream-json</artifactId>
 
   <name>Connectors SE :: Common Stream IO :: stream-json</name>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.google.protobuf</groupId>
-        <artifactId>protobuf-java</artifactId>
-        <version>3.4.0</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <dependencies>
     <!-- file line formats -->
     <dependency>
       <groupId>org.talend.components</groupId>
       <artifactId>common</artifactId>
-      <version>1.29.0-SNAPSHOT</version>
+      <version>1.32.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.talend.components</groupId>
       <artifactId>stream-api</artifactId>
-      <version>1.29.0-SNAPSHOT</version>
+      <version>1.32.0-SNAPSHOT</version>
     </dependency>
     <!-- Testing -->
     <dependency>

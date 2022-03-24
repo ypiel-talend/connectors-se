@@ -18,7 +18,7 @@
   <parent>
     <groupId>org.talend.components</groupId>
     <artifactId>azure</artifactId>
-    <version>1.29.0-SNAPSHOT</version>
+    <version>1.32.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>azurecommon</artifactId>
@@ -40,16 +40,22 @@
   </properties>
 
   <dependencies>
+    <!-- ADLS SDK dependency section -->
     <dependency>
-      <groupId>org.talend.components</groupId>
-      <artifactId>stream-json</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-identity</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.talend.components</groupId>
-      <artifactId>stream-excel</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-file-datalake</artifactId>
     </dependency>
+
+    <!--AzureBlob SDK dependency section -->
+    <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-storage</artifactId>
+    </dependency>
+
     <!-- traductions -->
     <dependency>
       <groupId>org.talend.components</groupId>
@@ -70,6 +76,12 @@
     </dependency>
 
     <!-- Excel format -->
+    <dependency>
+      <groupId>org.talend.components</groupId>
+      <artifactId>stream-excel</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
@@ -223,10 +235,6 @@
           <artifactId>re2j</artifactId>
           <groupId>com.google.re2j</groupId>
         </exclusion>
-        <exclusion>
-          <groupId>com.google.protobuf</groupId>
-          <artifactId>protobuf-java</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -237,6 +245,12 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>jsr311-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Delta support -->
     <dependency>
@@ -255,10 +269,10 @@
       <version>3.5.3</version>
     </dependency>
 
-    <!-- Testing -->
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
+      <groupId>org.talend.components</groupId>
+      <artifactId>stream-json</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <!-- For Active directory authentication -->
